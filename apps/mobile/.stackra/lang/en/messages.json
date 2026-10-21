@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "message": {
+      "send": "Send messages",
+      "read": "View messages"
+    },
+    "notification": {
+      "read": "View own notifications",
+      "update": "Mark own notifications read"
+    }
+  },
+  "status": {
+    "queued": "Queued",
+    "sent": "Sent",
+    "failed": "Failed"
+  },
+  "refusals": {
+    "mail_provider_unavailable": "The mail provider is unavailable; we will retry.",
+    "notification_not_found": "This notification was not found."
+  },
+  "notification_kind": {
+    "order_paid": "Order {orderId} is paid ({lines, plural, one {# item} other {# items}})"
+  },
+  "mail_auth": {
+    "pass": "Pass",
+    "fail": "Fail",
+    "soft_fail": "Soft fail",
+    "none": "None"
+  },
+  "settings": {
+    "title": "Notifications",
+    "order_updates": "Order updates",
+    "order_receipts": "Order receipts in the app",
+    "product_updates": "Product updates",
+    "marketing": "Marketing messages"
+  },
+  "integrations": {
+    "resend": "Resend"
+  }
+}

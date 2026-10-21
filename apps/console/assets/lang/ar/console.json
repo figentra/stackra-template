@@ -1,0 +1,189 @@
+{
+  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "shell": {
+    "brand": "وحدة تحكم فيجنترا",
+    "top_bar": "الشريط العلوي",
+    "menu": "القائمة",
+    "sidebar": "تبديل الشريط الجانبي",
+    "navigation": "التنقل الرئيسي",
+    "account": "الحساب",
+    "loading_session": "جارٍ تحميل الجلسة"
+  },
+  "shortcuts": {
+    "quick_order": "طلب سريع"
+  },
+  "pages": {
+    "dashboard": "لوحة التحكم",
+    "welcome": "مرحبًا",
+    "settings": "الإعدادات"
+  },
+  "commands": {
+    "palette": "لوحة الأوامر",
+    "placeholder": "اكتب أمرًا أو صفحة أو ما تريد فعله…",
+    "clear": "مسح",
+    "no_match": "لا يوجد أمر مطابق",
+    "no_match_hint": "جرّب اسم صفحة أو إجراء، أو صِف ما تريد فعله.",
+    "group_app": "وحدة التحكم",
+    "group_account": "الحساب",
+    "group_intent": "إجراء مقترح",
+    "sidebar": "تبديل الشريط الجانبي",
+    "theme": "تبديل السمة",
+    "locale": "تبديل اللغة",
+    "pending_changes": "التغييرات المعلّقة",
+    "logout": "تسجيل الخروج",
+    "navigate": "تنقّل",
+    "select": "اختيار",
+    "escape": "إلغاء"
+  },
+  "tenant": {
+    "switch": "تبديل المستأجر",
+    "none_title": "لا توجد مساحة عمل بعد",
+    "none_body": "اطلب من المسؤول إضافتك إلى مستأجر.",
+    "switch_blocked_by_queue": "زامِن تغييراتك المعلّقة قبل تبديل المستأجر."
+  },
+  "roles": {
+    "admin": "مسؤول",
+    "staff": "موظف",
+    "viewer": "مشاهد"
+  },
+  "locale": {
+    "switch": "تبديل اللغة"
+  },
+  "theme": {
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "toggle": "السمة: {scheme}"
+  },
+  "offline": {
+    "title": "أنت غير متصل",
+    "body": "{count, plural, zero {ستتم مزامنة تغييراتك عند عودة الاتصال.} one {تغيير واحد بانتظار المزامنة.} two {تغييران بانتظار المزامنة.} few {# تغييرات بانتظار المزامنة.} many {# تغييرًا بانتظار المزامنة.} other {# تغيير بانتظار المزامنة.}}",
+    "page_title": "أنت غير متصل",
+    "page_body": "لم تُحفظ هذه الصفحة للاستخدام دون اتصال. أعد الاتصال وحاول مجددًا."
+  },
+  "queue": {
+    "title": "التغييرات المعلّقة",
+    "open": "التغييرات المعلّقة: {count}",
+    "empty_title": "لا شيء بانتظار المزامنة",
+    "empty_body": "تظهر هنا التغييرات التي تجريها دون اتصال حتى تصل إلى الخادم.",
+    "pending": "معلّق",
+    "conflict_hint": "غيّر الخادم هذا السجل أثناء انقطاع اتصالك. اختر طريقة الحل.",
+    "sync_now": "زامِن الآن",
+    "reason": {
+      "version_conflict": "تغيّر على الخادم",
+      "permission_denied": "لم يعد مسموحًا",
+      "stale_offline_mutation": "قديم جدًا لإعادة الإرسال"
+    },
+    "strategy": {
+      "server_wins": "الإبقاء على نسخة الخادم",
+      "client_retry": "إعادة المحاولة على الأحدث",
+      "manual": "مراجعة",
+      "discard": "تجاهل تغييري"
+    }
+  },
+  "dashboard": {
+    "today": "اليوم",
+    "orders_today": "طلبات اليوم",
+    "loading": "جارٍ تحميل أرقام اليوم"
+  },
+  "welcome": {
+    "title": "مرحبًا بك في وحدة التحكم",
+    "body": "كل ما أعلنته خدماتك موجود هنا: المنتجات والطلبات والمخزون. ابدأ بطلب سريع.",
+    "cta": "أنشئ طلبك الأول",
+    "loading": "جارٍ تحميل صفحة الترحيب",
+    "empty_title": "لم تُنشر صفحة ترحيب بعد",
+    "empty_body": "يمكن لمسؤول المستأجر بناؤها في منشئ الصفحات.",
+    "open_builder": "فتح منشئ الصفحات"
+  },
+  "login": {
+    "title": "جارٍ تسجيل دخولك",
+    "body": "يتم نقلك إلى صفحة تسجيل الدخول.",
+    "redirecting": "جارٍ إعادة التوجيه",
+    "continue": "المتابعة إلى تسجيل الدخول"
+  },
+  "settings": {
+    "tabs": "أقسام الإعدادات",
+    "device": "هذا الجهاز",
+    "tenant": "المستأجر",
+    "scheme": "السمة",
+    "locale": "اللغة",
+    "density": "كثافة الجداول",
+    "density_comfortable": "مريحة",
+    "density_compact": "مضغوطة",
+    "local_notifications": "إشعارات سطح المكتب",
+    "local_notifications_hint": "تظهر أثناء فتح وحدة التحكم.",
+    "save": "حفظ",
+    "saved_device": "تم حفظ إعدادات الجهاز",
+    "privacy": "الخصوصية",
+    "analytics_consent": "مشاركة إحصاءات الاستخدام",
+    "analytics_consent_hint": "تساعدنا على معرفة الشاشات المهمة. لا يُرسل شيء حتى تفعّل هذا الخيار.",
+    "notification_preferences": "تفضيلات الإشعارات"
+  },
+  "capabilities": {
+    "permission_denied": "لم يسمح المتصفح بالإشعارات.",
+    "unavailable": "لا يمكن لهذا الجهاز عرض الإشعارات."
+  },
+  "quick_order": {
+    "variant_required": "اختر متغيرًا"
+  },
+  "risk": {
+    "l0": "آمن",
+    "l1": "منخفض",
+    "l2": "متوسط",
+    "l3": "مرتفع"
+  },
+  "export": {
+    "pick_folder": "اختر مجلد التصدير"
+  },
+  "menu": {
+    "file": "ملف",
+    "view": "عرض",
+    "go": "انتقال",
+    "help": "مساعدة",
+    "docs": "التوثيق"
+  },
+  "tray": {
+    "show": "إظهار وحدة التحكم"
+  },
+  "errors": {
+    "retry": "حاول مجددًا",
+    "go_home": "العودة إلى الرئيسية",
+    "unknown": {
+      "title": "حدث خطأ ما",
+      "body": "تم الإبلاغ عن الخطأ. حاول مجددًا أو تواصل مع الدعم مع ذكر الرمز."
+    },
+    "not_found": {
+      "title": "الصفحة غير موجودة",
+      "body": "ربما نُقلت الصفحة أو لا تملك صلاحية الوصول إليها."
+    },
+    "permission_denied": {
+      "title": "لا تملك صلاحية الوصول",
+      "body": "اطلب من المسؤول الصلاحية المذكورة في الرمز."
+    },
+    "unavailable": {
+      "title": "الخدمة غير متاحة",
+      "body": "لم يستجب الخادم. لم يُفقد تغييرك."
+    },
+    "invalid_argument": {
+      "title": "راجع النموذج",
+      "body": "رفض الخادم إحدى القيم."
+    },
+    "entitlement_required": {
+      "title": "غير مشمول في خطتك",
+      "body": "قم بالترقية لاستخدام هذه الميزة."
+    }
+  },
+  "realtime": {
+    "connected": "مباشر",
+    "connecting": "جارٍ الاتصال بالتحديثات المباشرة",
+    "disconnected": "غير متصل بالتحديثات"
+  },
+  "inbox": {
+    "title": "الإشعارات",
+    "open": "الإشعارات: {count, plural, zero {لا شيء غير مقروء} one {إشعار واحد غير مقروء} two {إشعاران غير مقروءين} few {# إشعارات غير مقروءة} many {# إشعارًا غير مقروء} other {# إشعار غير مقروء}}",
+    "empty_title": "لا إشعارات بعد",
+    "empty_body": "تظهر هنا تحديثات الطلبات والرسائل الموجهة إليك.",
+    "mark_read": "تحديد كمقروء",
+    "loading": "جارٍ تحميل الإشعارات"
+  }
+}

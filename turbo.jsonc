@@ -1,0 +1,59 @@
+// Stackra file contract:
+// Purpose: task graph. `gen` runs before typecheck, test and build in every member, because code
+//          imports #stackra/*. Every member's turbo.jsonc extends this file with exactly one tier
+//          tag; `boundaries` enforces the tier direction.
+// Boundary: task order and outputs only. A member's own committed manifest and OpenAPI file are
+//           outputs of its `gen`, never its inputs; an app's `gen` reads the services' committed
+//           manifests as inputs, so a service change re-runs the apps' gen.
+// Runtime: node
+// Governing contract: ADR 0261 (gen before build), ADR 0003 (tier direction), ADR 0158 (committed
+//                     manifest)
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  // every member runway is a task input below
+  "globalDependencies": [
+    "pnpm-workspace.yaml",
+    "runway.yaml",
+    "mise.toml",
+    "stackra-manifests.lock.yaml",
+  ],
+  "boundaries": {
+    "tags": {
+      "tier:config": { "dependencies": { "deny": ["tier:lib", "tier:app", "tier:service"] } },
+      "tier:lib": { "dependencies": { "deny": ["tier:app", "tier:service"] } },
+      "tier:app": { "dependencies": { "deny": ["tier:service"] } },
+      "tier:service": { "dependencies": { "deny": ["tier:app", "tier:service"] } },
+    },
+  },
+  "tasks": {
+    "gen": {
+      "dependsOn": ["^gen"],
+      // an app's clients come from the in-repo service manifests (committed outputs of their own
+      // `gen`) plus the external manifests pinned in stackra-manifests.lock.yaml
+      "inputs": [
+        "src/**",
+        "assets/**",
+        "package.json",
+        "stackra.config.ts",
+        "runway.yaml",
+        "$TURBO_ROOT$/services/*/.stackra/app-manifest.json",
+      ],
+      "outputs": [".stackra/**", "css/**"],
+    },
+    "typecheck": { "dependsOn": ["gen", "^build"] },
+    "test": { "dependsOn": ["gen"], "outputs": ["coverage/**"] },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "playwright-report/**",
+        "test-results/**",
+        "maestro-report/**",
+        ".maestro/output/**",
+      ],
+    },
+    "build": { "dependsOn": ["gen", "^build"], "outputs": ["dist/**"] },
+    "lint": {},
+    "format:check": {},
+    "validate": { "dependsOn": ["gen"] },
+  },
+}

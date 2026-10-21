@@ -1,0 +1,96 @@
+{
+  "name": "@stackra/access-log",
+  "version": "0.1.0",
+  "description": "@AccessLogged: every call of a marked method is written to an access-log sink; self-registering postgres and memory drivers.",
+  "license": "MIT",
+  "type": "module",
+  "imports": {
+    "#config/*": "./src/config/*",
+    "#contracts/*": "./src/contracts/*",
+    "#core/*": "./src/core/*",
+    "#node/*": "./src/node/*",
+    "#testing/*": "./src/testing/*",
+    "#stackra/*": [
+      "./.stackra/gen/*.ts",
+      "./.stackra/gen/*.tsx"
+    ]
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/contracts/index.ts",
+    "./node": "./src/node/index.ts",
+    "./testing": "./src/testing/index.ts",
+    "./assets/*": "./assets/*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "import": "./dist/index.mjs"
+      },
+      "./contracts": {
+        "types": "./dist/contracts.d.mts",
+        "import": "./dist/contracts.mjs"
+      },
+      "./node": {
+        "types": "./dist/node.d.mts",
+        "import": "./dist/node.mjs"
+      },
+      "./testing": {
+        "types": "./dist/testing.d.mts",
+        "import": "./dist/testing.mjs"
+      },
+      "./assets/*": "./assets/*"
+    },
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "gen": "stackra gen",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@stackra/actions": "catalog:stackra",
+    "@stackra/config": "catalog:stackra",
+    "@stackra/container": "catalog:stackra",
+    "@stackra/contracts": "catalog:stackra",
+    "@stackra/database": "catalog:stackra",
+    "@stackra/errors": "catalog:stackra",
+    "@stackra/i18n": "catalog:stackra",
+    "@stackra/iam": "catalog:stackra",
+    "@stackra/model": "catalog:stackra",
+    "@stackra/panel": "catalog:stackra",
+    "@stackra/queue": "catalog:stackra",
+    "@stackra/scheduler": "catalog:stackra",
+    "@stackra/schema": "catalog:stackra",
+    "@stackra/validation": "catalog:stackra"
+  },
+  "devDependencies": {
+    "@stackra/gen": "catalog:stackra",
+    "@stackra/testing": "catalog:stackra",
+    "@stackra/tsdown-config": "catalog:stackra",
+    "@stackra/typescript-config": "catalog:stackra",
+    "@stackra/vitest-config": "catalog:stackra",
+    "oxfmt": "catalog:quality",
+    "oxlint": "catalog:quality",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:quality"
+  },
+  "peerDependencies": {
+    "@stackra/testing": "catalog:stackra",
+    "@stackra/ui": "catalog:stackra"
+  },
+  "peerDependenciesMeta": {
+    "@stackra/testing": {
+      "optional": true
+    }
+  },
+  "stackra": {
+    "module": "./src/node/access-log.module.ts"
+  }
+}

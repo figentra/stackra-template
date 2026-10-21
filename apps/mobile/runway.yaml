@@ -1,0 +1,115 @@
+# Stackra file contract:
+# Purpose: how and where THIS app runs, per environment. The Metro dev port (the
+#          ONLY place it is written; gen writes it into `.stackra/metro.config.js` and
+#          `.stackra/dev/ports.json`), the per-environment public `EXPO_PUBLIC_*` values gen inlines
+#          into `app.config.ts` (dev) and runway syncs into the matching EAS environment on deploy,
+#          the EAS build profiles and update channels, the Sentry project.
+# Boundary: what the app is lives in `stackra.config.ts`; how its packages behave in `src/config/*`;
+#           accounts, the EAS project id, Apple/Google ids, the release policy and the OTA rollout
+#           in the ROOT runway (`providers.expo`, `targets.eas`). Origins of other members in dev
+#           are `from-member` / `from-port`, never a literal port. No secret VALUE ever (ADR 0173):
+#           a name here is synced from Infisical; mobile has no runtime secret at all.
+# Runtime: node
+# Governing contract: ADR 0170, ADR 0173, ADR 0180, ADR 0231
+$schema: "@stackra/runway/schema/app.json"
+version: 2
+member: mobile # must equal stackra.config.ts `key`
+
+# ── Secrets this app names: none. A native client holds no secret (ADR 0206 d8); push, store and CI
+# credentials are EAS-managed or root `secrets.ci` (EXPO_TOKEN, the ASC key triple, the Play service
+# account).
+secrets: {}
+
+# ── Release: EAS profiles (channel = profile name; `environment` = the EAS environment runway syncs
+# vars into)
+release:
+  mobile:
+    profiles:
+      development:
+        {
+          distribution: internal,
+          developmentClient: true,
+          simulator: true,
+          environment: development,
+        }
+      preview: { distribution: internal, androidApk: true, environment: preview }
+      staging: { distribution: store, autoIncrement: true, environment: staging }
+      production: { distribution: store, autoIncrement: true, environment: production }
+      # stackra.config.ts e2e.profile
+      e2e: { distribution: internal, simulator: true, androidApk: true, environment: preview }
+    # the release job submits to both stores (root targets.eas.submit names the credentials)
+    submit: { ios: true, android: true }
+    whiteLabel: false # Pro: per-tenant store builds (MR1) take a `variants:` list here
+
+# ── Telemetry destination that is per member, not per environment (org is root
+# providers.sentry.org)
+telemetry: { sentryProject: figentra-mobile }
+
+# ── Environments (names fixed by ADR 0170 DP5 as amended: dev | preview | staging | production)
+environments:
+  dev:
+    # Metro; lanes add N*100 per worktree (root environments.dev.lanes)
+    mobile: { metroPort: 8081, devClient: true }
+    # EXPO_PUBLIC_* values for a dev client; names are MobileEnv's fields, gen checks the prefix
+    vars:
+      EXPO_PUBLIC_EAS_PROJECT_ID: "" # empty in a bare clone: no EAS update URL, no project binding
+      # root environments.dev.infra.gateway; `stackra dev --lan` rewrites to the LAN address
+      EXPO_PUBLIC_API_ORIGIN: { from-port: gateway }
+      # the console's dev origin, for universal links in dev
+      EXPO_PUBLIC_APP_ORIGIN: { from-member: console }
+      # served by the dev gateway
+      EXPO_PUBLIC_REALTIME_ORIGIN: { from-port: gateway, scheme: ws, path: /realtime }
+      # the dev ZITADEL container, seeded with this app's PKCE client
+      EXPO_PUBLIC_ZITADEL_ISSUER: { from-port: zitadel }
+      # the seeded client id (`.stackra/zitadel/seed.yaml`)
+      EXPO_PUBLIC_ZITADEL_CLIENT_ID: mobile-dev
+      EXPO_PUBLIC_SENTRY_DSN: "" # crash reporting off in dev
+      EXPO_PUBLIC_PUSH_PROVIDER: expo
+      EXPO_PUBLIC_POSTHOG_KEY: "" # no product analytics in dev
+    config: # last config layer (ADR 0146)
+      mobile.telemetry: { errors: { sampleRate: 1 } }
+      mobile.analytics: { driver: none }
+    # Maestro runs on the simulator/emulator against the dev gateway
+    e2e: { seeds: from-stackra-config }
+
+  preview:
+    mobile: { channel: preview, profile: preview }
+    vars:
+      EXPO_PUBLIC_EAS_PROJECT_ID: ref:expo.projectId
+      EXPO_PUBLIC_API_ORIGIN: "https://api-pr-${pr}.preview.figentra.com"
+      EXPO_PUBLIC_REALTIME_ORIGIN: "wss://api-pr-${pr}.preview.figentra.com/realtime"
+      EXPO_PUBLIC_APP_ORIGIN: "https://console-pr-${pr}.preview.figentra.com"
+      EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.nonprod
+      EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.nonprod
+      EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
+      EXPO_PUBLIC_PUSH_PROVIDER: expo
+      EXPO_PUBLIC_POSTHOG_KEY: ref:posthog.key.mobile
+
+  staging:
+    # inherits root environments.staging.mobile.channel; shown for completeness
+    mobile: { channel: staging, profile: staging }
+    vars:
+      EXPO_PUBLIC_EAS_PROJECT_ID: ref:expo.projectId
+      EXPO_PUBLIC_API_ORIGIN: https://api.staging.figentra.com
+      EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.staging.figentra.com/realtime
+      EXPO_PUBLIC_APP_ORIGIN: https://console.staging.figentra.com
+      EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.nonprod
+      EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.nonprod
+      EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
+      EXPO_PUBLIC_PUSH_PROVIDER: expo
+      EXPO_PUBLIC_POSTHOG_KEY: ref:posthog.key.mobile
+    config: { mobile.telemetry: { errors: { sampleRate: 1 }, traces: { sampleRate: 0.5 } } }
+
+  production:
+    mobile: { channel: production, profile: production }
+    vars:
+      EXPO_PUBLIC_EAS_PROJECT_ID: ref:expo.projectId
+      EXPO_PUBLIC_API_ORIGIN: https://api.figentra.com
+      EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.figentra.com/realtime
+      EXPO_PUBLIC_APP_ORIGIN: https://console.figentra.com
+      EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.prod
+      EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.prod
+      EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
+      EXPO_PUBLIC_PUSH_PROVIDER: expo
+      EXPO_PUBLIC_POSTHOG_KEY: ref:posthog.key.mobile
+    config: { mobile.telemetry: { errors: { sampleRate: 0.5 }, traces: { sampleRate: 0.1 } } }

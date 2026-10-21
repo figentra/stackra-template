@@ -1,0 +1,7 @@
+// Stackra file contract:
+// Purpose: extends the root turbo.jsonc and declares this member's one tier tag (the validator
+//          checks it matches the path).
+// Boundary: tier tag only; task overrides for this member would go here.
+// Runtime: node
+// Governing contract: ADR 0003 (tier direction)
+{ "$schema": "https://turborepo.dev/schema.json", "extends": ["//"], "tags": ["tier:lib"] }

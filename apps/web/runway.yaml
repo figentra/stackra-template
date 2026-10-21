@@ -1,0 +1,80 @@
+# Stackra file contract:
+# Purpose: how and where the public site runs, per environment: the dev port and host (the ONLY
+#          place a port is written; gen puts it into the generated Vite server, Playwright and
+#          Lighthouse configs), domains, the public and server vars of the env class, secret names,
+#          Workers-with-assets knobs. These are what `wrangler.jsonc` is generated from.
+# Boundary: identity is stackra.config.ts; behaviour is src/config/*; the Cloudflare account, zone
+#           and the edge rules are the root runway. A value here may override a root default, never
+#           the reverse. Validated by `@stackra/runway/schema/app.json`.
+# Runtime: node
+# Governing contract: ADR 0176, ADR 0175, ADR 0173, ADR 0231 d4
+$schema: "@stackra/runway/schema/app.json"
+version: 2
+member: web
+
+# Every @Secret of the env class, by NAME; the value lives in Infisical and runway syncs it into the
+# Worker on deploy.
+secrets:
+  TURNSTILE_SECRET_KEY: {} # the contact form's captcha check in the Worker
+
+health: { path: /healthz, expects: sha } # the Worker answers with the release SHA (ADR 0170 DP24)
+
+telemetry: { sentryProject: figentra-web } # org is root `providers.sentry.org`; DSN is a var below
+
+environments:
+  dev:
+    port: 5175 # the React Router dev server on the Workers runtime; hmr defaults to 5176
+    host: localhost
+    https: false
+    open: false
+    # names are the env class fields; gen checks the VITE_ (public) and STACKRA_ (server) prefixes
+    vars:
+      VITE_POSTHOG_KEY: ""
+      # Cloudflare's published always-pass test site key
+      VITE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+      # STACKRA_API_URL is omitted: gen fills it from the root gateway (lane offsets applied)
+      # this member's own dev origin; gen expands host:port so the number is never repeated
+      STACKRA_SITE_URL: from-port
+      STACKRA_SENTRY_DSN: ""
+    config:
+      web.telemetry: { traces: { sampleRate: 1 } }
+      web.analytics: { driver: none }
+    # the Worker gets Cloudflare's always-pass test secret
+    e2e: { baseUrl: from-port, seeds: from-stackra-config, turnstile: test-keys }
+
+  preview:
+    domain: "web-pr-${pr}.preview.figentra.com"
+    vars:
+      VITE_POSTHOG_KEY: ""
+      VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.preview
+      STACKRA_API_URL: "https://api-pr-${pr}.preview.figentra.com"
+      STACKRA_SITE_URL: "https://web-pr-${pr}.preview.figentra.com"
+      STACKRA_SENTRY_DSN: ref:sentry.dsn.web
+    secrets: [TURNSTILE_SECRET_KEY]
+    config: { web.site: { previewHostPrefixes: [web-pr-] } } # never indexed
+
+  staging:
+    domain: staging.figentra.com
+    destination: cloudflare-workers # inherited from root `destinations.web`; shown for completeness
+    vars:
+      VITE_POSTHOG_KEY: ref:posthog.key.web
+      VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.staging
+      STACKRA_API_URL: https://api.staging.figentra.com
+      STACKRA_SITE_URL: https://staging.figentra.com
+      STACKRA_SENTRY_DSN: ref:sentry.dsn.web
+    secrets: [TURNSTILE_SECRET_KEY]
+    config: { web.telemetry: { traces: { sampleRate: 0.5 } } }
+    workers: { observability: { headSamplingRate: 0.5 } }
+
+  production:
+    domain: www.figentra.com
+    aliases: [figentra.com] # redirect to `domain`
+    vars:
+      VITE_POSTHOG_KEY: ref:posthog.key.web
+      VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.production
+      STACKRA_API_URL: https://api.figentra.com
+      STACKRA_SITE_URL: https://www.figentra.com
+      STACKRA_SENTRY_DSN: ref:sentry.dsn.web
+    secrets: [TURNSTILE_SECRET_KEY]
+    # SSR Worker: CPU limit per request
+    workers: { observability: { headSamplingRate: 0.1 }, limits: { cpuMs: 50 } }

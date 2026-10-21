@@ -1,0 +1,150 @@
+# Stackra file contract:
+# Purpose: workspace members and the only source of versions (catalogs). Every version referenced by
+#          any member is here.
+# Boundary: versions only; no scripts. Exact pins, no ranges (versions rule). Workspace members
+#           (@stackra/loyalty-kit, @stackra/access-log, @stackra/brand) are `workspace:*`, never
+#           catalog entries.
+# Runtime: node
+# Governing contract: ADR 0013 (versions come only from catalogs and workspace references)
+packages:
+  - apps/*
+  - packages/*/*
+  - services/*
+catalogMode: strict
+catalogs:
+  stackra:
+    "@stackra/actions": 1.0.0
+    "@stackra/ai": 1.0.0
+    "@stackra/analytics": 1.0.0
+    "@stackra/app": 1.0.0
+    "@stackra/assets": 1.0.0
+    "@stackra/cache": 1.0.0
+    "@stackra/cli": 1.0.0
+    "@stackra/clients": 1.0.0
+    "@stackra/config": 1.0.0
+    "@stackra/connections": 1.0.0
+    "@stackra/consent": 1.0.0
+    "@stackra/container": 1.0.0
+    "@stackra/content": 1.0.0
+    "@stackra/contracts": 1.0.0
+    "@stackra/coordinator": 1.0.0
+    "@stackra/csp": 1.0.0
+    "@stackra/database": 1.0.0
+    "@stackra/entitlements": 1.0.0
+    "@stackra/errors": 1.0.0
+    "@stackra/events": 1.0.0
+    "@stackra/experience": 1.0.0
+    "@stackra/feature-flags": 1.0.0
+    "@stackra/filesystem": 1.0.0
+    "@stackra/gen": 1.0.0
+    "@stackra/i18n": 1.0.0
+    "@stackra/iam": 1.0.0
+    "@stackra/identity": 1.0.0
+    "@stackra/integrations": 1.0.0
+    "@stackra/kbd": 1.0.0
+    "@stackra/ledger": 1.0.0
+    "@stackra/locking": 1.0.0
+    "@stackra/logger": 1.0.0
+    "@stackra/mail": 1.0.0
+    "@stackra/media": 1.0.0
+    "@stackra/model": 1.0.0
+    "@stackra/money": 1.0.0
+    "@stackra/navigation": 1.0.0
+    "@stackra/outbox": 1.0.0
+    "@stackra/oxlint-config": 1.0.0
+    "@stackra/panel": 1.0.0
+    "@stackra/peripherals": 1.0.0
+    "@stackra/platform": 1.0.0
+    "@stackra/query": 1.0.0
+    "@stackra/queue": 1.0.0
+    "@stackra/realtime": 1.0.0
+    "@stackra/runway": 1.0.0
+    "@stackra/scheduler": 1.0.0
+    "@stackra/schema": 1.0.0
+    "@stackra/search": 1.0.0
+    "@stackra/seo": 1.0.0
+    "@stackra/settings": 1.0.0
+    "@stackra/state": 1.0.0
+    "@stackra/state-machine": 1.0.0
+    "@stackra/storage": 1.0.0
+    "@stackra/support": 1.0.0
+    "@stackra/tenancy": 1.0.0
+    "@stackra/testing": 1.0.0
+    "@stackra/theming": 1.0.0
+    "@stackra/transport": 1.0.0
+    "@stackra/tsdown-config": 1.0.0
+    "@stackra/typescript-config": 1.0.0
+    "@stackra/ui": 1.0.0
+    "@stackra/validation": 1.0.0
+    "@stackra/versioning": 1.0.0
+    "@stackra/vite-plugin": 1.0.0
+    "@stackra/vitest-config": 1.0.0
+    "@stackra/webhooks": 1.0.0
+    "@stackra/workflow": 1.0.0
+    "@stackra-pro/ui": 1.0.0
+  default:
+    react: 19.2.0
+    react-dom: 19.2.0
+    react-router: 7.9.4
+    resend: 6.1.2
+    isbot: 5.1.31
+    "@react-email/components": 0.5.2
+  ui:
+    "@heroui/styles": 3.0.0
+  frontend:
+    tailwindcss: 4.1.14
+    workbox-expiration: 7.3.0
+    workbox-navigation-preload: 7.3.0
+    workbox-precaching: 7.3.0
+    workbox-routing: 7.3.0
+    workbox-strategies: 7.3.0
+  mobile:
+    expo: 57.0.0
+    react-native: 0.83.0
+    "@react-navigation/native": 7.1.17
+    "@react-navigation/native-stack": 7.3.26
+    react-native-bottom-tabs: 0.9.2
+    react-native-screens: 4.16.0
+    react-native-safe-area-context: 5.6.1
+    heroui-native: 1.0.0
+    uniwind: 1.0.0
+    react-native-reanimated: 4.1.2
+    react-native-gesture-handler: 2.28.0
+    expo-updates: 29.0.0
+    expo-dev-client: 6.0.0
+    expo-auth-session: 7.0.0
+    expo-camera: 17.0.0
+    expo-constants: 18.0.0
+    expo-crypto: 15.0.0
+    expo-device: 8.0.0
+    expo-glass-effect: 1.0.0
+    expo-linking: 8.0.0
+    expo-network: 8.0.0
+    expo-notifications: 0.32.0
+    expo-secure-store: 15.0.0
+    expo-splash-screen: 31.0.0
+    expo-sqlite: 16.0.0
+    expo-status-bar: 3.0.0
+    expo-web-browser: 15.0.0
+    "@bottom-tabs/react-navigation": 0.9.2
+    "@sentry/react-native": 7.3.0
+    "@types/react": 19.2.0
+    babel-preset-expo: 14.0.0
+    react-native-mmkv: 3.3.0
+    react-native-svg: 15.13.0
+    react-native-worklets: 0.5.1
+  build:
+    turbo: 2.5.8
+    typescript: 5.9.3
+    vite: 7.1.10
+    tsdown: 0.15.6
+    electron: 38.2.0
+    "@react-router/dev": 7.9.4
+  quality:
+    vitest: 3.2.4
+    "@playwright/test": 1.56.1
+    oxlint: 1.86.0
+    oxfmt: 0.9.0
+    "@lhci/cli": 0.15.1
+  docs:
+    mint: 4.2.0

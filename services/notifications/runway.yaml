@@ -1,0 +1,69 @@
+# Stackra file contract:
+# Purpose: how and where the notifications service runs, per environment. The root runway holds the destinations.
+# Boundary: what it needs (database `notifications`, queues `delivery` and `inbox`, two secrets) is
+#           derived into the manifest `infra`; this file sizes it. No secret value, no business
+#           value, no identity (stackra.config.ts). Health checks are declared in stackra.config.ts;
+#           this file tunes thresholds only (ADR 0190). The `delivery` dead-letter queue is what
+#           DeliverMessageAction's `deadLetter: true` lands in. Validated by
+#           `@stackra/runway/schema/service.json`.
+# Runtime: node
+# Governing contract: ADR 0168; ADR 0169, 0238, 0266, 0173
+$schema: "@stackra/runway/schema/service.json"
+version: 2
+member: notifications
+
+secrets:
+  RESEND_API_KEY: {}
+  RESEND_INBOUND_SIGNING_SECRET: {}
+
+health: # thresholds only; the path and checks are stackra.config.ts `health`
+  readiness: { requireMigrations: true, timeoutSeconds: 2 }
+  liveness: { eventLoopLagMs: 1000 }
+
+environments:
+  dev:
+    port: 4002
+    host: localhost
+    devConsolePort: 4902
+    deployable: core
+    drivers: { queue: memory, events: memory, workflow: native, webhooks: memory }
+    database: { extensions: [] }
+    config: { notifications.service: { transport: memory } }
+    crons: { enabled: false }
+
+  preview:
+    deployable: core
+    database: { plan: shared }
+    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET]
+    config: { notifications.service: { transport: memory } } # previews never mail a real address
+
+  staging:
+    deployable: core # grouped with commerce: both clients call in-process
+    isolate: false
+    resources: { cpu: 0.25, memory: 512Mi, instances: { min: 1, max: 2 } }
+    poolBudget: 10
+    database: { storageGb: 10, extensions: [] }
+    queues:
+      delivery: { visibilityTimeoutSeconds: 120, dlq: true }
+      inbox: { visibilityTimeoutSeconds: 60, dlq: true }
+    crons: { enabled: true }
+    drivers: { queue: encore-pubsub, events: encore-pubsub, workflow: native, webhooks: native }
+    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET]
+    config: { notifications.service: { transport: resend } }
+    workers: { split: false }
+
+  production:
+    deployable: notifications # split: the same code reaches commerce over RPC
+    isolate: false
+    resources:
+      { cpu: 0.5, memory: 1Gi, instances: { min: 2, max: 6 }, scaling: { metric: cpu, target: 60 } }
+    poolBudget: 20
+    database: { storageGb: 20, extensions: [], readReplica: false }
+    queues:
+      delivery: { visibilityTimeoutSeconds: 120, dlq: true }
+      inbox: { visibilityTimeoutSeconds: 60, dlq: true }
+    crons: { enabled: true }
+    drivers: { queue: encore-pubsub, events: encore-pubsub, workflow: native, webhooks: native }
+    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET]
+    config: { notifications.service: { transport: resend } }
+    workers: { split: false }

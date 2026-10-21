@@ -1,0 +1,122 @@
+{
+  "$comment": "Stackra file contract — Purpose: the public site's own strings in en (namespace `web::`); Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries zero, one, two, few, many and other; other modules' strings are overrides under src/overrides/<module>/lang/; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0192 (ICU plurals)",
+  "nav": {
+    "home": "Home",
+    "pricing": "Pricing",
+    "store": "Store",
+    "contact": "Contact",
+    "skip": "Skip to content",
+    "locale": "Language",
+    "main": "Main navigation"
+  },
+  "hero": {
+    "title": "Sell everywhere your customers are",
+    "subtitle": "Catalogue, orders, stock and loyalty in one place, from the first sale to the thousandth.",
+    "cta": "Start a free trial",
+    "secondary": "See the store"
+  },
+  "features": {
+    "title": "Everything a growing shop needs",
+    "catalogue": {
+      "title": "A catalogue that speaks your language",
+      "body": "Products and variants with titles in Arabic and English, priced per market."
+    },
+    "orders": {
+      "title": "Orders that never get lost",
+      "body": "Every order follows one state machine, from placed to paid to fulfilled, with payment handled for you."
+    },
+    "loyalty": {
+      "title": "Points that bring customers back",
+      "body": "Earn on every paid order, redeem at checkout, no spreadsheet."
+    }
+  },
+  "pricing": {
+    "title": "Simple pricing, no surprises",
+    "subtitle": "Every plan starts with a {days, plural, one {# day} other {# days}} free trial. No card required.",
+    "month": "Monthly",
+    "year": "Yearly",
+    "year_hint": "Two months free",
+    "per_month": "{amount} per month",
+    "contact_sales": "Contact sales",
+    "start_trial": "Start trial",
+    "trial": "{days, plural, one {# day} other {# days}} free, then {amount} per month",
+    "highlighted": "Most popular",
+    "interval": "Billing interval"
+  },
+  "testimonials": {
+    "title": "Shops that switched"
+  },
+  "faq": {
+    "title": "Questions, answered"
+  },
+  "cta": {
+    "title": "Ready when you are",
+    "body": "Open your store today. Your first order can be tomorrow.",
+    "button": "Open a store"
+  },
+  "store": {
+    "title": "Store",
+    "search": "Search products",
+    "empty": "No products match. Try another word.",
+    "more": "Show more",
+    "out_of_stock": "Out of stock",
+    "in_stock": "In stock"
+  },
+  "product": {
+    "add_to_cart": "Add to cart",
+    "breadcrumb_home": "Store",
+    "variant_axis": "Option: {axis}",
+    "breadcrumb": "Breadcrumb"
+  },
+  "contact": {
+    "title": "Talk to us",
+    "subtitle": "A person answers within one working day.",
+    "name": "Your name",
+    "email": "Work email",
+    "company": "Company (optional)",
+    "message": "How can we help?",
+    "consent": "You may contact me about this request.",
+    "submit": "Send",
+    "sent": "Thanks, {name}. We will reply to {email}.",
+    "failed": "We could not send this. Please try again.",
+    "errors": {
+      "name": "Please tell us your name.",
+      "email": "That does not look like an email address.",
+      "message": "Please write at least a sentence.",
+      "consent": "We need your permission to reply."
+    }
+  },
+  "consent": {
+    "title": "Cookies",
+    "body": "We use one necessary cookie. Analytics cookies are off until you say yes.",
+    "accept": "Allow analytics",
+    "decline": "Only necessary",
+    "settings": "Cookie settings",
+    "necessary": "Required for the site to work.",
+    "analytics_category": "Helps us see which pages matter."
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Colour scheme"
+  },
+  "footer": {
+    "rights": "© {year} {name}. All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "legal": "Legal"
+  },
+  "errors": {
+    "not_found": {
+      "title": "Page not found",
+      "body": "This page moved or never existed.",
+      "home": "Back to the home page"
+    },
+    "server": {
+      "title": "Something went wrong",
+      "body": "We have been told. Please try again in a moment.",
+      "reference": "Reference: {reference}"
+    }
+  }
+}

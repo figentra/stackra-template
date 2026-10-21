@@ -1,0 +1,26 @@
+# Stackra file contract:
+# Purpose: the staff journey: sign in, open the create-order sheet from Home, place an order, land
+#          on the detail.
+# Boundary: one journey, every locale; ids over text wherever possible; the one text assertion
+#           covers both languages. Runs on the `demo` seed profile: the variant is the seeded M tee
+#           `var_01JA0000000000000000000001` (in stock), from commerce `catalogue.demo`; the signed-in
+#           principal `usr_01JA0000000000000000000001` holds 1 000 points from `loyalty_kit.demo`, so the
+#           100-point redemption succeeds.
+# Runtime: node
+# Governing contract: ADR 0182, ADR 0022
+appId: com.figentra.stackra
+tags: [gate]
+---
+- runFlow: sign-in-and-home.flow.yaml
+- tapOn: { id: "home-new-order" }
+- assertVisible: { id: "create-order-page" }
+- tapOn: { id: "field-variant" }
+- inputText: "var_01JA0000000000000000000001"
+- tapOn: { id: "field-points" }
+- eraseText
+- inputText: "100"
+- hideKeyboard
+- tapOn: { id: "create-order-submit" }
+- assertVisible: { id: "order-detail-page", timeout: 15000 }
+- assertVisible:
+    text: "Pending payment|بانتظار الدفع"

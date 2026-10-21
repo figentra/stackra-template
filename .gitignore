@@ -1,0 +1,27 @@
+# Stackra file contract:
+# Purpose: what git never tracks. Everything under a member's .stackra/ is rebuilt by `stackra gen`
+#          except the two committed contract artefacts, app-manifest.json and openapi.json (ADR
+#          0158). The same rule set is repeated in each member's .gitignore so a member folder
+#          copied elsewhere keeps it.
+# Boundary: ignore rules only. No .env files exist in a Stackra project (ADR 0173): nothing to
+#           ignore, nothing to leak.
+# Runtime: node
+# Governing contract: ADR 0091, 0261 (gen output is derived), ADR 0158 d1, ADR 0268 (amended), ADR
+#                     0173
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.stackra/*
+!.stackra/app-manifest.json
+!.stackra/openapi.json
+# preview only: the generated samples are committed so they can be read; a real project drops the
+# next line
+!.stackra/**
+test-results/
+playwright-report/
+maestro-report/
+.lighthouseci/
+.wrangler/
+.expo/

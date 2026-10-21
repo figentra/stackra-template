@@ -1,0 +1,9 @@
+{
+  // Stackra file contract:
+  // Purpose: TypeScript settings of the access-log package; the library preset.
+  // Boundary: the preset owns strictness and decorators.
+  // Runtime: node
+  // Governing contract: ADR 0005
+  "extends": "@stackra/typescript-config/library.json",
+  "include": ["src"]
+}

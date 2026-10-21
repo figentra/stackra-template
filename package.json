@@ -1,0 +1,38 @@
+{
+  "name": "stackra-template-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "stackra dev",
+    "gen": "stackra gen",
+    "gen:check": "stackra gen --check",
+    "new": "stackra new",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "format": "oxfmt --write .",
+    "format:check": "turbo run format:check",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "db:migrate": "stackra db migrate",
+    "db:seed": "stackra db seed",
+    "infra": "stackra infra preview",
+    "validate": "stackra validate",
+    "verify": "turbo run format:check lint typecheck test build && stackra gen --check && stackra validate",
+    "docs": "pnpm --filter @figentra/docs dev"
+  },
+  "devDependencies": {
+    "@stackra/cli": "catalog:stackra",
+    "@stackra/oxlint-config": "catalog:stackra",
+    "@stackra/runway": "catalog:stackra",
+    "@stackra/testing": "catalog:stackra",
+    "@stackra/typescript-config": "catalog:stackra",
+    "@stackra/vitest-config": "catalog:stackra",
+    "oxfmt": "catalog:quality",
+    "oxlint": "catalog:quality",
+    "turbo": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:quality"
+  },
+  "packageManager": "pnpm@12.6.0"
+}

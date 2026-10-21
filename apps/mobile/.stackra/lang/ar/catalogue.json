@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "catalogue": "الكتالوج"
+  },
+  "resource": {
+    "products": "المنتجات"
+  },
+  "status": {
+    "draft": "مسودة",
+    "active": "نشط",
+    "archived": "مؤرشف"
+  },
+  "permissions": {
+    "product": {
+      "read": "عرض المنتجات",
+      "create": "إنشاء المنتجات",
+      "update": "تعديل المنتجات",
+      "archive": "أرشفة المنتجات"
+    }
+  },
+  "product": {
+    "archive_confirm": "أرشفة هذا المنتج؟ سيتوقف بيعه الآن.",
+    "archived": "تمت أرشفة المنتج",
+    "image_attached": "تمت إضافة الصورة",
+    "images": "الصور"
+  },
+  "refusals": {
+    "variant_unavailable": "أحد المنتجات لم يعد متاحًا.",
+    "variant_not_found": "لا يوجد منتج يطابق هذا الباركود.",
+    "product_not_found": "المنتج غير موجود."
+  },
+  "entitlements": {
+    "product_limit": "المنتجات"
+  }
+}

@@ -1,0 +1,12 @@
+// Stackra file contract:
+// Purpose: oxfmt settings for the whole workspace: 100 columns, which is the width every authored
+//          file is held to.
+// Boundary: formatter options and ignores only; generated output under `.stackra/gen/` is never
+//           reformatted by hand.
+// Runtime: node
+// Governing contract: ADR 0007 (docblocks wrap at the same width)
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "ignorePatterns": ["**/node_modules/**", "**/dist/**", "**/coverage/**", "**/.stackra/gen/**"],
+}

@@ -1,0 +1,9 @@
+{
+  // Stackra file contract:
+  // Purpose: TypeScript settings of the notifications service; one preset, nothing local.
+  // Boundary: the preset owns strictness, decorators and module resolution.
+  // Runtime: node
+  // Governing contract: ADR 0005, tier rule
+  "extends": "@stackra/typescript-config/service.json",
+  "include": ["src", ".stackra/gen"]
+}

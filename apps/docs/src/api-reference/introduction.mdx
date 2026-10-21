@@ -1,0 +1,54 @@
+---
+title: "Using the API"
+description: "Areas, authentication, idempotency, errors and versions, the same for every endpoint."
+icon: "code"
+---
+
+Every endpoint in this reference is generated from an action or a query the commerce service
+declares. The rules below are the action pipeline's, so they hold for every operation without
+exception.
+
+## Areas
+
+| Area     | Paths                                   | Who                                             |
+| -------- | --------------------------------------- | ----------------------------------------------- |
+| `public` | prefixed `/public` (`/public/products`) | no session: the storefront's reads              |
+| `app`    | unprefixed (`/orders`, `/products`)     | a tenant's users and staff, with a bearer token |
+
+An action declares no area unless it is public, so everything else is `app`. Admin and
+platform-operator endpoints are not published here.
+
+## Authentication
+
+`Authorization: Bearer <access token>` from the identity provider (OIDC, code + PKCE). The browser
+console uses an HttpOnly session cookie through the BFF instead; API clients use tokens. Public-area
+endpoints take no token.
+
+## Idempotency
+
+An action that is not safe to repeat declares its idempotency, and its operation lists the
+`Idempotency-Key` header: `required` (placing an order) or optional. A repeat with the same key and
+body returns the first response; the same key with a different body is refused with
+`idempotency_key_reused`. Reads never take the header.
+
+## Errors
+
+Every error is the same envelope, `{ "code": "insufficient_stock", "category":
+"failed_precondition", "retryable": false, "details": {…}, "errorId": "err_…" }`. The `code` is
+snake_case and specific; the `category` is one of a fixed list (`invalid_argument`,
+`unauthenticated`, `permission_denied`, `not_found`, `conflict`, `failed_precondition`,
+`resource_exhausted`, `unavailable`, …) and decides the HTTP status: `400`, `401`, `403`, `404`,
+`409`, `412`, `429`, `503`. Each operation lists its codes under its responses. Quote the `errorId`
+to support.
+
+## Versions
+
+Paths never carry a version. Send `Stackra-Version` with a supported date: `2026-10-01` or
+`2027-03-01` (the newest; order views carry the `totals` object from this date). Omit it and the
+version pinned on your API key applies; a key with no pin gets the oldest supported date, so an
+unpinned caller never breaks. Events are versioned in their name (`orders.order.placed.v1`).
+
+## Rate limits
+
+Per API key and per IP, returned in `RateLimit-Limit`, `RateLimit-Remaining` and `RateLimit-Reset`;
+a refusal is `429` with `rate_limited` and `Retry-After`.

@@ -1,0 +1,10 @@
+{
+  // Stackra file contract:
+  // Purpose: TypeScript settings of the loyalty kit; the library preset (declaration output for
+  //          consumers, JSX for ./react).
+  // Boundary: the preset owns strictness and decorators; `#` subpaths resolve through package.json imports.
+  // Runtime: node
+  // Governing contract: ADR 0005
+  "extends": "@stackra/typescript-config/library.json",
+  "include": ["src"]
+}

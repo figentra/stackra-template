@@ -1,0 +1,9 @@
+{
+  // Stackra file contract:
+  // Purpose: TypeScript settings of the brand package; the library preset.
+  // Boundary: the preset owns everything.
+  // Runtime: node
+  // Governing contract: ADR 0005, ADR 0003 (one preset per member)
+  "extends": "@stackra/typescript-config/library.json",
+  "include": ["src"]
+}

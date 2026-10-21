@@ -1,0 +1,69 @@
+{
+  "nav": {
+    "sales": "Sales"
+  },
+  "resource": {
+    "orders": "Orders"
+  },
+  "status": {
+    "pending_payment": "Pending payment",
+    "paid": "Paid",
+    "cancelled": "Cancelled",
+    "expired": "Expired"
+  },
+  "cancel_reason": {
+    "customer": "Cancelled by customer",
+    "staff": "Cancelled by staff",
+    "expired": "Expired unpaid",
+    "payment_failed": "Payment failed"
+  },
+  "permissions": {
+    "order": {
+      "create": "Place orders",
+      "read": "View orders",
+      "cancel": "Cancel orders",
+      "expire": "Expire unpaid orders"
+    }
+  },
+  "settings": {
+    "title": "Orders",
+    "auto_cancel_after_minutes": "Cancel unpaid orders after (minutes)",
+    "customers_may_cancel": "Customers may cancel unpaid orders"
+  },
+  "order": {
+    "placed": "Order placed",
+    "cancel_confirm": "Cancel this order? Reserved stock is released.",
+    "cancelled": "Order cancelled",
+    "lines_count": "{count, plural, one {# item} other {# items}}"
+  },
+  "widgets": {
+    "revenue_today": "Revenue today"
+  },
+  "documents": {
+    "sales_today": "Sales today"
+  },
+  "quick_order": {
+    "title": "Quick order",
+    "variant": "Variant",
+    "quantity": "Quantity",
+    "submit": "Place order"
+  },
+  "mail": {
+    "order_placed": {
+      "subject": "Your order {id}",
+      "body": "Thank you for your order. Total: {total}. It is being prepared.",
+      "cta": "View your order"
+    },
+    "order_receipt": {
+      "subject": "Receipt for order {id}",
+      "intro": "Thanks, your order {id} is paid."
+    }
+  },
+  "refusals": {
+    "order_not_payable": "This order can no longer take a payment.",
+    "tenant_suspended": "This store is suspended; orders cannot be changed right now."
+  },
+  "flags": {
+    "quick_order": "Quick order screen"
+  }
+}

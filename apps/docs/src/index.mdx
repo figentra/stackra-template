@@ -1,0 +1,33 @@
+---
+title: "Acme Retail on Stackra"
+description: "One commerce service, a console, a mobile app and a public site on Stackra."
+icon: "house"
+---
+
+Acme Retail is a `pnpm create stackra` project. It has one service (`@figentra/service-commerce`:
+catalogue, inventory, orders, loyalty), the console that renders what that service declares, the
+public site, and this documentation. Everything a page here says about the API is generated from the
+service's committed manifest, so it cannot drift from the code.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Run the service, the console and the site locally in ten minutes.
+  </Card>
+  <Card title="The programming model" icon="shapes" href="/guides/programming-model">
+    Everything with identity is a class with a kind decorator; folders say the kind.
+  </Card>
+  <Card title="Decisions" icon="landmark" href="/adr">
+    Why the repository looks the way it does, one ADR per decision.
+  </Card>
+  <Card title="API reference" icon="code" href="/api-reference/introduction">
+    Every public action and event of the commerce service, with try-it.
+  </Card>
+</CardGroup>
+
+## Reading order for a new contributor
+
+1. `AGENTS.md` at the repository root: the glossary and the "where does X go" table.
+2. `services/commerce/src/modules/orders/README.md`, then `actions/create-order.action.ts`.
+3. The [programming model](/guides/programming-model) guide.
+4. [Add a field end to end](/guides/add-a-field): one change through every file it touches.
+5. One ADR, [0001](/adr/0001-loyalty-ledger-is-a-port), to see how a decision is recorded.

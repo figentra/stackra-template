@@ -1,0 +1,12 @@
+# Stackra file contract:
+# Purpose: pins the toolchain every contributor and CI job runs; `pnpm` here matches `packageManager` in
+#          package.json (corepack reads that one).
+# Boundary: tool versions only; no secret, no environment value.
+# Runtime: node
+# Governing contract: ADR 0027 (CLI tools pinned in mise.toml)
+[tools]
+node = "24.22.0"
+pnpm = "12.6.0"
+gitleaks = "8.30.1"
+"github:Infisical/cli" = "0.44.2"
+"github:mobile-dev-inc/maestro" = "cli-2.10.0"

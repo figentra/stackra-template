@@ -1,0 +1,22 @@
+{
+  "name": "@figentra/docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The project's documentation site: Mintlify (docs.json + MDX), with the API reference generated from the consumed services' manifests.",
+  "type": "module",
+  "scripts": {
+    "gen": "stackra gen",
+    "dev": "stackra dev",
+    "build": "cd src && mint validate",
+    "lint": "cd src && mint broken-links",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "a11y": "cd src && mint a11y",
+    "clean": "rm -rf src/.mintlify .turbo"
+  },
+  "devDependencies": {
+    "@stackra/cli": "catalog:stackra",
+    "mint": "catalog:docs",
+    "oxfmt": "catalog:quality"
+  }
+}
