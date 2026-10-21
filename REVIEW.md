@@ -49,7 +49,7 @@ a real repo and shown here only so you can read the output next to the source.
 - **Workflows:** the decorator is `@Workflow()` on a class that `extends WorkflowBase` (the base class no longer shares
   the decorator's name).
 - **Closed sets are enums** everywhere, including `Idempotency.Required`, `MigrationMode.ForwardOnly`,
-  `MigrationRunner.Auto`, `ActionColor.Danger` and `SessionStatus.SignedIn`.
+  `MigrationRunner.Auto`, `Tone.Danger` and `SessionStatus.SignedIn`.
 
 ## Known limits of the preview
 

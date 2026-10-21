@@ -14,7 +14,6 @@ the same class enums authored code uses.
 | `i18n.ts`        | the complete key tree of every namespace referenced, with loaders                       | "which i18n keys exist?"                   |
 | `permissions.ts` | the permission keys this member hosts, with risk, users, policy and grantability        | "which permissions exist?"                 |
 | `events.ts`      | wire names, visibility, broadcast channels and outbound webhooks                        | "what leaves through the outbox?"          |
-| `panels.ts`      | the apps' panels and the realms each one hosts                                    | "which panel shows a realm's resources?"     |
 | `slots.ts`       | the panel slots a widget may name                                                       | "which slots may a widget use?"            |
 | `queues.ts`      | the worker queues this member may name                                                  | "which queue does a job run on?"           |
 | `assets.ts`      | asset keys per module with files and overridability                                     | "which assets ship?"                       |
