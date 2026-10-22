@@ -1,0 +1,12 @@
+# Code owners. Replace @your-org/your-team with your GitHub team or user (README, "Make it yours").
+# Reviews are required by branch protection (branch-protection.json), not by this file alone.
+
+* @your-org/your-team
+
+# Decisions, CI and the contracts other members build from (ADR 0158)
+apps/docs/src/adr/ @your-org/your-team
+.github/ @your-org/your-team
+**/.stackra/app-manifest.json @your-org/your-team
+**/.stackra/openapi.json @your-org/your-team
+runway.yaml @your-org/your-team
+stackra.lock.yaml @your-org/your-team

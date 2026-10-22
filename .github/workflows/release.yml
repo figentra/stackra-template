@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run `pnpm -r publish --dry-run` (no version PR, no publish) in the release environment"
+        type: boolean
+        default: false
+
+# One release run per ref at a time: a second run starting before this one finishes
+# would version the same changesets twice.
+concurrency: release-${{ github.ref }}
+
+# ADR 0019 D2: nothing by default; the job below asks for what it needs.
+permissions: {}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    # Stackra docs `/runbooks/release` ("Before the first release"): a human
+    # configures this environment as protected and restricted to main, so a branch that
+    # edits the workflow cannot obtain a credential.
+    environment: release
+    permissions:
+      contents: write # push the version-PR branch and the version tags
+      pull-requests: write # open and update the version PR
+      id-token: write # ADR 0177 amendment: pnpm trusted publishing (GitHub OIDC) and the provenance statement; no npm token
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0 # changesets diffs against history and reads existing tags
+          submodules: false
+
+      # ADR 0027 D2: node and pnpm come from mise.toml.
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # With pending changesets this opens or updates the "version packages" PR; on its merge `changeset publish`
+      # publishes every package with "private": false to npm with provenance. Apps and services deploy by commit SHA.
+      - name: Build
+        run: pnpm build
+
+      - name: Publish dry run
+        if: inputs.dry_run == true
+        run: pnpm -r publish --dry-run --no-git-checks
+
+      - name: Version PR / publish
+        if: inputs.dry_run != true
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          version-script: pnpm changeset version
+          publish-script: pnpm changeset publish
+          pr-title: "chore(release): version packages"
+          commit-message: "chore(release): version packages"
+          # GITHUB_TOKEN works, but a PR it opens does not trigger the Quality Gate. Swap in a GitHub App token
+          # (actions/create-github-app-token) when you want the version PR checked (README, "Make it yours").
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          # changesets runs pnpm 12's native publish (`pnpm changeset publish` -> `pnpm publish`): it resolves
+          # workspace:/catalog: versions and does the OIDC exchange and provenance itself, not the npm CLI.
+          # No NPM_TOKEN exists anywhere (ADR 0177 amendment).
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+          NPM_CONFIG_PROVENANCE: "true"
+
+  # The SBOM job holds no id-token and no write permission: it only reads the repository.
+  sbom:
+    name: SBOM
+    runs-on: ubuntu-latest
+    needs: release
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # SBOM covers what actually got installed (node_modules), independent of whether this
+      # run released. `--ignore-npm-errors` is required because cyclonedx-npm shells out to
+      # `npm ls` internally, which reports the devDependency-only peer graphs of transitive
+      # tools as errors even though pnpm installed fine. The tool is pinned via npx because
+      # it is not a workspace catalog dependency.
+      - name: Generate SBOM (CycloneDX)
+        run: npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --ignore-npm-errors --output-format JSON --output-file sbom.cdx.json
+
+      - name: Upload SBOM as release artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sbom
+          path: sbom.cdx.json
+          retention-days: 90

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# ADR 0019 D2: least privilege. Nothing in the gate writes to the repository or holds an OIDC token.
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      # ADR 0019 D1: every action is pinned to a full commit SHA, the version in the trailing comment.
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+
+      # ADR 0027 D2: toolchains come from mise.toml (node, pnpm, gitleaks), not per-tool setup actions.
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm gitleaks
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Commit messages
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BRANCH: ${{ github.head_ref }}
+        run: |
+          case "$PR_BRANCH" in renovate/*|changeset-release/*) exit 0 ;; esac
+          pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA"
+
+      # stackra verify: format check, lint, typecheck, test, build, gen check (committed manifests equal what gen
+      # derives), validate (structure, versions, docblocks), boundaries and knip.
+      - name: Verify
+        run: pnpm verify
+
+      - name: Secrets scan
+        run: pnpm secrets:scan
+
+  # Deploy reads each member's runway.yaml and the root runway.yaml (`stackra infra preview` shows the plan). Applying
+  # stays a human step until the deploy ADR decides the promotion unit; this job marks where the deploy goes.
+  deploy-staging:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    needs: gate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions: {}
+
+    steps:
+      - name: Deploy not wired
+        run: echo "Deploy is not wired yet. runway.yaml describes it and a human applies it; nothing is deployed."
