@@ -1,17 +1,156 @@
 # Stackra file contract:
-# Purpose: the project's MCP servers: the Stackra MCP, locally (`stackra mcp`, this project's generated facts:
-#          kinds, manifests, routes, wiring) and hosted (framework know-how). `stackra mcp sync`, run by
-#          `pnpm install` through `prepare`, renders this file into the gitignored .mcp.json that Claude Code reads.
-# Boundary: server definitions only; never a token. Third-party servers (docs, design system, GitHub, errors) are
-#           user-level, installed by `stackra agents setup`, not here. The hosted server authenticates with OAuth on
-#           first use (/mcp).
+# Purpose: every MCP server this project uses, in one file. `stackra mcp sync` (run by `pnpm install`
+#          through `prepare`) renders it into the gitignored .mcp.json that Claude Code reads; other
+#          tools get their own format from the same source through `stackra agents setup`.
+# Boundary: server definitions only, never a token. A server that needs a token runs through
+#           `stackra mcp exec --`, which injects `$NAME` values from the project's secret store into
+#           that one process. Remote (http) servers sign in with OAuth on first use (/mcp). Keep
+#           production access read-only unless a human approves writes.
 # Runtime: node
-# Governing contract: ADR 0173 (secret values never in files)
+# Governing contract: Stackra ADR 0173 (secret values never in files), Stackra ADR 0282 (developer MCP)
 mcpServers:
+  # --------------------------------------------------------------------------------------------
+  # 01. Stackra: this project's generated facts, the framework, and the spec workflow
+  # --------------------------------------------------------------------------------------------
+  # Local: manifests, routes, wiring, kinds; create members, run gen/validate/verify, call actions.
   stackra:
     command: pnpm
     args: [exec, stackra, mcp]
+  # Hosted: docs, ADRs, registry and examples; project data after sign-in (read-only).
   # Replace with the hosted Stackra MCP URL of your plan (README, "Make it yours").
   stackra-cloud:
     type: http
     url: https://<stackra-mcp-host>/mcp
+  # Spec status: which spec, what blocks it, which tasks are open (read-only).
+  vellum:
+    command: pnpm
+    args: [exec, vellum-mcp]
+
+  # --------------------------------------------------------------------------------------------
+  # 02. Runtime: the generated Encore app, locally and deployed
+  # --------------------------------------------------------------------------------------------
+  # Replace <your-encore-app-id> with the id from `encore app create`.
+  encore:
+    command: encore
+    args: [mcp, run, --app=<your-encore-app-id>]
+  encore-cloud:
+    type: http
+    url: https://api.encore.dev/mcp
+
+  # --------------------------------------------------------------------------------------------
+  # 03. Library and framework documentation
+  # --------------------------------------------------------------------------------------------
+  context7:
+    command: pnpm
+    args:
+      - exec
+      - stackra
+      - mcp
+      - exec
+      - --
+      - npx
+      - -y
+      - "@upstash/context7-mcp@latest"
+      - --api-key
+      - $CONTEXT7_API_KEY
+  mintlify:
+    type: http
+    url: https://mintlify.com/docs/mcp
+
+  # --------------------------------------------------------------------------------------------
+  # 04. UI: HeroUI (web and native, open source and Pro), Uniwind, Expo, Figma
+  # --------------------------------------------------------------------------------------------
+  heroui-react:
+    command: npx
+    args: [-y, "@heroui/react-mcp@latest"]
+  heroui-native:
+    command: npx
+    args: [-y, "@heroui/native-mcp@latest"]
+  heroui-pro:
+    command: pnpm
+    args:
+      - exec
+      - stackra
+      - mcp
+      - exec
+      - --
+      - npx
+      - -y
+      - mcp-remote@latest
+      - https://mcp.heroui.pro/mcp
+      - --header
+      - x-heroui-personal-token:$HEROUI_PERSONAL_TOKEN
+  heroui-native-pro:
+    command: pnpm
+    args:
+      - exec
+      - stackra
+      - mcp
+      - exec
+      - --
+      - npx
+      - -y
+      - mcp-remote@latest
+      - https://native-mcp.heroui.pro/mcp
+      - --header
+      - x-heroui-personal-token:$HEROUI_PERSONAL_TOKEN
+  uniwind:
+    type: http
+    url: https://docs.uniwind.dev/mcp
+  expo:
+    type: http
+    url: https://mcp.expo.dev/mcp
+  figma:
+    type: http
+    url: https://mcp.figma.com/mcp
+
+  # --------------------------------------------------------------------------------------------
+  # 05. Source control and tracking
+  # --------------------------------------------------------------------------------------------
+  github:
+    type: http
+    url: https://api.githubcopilot.com/mcp/
+  linear:
+    type: http
+    url: https://mcp.linear.app/mcp
+
+  # --------------------------------------------------------------------------------------------
+  # 06. Cloud and edge
+  # --------------------------------------------------------------------------------------------
+  cloudflare-docs:
+    type: http
+    url: https://docs.mcp.cloudflare.com/mcp
+  cloudflare-api:
+    type: http
+    url: https://mcp.cloudflare.com/mcp
+  # AWS documentation and regional availability only; no operations access.
+  aws-knowledge:
+    type: http
+    url: https://knowledge-mcp.global.api.aws
+
+  # --------------------------------------------------------------------------------------------
+  # 07. Payments and email
+  # --------------------------------------------------------------------------------------------
+  stripe:
+    type: http
+    url: https://mcp.stripe.com
+  resend-docs:
+    type: http
+    url: https://resend.com/docs/mcp
+
+  # --------------------------------------------------------------------------------------------
+  # 08. Errors, analytics and observability (read-only)
+  # --------------------------------------------------------------------------------------------
+  sentry:
+    type: http
+    url: https://mcp.sentry.dev/mcp
+  posthog:
+    type: http
+    url: https://mcp.posthog.com/mcp?readonly=true
+
+  # --------------------------------------------------------------------------------------------
+  # 09. Browser automation and end-to-end checks
+  # --------------------------------------------------------------------------------------------
+  playwright:
+    command: npx
+    args: [-y, "@playwright/mcp@latest"]
