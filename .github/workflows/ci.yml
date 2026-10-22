@@ -1,3 +1,8 @@
+# Stackra file contract:
+# Purpose: the Quality Gate. Runs on every pull request to main and every push to main; branch
+#          protection requires the `Quality Gate` job, so keep that job name unchanged.
+# Needs: no secrets and no OIDC token; contents: read only. Tools come from mise.toml (node, gitleaks).
+# Owner: the repository maintainers (CODEOWNERS). Runbook: Stackra docs `/runbooks/ci`.
 name: CI
 
 on:
@@ -35,31 +40,17 @@ jobs:
 
       # Preview gate: the `@stackra/*` packages and the `stackra` CLI are not published yet, so
       # `pnpm install` and `pnpm verify` cannot run here. Until they are, the gate runs every check that
-      # needs no workspace install. Replace these steps with `pnpm install --frozen-lockfile`,
-      # `pnpm exec commitlint …`, `pnpm verify` and `pnpm secrets:scan` once @stackra/cli is released.
-      - name: Commit messages
-        if: github.event_name == 'pull_request'
+      # needs no workspace install (commit messages, format, config files parse, secrets scan) through
+      # one committed script, the same command a contributor or agent runs locally. Replace this step with
+      # `pnpm install --frozen-lockfile`, `pnpm exec commitlint …`, `pnpm verify` and `pnpm secrets:scan`
+      # once @stackra/cli is released, and delete .github/scripts/preview-gate.mjs.
+      - name: Preview gate
         env:
+          # Read by the script's commit-message check; empty on push events, where it is skipped.
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BRANCH: ${{ github.head_ref }}
-        run: |
-          case "$PR_BRANCH" in renovate/*|changeset-release/*) exit 0 ;; esac
-          printf 'extends: ["@commitlint/config-conventional"]\n' > "$RUNNER_TEMP/commitlint.yaml"
-          npx --yes -p @commitlint/cli@21.2.3 -p @commitlint/config-conventional@21.2.3 \
-            commitlint --config "$RUNNER_TEMP/commitlint.yaml" --from "$BASE_SHA" --to "$HEAD_SHA"
-
-      - name: Format
-        run: npx --yes oxfmt@0.71.0 --check
-
-      - name: Config files parse
-        run: |
-          git ls-files -z '*.yaml' '*.yml' | xargs -0 -n1 sh -c 'npx --yes yaml@2.9.1 valid < "$0" || { echo "invalid YAML: $0"; exit 1; }'
-          # tsconfig files and .vscode settings are JSONC (comments allowed); everything else is strict JSON.
-          git ls-files -z '*.json' ':!:**/tsconfig*.json' ':!:tsconfig*.json' ':!:.vscode/**' ':!:packages/tooling/typescript/src/*.json' | xargs -0 node -e 'for (const f of process.argv.slice(1)) { try { JSON.parse(require("fs").readFileSync(f, "utf8")); } catch (e) { console.error("invalid JSON: " + f + ": " + e.message); process.exitCode = 1; } }'
-
-      - name: Secrets scan
-        run: gitleaks detect --no-banner --redact --source .
+        run: node .github/scripts/preview-gate.mjs
 
   # Deploy reads each member's runway.yaml and the root runway.yaml (`stackra infra preview` shows the plan). Applying
   # stays a human step until the deploy ADR decides the promotion unit; this job marks where the deploy goes.

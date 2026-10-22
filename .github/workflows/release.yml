@@ -1,3 +1,14 @@
+# Stackra file contract:
+# Purpose: release. With pending changesets it opens or updates the "version packages" PR; on that
+#          PR's merge it publishes every package with "private": false to npm with provenance, then
+#          uploads a CycloneDX SBOM. Apps and services deploy by commit SHA, not from here.
+# Triggers: every push to main; workflow_dispatch with `dry_run` for a publish dry run.
+# Needs: the `release` environment (protected, main only), contents and pull-requests write, and
+#        id-token write for npm trusted publishing. No npm token and no repository secret.
+# Skips: until the repository commits pnpm-lock.yaml (`preflight` below), every job is skipped and
+#        the run is green: `pnpm install --frozen-lockfile` cannot run without a lockfile, which is
+#        the case in the template preview while `@stackra/*` is unpublished.
+# Owner: the repository maintainers (CODEOWNERS). Runbook: Stackra docs `/runbooks/release`.
 name: Release
 
 on:
@@ -18,9 +29,40 @@ concurrency: release-${{ github.ref }}
 permissions: {}
 
 jobs:
+  # Decides whether a release can run at all. hashFiles() is not available in a job-level `if`, so
+  # this job checks out the lockfile alone and exposes the answer as an output the jobs below read.
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      has-lockfile: ${{ steps.lockfile.outputs.present }}
+    steps:
+      # ADR 0019 D1: every action is pinned to a full commit SHA, the version in the trailing comment.
+      - name: Checkout (lockfile only)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          sparse-checkout: pnpm-lock.yaml
+          sparse-checkout-cone-mode: false
+
+      - name: Lockfile present
+        id: lockfile
+        run: |
+          present=false
+          if [ -f pnpm-lock.yaml ]; then present=true; fi
+          echo "present=$present" >> "$GITHUB_OUTPUT"
+          if [ "$present" = false ]; then
+            echo "::notice::No pnpm-lock.yaml committed yet; release and SBOM are skipped."
+          fi
+
   release:
     name: Release
     runs-on: ubuntu-latest
+    needs: preflight
+    # No lockfile, no install: skip instead of failing (see the header).
+    if: needs.preflight.outputs.has-lockfile == 'true'
     # Stackra docs `/runbooks/release` ("Before the first release"): a human
     # configures this environment as protected and restricted to main, so a branch that
     # edits the workflow cannot obtain a credential.
@@ -77,6 +119,7 @@ jobs:
   sbom:
     name: SBOM
     runs-on: ubuntu-latest
+    # Runs only after a release job that ran; a skipped release skips this job too.
     needs: release
     permissions:
       contents: read
