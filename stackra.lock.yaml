@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schemas/stackra-lock.schema.json
 # Stackra file contract:
 # Purpose: the pinned revision of every external producer manifest this workspace builds clients
 #          from, once per workspace. `stackra gen` reads a producer's committed

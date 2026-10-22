@@ -5,7 +5,7 @@
 // Runtime: node
 // Governing contract: ADR 0007 (docblocks wrap at the same width)
 {
-  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "$schema": "https://unpkg.com/oxfmt@0.71.0/configuration_schema.json",
   "printWidth": 100,
   "ignorePatterns": [
     "**/node_modules/**",

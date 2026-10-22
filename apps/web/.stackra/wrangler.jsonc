@@ -7,7 +7,7 @@
 //           and the Worker reads them from `env`. Secret names are listed for the reviewer only.
 // Runtime: node
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
   "name": "acme-web",
   "main": "./workers/app.ts",
   "compatibility_date": "2026-10-01",

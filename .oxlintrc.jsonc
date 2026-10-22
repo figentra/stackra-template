@@ -8,7 +8,7 @@
 // Runtime: node
 // Governing contract: ADR 0003 (tier direction), ADR 0129 (house lint rules)
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "$schema": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json",
   "extends": ["./packages/tooling/oxlint/src/boundaries.jsonc"],
   "ignorePatterns": [
     // oxlint follows workspace symlinks; a bare name pattern stops the traversal

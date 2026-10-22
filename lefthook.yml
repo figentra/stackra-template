@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/v2.2.2/schema.json
 # Stackra file contract:
 # Purpose: git hooks: pre-commit format and lint on staged files plus a secret scan, commit-msg conventional
 #          commits, pre-push the committed contracts check and the affected gate. Installed by `pnpm install`
