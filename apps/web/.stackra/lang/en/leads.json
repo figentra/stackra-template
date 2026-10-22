@@ -1,0 +1,6 @@
+{
+  "refusals": {
+    "rate_limited": "Too many requests; try again in a minute.",
+    "captcha_failed": "We could not verify that you are human; please try again."
+  }
+}

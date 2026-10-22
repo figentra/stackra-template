@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "catalogue": "Catalogue"
+  },
+  "resource": {
+    "products": "Products"
+  },
+  "status": {
+    "draft": "Draft",
+    "active": "Active",
+    "archived": "Archived"
+  },
+  "permissions": {
+    "product": {
+      "read": "View products",
+      "create": "Create products",
+      "update": "Edit products",
+      "archive": "Archive products"
+    }
+  },
+  "product": {
+    "archive_confirm": "Archive this product? It stops selling now.",
+    "archived": "Product archived",
+    "image_attached": "Image added",
+    "images": "Images"
+  },
+  "refusals": {
+    "variant_unavailable": "One of the items is no longer available.",
+    "variant_not_found": "No product matches this barcode.",
+    "product_not_found": "Product not found."
+  },
+  "entitlements": {
+    "product_limit": "Products"
+  }
+}
