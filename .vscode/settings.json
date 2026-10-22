@@ -82,6 +82,22 @@
   ],
   "tailwindCSS.classAttributes": ["class", "className", "classNames"],
 
+  // ── i18n: assets/lang/<locale>/<namespace>.json in every member ───────────────────────────────
+  "i18n-ally.localesPaths": [
+    "apps/*/assets/lang",
+    "services/*/assets/lang",
+    "packages/*/*/assets/lang"
+  ],
+  "i18n-ally.pathMatcher": "{locale}/{namespaces}.json",
+  "i18n-ally.namespace": true,
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.displayLanguage": "en",
+  "i18n-ally.enabledFrameworks": ["general"],
+
+  // ── Markdown: oxfmt formats, markdownlint checks structure (rules in .markdownlint.yaml) ────────
+  "markdown.validate.enabled": true,
+
   // ── Tests ──────────────────────────────────────────────────────────────────────────────────
   // The @stackra/* packages are pre-release and not installable yet, so the Vitest extension cannot
   // resolve vitest in any member. Remove this line once they are published.

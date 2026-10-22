@@ -21,6 +21,18 @@
     "usernamehw.errorlens",
     // Spelling in code and docs (English and the Arabic-ready word list lives in cspell.config.yaml)
     "streetsidesoftware.code-spell-checker",
+    // Docs: Markdown rules (oxfmt formats; markdownlint flags structure) and Mermaid in previews
+    "davidanson.vscode-markdownlint",
+    "bierner.markdown-mermaid",
+    // i18n keys in assets/lang/<locale>/<namespace>.json, inline and with missing-key reports
+    "lokalise.i18n-ally",
+    // Data: Postgres through SQLTools, and SQLite files (the desktop offline store)
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg",
+    "qwtel.sqlite-viewer",
+    // Containers (generated compose files) and pull-request review in the editor
+    "ms-azuretools.vscode-docker",
+    "github.vscode-pull-request-github",
     // AI pair: Claude Code
     "anthropic.claude-code"
   ],
