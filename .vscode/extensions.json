@@ -19,8 +19,6 @@
     // TypeScript errors you can read, inline
     "yoavbls.pretty-ts-errors",
     "usernamehw.errorlens",
-    // Spelling in code and docs (English and the Arabic-ready word list lives in cspell.config.yaml)
-    "streetsidesoftware.code-spell-checker",
     // Docs: Markdown rules (oxfmt formats; markdownlint flags structure) and Mermaid in previews
     "davidanson.vscode-markdownlint",
     "bierner.markdown-mermaid",
