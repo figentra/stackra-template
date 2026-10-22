@@ -1,0 +1,65 @@
+{
+  "name": "@acme/service-notifications",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The consumer service: delivery, notification preferences, the message log and the in-app inbox. Reaches commerce by event, call and command through the generated client, never its code.",
+  "type": "module",
+  "imports": {
+    "#src/*": "./src/*",
+    "#modules/*": "./src/modules/*",
+    "#config/*": "./src/config/*",
+    "#assets/*": "./assets/*",
+    "#stackra/*": [
+      "./.stackra/gen/*.ts",
+      "./.stackra/gen/*.tsx"
+    ]
+  },
+  "exports": {
+    "./contracts": "./src/contracts/index.ts",
+    "./assets/*": "./assets/*"
+  },
+  "scripts": {
+    "gen": "stackra gen",
+    "dev": "stackra dev",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
+    "build": "stackra build"
+  },
+  "dependencies": {
+    "@stackra/actions": "catalog:stackra",
+    "@stackra/app": "catalog:stackra",
+    "@stackra/clients": "catalog:stackra",
+    "@stackra/config": "catalog:stackra",
+    "@stackra/connections": "catalog:stackra",
+    "@stackra/container": "catalog:stackra",
+    "@stackra/contracts": "catalog:stackra",
+    "@stackra/database": "catalog:stackra",
+    "@stackra/errors": "catalog:stackra",
+    "@stackra/events": "catalog:stackra",
+    "@stackra/i18n": "catalog:stackra",
+    "@stackra/iam": "catalog:stackra",
+    "@stackra/identity": "catalog:stackra",
+    "@stackra/integrations": "catalog:stackra",
+    "@stackra/model": "catalog:stackra",
+    "@stackra/outbox": "catalog:stackra",
+    "@stackra/queue": "catalog:stackra",
+    "@stackra/schema": "catalog:stackra",
+    "@stackra/settings": "catalog:stackra",
+    "@stackra/transport": "catalog:stackra",
+    "@stackra/validation": "catalog:stackra",
+    "@stackra/webhooks": "catalog:stackra",
+    "resend": "catalog:"
+  },
+  "devDependencies": {
+    "@stackra/runway": "catalog:stackra",
+    "@stackra/testing": "catalog:stackra",
+    "@stackra/typescript-config": "workspace:*",
+    "@stackra/vitest-config": "workspace:*",
+    "oxfmt": "catalog:quality",
+    "oxlint": "catalog:quality",
+    "typescript": "catalog:build",
+    "vitest": "catalog:quality"
+  }
+}
