@@ -1,0 +1,7 @@
+{
+  // The @stackra/* packages are pre-release and not installable yet, so the Vitest extension cannot
+  // resolve vitest in any member. Stop it searching for configs until they are published.
+  "vitest.configSearchPatternExclude": "**/*",
+  "search.exclude": { "**/node_modules": true },
+  "files.watcherExclude": { "**/node_modules/**": true }
+}
