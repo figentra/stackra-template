@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: the Electron desktop target. Windows, menus, tray, deep links, auto-update
- *          behaviour, renderer permissions, tighten-only hardening knobs and packaging.
+ * Purpose: one fact: the Electron desktop target. Windows (including a quick-entry panel), global
+ *          shortcuts, menus, tray, deep links, auto-update behaviour, renderer permissions, tighten-only hardening knobs and packaging.
  * Boundary: no identity, password, certificate, feed domain or origin list: signing switches and
  *           the feed path are `runway.yaml` `release.desktop`, the feed URL is derived by gen, and
  *           `connect-src` is csp.config.ts. The hardening baseline (context isolation, sandbox,
@@ -39,6 +39,20 @@ class WindowConfig {
   @OneOf(WindowKind) kind = WindowKind.Normal;
   /** Open at launch. @defaultValue true */
   @Bool() openOnLaunch = true;
+  /** Float above other apps, for a quick-entry panel. @defaultValue false */
+  @Bool() alwaysOnTop = false;
+  /** Hide when the window loses focus, for a quick-entry panel. @defaultValue false */
+  @Bool() hideOnBlur = false;
+}
+
+/** One system-wide keyboard shortcut; it works while the app is in the background. */
+class GlobalShortcutConfig {
+  /** Electron accelerator, for example `CommandOrControl+Shift+Space`. */
+  @Str() accelerator = "";
+  /** Window key it toggles, from `windows`. */
+  @Str() window = "";
+  /** The user may rebind or turn it off in settings. @defaultValue true */
+  @Bool() userConfigurable = true;
 }
 
 /** Shell switches of the application and context menus; the items are the `@Menu` classes. */
@@ -108,7 +122,18 @@ class PermissionsConfig {
    * Electron permission names granted.
    * @defaultValue ["notifications", "clipboard-read", "fullscreen", "usb", "hid"]
    */
-  @List(OneOf(["notifications", "media", "clipboard-read", "fullscreen", "serial", "usb", "hid"]))
+  @List(
+    OneOf([
+      "notifications",
+      "media",
+      "display-capture",
+      "clipboard-read",
+      "fullscreen",
+      "serial",
+      "usb",
+      "hid",
+    ]),
+  )
   allow = ["notifications", "clipboard-read", "fullscreen", "usb", "hid"];
   /**
    * Origins the renderer may navigate to; everything else opens in the system browser.
@@ -159,7 +184,30 @@ class PackagingConfig {
 @Config("console.desktop")
 export class DesktopConfig {
   /** One window per key; `main` is required. */
-  @Map(Nested(WindowConfig)) windows: Record<string, WindowConfig> = { main: new WindowConfig() };
+  @Map(Nested(WindowConfig)) windows: Record<string, WindowConfig> = {
+    main: new WindowConfig(),
+    // A quick-entry panel summoned by the global shortcut below, like a menu-bar launcher.
+    quick: Object.assign(new WindowConfig(), {
+      route: "/quick-order",
+      width: 680,
+      height: 120,
+      minWidth: 480,
+      minHeight: 120,
+      resizable: false,
+      titleBarStyle: "hidden",
+      kind: WindowKind.Panel,
+      openOnLaunch: false,
+      alwaysOnTop: true,
+      hideOnBlur: true,
+    }),
+  };
+  /** System-wide shortcuts, shortcut key → binding; registered by main, never by the renderer. */
+  @Map(Nested(GlobalShortcutConfig)) globalShortcuts: Record<string, GlobalShortcutConfig> = {
+    quick: Object.assign(new GlobalShortcutConfig(), {
+      accelerator: "CommandOrControl+Shift+Space",
+      window: "quick",
+    }),
+  };
   /** Which shell menus are shown and where Help points. */
   @Nested(MenusConfig) menus = new MenusConfig();
   /** Whether the tray icon shows and what it does. */
