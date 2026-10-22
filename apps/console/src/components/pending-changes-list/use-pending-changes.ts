@@ -1,6 +1,6 @@
 /**
  * Stackra file contract:
- * Purpose: the queue view's data: pending entries, conflicts, and the resolutions a user may pick
+ * Purpose: the queue list's data: pending entries, conflicts, and the resolutions a user may pick
  *          per entry.
  * Boundary: a projection over `useMutationQueue()`; strategies are the ones the action declared
  *           (`onConflict`), read from `#stackra/offline`, so the UI cannot offer `client_retry` to

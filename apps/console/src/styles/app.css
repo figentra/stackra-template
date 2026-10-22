@@ -1,39 +1,67 @@
 /*
 Stackra file contract:
-Purpose: the console's one stylesheet entry: Tailwind v4, the HeroUI v3 styles and the brand tokens,
-         in that order, with the brand's generated custom properties mapped onto theme values.
-Boundary: imports and the few app-level layers only; components carry utility classes; logical
-          properties only. Only the `--brand-<group>-<name>` names `@stackra/brand` generates from
-          its token source are referenced.
+Purpose: the console's one stylesheet, imported by the generated entry: Tailwind v4, the HeroUI v3
+         styles and the brand tokens, in that order; HeroUI's own variables set from the brand so
+         every component (primary buttons, focus rings, hover) wears it in light and dark; the few
+         brand-only utilities; the Arabic font; the viewport frame of the phone PWA.
+Boundary: imports and the few app-level rules only; components carry utility classes. Only the
+          `--brand-<group>-<name>` names `@acme/brand` generates from its token source are
+          referenced. Logical properties everywhere except the safe-area insets, which the
+          platform reports per physical edge.
 Runtime: browser
-Governing contract: ADR 0165 (HeroUI v3 on Tailwind v4), ADR 0080 decision 3 (logical CSS),
-                    ADR 0231 (token names)
+Governing contract: ADR 0165 (HeroUI v3 on Tailwind v4), ADR 0080 decision 3 (logical CSS)
 */
 @import "tailwindcss";
 @import "@heroui/styles";
 /* generated from the brand's TS tokens: --brand-color-*, --brand-font-*, --brand-radius-* */
-@import "@stackra/brand/css/tokens.css";
+@import "@acme/brand/css/tokens.css";
 
-/* Tailwind reads the brand tokens as theme values: `text-ink` and `bg-accent` are the brand's. */
+/* Tailwind skips gitignored and installed files by default: scan the generated sources and the
+   Stackra UI packages, whose components carry utility classes too. */
+@source "../../.stackra";
+@source "../../node_modules/@stackra";
+@source "../../node_modules/@stackra-pro";
+
+/* Dark follows the system unless the user chose; `data-theme` is written by @stackra/theming. */
+@custom-variant dark (&:where(
+  [data-theme="dark"],
+  [data-theme="dark"] *,
+  :not([data-theme="light"]):where(.dark, .dark *)
+));
+
+/* HeroUI's semantic variables point at the brand; the brand file switches its values for dark, so
+   one mapping serves both schemes. */
+:root,
+.light,
+.dark,
+[data-theme] {
+  --accent: var(--brand-color-accent);
+  --accent-foreground: var(--brand-color-accent-foreground);
+  --foreground: var(--brand-color-ink);
+  --muted: var(--brand-color-ink-muted);
+  --surface: var(--brand-color-surface);
+  --warning: var(--brand-color-warning);
+  --radius: var(--brand-radius-md);
+}
+
+/* The brand-only names HeroUI has no variable for: `text-ink`, `text-ink-muted`, the font stack. */
 @theme inline {
   --color-ink: var(--brand-color-ink);
   --color-ink-muted: var(--brand-color-ink-muted);
-  --color-surface: var(--brand-color-surface);
-  --color-accent: var(--brand-color-accent);
-  --color-accent-foreground: var(--brand-color-accent-foreground);
-  --color-warning: var(--brand-color-warning);
-  --color-foreground: var(--brand-color-ink);
-  --color-muted: var(--brand-color-ink-muted);
   --font-sans: var(--brand-font-sans);
 }
 
-/* Arabic switches the sans stack to the brand's Arabic face; everything else is the same tokens. */
+/* Arabic switches the brand's sans stack to its Arabic face; `--font-sans` follows it. */
 :root[lang="ar"] {
-  --font-sans: var(--brand-font-arabic);
+  --brand-font-sans: var(--brand-font-arabic);
 }
 
-/* The panel's root claims the viewport; `100dvh` and `viewport-fit=cover` handle the phone PWA. */
+/* The panel's root claims the viewport; `100dvh` and `viewport-fit=cover` handle the phone PWA, and
+   the insets keep content clear of the notch and the home indicator. */
 #root {
   min-block-size: 100dvh;
-  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
 }

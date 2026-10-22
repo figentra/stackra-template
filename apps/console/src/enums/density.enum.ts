@@ -5,7 +5,7 @@
  * Boundary: an app-local class enum (only the console offers density); persisted by its code,
  *           compared by identity.
  * Runtime: browser
- * Governing contract: ADR 0128 (enums are classes), ADR 0231 (snake_case codes)
+ * Governing contract: ADR 0231 (snake_case codes)
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

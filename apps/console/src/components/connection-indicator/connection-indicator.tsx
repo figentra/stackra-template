@@ -5,27 +5,33 @@
  * Boundary: presentation over `useRealtime`; it never reconnects itself (the realtime package backs
  *           off and retries). A `role="status"` so a lost connection is announced once.
  * Runtime: browser
- * Governing contract: ADR 0225 (broadcast), ADR 0128
+ * Governing contract: ADR 0225 (broadcast)
  */
 import { Tone } from "@stackra/contracts";
 import { useTranslation } from "@stackra/i18n/react";
 import { RealtimeStatus } from "@stackra/realtime";
 import { Chip } from "@stackra/ui";
-import { I18n } from "#stackra/i18n";
+import { I18n, type I18nKey } from "#stackra/i18n";
 import { useRealtime } from "#src/providers/realtime/use-realtime";
 
-/** Status → label and chip colour; one row per `RealtimeStatus` case. */
-const LOOK = new Map([
-  [RealtimeStatus.Connected, { label: I18n.console.realtime.connected, color: Tone.Success }],
-  [RealtimeStatus.Connecting, { label: I18n.console.realtime.connecting, color: Tone.Warning }],
-  [RealtimeStatus.Disconnected, { label: I18n.console.realtime.disconnected, color: Tone.Danger }],
-] as const);
+/** Status code → label and chip colour; the record type makes a missing case a type error. */
+const LOOK: Record<RealtimeStatus["value"], { label: I18nKey; color: Tone }> = {
+  [RealtimeStatus.Connected.value]: { label: I18n.console.realtime.connected, color: Tone.Success },
+  [RealtimeStatus.Connecting.value]: {
+    label: I18n.console.realtime.connecting,
+    color: Tone.Warning,
+  },
+  [RealtimeStatus.Disconnected.value]: {
+    label: I18n.console.realtime.disconnected,
+    color: Tone.Danger,
+  },
+};
 
 /** A small chip; the colour is decoration, the text is what assistive tech reads. */
 export function ConnectionIndicator() {
   const { t } = useTranslation();
   const { status } = useRealtime();
-  const look = LOOK.get(status) ?? LOOK.get(RealtimeStatus.Disconnected)!;
+  const look = LOOK[status.value];
   return (
     <Chip role="status" size="sm" variant="dot" color={look.color}>
       <span className="sr-only md:not-sr-only">{t(look.label)}</span>

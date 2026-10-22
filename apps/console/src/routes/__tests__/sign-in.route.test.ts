@@ -1,8 +1,8 @@
 /**
  * Stackra file contract:
  * Purpose: proves a signed-in visitor is redirected to `returnTo` (in-app paths only; an absolute
- *          URL falls back to `/`), and a visitor without a session is sent to the BFF login with
- *          `returnTo` encoded.
+ *          URL, a protocol-relative `//host` and the backslash form `/\host` all fall back to `/`),
+ *          and a visitor without a session is sent to the BFF login with `returnTo` encoded.
  * Boundary: unit tier; `runRouteLoader` calls the class's loader with a fake RouteContext (session,
  *           search, identity).
  * Runtime: browser
@@ -16,15 +16,27 @@ import { SignInRoute } from "#src/routes/sign-in.route";
 /** Guards the sign-in entry, which handles redirects from untrusted input. */
 describe(SignInRoute, () => {
   /**
-   * An open redirect through `returnTo` must be impossible: anything not an in-app path becomes
-   * `/`.
+   * An open redirect through `returnTo` must be impossible: every form a browser resolves to
+   * another host becomes `/`, including the two a prefix check misses.
    */
-  it("bounces a signed-in visitor to an in-app returnTo only", async () => {
+  it.each(["https://evil.example", "//evil.example", "/\\evil.example", "/\t/evil.example"])(
+    "sends a signed-in visitor to / instead of %j",
+    async (returnTo) => {
+      const result = await runRouteLoader(SignInRoute, {
+        session: { status: SessionStatus.SignedIn },
+        search: { returnTo },
+      });
+      expect(result.redirect).toBe("/");
+    },
+  );
+
+  /** An in-app path keeps its query and fragment, so the visitor lands on the exact view. */
+  it("sends a signed-in visitor back to an in-app returnTo", async () => {
     const result = await runRouteLoader(SignInRoute, {
       session: { status: SessionStatus.SignedIn },
-      search: { returnTo: "https://evil.example" },
+      search: { returnTo: "/settings?tab=device#pending-changes" },
     });
-    expect(result.redirect).toBe("/");
+    expect(result.redirect).toBe("/settings?tab=device#pending-changes");
   });
 
   /**

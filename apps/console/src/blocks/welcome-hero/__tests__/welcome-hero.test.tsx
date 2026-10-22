@@ -12,7 +12,7 @@ import { WelcomeHero } from "#src/blocks/welcome-hero";
 import { WelcomeHeroProps } from "#src/schemas/welcome-hero.schema";
 import { I18n } from "#stackra/i18n";
 
-/** Guards the dashboard hero, whose action target comes from configurable data. */
+/** Guards the welcome hero, whose action target comes from configurable data. */
 describe(WelcomeHero, () => {
   /** The call to action must move the user through the router. */
   it("navigates on the call to action", async () => {

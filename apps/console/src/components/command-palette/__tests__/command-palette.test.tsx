@@ -39,6 +39,6 @@ describe(CommandPalette, () => {
     await userEvent.type(screen.getByRole("combobox"), "archive the summer dress");
     expect(actions.ran()).toHaveLength(0);
     await userEvent.click(await screen.findByRole("option", { name: /archive/i }));
-    expect(actions.ran[0]?.ref).toBe(Commerce.actions.ArchiveProduct);
+    expect(actions.ran().map((run) => run.ref)).toEqual([Commerce.actions.ArchiveProduct]);
   });
 });

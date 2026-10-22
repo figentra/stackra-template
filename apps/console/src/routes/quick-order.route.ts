@@ -33,6 +33,6 @@ import { QuickOrderForm } from "#src/schemas/quick-order-form.schema";
     redirect: (output) => [Resources.Order.view, { id: output.orderId }],
   },
   component: QuickOrderPage,
-  meta: { title: I18n.orders.quick_order.title },
+  title: I18n.orders.quick_order.title,
 })
 export class QuickOrderRoute {}

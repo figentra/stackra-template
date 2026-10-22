@@ -13,6 +13,7 @@ import { Config } from "@stackra/config";
 import { Target } from "@stackra/contracts";
 import { AuthFlow } from "@stackra/identity";
 import { Bool, Int, List, Map, OneOf, Str } from "@stackra/validation";
+import { Routes } from "#stackra/routes";
 
 /** How the console authenticates: BFF cookie session on web and PWA, PKCE on desktop. */
 @Config("console.identity")
@@ -27,8 +28,11 @@ export class IdentityConfig {
   };
   /** The BFF mount, relative to the API origin. @defaultValue "/api/auth" */
   @Str({ pattern: /^\/api\/auth/ }) bffEndpoint = "/api/auth";
-  /** Where the browser lands after signing out. @defaultValue "/" */
-  @Str({ pattern: /^\// }) postLogoutRoute = "/";
+  /**
+   * Where the browser lands after signing out, as a route ref so a removed route is a type error;
+   * signed out, the shell's guard sends it on to sign in. @defaultValue Routes.dashboard
+   */
+  postLogoutRoute = Routes.dashboard;
   /** Signs out a forgotten shared till; the queue pauses, never drops. @defaultValue 30 */
   @Int({ min: 5 }) idleMinutes = 30;
   /** Re-reads the session when the window regains focus. @defaultValue true */

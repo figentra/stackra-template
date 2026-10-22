@@ -19,6 +19,6 @@ import { ShellLayout } from "#src/routes/shell.layout";
   path: "/welcome",
   layout: ShellLayout,
   document: WelcomeDocument,
-  meta: { title: I18n.console.pages.welcome },
+  title: I18n.console.pages.welcome,
 })
 export class WelcomeRoute {}

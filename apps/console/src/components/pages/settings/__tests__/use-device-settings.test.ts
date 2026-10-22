@@ -5,7 +5,7 @@
  *          toast instead of persisting a permission the device will not honour.
  * Boundary: unit tier, jsdom; prefs, platform, consent and toasts are the testing fakes.
  * Runtime: browser
- * Governing contract: ADR 0022, ADR 0250, ADR 0071, ADR 0007
+ * Governing contract: ADR 0022, ADR 0250, ADR 0007
  */
 import { ConsentCategory } from "@stackra/consent";
 import { Locale } from "@stackra/i18n";
@@ -13,7 +13,7 @@ import { Capability } from "@stackra/platform";
 import { describe, expect, it } from "@stackra/testing";
 import { act, renderHook } from "@stackra/testing/react";
 import { ColorScheme } from "@stackra/theming";
-import { useDeviceSettings } from "#src/components/pages/settings";
+import { useDeviceSettings } from "#src/components/pages/settings/use-device-settings";
 import { Density } from "#src/enums/density.enum";
 
 /** A whole, valid set of device prefs the cases vary. */

@@ -2,7 +2,7 @@
  * Stackra file contract:
  * Purpose: one fact: the look. The one logo source, schemes and theme colours. Gen rasterises every
  *          icon (PWA 192/512/maskable, .icns, .ico, the tray template) from `logo`.
- * Boundary: tokens themselves are `@stackra/brand`. Per-tenant brand at runtime is Pro (brand
+ * Boundary: tokens themselves are `@acme/brand`. Per-tenant brand at runtime is Pro (brand
  *           service), so the console shows the house brand only; the public site is where a
  *           tenant's brand is real.
  * Runtime: isomorphic
@@ -35,8 +35,9 @@ export class ThemingConfig {
   /** `<meta name="theme-color">` and the desktop frame. */
   @Nested(ThemeColors) themeColor = new ThemeColors();
   /**
-   * Preload the brand fonts the app self-hosts instead of using the system stack.
-   * @defaultValue true
+   * Self-host and preload the brand fonts instead of the system families `@acme/brand` names.
+   * Off: the brand ships no font files, so there is nothing to host, preload or cache.
+   * @defaultValue false
    */
-  @Bool() selfHostedFonts = true;
+  @Bool() selfHostedFonts = false;
 }

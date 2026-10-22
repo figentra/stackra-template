@@ -8,7 +8,7 @@ Governing contract: root AGENTS.md
 
 # AGENTS — @acme/console
 
-- Owner: your team (`.github/CODEOWNERS`). This member is the tenant console (web, PWA, desktop).
+- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is the tenant console (web, PWA, desktop).
 - UI, routes and providers only; data comes from the services through the generated clients (`#stackra/clients`).
 - `.stackra/` holds generated samples; change `stackra.config.ts` and rerun `stackra gen`, never edit them.
 - Secrets: forbidden; secret values come from the project's secret store at run time.

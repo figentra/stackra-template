@@ -35,16 +35,17 @@
     "test": "stackra test",
     "test:e2e": "stackra test --tier e2e",
     "lint": "oxlint .",
+    "format": "oxfmt --write .",
     "format:check": "oxfmt --check ."
   },
   "dependencies": {
+    "@acme/brand": "workspace:*",
     "@heroui/styles": "catalog:ui",
     "@stackra-pro/ui": "catalog:stackra",
     "@stackra/actions": "catalog:stackra",
     "@stackra/analytics": "catalog:stackra",
     "@stackra/app": "catalog:stackra",
     "@stackra/assets": "catalog:stackra",
-    "@stackra/brand": "workspace:*",
     "@stackra/clients": "catalog:stackra",
     "@stackra/config": "catalog:stackra",
     "@stackra/consent": "catalog:stackra",
@@ -92,10 +93,15 @@
     "@stackra/typescript-config": "workspace:*",
     "@stackra/vite-plugin": "catalog:stackra",
     "@stackra/vitest-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "electron": "catalog:build",
+    "jsdom": "catalog:quality",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "typescript": "catalog:build",
-    "vite": "catalog:build"
+    "vite": "catalog:build",
+    "vitest": "catalog:quality"
   }
 }

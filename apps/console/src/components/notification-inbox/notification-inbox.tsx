@@ -3,14 +3,16 @@
  * Purpose: the top bar's in-app inbox: a bell with the unread count and a sheet listing the
  *          notifications the notifications service delivered, each with a "mark read" action.
  * Boundary: presentation over `useNotificationInbox()`, with the console's loading, empty and error
- *           states. An entry's text is its kind's label, interpolated with the entry's `data`, in
- *           the user's locale; the badge shows the service's inbox-wide unread count.
+ *           states, and a "load more" button while older notifications exist. An entry's text is
+ *           its kind's label, interpolated with the entry's `data`, in the user's locale; the badge
+ *           shows the service's inbox-wide unread count. A refused mark-read is a toast, and the
+ *           entry stays unread.
  * Runtime: browser
- * Governing contract: ADR 0128, ADR 0139 (feedback), ADR 0140 (error envelope)
+ * Governing contract: ADR 0139 (feedback), ADR 0140 (error envelope)
  */
 import { Sheet } from "@stackra-pro/ui";
 import { useDateTime, useTranslation } from "@stackra/i18n/react";
-import { Badge, Button, Description } from "@stackra/ui";
+import { Badge, Button, Description, toast } from "@stackra/ui";
 import { Icon, Icons } from "@stackra/ui/icons";
 import { I18n } from "#stackra/i18n";
 import { EmptyView } from "#src/components/empty-view";
@@ -23,6 +25,10 @@ export function NotificationInbox() {
   const { t } = useTranslation();
   const formatDateTime = useDateTime();
   const inbox = useNotificationInbox();
+  const markRead = (notificationId: string) =>
+    inbox
+      .markRead(notificationId)
+      .catch(() => toast.danger(t(I18n.console.inbox.mark_read_failed)));
 
   return (
     <Sheet>
@@ -60,13 +66,24 @@ export function NotificationInbox() {
               <div className="flex items-center gap-2">
                 <Description>{formatDateTime(item.createdAt)}</Description>
                 {item.readAt === null && (
-                  <Button size="sm" variant="tertiary" onPress={() => inbox.markRead(item.id)}>
+                  <Button size="sm" variant="tertiary" onPress={() => markRead(item.id)}>
                     {t(I18n.console.inbox.mark_read)}
                   </Button>
                 )}
               </div>
             </article>
           ))}
+          {inbox.hasMore && (
+            <Button
+              variant="secondary"
+              size="sm"
+              isPending={inbox.isLoadingMore}
+              onPress={inbox.loadMore}
+              className="mt-2 self-center"
+            >
+              {t(I18n.console.inbox.load_more)}
+            </Button>
+          )}
         </Sheet.Body>
       </Sheet.Content>
     </Sheet>

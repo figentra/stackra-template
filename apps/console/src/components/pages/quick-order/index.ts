@@ -1,10 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: the page folder's barrel: the quick-order page and its one hook.
- * Boundary: explicit exports only.
+ * Purpose: the page folder's barrel.
+ * Boundary: the page component only; the folder's hook stays private to it.
  * Runtime: browser
- * Governing contract: ADR 0128 d2
+ * Governing contract: ADR 0128 (component folders)
  */
 export { QuickOrderPage } from "./quick-order";
-export { useVariantSearch } from "./use-variant-search";
-export type { VariantSearchState } from "./use-variant-search";

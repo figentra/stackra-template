@@ -5,7 +5,7 @@
  * Boundary: one schema class; scheme, locale and density are the class enums of their owning
  *           packages, and the analytics choice is the consent store's input, not a copy of it.
  * Runtime: browser
- * Governing contract: ADR 0256 (prefs store), ADR 0095, ADR 0071 (consent)
+ * Governing contract: ADR 0256 (prefs store), ADR 0095
  */
 import { Locale } from "@stackra/i18n";
 import { Schema, z } from "@stackra/schema";

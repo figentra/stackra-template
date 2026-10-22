@@ -2,6 +2,7 @@
   "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
   "shell": {
     "brand": "Acme Console",
+    "short_name": "Console",
     "top_bar": "Top bar",
     "menu": "Menu",
     "sidebar": "Toggle sidebar",
@@ -10,7 +11,12 @@
     "loading_session": "Loading your session"
   },
   "shortcuts": {
-    "quick_order": "Quick order"
+    "quick_order": "Quick order",
+    "quick_order_short": "Order",
+    "quick_order_description": "Place an order for a customer in a few taps."
+  },
+  "manifest": {
+    "description": "Orders, catalogue and stock for your store, online or offline."
   },
   "pages": {
     "dashboard": "Dashboard",
@@ -44,10 +50,12 @@
   "roles": {
     "admin": "Administrator",
     "staff": "Staff",
-    "viewer": "Viewer"
+    "viewer": "Viewer",
+    "member": "Member"
   },
   "locale": {
-    "switch": "Switch language"
+    "switch": "Switch language",
+    "current": "Language: {name}"
   },
   "theme": {
     "light": "Light",
@@ -59,7 +67,8 @@
     "title": "You are offline",
     "body": "{count, plural, =0 {Changes you make will sync when you are back online.} one {# change is waiting to sync.} other {# changes are waiting to sync.}}",
     "page_title": "You are offline",
-    "page_body": "This page was not saved for offline use. Reconnect and try again."
+    "page_body": "This page was not saved for offline use. Reconnect and try again.",
+    "retry": "Try again"
   },
   "queue": {
     "title": "Pending changes",
@@ -79,7 +88,10 @@
       "client_retry": "Retry on latest",
       "manual": "Review",
       "discard": "Discard my change"
-    }
+    },
+    "discard_confirm_title": "Discard this change?",
+    "discard_confirm_body": "The change you made offline is deleted and never reaches the server.",
+    "discard_keep": "Keep it"
   },
   "dashboard": {
     "today": "Today",
@@ -184,6 +196,8 @@
     "empty_title": "No notifications yet",
     "empty_body": "Order updates and messages for you appear here.",
     "mark_read": "Mark read",
-    "loading": "Loading notifications"
+    "loading": "Loading notifications",
+    "load_more": "Load more",
+    "mark_read_failed": "Could not mark the notification read. Try again."
   }
 }

@@ -1,13 +1,13 @@
 /**
  * Stackra file contract:
  * Purpose: the console's replacement for the order status badge declared by commerce (its
- *          `OrderStatusBadge` override point): the resource table shows the raw code compactly, the
- *          infolist the full label, coloured by the case.
+ *          `OrderStatusBadge` override point): the translated status, coloured by the case, as a
+ *          small chip in the resource table and a regular one in the infolist.
  * Boundary: the override is a class whose options name the component; props are typed from the
  *           override point, so a changed props shape in commerce is a type error here. Gen refuses
  *           an `@Override` of a point nobody declares.
  * Runtime: browser
- * Governing contract: ADR 0234 d9 (overrides/), ADR 0128
+ * Governing contract: ADR 0234 (asset and override keys)
  */
 import { Override, type OverrideComponent } from "@stackra/panel";
 import { Chip } from "@stackra/ui";
@@ -15,8 +15,8 @@ import { useTranslation } from "@stackra/i18n/react";
 import { Commerce } from "#stackra/clients";
 
 /**
- * `status` is an `OrderStatus` case: `value` is the code, `label` the i18n key, `meta.color` the
- * chip colour.
+ * `status` is an `OrderStatus` case: `label` is the i18n key, `meta.color` the chip colour. The
+ * code itself is never shown: a reader sees "Paid", never `paid`.
  */
 const StatusChip: OverrideComponent<typeof Commerce.overrides.OrderStatusBadge> = ({
   status,
@@ -24,8 +24,8 @@ const StatusChip: OverrideComponent<typeof Commerce.overrides.OrderStatusBadge> 
 }) => {
   const { t } = useTranslation();
   return (
-    <Chip color={status.meta.color} size="sm">
-      {compact ? status.value : t(status.label)}
+    <Chip color={status.meta.color} size={compact ? "sm" : "md"}>
+      {t(status.label)}
     </Chip>
   );
 };

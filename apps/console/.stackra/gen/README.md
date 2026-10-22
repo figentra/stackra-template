@@ -24,6 +24,6 @@ excerpt.
 | `assets.ts`       | `Assets.console.public.logo_svg` and the consumed modules' public assets                                  |
 | `capabilities.ts` | what the active target offers and which file requires which capability                                   |
 | `overrides.ts`    | the override map: point → class, component, merge rule, check result                                      |
-| `wiring.ts`       | the client container wiring: modules, bindings and driver candidates (lazy imports)                       |
+| `wiring.ts`       | the renderer container wiring: modules, bindings and driver candidates (main's is `../desktop/wiring.ts`) |
 
 `../desktop/` holds what gen writes for the Electron target; `../pwa/` the web manifest, icons and offline page.

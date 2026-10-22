@@ -18,6 +18,6 @@ import { ShellLayout } from "#src/routes/shell.layout";
   layout: ShellLayout,
   status: 404,
   component: NotFoundPage,
-  meta: { title: I18n.console.errors.not_found.title, noindex: true },
+  title: I18n.console.errors.not_found.title,
 })
 export class NotFoundRoute {}

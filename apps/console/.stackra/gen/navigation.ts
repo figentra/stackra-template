@@ -6,13 +6,14 @@
  *          `useNavigation(Panels.TenantAdmin)`; the palette's `navigate.*` commands and the
  *          AppMenu's `m.navigation()` section are built from the same tree.
  * Boundary: data; labels are i18n keys, targets are the generated resources and route keys
- *           (`Routes.*`, never route classes), icons are `Icons` cases. `Tabs` is built from the
- *           routes that declare `tab: { order, icon, label }`, sorted by `order`.
+ *           (`Routes.*`, never route classes), icons are `Icons` cases. A group and its order are
+ *           the ones the declaring module wrote; an app route appears here only when it declares
+ *           `navigation:` (none does), so quick order reaches the shell through its tab. `Tabs` is
+ *           built from the routes that declare `tab: { order, icon, label }`, sorted by `order`.
  * Runtime: browser
  */
 import { navigation, tabs } from "@stackra/navigation";
 import { Icons } from "@stackra/ui/icons";
-import { Flags } from "#stackra/flags";
 import { I18n } from "#stackra/i18n";
 import { Panels } from "#stackra/panels";
 import { Resources } from "#stackra/resources";
@@ -34,12 +35,6 @@ export const Navigation = navigation(Panels.TenantAdmin, [
     items: [
       { label: I18n.orders.resource.orders, to: Resources.Order, icon: Icons.Receipt },
       { label: I18n.orders.documents.sales_today, to: Resources.SalesToday, icon: Icons.Chart },
-      {
-        label: I18n.orders.quick_order.title,
-        to: Routes.quick_order,
-        icon: Icons.Bolt,
-        flag: Flags.orders.quick_order,
-      },
     ],
   },
   {
@@ -48,8 +43,14 @@ export const Navigation = navigation(Panels.TenantAdmin, [
       { label: I18n.orders.settings.title, to: SettingsPages.orders, icon: Icons.Gear },
       { label: I18n.inventory.settings.title, to: SettingsPages.inventory, icon: Icons.Gear },
       { label: I18n.messages.settings.title, to: SettingsPages.messages, icon: Icons.Bell },
-      { label: I18n.access_log.nav.access_log, to: Resources.AccessLogEntry, icon: Icons.Shield },
       { label: I18n.queue.nav.failed_jobs, to: Resources.FailedJob, icon: Icons.Warning },
+    ],
+  },
+  {
+    // the group access-log declares (`access_log.nav.audit`, order 90), so it sorts last
+    group: I18n.access_log.nav.audit,
+    items: [
+      { label: I18n.access_log.nav.access_log, to: Resources.AccessLogEntry, icon: Icons.Shield },
     ],
   },
 ]);

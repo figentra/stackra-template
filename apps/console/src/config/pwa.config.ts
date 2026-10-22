@@ -2,11 +2,12 @@
  * Stackra file contract:
  * Purpose: one fact: the installable web app (target `pwa`). The service-worker build, manifest
  *          fields gen cannot derive, caching, offline, push, updates and the install prompt; every
- *          field reaches the generated `sw.ts`, `vite.config.ts` or `pwa/manifest.webmanifest`.
- *          Name, colours, icons, `lang` and `dir` come from theming and i18n.
+ *          field reaches the generated `sw.ts`, `vite.config.ts` or the per-locale
+ *          `pwa/manifest.<locale>.webmanifest`. Name, colours, icons, `lang` and `dir` come from
+ *          theming and i18n; text fields are i18n keys, translated once per locale.
  * Boundary: tenant data never enters Cache Storage (`/api/*` is NetworkOnly) and the worker scope
  *           is the app origin (ADR 0255 d2): fixed rules of the generated worker, not options.
- *           `display`, `displayOverride`, `orientation`, `launchClientMode` and
+ *           `display`, `handleLinks`, `orientation`, `launchClientMode` and
  *           `serviceWorker.strategies` are tool-owned values typed by the web manifest and
  *           vite-plugin-pwa, not house enums.
  * Runtime: isomorphic
@@ -29,25 +30,29 @@ class ServiceWorkerConfig {
   @Str() filename = "sw.ts";
 }
 
-/** One manifest shortcut: a route and its label; the icon is derived. */
+/** One manifest shortcut: a route, its names and its description; the 96px icon is derived. */
 class Shortcut {
   /** The route the shortcut opens. */
   route = Routes.quick_order;
   /** Its label, translated per locale. */
   nameKey = I18n.console.shortcuts.quick_order;
+  /** Its short label where space is tight, translated per locale. */
+  shortNameKey = I18n.console.shortcuts.quick_order_short;
+  /** What it does, for assistive tech and app launchers, translated per locale. */
+  descriptionKey = I18n.console.shortcuts.quick_order_description;
 }
 
 /** Manifest fields gen cannot derive from theming and i18n. */
 class ManifestConfig {
   /**
-   * Short name on the home screen (12 characters at most); the long name is `console::shell.brand`.
+   * Short name on the home screen, translated per locale (gen refuses one longer than 12
+   * characters); the long name is `console::shell.brand`.
    */
-  @Str({ max: 12 }) shortName = "Console";
+  shortNameKey = I18n.console.shell.short_name;
+  /** Web manifest `description`, translated per locale. */
+  descriptionKey = I18n.console.manifest.description;
   /** Web manifest `display`. @defaultValue "standalone" */
   @OneOf(["standalone", "minimal-ui", "fullscreen", "browser"]) display = "standalone";
-  /** Web manifest `display_override`. @defaultValue ["standalone"] */
-  @List(OneOf(["window-controls-overlay", "standalone", "minimal-ui", "browser"]))
-  displayOverride: string[] = ["standalone"];
   /** Web manifest `orientation`. @defaultValue "any" */
   @OneOf(["any", "portrait", "landscape"]) orientation = "any";
   /** Path the installed app opens on. @defaultValue "/" */
@@ -58,8 +63,13 @@ class ManifestConfig {
   @List(Str) categories: string[] = ["business", "productivity"];
   /** Manifest `shortcuts`; icons are derived. */
   @List(Nested(Shortcut)) shortcuts: Shortcut[] = [new Shortcut()];
-  /** `web+acme://…` opens the matching route. */
+  /** `web+acme://…` opens the `/open` route (`OpenRoute`), which resolves it to an in-app path. */
   @Map(Str) protocolHandlers: Record<string, string> = { "web+acme": "/open?url=%s" };
+  /**
+   * Web manifest `handle_links`: a link into the console's scope opens the installed app.
+   * @defaultValue "preferred"
+   */
+  @OneOf(["auto", "preferred", "not-preferred"]) handleLinks = "preferred";
   /** Web manifest `launch_handler.client_mode`. @defaultValue "navigate-existing" */
   @OneOf(["auto", "navigate-existing", "navigate-new", "focus-existing"])
   launchClientMode = "navigate-existing";
@@ -73,7 +83,6 @@ class CachingConfig {
   @Map(OneOf(CacheStrategy)) routes: Record<string, CacheStrategy> = {
     "/assets/": CacheStrategy.CacheFirst,
     "/icons/": CacheStrategy.CacheFirst,
-    "/fonts/": CacheStrategy.CacheFirst,
     "/": CacheStrategy.NetworkFirst,
   };
   /** Cross-origin assets runtime-cached by allow-list only. @defaultValue [] */
@@ -84,7 +93,15 @@ class CachingConfig {
   @Duration() maxAge = "30d";
   /** Start the navigation request while the worker boots. @defaultValue true */
   @Bool() navigationPreload = true;
-  /** The page served for a navigation that fails with no cached copy. @defaultValue "/offline" */
+  /**
+   * How long a network-first navigation waits before the cached copy answers. @defaultValue "3s"
+   */
+  @Duration() networkTimeout = "3s";
+  /**
+   * The page served for a navigation only when even the app shell is missing; with the shell
+   * cached, a never-visited route renders in the shell with the offline banner.
+   * @defaultValue "/offline"
+   */
   @Str({ pattern: /^\// }) offlineFallback = "/offline";
 }
 

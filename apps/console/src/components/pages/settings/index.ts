@@ -1,10 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: the page folder's barrel: the settings page and its one hook.
- * Boundary: explicit exports only.
+ * Purpose: the page folder's barrel.
+ * Boundary: the component and its Props only; a hook stays private to its folder.
  * Runtime: browser
- * Governing contract: ADR 0128 d2
+ * Governing contract: ADR 0128 (component folders)
  */
 export { SettingsPage } from "./settings";
-export { useDeviceSettings } from "./use-device-settings";
-export type { DeviceSettingsState } from "./use-device-settings";

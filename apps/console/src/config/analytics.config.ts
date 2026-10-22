@@ -6,8 +6,7 @@
  *           category in settings; events carry the user id and tenant id only, never a name or an
  *           email. Drivers self-register.
  * Runtime: isomorphic
- * Governing contract: ADR 0071 d6 (no personal data without consent), ADR 0231 (checked driver
- *                     names)
+ * Governing contract: ADR 0231 (checked driver names)
  */
 import { AnalyticsDriver } from "@stackra/analytics/contracts";
 import { Config, DriverOf } from "@stackra/config";

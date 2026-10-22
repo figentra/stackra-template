@@ -9,7 +9,7 @@
 import { RealtimeStatus } from "@stackra/realtime";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
-import { ConnectionIndicator } from "#src/components/shell";
+import { ConnectionIndicator } from "#src/components/connection-indicator";
 
 /** Guards the live-updates indicator in the top bar. */
 describe(ConnectionIndicator, () => {

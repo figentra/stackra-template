@@ -9,6 +9,7 @@
  * Runtime: browser
  * Governing contract: ADR 0140 (error envelope), ADR 0232 (@stackra/errors reporter), ADR 0128
  */
+import { useEffect } from "react";
 import { Alert, Button } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";
 import { ErrorCategory } from "@stackra/errors";
@@ -17,7 +18,7 @@ import { I18n } from "#stackra/i18n";
 
 /** What an error state needs. */
 export interface ErrorStateProps {
-  /** Whatever was thrown; a `AppError` envelope renders by category, anything else as `unknown`. */
+  /** Whatever was thrown; an `AppError` renders by category, anything else as `unknown`. */
   readonly error: unknown;
   /** Called by the retry button; absent means no button (for example, a 403). */
   readonly onRetry?: () => void;
@@ -50,7 +51,11 @@ export function ErrorState({ error, onRetry }: ErrorStateProps) {
   const envelope = isAppError(error) ? error : null;
   const message = (envelope && MESSAGES.get(envelope.category)) ?? I18n.console.errors.unknown;
   const retryable = !envelope || !NO_RETRY.has(envelope.category);
-  if (!envelope) report(error); // unexpected: let Sentry see it, the user sees the generic text
+  // An unexpected error goes to the reporter once, after commit; the user sees the generic text.
+  // Reporting during render would repeat on every re-render and twice under Strict Mode.
+  useEffect(() => {
+    if (!isAppError(error)) report(error);
+  }, [error, report]);
 
   return (
     <Alert status="danger" role="alert">

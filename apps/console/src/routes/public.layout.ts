@@ -9,7 +9,7 @@
  */
 import { Layout, LayoutKind } from "@stackra/navigation";
 import { PublicFrame } from "#src/components/public-frame";
-import { RouteErrorState } from "#src/components/error-state";
+import { RouteErrorState } from "#src/components/route-error-state";
 
 /** Frame for routes that need no session: a centred page with the brand mark and no chrome. */
 @Layout({ kind: LayoutKind.Page, component: PublicFrame, errorBoundary: RouteErrorState })

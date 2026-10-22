@@ -6,13 +6,15 @@
  *          `m.route(Routes.store)`), never with the route class.
  * Boundary: data plus types. The route classes are imported as types only, so importing this file
  *           never loads a route module and no layout, menu or page can close an import cycle
- *           through it (links point down: app shell ← layout ← route → page). The key → class
- *           table the router mounts is `route-table.ts`, imported only by gen's entry and tree.
+ *           through it (links point down: app shell ← layout ← route → page). The router mounts
+ *           the classes themselves from gen's route tree, which is the only importer of a route
+ *           module.
  * Runtime: browser
  */
 import { routeRef } from "@stackra/navigation";
 import type { DashboardRoute } from "#src/routes/dashboard.route";
 import type { NotFoundRoute } from "#src/routes/not-found.route";
+import type { OpenRoute } from "#src/routes/open.route";
 import type { QuickOrderRoute } from "#src/routes/quick-order.route";
 import type { SettingsRoute } from "#src/routes/settings.route";
 import type { SignInRoute } from "#src/routes/sign-in.route";
@@ -25,6 +27,7 @@ export const Routes = {
   settings: routeRef<typeof SettingsRoute>("settings"),
   sign_in: routeRef<typeof SignInRoute>("sign_in"),
   welcome: routeRef<typeof WelcomeRoute>("welcome"),
+  open: routeRef<typeof OpenRoute>("open"),
   not_found: routeRef<typeof NotFoundRoute>("not_found"),
 } as const;
 

@@ -31,8 +31,9 @@ describe(DashboardRoute, () => {
     });
     const permissions = ["orders.order.read", "inventory.stock.read"];
     renderRoute(Routes.dashboard, { locale: "ar", clients: [commerce], session: { permissions } });
-    expect(await screen.findByText("٥٠٠٫٠٠ ر.س.")).toBeTruthy();
-    expect(await screen.findByRole("region", { name: "المخزون المنخفض" })).toBeTruthy();
+    // Latin digits in Arabic text: i18n.config.ts `numerals` (the tenant may switch them)
+    expect(await screen.findByText(/500\.00\sر\.س\./)).toBeTruthy();
+    expect(await screen.findByRole("region", { name: "مخزون منخفض" })).toBeTruthy();
   });
 
   /** A paid order elsewhere in the tenant must update the KPI row without a reload. */

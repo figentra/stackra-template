@@ -7,6 +7,9 @@
  *           navigation package (permission, entitlement, flag, module). The shell owns no business
  *           logic; the session guard is `ShellLayout.guard`, so by the time this renders a session
  *           exists. HeroUI Pro's `AppLayout` and `Sidebar` because this is our own app (ADR 0197).
+ *           Keyboard shortcuts have one owner each, the `@Command` classes: the layout's own
+ *           `mod+b` binding is off, and every key hint is drawn by the kbd package with the
+ *           platform's modifier (⌘ on Apple devices, Ctrl elsewhere).
  * Runtime: browser
  * Governing contract: ADR 0164 (panel shell), ADR 0214 (gate-filtered navigation), ADR 0197 (HeroUI
  *                     Pro)
@@ -14,18 +17,20 @@
 import { AppLayout, Navbar, Sidebar } from "@stackra-pro/ui";
 import { Tone } from "@stackra/contracts";
 import { useTranslation } from "@stackra/i18n/react";
-import { useCommand } from "@stackra/kbd/react";
+import { ShortcutKeys, useCommand } from "@stackra/kbd/react";
 import { Link, NavLink, Outlet, useNavigate, useNavigation } from "@stackra/navigation/react";
 import { PanelShell, useBreadcrumbs } from "@stackra/panel/react";
 import { useStore } from "@stackra/state/react";
-import { Avatar, Breadcrumbs, Button, Dropdown, Kbd, Separator } from "@stackra/ui";
+import { Avatar, Breadcrumbs, Button, Dropdown, Separator } from "@stackra/ui";
 import { Icon, Icons } from "@stackra/ui/icons";
 import { I18n } from "#stackra/i18n";
 import { Navigation } from "#stackra/navigation";
 import { Panels } from "#stackra/panels";
+import { Routes } from "#stackra/routes";
 import { OpenPaletteCommand } from "#src/commands/open-palette.command";
 import { SignOutCommand } from "#src/commands/sign-out.command";
 import { CommandPalette } from "#src/components/command-palette";
+import { ConnectionIndicator } from "#src/components/connection-indicator";
 import { LocaleSwitcher } from "#src/components/locale-switcher";
 import { NotificationInbox } from "#src/components/notification-inbox";
 import { OfflineBanner } from "#src/components/offline-banner";
@@ -34,15 +39,11 @@ import { TenantSwitcher } from "#src/components/tenant-switcher";
 import { ThemeToggle } from "#src/components/theme-toggle";
 import { useActor } from "#src/providers/session/use-actor";
 import { UiStore } from "#src/stores/ui.store";
-import { ConnectionIndicator } from "./connection-indicator";
-import { Routes } from "#stackra/routes";
 
 /**
  * The sidebar state lives in `UiStore` so the keyboard command, the rail button and the desktop
- * menu all move the same
- * value; `main` carries the density class so the panel's tables inherit it. Breadcrumbs come from
- * the matched routes'
- * titles and the panel's resource labels.
+ * menu all move the same value; `main` carries the density class so the panel's tables inherit
+ * it. Breadcrumbs come from the matched routes' titles and the panel's resource labels.
  */
 export function Shell() {
   const { actor } = useActor();
@@ -61,7 +62,7 @@ export function Shell() {
         sidebarOpen={!ui.state.sidebarCollapsed}
         onSidebarOpenChange={(open) => ui.setSidebarCollapsed(!open)}
         navigate={(href) => navigate(href)}
-        toggleShortcut="mod+b"
+        toggleShortcut={false}
         navbar={
           <Navbar maxWidth="full" aria-label={t(I18n.console.shell.top_bar)}>
             <Navbar.Header>
@@ -79,10 +80,7 @@ export function Shell() {
               <Button variant="tertiary" size="sm" onPress={openPalette}>
                 <Icon name={Icons.Magnifier} aria-hidden />
                 {t(I18n.console.commands.palette)}
-                <Kbd>
-                  <Kbd.Abbr keyValue="command" />
-                  <Kbd.Content>K</Kbd.Content>
-                </Kbd>
+                <ShortcutKeys command={OpenPaletteCommand} />
               </Button>
               <ConnectionIndicator />
               <NotificationInbox />
