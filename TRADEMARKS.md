@@ -1,6 +1,6 @@
 # Trademarks
 
-Stackra™ and Figentra™, and the Stackra and Figentra logos, are trademarks of Figentra Technologies FZ-LLC.
+Stackra™ and Figentra™, and the Stackra and Figentra logos, are trademarks of Figentra Technologies L.L.C.
 
 This file covers only the Stackra brand assets bundled with the template: the logos in `.github/assets/brand/` and
 the social image in `.github/assets/`. The MIT licence in [`LICENSE`](LICENSE) covers code only; it grants no right
