@@ -40,12 +40,11 @@
   "editor.insertSpaces": true,
 
   // ── TypeScript: the repo's version, project-relative imports, `#` subpath imports ──────────────
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "typescript.preferences.preferTypeOnlyAutoImports": true,
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  "javascript.updateImportsOnFileMove.enabled": "always",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.preferences.preferTypeOnlyAutoImports": true,
+  "js/ts.updateImportsOnFileMove.enabled": "always",
 
   // ── JSON with comments: trailing commas are allowed (oxfmt writes them) ───────────────────────
   "files.associations": {
@@ -56,6 +55,20 @@
     "**/tsconfig*.json": "jsonc",
     "**/.vscode/*.json": "jsonc",
     "*.mdx": "mdx"
+  },
+  // Remote $schema URLs load only from trusted hosts (VS Code asks otherwise and shows "Unable to load").
+  "json.schemaDownload.enable": true,
+  "json.schemaDownload.trustedDomains": {
+    "https://json.schemastore.org/": true,
+    "https://www.schemastore.org/": true,
+    "https://unpkg.com/": true,
+    "https://cdn.jsdelivr.net/": true,
+    "https://raw.githubusercontent.com/": true,
+    "https://turborepo.com/": true,
+    "https://turbo.build/": true,
+    "https://biomejs.dev/": true,
+    "https://mintlify.com/": true,
+    "https://schemas.stackra.dev/": true
   },
   "json.schemas": [
     {
@@ -81,6 +94,22 @@
     ["tv\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"]
   ],
   "tailwindCSS.classAttributes": ["class", "className", "classNames"],
+
+  // ── i18n: assets/lang/<locale>/<namespace>.json in every member ───────────────────────────────
+  "i18n-ally.localesPaths": [
+    "apps/*/assets/lang",
+    "services/*/assets/lang",
+    "packages/*/*/assets/lang"
+  ],
+  "i18n-ally.pathMatcher": "{locale}/{namespaces}.json",
+  "i18n-ally.namespace": true,
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.displayLanguage": "en",
+  "i18n-ally.enabledFrameworks": ["general"],
+
+  // ── Markdown: oxfmt formats, markdownlint checks structure (rules in .markdownlint.yaml) ────────
+  "markdown.validate.enabled": true,
 
   // ── Tests ──────────────────────────────────────────────────────────────────────────────────
   // The @stackra/* packages are pre-release and not installable yet, so the Vitest extension cannot

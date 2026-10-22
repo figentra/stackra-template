@@ -9,8 +9,9 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["exec", "vitest", "run", "${relativeFile}"],
-      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["exec", "vitest", "run", "${file}"],
+      // Run from the file's folder so the member's own vitest config applies.
+      "cwd": "${fileDirname}",
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
