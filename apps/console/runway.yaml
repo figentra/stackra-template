@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/app.json
+# yaml-language-server: $schema=../../schemas/runway-app.schema.json
 # Stackra file contract:
 # Purpose: how and where the console runs, per environment: the dev port and host (the only place
 #          a port is written; gen puts it into the generated Vite server and Electron dev config),

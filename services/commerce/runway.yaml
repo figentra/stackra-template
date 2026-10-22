@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/service.json
+# yaml-language-server: $schema=../../schemas/runway-service.schema.json
 # Stackra file contract:
 # Purpose: how and where THIS service runs, per environment: dev port and host, the deployable it
 #          joins, resources and scaling, the sizes of what it needs (its logical database, cache
