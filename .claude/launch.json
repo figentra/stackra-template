@@ -6,31 +6,19 @@
     {
       "name": "console",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--filter",
-        "@acme/console",
-        "dev"
-      ],
+      "runtimeArgs": ["--filter", "@acme/console", "dev"],
       "port": 5173
     },
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--filter",
-        "@acme/web",
-        "dev"
-      ],
+      "runtimeArgs": ["--filter", "@acme/web", "dev"],
       "port": 5175
     },
     {
       "name": "docs",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--filter",
-        "@acme/docs",
-        "dev"
-      ],
+      "runtimeArgs": ["--filter", "@acme/docs", "dev"],
       "port": 3333
     }
   ]

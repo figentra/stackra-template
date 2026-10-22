@@ -42,9 +42,17 @@
       "manifest": "services/notifications/.stackra/app-manifest.json",
       "uses": ["messages.notification.list", "messages.notification.mark_read"]
     },
-    { "service": "experience", "pin": "stackra.lock.yaml#experience", "uses": ["experience.document.get"] },
+    {
+      "service": "experience",
+      "pin": "stackra.lock.yaml#experience",
+      "uses": ["experience.document.get"]
+    },
     { "service": "platform", "pin": "stackra.lock.yaml#platform", "uses": ["settings.value.set"] },
-    { "service": "identity", "pin": "stackra.lock.yaml#identity", "uses": ["identity.session.current"] }
+    {
+      "service": "identity",
+      "pin": "stackra.lock.yaml#identity",
+      "uses": ["identity.session.current"]
+    }
   ],
   "providers": [
     {

@@ -1,8 +1,8 @@
 # orders
 
-Places, cancels and expires orders. The reference module: every kind of the programming model appears once. Tests
-sit in a `__tests__/` folder beside their subject's kind folder (ADR 0022), carry intent docblocks (ADR 0007) and read
-the ids factories return instead of typing them.
+Places, cancels and expires orders. The reference module: every kind of the programming model
+appears once. Tests sit in a `__tests__/` folder beside their subject's kind folder (ADR 0022),
+carry intent docblocks (ADR 0007) and read the ids factories return instead of typing them.
 
 | Kind           | File                                                                              | Read it for                                                                          |
 | -------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
@@ -17,7 +17,7 @@ the ids factories return instead of typing them.
 | repository     | `repositories/order.repository.ts`                                                | `@RepositoryOf(Order)`: named reads, no behaviour                                    |
 | service        | `./services/order.service.ts`, `./services/order-pricing.service.ts`              | `@Crud`, transitions, `@AccessLogged`, `Money` arithmetic, the `Logger` port         |
 | policy         | `policies/order.policy.ts`                                                        | a method per verb; a `Service` actor is judged as the customer it acts for           |
-| guard          | `guards/accepting-orders.guard.ts`                                                | `extends Guard` on `order.create`: refuses while ordering is paused (a setting)       |
+| guard          | `guards/accepting-orders.guard.ts`                                                | `extends Guard` on `order.create`: refuses while ordering is paused (a setting)      |
 | action         | `actions/create-order.action.ts`                                                  | `runs: CreateOrderWorkflow`, `idempotency`, `offline`, `UxAfter.OpenRecord`          |
 | action         | `actions/cancel-order.action.ts`                                                  | inline action, `ctx.authorize`, queued command after commit, `onBehalfOf`            |
 | job            | `actions/expire-unpaid-orders.action.ts`                                          | `@AsJob` + `@Cron`; `actors: [ActorKind.System]`, `time.subMinutes`                  |
@@ -42,7 +42,8 @@ the ids factories return instead of typing them.
 | ai             | `ai/order.facts.ts`, `ai/*.prompt.ts`, `ai/*.skill.ts`                            | `@Facts`, `@Prompt`, `@Skill`; tools referenced by class                             |
 | assets         | member root `assets/lang/<locale>/orders.json`, `assets/ai/orders/*`              | `I18n.orders.*` and `Assets.orders.*` are generated from these                       |
 
-Extending orders: implement a point of `hooks/order.hook-point.ts` in your own module (see `../loyalty`). A sibling
-module imports only an exported class, a declaration file (`events/`, `hooks/*.hook-point.ts`, `enums/`, `schemas/`,
-`errors/`, `permissions/`) or, inside `links/`, a model (the sibling rule, guides/programming-model.mdx#reaching-a-sibling-module). Never edit these files to
-change pricing.
+Extending orders: implement a point of `hooks/order.hook-point.ts` in your own module (see
+`../loyalty`). A sibling module imports only an exported class, a declaration file (`events/`,
+`hooks/*.hook-point.ts`, `enums/`, `schemas/`, `errors/`, `permissions/`) or, inside `links/`, a
+model (the sibling rule, guides/programming-model.mdx#reaching-a-sibling-module). Never edit these
+files to change pricing.

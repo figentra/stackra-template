@@ -10,9 +10,7 @@
 import { describe, expect, it } from "@stackra/testing";
 import { renderOverride, screen } from "@stackra/testing/react";
 import { Commerce } from "#stackra/clients";
-import {
-  OrderStatusBadgeOverride,
-} from "#src/overrides/orders/components/order-status-badge.override";
+import { OrderStatusBadgeOverride } from "#src/overrides/orders/components/order-status-badge.override";
 
 /** Guards the badge the order table and the order page share. */
 describe(OrderStatusBadgeOverride, () => {

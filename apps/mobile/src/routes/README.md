@@ -40,9 +40,10 @@ linking map) and reports a path declared twice. A hand-written navigator or rout
 
 Route keys are the snake_case of the class name minus `Route` (`order_detail`); `#stackra/routes`
 exports `Routes` under those keys and the `RouteKey` union. Links point down (app shell ← layout ←
-route → page): pages, menus, layouts and data navigate with `navigate.to(Routes.order_detail, params)`
-and never import a route class; a document's navigate verb holds a `RouteKey` resolved with
-`Routes[key]`. Tabs are the routes that declare `tab: { order, icon, label }`; the layout lists none.
+route → page): pages, menus, layouts and data navigate with
+`navigate.to(Routes.order_detail, params)` and never import a route class; a document's navigate
+verb holds a `RouteKey` resolved with `Routes[key]`. Tabs are the routes that declare
+`tab: { order, icon, label }`; the layout lists none.
 
 Tests: `__tests__/<name>.layout.test.ts` for guards (`runGuard` from `@stackra/navigation/testing`);
 `__tests__/*.flow.yaml` are the Maestro journeys, run on iOS and Android in every locale

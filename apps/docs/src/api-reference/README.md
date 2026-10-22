@@ -12,5 +12,5 @@ generated output.
 
 `docs.json` points the Endpoints group at `openapi.json`; Mintlify renders one page per operation
 with try-it. The `x-stackra-*` extensions (permission, risk, area, idempotency) are shown as badges
-by the Mintlify OpenAPI renderer's extension support. Nothing here is edited by hand; `stackra gen
---check` fails CI when it is stale.
+by the Mintlify OpenAPI renderer's extension support. Nothing here is edited by hand;
+`stackra gen --check` fails CI when it is stale.

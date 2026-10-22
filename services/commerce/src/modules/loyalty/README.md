@@ -1,7 +1,7 @@
 # loyalty
 
-The extender. Shows how a module changes another module's behaviour without touching its files, and how a service
-hosts a package (`@acme/loyalty-kit`).
+The extender. Shows how a module changes another module's behaviour without touching its files, and
+how a service hosts a package (`@acme/loyalty-kit`).
 
 | Need                                  | Mechanism                                                       | File                                             |
 | ------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------ |
@@ -14,5 +14,5 @@ hosts a package (`@acme/loyalty-kit`).
 | Own an adjustment code                | a class enum, referenced by `.value` and `.label`               | `enums/adjustment-code.enum.ts`                  |
 | Prove it                              | `fakeHookContext`, `drainOutbox`, `toEmit(PointsEarned)`        | `hooks/__tests__/`, `listeners/__tests__/`       |
 
-Every id crosses into the kit as a `MemberId` through `memberId(...)`. Rule of thumb: change a value **before** commit
-→ hook. React **after** commit → listener. Another service reacts → public event.
+Every id crosses into the kit as a `MemberId` through `memberId(...)`. Rule of thumb: change a value
+**before** commit → hook. React **after** commit → listener. Another service reacts → public event.

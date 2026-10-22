@@ -49,10 +49,7 @@ precacheAndRoute(self.__WB_MANIFEST); // precacheShell: true
 cleanupOutdatedCaches();
 navigationPreload.enable(); // caching.navigationPreload: true
 
-registerRoute(
-  ({ url }) => NETWORK_ONLY.some((path) => path.test(url.pathname)),
-  new NetworkOnly(),
-);
+registerRoute(({ url }) => NETWORK_ONLY.some((path) => path.test(url.pathname)), new NetworkOnly());
 // caching.routes: CacheStrategy.CacheFirst for /assets/ and /icons/ (hashed or versioned files)
 for (const [prefix, cacheName] of [
   ["/assets/", "static-assets"],

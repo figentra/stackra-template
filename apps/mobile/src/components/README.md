@@ -40,6 +40,6 @@ component kind under `components/`.
 | `profile/`                  | `ProfileRoute`                 | —                                   |
 | `sign-in/`                  | `SignInRoute`                  | —                                   |
 
-Tests: `__tests__/<name>.test.tsx` with `renderRoute(Routes.<key>, options)` (`#stackra/routes`) from
-`@stackra/testing/native`, which mounts the route (guards, params, prefetch and document against
-faked clients) and its page under the testing providers.
+Tests: `__tests__/<name>.test.tsx` with `renderRoute(Routes.<key>, options)` (`#stackra/routes`)
+from `@stackra/testing/native`, which mounts the route (guards, params, prefetch and document
+against faked clients) and its page under the testing providers.

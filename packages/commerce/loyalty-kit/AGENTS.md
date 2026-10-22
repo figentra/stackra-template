@@ -8,7 +8,8 @@ Governing contract: root AGENTS.md
 
 # AGENTS — @acme/loyalty-kit
 
-- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is points, tiers and redemption as a module.
+- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is points, tiers and redemption
+  as a module.
 - The ledger is a port (`./contracts`); drivers self-register, consumers never import a driver.
 - Never import an app or a service; a package depends only on packages.
 - Secrets: forbidden; secret values come from the project's secret store at run time.

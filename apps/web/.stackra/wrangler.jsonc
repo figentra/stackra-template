@@ -21,33 +21,33 @@
       "vars": {
         "STACKRA_API_URL": "https://api-pr-${pr}.preview.acme.example",
         "STACKRA_SITE_URL": "https://web-pr-${pr}.preview.acme.example",
-        "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web",
+        "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web"
       },
       "routes": [{ "pattern": "web-pr-${pr}.preview.acme.example", "custom_domain": true }],
-      "observability": { "enabled": true, "head_sampling_rate": 1 },
+      "observability": { "enabled": true, "head_sampling_rate": 1 }
     },
     "staging": {
       "vars": {
         "STACKRA_API_URL": "https://api.staging.acme.example",
         "STACKRA_SITE_URL": "https://staging.acme.example",
-        "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web",
+        "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web"
       },
       "routes": [{ "pattern": "staging.acme.example", "custom_domain": true }],
-      "observability": { "enabled": true, "head_sampling_rate": 0.5 },
+      "observability": { "enabled": true, "head_sampling_rate": 0.5 }
     },
     "production": {
       "vars": {
         "STACKRA_API_URL": "https://api.acme.example",
         "STACKRA_SITE_URL": "https://www.acme.example",
-        "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web",
+        "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web"
       },
       "routes": [
         { "pattern": "www.acme.example", "custom_domain": true },
         // alias: the Worker redirects it to `domain`
-        { "pattern": "acme.example", "custom_domain": true },
+        { "pattern": "acme.example", "custom_domain": true }
       ],
       "observability": { "enabled": true, "head_sampling_rate": 0.1 },
-      "limits": { "cpu_ms": 50 },
-    },
-  },
+      "limits": { "cpu_ms": 50 }
+    }
+  }
 }

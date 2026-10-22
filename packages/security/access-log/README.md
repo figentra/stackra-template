@@ -6,15 +6,15 @@ an `AccessLogSink`. The package shows the three parts every decorator package ha
 self-registering drivers, the retention job and the screen that reads the audit trail, and the test
 that keeps the decorator and gen honest.
 
-| Entry         | Holds                                                                                                                      |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `.`           | `AccessLogged`, `AccessLogService`, `AccessLogConfig`, `MemoryAccessLogSink`                                               |
+| Entry         | Holds                                                                                                                              |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `.`           | `AccessLogged`, `AccessLogService`, `AccessLogConfig`, `MemoryAccessLogSink`                                                       |
 | `./contracts` | the `AccessLogSink` port, `AccessRecord`, `AccessLoggedOptions` and `AccessLoggedDecorator` (gen reads them), `DataClassification` |
-| `./node`      | `AccessLogModule`, `AccessLogExplorer`, `PostgresAccessLogSink`, `AccessLogEntry`, the permissions, `PurgeAccessLogAction` |
-| `./testing`   | `FakeAccessLogSink.with({ failing })`, `AccessLogEntryFactory`, `toHaveLoggedAccess`                                       |
+| `./node`      | `AccessLogModule`, `AccessLogExplorer`, `PostgresAccessLogSink`, `AccessLogEntry`, the permissions, `PurgeAccessLogAction`         |
+| `./testing`   | `FakeAccessLogSink.with({ failing })`, `AccessLogEntryFactory`, `toHaveLoggedAccess`                                               |
 
-`.stackra/app-manifest.json` is the committed contract; `.stackra/gen/*` is committed in the template
-only so it can be read, and is imported as `#stackra/<name>`.
+`.stackra/app-manifest.json` is the committed contract; `.stackra/gen/*` is committed in the
+template only so it can be read, and is imported as `#stackra/<name>`.
 
 ## Shapes index
 

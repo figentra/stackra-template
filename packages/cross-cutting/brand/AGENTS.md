@@ -8,7 +8,8 @@ Governing contract: root AGENTS.md
 
 # AGENTS — @acme/brand
 
-- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is design tokens and the product brand assets.
+- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is design tokens and the product
+  brand assets.
 - One TypeScript token source in `src/`; the CSS in `css/` is generated from it.
 - `assets/` holds the Acme example product's mark; a project replaces it with its own (see
   `assets/NOTICE`).

@@ -1,10 +1,12 @@
 # apps
 
-Client members (`@acme/<name>`, `tier:app`). An app renders what services declare (resources, widgets,
-documents, settings pages) and adds its own routes, providers, stores, blocks and overrides, all as decorated classes
-discovered from their kind folders ([the programming model, apps](docs/src/guides/programming-model.mdx#apps)). Apps
-never import a service: they call it through the generated `#stackra/clients` built from the producer's committed
-`.stackra/app-manifest.json`, and gen copies consumed services' lang files into `.stackra/lang/` (ADR 0003, 0261).
+Client members (`@acme/<name>`, `tier:app`). An app renders what services declare (resources,
+widgets, documents, settings pages) and adds its own routes, providers, stores, blocks and
+overrides, all as decorated classes discovered from their kind folders
+([the programming model, apps](docs/src/guides/programming-model.mdx#apps)). Apps never import a
+service: they call it through the generated `#stackra/clients` built from the producer's committed
+`.stackra/app-manifest.json`, and gen copies consumed services' lang files into `.stackra/lang/`
+(ADR 0003, 0261).
 
 | App       | Targets                               | Shows                                                                                                       |
 | --------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
@@ -24,5 +26,5 @@ apps/<name>/
                                                          platform config, gen/; only app-manifest.json is committed
 ```
 
-No app has an authored entry: `stackra gen` writes `createApp(<App>, { wiring })` into `.stackra/` (the web app's
-`app.ts`, imported by its Worker, root and client entry, is the same call).
+No app has an authored entry: `stackra gen` writes `createApp(<App>, { wiring })` into `.stackra/`
+(the web app's `app.ts`, imported by its Worker, root and client entry, is the same call).

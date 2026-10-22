@@ -1,8 +1,9 @@
 # @acme/service-commerce
 
-A deployable that hosts four modules of the Acme example product's commerce domain and two package modules
-(`@acme/loyalty-kit`, `@acme/access-log`). It owns no behaviour of its own (ADR 0111, 0259): the root module
-imports the package modules it hosts; everything else is in `src/modules/*` and discovered by kind folder and decorator.
+A deployable that hosts four modules of the Acme example product's commerce domain and two package
+modules (`@acme/loyalty-kit`, `@acme/access-log`). It owns no behaviour of its own (ADR 0111, 0259):
+the root module imports the package modules it hosts; everything else is in `src/modules/*` and
+discovered by kind folder and decorator.
 
 | Path                                                 | What it is                                                                                                   |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -24,15 +25,16 @@ imports the package modules it hosts; everything else is in `src/modules/*` and 
 | `src/modules/orders`                                 | Orders: create (workflow), cancel, expire unpaid; the reference module for every kind                        |
 | `src/modules/loyalty`                                | An extender: redeems points through a hook, earns through the kit's `AccountService`                         |
 
-Module dependencies are inferred: catalogue injects `StockService` (inventory), orders injects `ProductService`
-(catalogue) and `StockService`, loyalty implements an orders hook point. Boot order is therefore inventory, catalogue,
-orders, loyalty. A cycle, or an import of a sibling's internals, is a gen error.
+Module dependencies are inferred: catalogue injects `StockService` (inventory), orders injects
+`ProductService` (catalogue) and `StockService`, loyalty implements an orders hook point. Boot order
+is therefore inventory, catalogue, orders, loyalty. A cycle, or an import of a sibling's internals,
+is a gen error.
 
-Drivers: a port is an abstract class; implementations register with `@Driver(Port, name)`; one `@DriverOf` field, in
-the package that owns the port, picks one by a checked name literal, and runway `drivers.<capability>` sets it per
-environment. A port with one candidate (`LoyaltyMembers` → `commerce`) needs no selector. A custom implementation is
-`@Replaces(Class)`.
+Drivers: a port is an abstract class; implementations register with `@Driver(Port, name)`; one
+`@DriverOf` field, in the package that owns the port, picks one by a checked name literal, and
+runway `drivers.<capability>` sets it per environment. A port with one candidate (`LoyaltyMembers` →
+`commerce`) needs no selector. A custom implementation is `@Replaces(Class)`.
 
-Other services reach commerce through the client gen builds from the manifest (`services/notifications` uses call,
-`.queue()` and `@OnEvent`). A service caller of `orders.order.cancel` must act `onBehalfOf` a customer, and every such
-cancel is access-logged.
+Other services reach commerce through the client gen builds from the manifest
+(`services/notifications` uses call, `.queue()` and `@OnEvent`). A service caller of
+`orders.order.cancel` must act `onBehalfOf` a customer, and every such cancel is access-logged.

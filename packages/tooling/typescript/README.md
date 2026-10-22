@@ -6,17 +6,17 @@ every `include` lives here, with its reason below and in each preset's header (t
 JSONC, so they carry comments). Decorators are in every member (Stackra ADR 0094), so `app`,
 `mobile`, `library` and `service` enable legacy decorators without metadata (Stackra ADR 0005).
 
-| Role (export) | Extends   | Use for                                                                                                  |
-| ------------- | --------- | -------------------------------------------------------------------------------------------------------- |
-| `app`         | `vite`    | a Vite or React Router app (`apps/console`, `apps/web`): src, stackra.config.ts, `*.extend.ts`, .stackra |
-| `mobile`      | `base`    | the Expo app (`apps/mobile`): src, stackra.config.ts, `*.extend.ts`, .stackra                            |
-| `library`     | `node`    | a tsdown-built package (`packages/<category>/<name>`), with DOM and JSX for its react and native entries |
-| `service`     | `library` | a service member (`services/<name>`): src, stackra.config.ts, .stackra/gen                               |
-| `tooling`     | `node`    | the preset packages in `packages/tooling`                                                                |
-| `desktop`     | `node`    | only the Electron main and preload program gen writes into an app's `.stackra/desktop/`                  |
-| `service-worker` | `base` | only the service-worker program gen writes beside an app's `.stackra/sw.ts` (WebWorker lib, no DOM)      |
-| `encore`      | `node`    | only the Encore app gen emits into `.stackra/encore/`; never an authored member                          |
-| `runtime`     | `library` | the tsx runtime loader for a package's `bin/` (never tsc or the build)                                   |
+| Role (export)    | Extends   | Use for                                                                                                  |
+| ---------------- | --------- | -------------------------------------------------------------------------------------------------------- |
+| `app`            | `vite`    | a Vite or React Router app (`apps/console`, `apps/web`): src, stackra.config.ts, `*.extend.ts`, .stackra |
+| `mobile`         | `base`    | the Expo app (`apps/mobile`): src, stackra.config.ts, `*.extend.ts`, .stackra                            |
+| `library`        | `node`    | a tsdown-built package (`packages/<category>/<name>`), with DOM and JSX for its react and native entries |
+| `service`        | `library` | a service member (`services/<name>`): src, stackra.config.ts, .stackra/gen                               |
+| `tooling`        | `node`    | the preset packages in `packages/tooling`                                                                |
+| `desktop`        | `node`    | only the Electron main and preload program gen writes into an app's `.stackra/desktop/`                  |
+| `service-worker` | `base`    | only the service-worker program gen writes beside an app's `.stackra/sw.ts` (WebWorker lib, no DOM)      |
+| `encore`         | `node`    | only the Encore app gen emits into `.stackra/encore/`; never an authored member                          |
+| `runtime`        | `library` | the tsx runtime loader for a package's `bin/` (never tsc or the build)                                   |
 
 `base`, `node`, `react` and `vite` are building blocks inside this package and are not exported: a
 member always extends a role.

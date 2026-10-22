@@ -12,8 +12,8 @@ Postgres directly would make every unit test an integration test.
 
 ## Decision
 
-1. **`@acme/loyalty-kit` owns the rules** (earn, redeem, tiers) as a module with no product rules
-   in it. Commerce earns through `AccountService.earn`, which enrolls a customer on the first paid
+1. **`@acme/loyalty-kit` owns the rules** (earn, redeem, tiers) as a module with no product rules in
+   it. Commerce earns through `AccountService.earn`, which enrolls a customer on the first paid
    order.
 2. **The ledger is a port**: `LoyaltyLedger`, an abstract class in the kit's `./contracts` entry
    that is its own DI token (no separate token constant). Two drivers register themselves with

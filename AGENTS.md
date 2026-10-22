@@ -15,14 +15,14 @@ Governing contract: Stackra ADR 0264 (vocabulary, kind folders), 0263 (DI), 0265
 
 Everything with identity is a class with a kind decorator, discovered by gen from its kind folder.
 The define family is retired; the only remaining factory verbs are helpers (`createApp`,
-`createDecorator`, `createMatcher`, `Schema`, `Enum.case`, `transform`, `verify`,
-`override`) and the build-config carve-out `defineApp` / `defineService` in `stackra.config.ts`
-(recorded beside [Stackra ADR 0145](https://docs.stackra.figentra.com/adr/0145-tokens-are-define-token-values-and-global-helpers-are-banned)).
+`createDecorator`, `createMatcher`, `Schema`, `Enum.case`, `transform`, `verify`, `override`) and
+the build-config carve-out `defineApp` / `defineService` in `stackra.config.ts` (recorded beside
+[Stackra ADR 0145](https://docs.stackra.figentra.com/adr/0145-tokens-are-define-token-values-and-global-helpers-are-banned)).
 
 A kind is marked by its folder plus exactly one form, and the table lists that form: a class
-decorator, an `extends` clause, or nothing but the folder. There is no `@Injectable`: gen
-discovers by folder and DI is by type. A listener needs no class decorator (its `@OnEvent` method
-marks it) and a guard is marked by `extends Guard`.
+decorator, an `extends` clause, or nothing but the folder. There is no `@Injectable`: gen discovers
+by folder and DI is by type. A listener needs no class decorator (its `@OnEvent` method marks it)
+and a guard is marked by `extends Guard`.
 
 | Term                 | Meaning                                                                                                             | Form                                                                                                                              | Folder                                                                                       | Not to be confused with                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -100,29 +100,29 @@ apps/<name>/src/<kind>/                        an app: routes/, components/, pro
 
 Commands and queries are separate kinds (Stackra ADR 0098, 0155). Pick by what the call does:
 
-|                 | Action (`@Action`, `actions/`)                                       | Query (`@Query`, `queries/`)                            |
-| --------------- | -------------------------------------------------------------------- | ------------------------------------------------------- |
-| Does            | changes state: create, update, transition, delete                    | reads; changes nothing                                  |
-| HTTP            | `POST`, `PUT`, `PATCH` or `DELETE` through `@AsEndpoint`             | `GET` through `@AsEndpoint`                             |
-| MCP             | only with `@AsTool` (a write opts in, with its risk)                 | an MCP tool automatically                               |
-| Retries         | `Idempotency-Key` unless the verb is idempotent (`PUT`, `DELETE`)    | safe to repeat                                          |
-| Offline         | may queue (`offline: { mode: OfflineMode.Queue }`) and replay        | the client shows its last persisted result              |
-| Caching         | never cached                                                         | `cache: { ttl, invalidateOn }` on the server            |
-| Long work       | `runs: SomeWorkflow` when it crosses modules or must compensate      | never; it answers from what is stored                   |
-| Client UX       | `ux`: success, queued, confirm and what to open after                | none                                                    |
+|           | Action (`@Action`, `actions/`)                                    | Query (`@Query`, `queries/`)                 |
+| --------- | ----------------------------------------------------------------- | -------------------------------------------- |
+| Does      | changes state: create, update, transition, delete                 | reads; changes nothing                       |
+| HTTP      | `POST`, `PUT`, `PATCH` or `DELETE` through `@AsEndpoint`          | `GET` through `@AsEndpoint`                  |
+| MCP       | only with `@AsTool` (a write opts in, with its risk)              | an MCP tool automatically                    |
+| Retries   | `Idempotency-Key` unless the verb is idempotent (`PUT`, `DELETE`) | safe to repeat                               |
+| Offline   | may queue (`offline: { mode: OfflineMode.Queue }`) and replay     | the client shows its last persisted result   |
+| Caching   | never cached                                                      | `cache: { ttl, invalidateOn }` on the server |
+| Long work | `runs: SomeWorkflow` when it crosses modules or must compensate   | never; it answers from what is stored        |
+| Client UX | `ux`: success, queued, confirm and what to open after             | none                                         |
 
 ## Single owners (never import these from anywhere else)
 
 `z`, `Schema`, `Enum` → `@stackra/schema` · `isRefusal`, `AppError`, `ErrorCategory` →
 `@stackra/errors` (`refusal(ref)` from `@stackra/errors/testing`) · `hydrateEnv` →
-`@stackra/config/env` · `Actor`, `ActorKind`, `HttpMethod`, `ApiArea`, `Target`, `IdentityResolver` →
-`@stackra/contracts` · `Risk`, `SystemRole` → `@stackra/iam` · `UxAfter` → `@stackra/actions` ·
+`@stackra/config/env` · `Actor`, `ActorKind`, `HttpMethod`, `ApiArea`, `Target`, `IdentityResolver`
+→ `@stackra/contracts` · `Risk`, `SystemRole` → `@stackra/iam` · `UxAfter` → `@stackra/actions` ·
 `Scope`, `DriverName` → `@stackra/container` · `SettingScope` → `@stackra/settings` · `QueryScope` →
 `@stackra/query` · `StorageArea` → `@stackra/storage` · `ColorScheme` → `@stackra/theming` ·
-`NumberingSystem`, `Locale` → `@stackra/i18n` · `PromptMoment`, `Capability`, `DesktopMode`, `OverlayStyle`, `OverlayAnchor` →
-`@stackra/platform` · connectivity → `usePlatform().network` (`@stackra/platform` owns the PWA
-service worker and network) · `Queues` → `#stackra/queues` · `Slots`, `Panels`, `Flags` →
-`#stackra/*` · `RouteForm` → `@stackra/navigation/react` · brand CSS →
+`NumberingSystem`, `Locale` → `@stackra/i18n` · `PromptMoment`, `Capability`, `DesktopMode`,
+`OverlayStyle`, `OverlayAnchor` → `@stackra/platform` · connectivity → `usePlatform().network`
+(`@stackra/platform` owns the PWA service worker and network) · `Queues` → `#stackra/queues` ·
+`Slots`, `Panels`, `Flags` → `#stackra/*` · `RouteForm` → `@stackra/navigation/react` · brand CSS →
 `@acme/brand/css/tokens.css` (web) and `/css/native.css` (mobile), referenced only as
 `--brand-<group>-<name>`. Provider and component exports have unique names, so nothing is imported
 under an alias.
@@ -145,13 +145,14 @@ under an alias.
   page by class (`@Route({ path, layout: ShellLayout, component: DashboardPage })`); layouts, menus,
   frames, headers, pages and data never import a route class, they use its generated key
   (`Routes.dashboard` from `#stackra/routes`: `navigate.to(Routes.order_detail, params)`,
-  `ctx.redirect(Routes.sign_in)`, `m.route(Routes.store)`). A layout has no `tabs:`; a route declares
-  `tab: { order, icon, label }` and gen builds the tab and menu tables into `#stackra/navigation`.
-  Planned lint rule: `no-upward-route-import`.
-- One exported declaration per file, named for it, with its kind suffix ([Stackra ADR 0006](https://docs.stackra.figentra.com/adr/0006-naming-exports-and-imports),
-  [Stackra ADR 0128](https://docs.stackra.figentra.com/adr/0128-code-conventions-enums-classes-components-and-kind-folders)). A
-  component's `<Name>Props` and a hook's `<Name>State` are part of their declaration and stay in its
-  file; a second runtime value is a second file.
+  `ctx.redirect(Routes.sign_in)`, `m.route(Routes.store)`). A layout has no `tabs:`; a route
+  declares `tab: { order, icon, label }` and gen builds the tab and menu tables into
+  `#stackra/navigation`. Planned lint rule: `no-upward-route-import`.
+- One exported declaration per file, named for it, with its kind suffix
+  ([Stackra ADR 0006](https://docs.stackra.figentra.com/adr/0006-naming-exports-and-imports),
+  [Stackra ADR 0128](https://docs.stackra.figentra.com/adr/0128-code-conventions-enums-classes-components-and-kind-folders)).
+  A component's `<Name>Props` and a hook's `<Name>State` are part of their declaration and stay in
+  its file; a second runtime value is a second file.
 - Never write a `providers` array, `forRoot`, `ConfigurableModuleBuilder`, `@Injectable()`, or an
   `@Inject` for a typed parameter: drivers self-register, config picks them, gen writes
   `#stackra/wiring`.
@@ -159,9 +160,9 @@ under an alias.
   inject it; (2) its declarations — `events/`, `hooks/*.hook-point.ts`, `enums/`, `schemas/`,
   `errors/`, `permissions/`; (3) its model, inside `links/` only. Everything else in a sibling is
   internal; gen fails on the import. Carve-out: a test file (`__tests__/`) may also import a
-  sibling's `factories/` and `models/` to arrange data. Cross-service: inject its generated client (call or `.queue()`)
-  or listen to its events; never import its code or its package (an app gets a service's lang
-  through gen's `.stackra/lang/` copy).
+  sibling's `factories/` and `models/` to arrange data. Cross-service: inject its generated client
+  (call or `.queue()`) or listen to its events; never import its code or its package (an app gets a
+  service's lang through gen's `.stackra/lang/` copy).
 - Extension: implement a hook point or bind an override point. Never edit another module's file to
   change behaviour.
 - One fact, one file: what a member IS → `stackra.config.ts`; how it BEHAVES →
@@ -182,27 +183,34 @@ under an alias.
   subclassed; `throw new Error` is banned in authored code, fakes and tests included.
 - Tests: every test file sits in `__tests__/` beside its subject, `describe` takes the subject
   class; tests in services and packages use ids their factories return, and app tests use the
-  fixture ids the seeds publish (`ord_01JA…`, `usr_01JA…`). Vitest comes only from `@stackra/testing`, never
-  directly; the helpers for each concern are in README.md ("Test header and helpers"). Unit tests
-  use memory drivers; `.int.test.ts` uses `usePostgres()`; every e2e test runs axe.
-- Docblocks ([Stackra ADR 0007](https://docs.stackra.figentra.com/adr/0007-source-documentation-standard) as amended): every authored file opens with the contract block (Purpose,
-  Boundary, Runtime, Governing contract); `Runtime` is exactly one of node, browser, worker,
-  react-native, isomorphic, and anything in parentheses goes into Boundary; `Governing contract`
-  lists published ADR numbers or a published standard page only, never an unpublished document. A generated file opens with `generated by stackra gen from <sources> — do not edit`,
-  then Purpose, Boundary, Runtime. Every exported symbol, public member and config field has TSDoc
-  saying what the type cannot (config fields add `@defaultValue`); tests carry a docblock on every
-  `describe` and `it` saying why the case matters. `// why`, never `// what`.
-- Naming ([Stackra ADR 0231](https://docs.stackra.figentra.com/adr/0231-naming-and-casing-standard)): module keys one snake_case segment; source keys short (`order.cancel`), wire
-  keys `<module>.<resource>.<verb>`, unique per member whatever their area; verbs `get`, `list`,
+  fixture ids the seeds publish (`ord_01JA…`, `usr_01JA…`). Vitest comes only from
+  `@stackra/testing`, never directly; the helpers for each concern are in README.md ("Test header
+  and helpers"). Unit tests use memory drivers; `.int.test.ts` uses `usePostgres()`; every e2e test
+  runs axe.
+- Docblocks
+  ([Stackra ADR 0007](https://docs.stackra.figentra.com/adr/0007-source-documentation-standard) as
+  amended): every authored file opens with the contract block (Purpose, Boundary, Runtime, Governing
+  contract); `Runtime` is exactly one of node, browser, worker, react-native, isomorphic, and
+  anything in parentheses goes into Boundary; `Governing contract` lists published ADR numbers or a
+  published standard page only, never an unpublished document. A generated file opens with
+  `generated by stackra gen from <sources> — do not edit`, then Purpose, Boundary, Runtime. Every
+  exported symbol, public member and config field has TSDoc saying what the type cannot (config
+  fields add `@defaultValue`); tests carry a docblock on every `describe` and `it` saying why the
+  case matters. `// why`, never `// what`.
+- Naming
+  ([Stackra ADR 0231](https://docs.stackra.figentra.com/adr/0231-naming-and-casing-standard)):
+  module keys one snake_case segment; source keys short (`order.cancel`), wire keys
+  `<module>.<resource>.<verb>`, unique per member whatever their area; verbs `get`, `list`,
   `search`, `stats`, qualifier last; events `<module>.<aggregate>.<verb>.v<n>` on the wire; codes,
   route keys and panel keys snake_case; files kebab-case with a singular kind suffix; constants
   SCREAMING_SNAKE; namespace lookups `<module>::<path>`; secrets `<PROVIDER>_<PURPOSE>`.
 
 ## Commands
 
-Every repo operation is a `stackra` command behind a root script: `pnpm gen` (after any declaration change; commit
-the member's `.stackra/app-manifest.json` and a service's `openapi.json`), `pnpm new <kind> <name>`, `pnpm verify`
-(the gate CI runs), `pnpm validate`, `pnpm structure` (the kind → folder → test table), `pnpm db:diff`,
-`pnpm run doctor` (`run`, because `pnpm doctor` is pnpm's own command). Agent skills, sub-agents, rules and guard hooks are not in this repository: install them once per
-machine with `stackra agents setup` (`@stackra/skills`), and read framework know-how through the Stackra MCP server
-in `.mcp.yaml`.
+Every repo operation is a `stackra` command behind a root script: `pnpm gen` (after any declaration
+change; commit the member's `.stackra/app-manifest.json` and a service's `openapi.json`),
+`pnpm new <kind> <name>`, `pnpm verify` (the gate CI runs), `pnpm validate`, `pnpm structure` (the
+kind → folder → test table), `pnpm db:diff`, `pnpm run doctor` (`run`, because `pnpm doctor` is
+pnpm's own command). Agent skills, sub-agents, rules and guard hooks are not in this repository:
+install them once per machine with `stackra agents setup` (`@stackra/skills`), and read framework
+know-how through the Stackra MCP server in `.mcp.yaml`.

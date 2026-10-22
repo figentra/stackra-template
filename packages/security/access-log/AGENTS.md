@@ -8,7 +8,8 @@ Governing contract: root AGENTS.md
 
 # AGENTS — @acme/access-log
 
-- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is `@AccessLogged` and its access-log sinks.
+- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is `@AccessLogged` and its
+  access-log sinks.
 - The sink is a port (`./contracts`); drivers self-register, consumers never import a driver.
 - Never import an app or a service; a package depends only on packages.
 - Secrets: forbidden; secret values come from the project's secret store at run time.

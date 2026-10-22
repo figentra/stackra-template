@@ -16,7 +16,11 @@
         "catalogue.product.get_by_slug"
       ]
     },
-    { "service": "billing", "pin": "stackra.lock.yaml#billing", "uses": ["billing.catalog.plan.list"] },
+    {
+      "service": "billing",
+      "pin": "stackra.lock.yaml#billing",
+      "uses": ["billing.catalog.plan.list"]
+    },
     { "service": "content", "pin": "stackra.lock.yaml#content", "uses": ["content.entry.list"] },
     {
       "service": "experience",
@@ -181,7 +185,12 @@
       "props": "FaqProps",
       "accepts": "content.entry.list"
     },
-    { "class": "CtaBannerBlock", "key": "web.cta_banner", "component": "CtaBanner", "props": "CtaProps" },
+    {
+      "class": "CtaBannerBlock",
+      "key": "web.cta_banner",
+      "component": "CtaBanner",
+      "props": "CtaProps"
+    },
     {
       "class": "ProductGridBlock",
       "key": "web.product_grid",

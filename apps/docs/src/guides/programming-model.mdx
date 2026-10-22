@@ -92,12 +92,13 @@ route names its layout and its page component by class:
 export class DashboardRoute {}
 ```
 
-Nothing above a route imports it. A layout, menu, frame, header, page or document refers to a route by its
-generated key, `Routes.dashboard` from `#stackra/routes`, which imports route classes as types only:
-`navigate.to(Routes.order_detail, { orderId })`, `ctx.redirect(Routes.sign_in)`, `m.route(Routes.store)`,
-`<Link to={Routes.store} />`. Layouts carry no `tabs:` list; each tab route declares `tab`, and gen builds the tab
-bar and the menus into `#stackra/navigation`. Only gen's own route tree imports the route classes, so no import
-cycle among decorated classes can form. A planned lint rule, `no-upward-route-import`, will fail an upward import.
+Nothing above a route imports it. A layout, menu, frame, header, page or document refers to a route
+by its generated key, `Routes.dashboard` from `#stackra/routes`, which imports route classes as
+types only: `navigate.to(Routes.order_detail, { orderId })`, `ctx.redirect(Routes.sign_in)`,
+`m.route(Routes.store)`, `<Link to={Routes.store} />`. Layouts carry no `tabs:` list; each tab route
+declares `tab`, and gen builds the tab bar and the menus into `#stackra/navigation`. Only gen's own
+route tree imports the route classes, so no import cycle among decorated classes can form. A planned
+lint rule, `no-upward-route-import`, will fail an upward import.
 
 ## Reaching a sibling module
 
@@ -114,8 +115,8 @@ models outside links) is internal, and gen fails on the import. A package is rea
 through its public entries only.
 
 One carve-out: a test file under `__tests__/` may also import a sibling's `factories/` and `models/`
-to arrange its data (an orders test seeds a catalogue variant with `VariantFactory`). Production code
-never does.
+to arrange its data (an orders test seeds a catalogue variant with `VariantFactory`). Production
+code never does.
 
 ## Reaching another service
 
@@ -144,28 +145,31 @@ imports (there is no `consumes` list anywhere), and emits one family of Zod desc
 (`actionRef`, `queryRef`, `eventRef`, …) in every app. Types come from the descriptor,
 `ActionInput<typeof Commerce.actions.CancelOrder>`, never from a hand-written type. Routes are keyed
 by their snake_case route key in `#stackra/routes`, so data that must name a route holds a
-`RouteKey`, written from the ref (`Routes.pricing.name`) so a renamed route is a type error. The site
-is restricted to the `public` API area; a reference to anything else is a gen error. The site's route
-modules never import server-only code: the public clients and the server env reach every loader
-through the Worker's load context, and a GET for HTML never sets a cookie.
+`RouteKey`, written from the ref (`Routes.pricing.name`) so a renamed route is a type error. The
+site is restricted to the `public` API area; a reference to anything else is a gen error. The site's
+route modules never import server-only code: the public clients and the server env reach every
+loader through the Worker's load context, and a GET for HTML never sets a cookie.
 
 Ready to change something? [Add a field end to end](/guides/add-a-field) walks one change through
 every file.
 
 ## Kind reference
 
-One short entry per kind; every template file cites the entry for its kind in its `Governing contract` line. The
-folder, suffix and decorator of each kind are also in the `AGENTS.md` glossary.
+One short entry per kind; every template file cites the entry for its kind in its
+`Governing contract` line. The folder, suffix and decorator of each kind are also in the `AGENTS.md`
+glossary.
 
 ### Enums
 
-A closed set of codes is a class: `class OrderStatus extends Enum<OrderStatus>` with `static readonly` cases built by
-`Enum.case(code, { label })`. Codes are snake_case (ADR 0128, 0231). Example: `orders/enums/order-status.enum.ts`.
+A closed set of codes is a class: `class OrderStatus extends Enum<OrderStatus>` with
+`static readonly` cases built by `Enum.case(code, { label })`. Codes are snake_case (ADR 0128,
+0231). Example: `orders/enums/order-status.enum.ts`.
 
 ### Models
 
-A table is a `@Model()` class composed from traits (`Model.with(HasPublicId("ord"), BelongsToTenant, Timestamps)`);
-columns and indexes live on the model and migrations are generated from it (ADR 0097, 0159).
+A table is a `@Model()` class composed from traits
+(`Model.with(HasPublicId("ord"), BelongsToTenant, Timestamps)`); columns and indexes live on the
+model and migrations are generated from it (ADR 0097, 0159).
 
 ### Traits
 
@@ -173,17 +177,18 @@ A trait is a reusable column-and-behaviour mixin passed to `Model.with(...)` (AD
 
 ### States
 
-A model's lifecycle is a `ModelState` class with `Transition` subclasses from `@stackra/state-machine` (ADR 0161).
+A model's lifecycle is a `ModelState` class with `Transition` subclasses from
+`@stackra/state-machine` (ADR 0161).
 
 ### Links
 
-A relation across modules is a `@Link()` class with `@Link({ relation, to })` properties in `links/`; the only place a
-sibling's model is imported (ADR 0104).
+A relation across modules is a `@Link()` class with `@Link({ relation, to })` properties in
+`links/`; the only place a sibling's model is imported (ADR 0104).
 
 ### Migrations
 
-`migrations/NNNN-<verb>-<what>.migration.ts`, generated by `stackra db diff`, forward-only, with `up(schema:
-Blueprint)` (ADR 0159).
+`migrations/NNNN-<verb>-<what>.migration.ts`, generated by `stackra db diff`, forward-only, with
+`up(schema: Blueprint)` (ADR 0159).
 
 ### Factories
 
@@ -191,26 +196,27 @@ Blueprint)` (ADR 0159).
 
 ### Seeds
 
-`seeds/<name>.seed.ts`: a `Seeder` with `static profiles`; the key is `<module>.<name>` (ADR 0190). A seeder declares
-the ids other seeders and tests reuse once, in `static readonly ids`. A package keeps its seeders under `src/testing/`
-and exports them from `./testing`, so Faker never reaches a runtime entry; a service's seeders load lazily, never at
-boot.
+`seeds/<name>.seed.ts`: a `Seeder` with `static profiles`; the key is `<module>.<name>` (ADR 0190).
+A seeder declares the ids other seeders and tests reuse once, in `static readonly ids`. A package
+keeps its seeders under `src/testing/` and exports them from `./testing`, so Faker never reaches a
+runtime entry; a service's seeders load lazily, never at boot.
 
 ### Schemas
 
-One schema class per file (`class X extends Schema(z.object(...))`); an action's input and output are two files (ADR
-0095, 0006).
+One schema class per file (`class X extends Schema(z.object(...))`); an action's input and output
+are two files (ADR 0095, 0006).
 
 ### Permissions
 
-`@Permissions(Model)` with `@Permission({ risk })` static members; names are `<module>.<snake class>.<member>`, and
-risk lives here only (ADR 0132, 0208).
+`@Permissions(Model)` with `@Permission({ risk })` static members; names are
+`<module>.<snake class>.<member>`, and risk lives here only (ADR 0132, 0208).
 
 ### Events
 
-`@Event({ name, public, broadcast? })` on a class extending `IntegrationEvent(schema)`; the wire name is
-`<module>.<aggregate>.<verb>.v<n>` (ADR 0141). A `DomainEvent` never leaves its service, so its name carries no version
-(`inventory.stock.low`). A broadcast names the permission a session needs to receive it.
+`@Event({ name, public, broadcast? })` on a class extending `IntegrationEvent(schema)`; the wire
+name is `<module>.<aggregate>.<verb>.v<n>` (ADR 0141). A `DomainEvent` never leaves its service, so
+its name carries no version (`inventory.stock.low`). A broadcast names the permission a session
+needs to receive it.
 
 ### Listeners
 
@@ -218,21 +224,23 @@ A class whose method carries `@OnEvent(Event, { queue })`; no class decorator (A
 
 ### Hooks
 
-A hook point is a `@HookPoint()` class in `hooks/<name>.hook-point.ts`; an implementer is `@Hook(Point, { order })` in
-`hooks/<name>.hook.ts` (ADR 0265).
+A hook point is a `@HookPoint()` class in `hooks/<name>.hook-point.ts`; an implementer is
+`@Hook(Point, { order })` in `hooks/<name>.hook.ts` (ADR 0265).
 
 ### Actions
 
-`@Action({ key, input, output, permission, actors, ... })` plus `@AsEndpoint`, `@AsJob` or `@AsTool`; the unit of
-behaviour (ADR 0098, 0136, 0137).
+`@Action({ key, input, output, permission, actors, ... })` plus `@AsEndpoint`, `@AsJob` or
+`@AsTool`; the unit of behaviour (ADR 0098, 0136, 0137).
 
 ### Queries
 
-`@Query({ key, input, output, permission })`; read only, exposed as MCP tools automatically (ADR 0098, 0155).
+`@Query({ key, input, output, permission })`; read only, exposed as MCP tools automatically (ADR
+0098, 0155).
 
 ### Policies and guards
 
-A `@Policy(Model)` class answers per-record questions; a guard `extends Guard` and runs before the action (ADR 0209).
+A `@Policy(Model)` class answers per-record questions; a guard `extends Guard` and runs before the
+action (ADR 0209).
 
 ### Repositories
 
@@ -240,30 +248,33 @@ A `@Policy(Model)` class answers per-record questions; a guard `extends Guard` a
 
 ### Services
 
-`services/<name>.service.ts`: an injectable class inside a module; `@Crud` generates the standard actions (ADR 0105,
-0263).
+`services/<name>.service.ts`: an injectable class inside a module; `@Crud` generates the standard
+actions (ADR 0105, 0263).
 
 ### Errors
 
-`class XError extends AppError` with `category = ErrorCategory.X` and a snake_case `code` (ADR 0140, 0232).
+`class XError extends AppError` with `category = ErrorCategory.X` and a snake_case `code` (ADR 0140,
+0232).
 
 ### Workflows
 
-A multi-step action runs as a `@Workflow()` class that `extends WorkflowBase<Input, Output>`, with `@Step`
-methods and compensations (ADR 0101, 0151, 0152). A step that waits for something outside the run names it with
-`waitFor` (an event or a `@Signal` class in `workflows/<name>.signal.ts`), `correlate` (the values the signal must
-carry) and `timeout`; the run's own `timeout` is at least as long as its waits. An action sends the signal, so
-permission, tenancy and the audit trail apply to it: the loyalty kit's `RedeemPointsWorkflow` parks its `confirm`
-step on `RedemptionConfirmed`, which `ConfirmRedemptionAction` sends (ADR 0152 decision 1).
+A multi-step action runs as a `@Workflow()` class that `extends WorkflowBase<Input, Output>`, with
+`@Step` methods and compensations (ADR 0101, 0151, 0152). A step that waits for something outside
+the run names it with `waitFor` (an event or a `@Signal` class in `workflows/<name>.signal.ts`),
+`correlate` (the values the signal must carry) and `timeout`; the run's own `timeout` is at least as
+long as its waits. An action sends the signal, so permission, tenancy and the audit trail apply to
+it: the loyalty kit's `RedeemPointsWorkflow` parks its `confirm` step on `RedemptionConfirmed`,
+which `ConfirmRedemptionAction` sends (ADR 0152 decision 1).
 
 ### Resources
 
-`@Resource(Model, { panels, permission })` with `table()`, `form()` and `infolist()` builders, rendered by the panel
-(ADR 0164).
+`@Resource(Model, { panels, permission })` with `table()`, `form()` and `infolist()` builders,
+rendered by the panel (ADR 0164).
 
 ### Settings
 
-`@Settings({ scopes })` with `@Setting()` fields; a flag is `@Flag` in the same folder (ADR 0108, 0213).
+`@Settings({ scopes })` with `@Setting()` fields; a flag is `@Flag` in the same folder (ADR 0108,
+0213).
 
 ### Widgets
 
@@ -279,22 +290,23 @@ step on `RedemptionConfirmed`, which `ConfirmRedemptionAction` sends (ADR 0152 d
 
 ### Override points
 
-`override-points/<name>.point.ts` declares a slot (`@OverridePoint`); an app binds it with `@Override` in
-`overrides/<module>/components/` (ADR 0164, 0234).
+`override-points/<name>.point.ts` declares a slot (`@OverridePoint`); an app binds it with
+`@Override` in `overrides/<module>/components/` (ADR 0164, 0234).
 
 ### AI
 
-Skills, prompts and `@Facts` classes in `ai/`; queries become MCP tools, writes opt in with `@AsTool` (ADR 0245,
-0155).
+Skills, prompts and `@Facts` classes in `ai/`; queries become MCP tools, writes opt in with
+`@AsTool` (ADR 0245, 0155).
 
 ### Config files
 
-`src/config/<name>.config.ts`: a `@Config(key)` class with typed fields and `@defaultValue` docs; a host overrides a
-package's config with `override(...)` (ADR 0146).
+`src/config/<name>.config.ts`: a `@Config(key)` class with typed fields and `@defaultValue` docs; a
+host overrides a package's config with `override(...)` (ADR 0146).
 
 ### Modules
 
-`<key>.module.ts`: `@Module({ key, exports })`, nothing else; gen writes the wiring (ADR 0111, 0263, 0264).
+`<key>.module.ts`: `@Module({ key, exports })`, nothing else; gen writes the wiring (ADR 0111, 0263,
+0264).
 
 ### Entry
 
@@ -302,21 +314,23 @@ A member's entry (`.stackra/main.ts`) is generated: `createApp(Root, { wiring })
 
 ### Tests
 
-`__tests__/<name>.<kind>.test.ts` beside the subject; `describe` names the class (ADR 0022, 0182, 0269).
+`__tests__/<name>.<kind>.test.ts` beside the subject; `describe` names the class (ADR 0022, 0182,
+0269).
 
 ### Versioning
 
-`versions/<name>.change.ts` (`@Change`) and `<name>.upcast.ts` (`@Upcast`) keep old API dates and event versions
-working (ADR 0118, 0141).
+`versions/<name>.change.ts` (`@Change`) and `<name>.upcast.ts` (`@Upcast`) keep old API dates and
+event versions working (ADR 0118, 0141).
 
 ### Apps
 
-An app is decorated classes in kind folders (`routes/`, `providers/`, `stores/`, `menus/`, `blocks/`); it never
-imports a service (ADR 0249, 0260).
+An app is decorated classes in kind folders (`routes/`, `providers/`, `stores/`, `menus/`,
+`blocks/`); it never imports a service (ADR 0249, 0260).
 
 ### Routes
 
-`@Route({ path, layout, component, tab? })`; links point down (see "Links point down" above) (ADR 0165).
+`@Route({ path, layout, component, tab? })`; links point down (see "Links point down" above) (ADR
+0165).
 
 ### Layouts
 
@@ -324,12 +338,15 @@ imports a service (ADR 0249, 0260).
 
 ### Providers, stores and menus
 
-`@Provider` runs code before mount; `@Store` holds client state (ADR 0079); `@Menu` builds menu items by route key.
+`@Provider` runs code before mount; `@Store` holds client state (ADR 0079); `@Menu` builds menu
+items by route key.
 
 ### Overrides
 
-An app's bindings of other modules' override points and lang keys, in `overrides/<module>/` (ADR 0234).
+An app's bindings of other modules' override points and lang keys, in `overrides/<module>/` (ADR
+0234).
 
 ### i18n
 
-`assets/lang/<locale>/<namespace>.json`, ICU messages, typed keys through `#stackra/i18n` (ADR 0080, 0192).
+`assets/lang/<locale>/<namespace>.json`, ICU messages, typed keys through `#stackra/i18n` (ADR 0080,
+0192).

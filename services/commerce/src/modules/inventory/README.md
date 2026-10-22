@@ -1,7 +1,8 @@
 # inventory
 
-Stock per variant and location, with reservations and low-stock alerts. Exports `StockService` (reserve, release) to
-orders, which calls it as a compensated workflow step, and to catalogue, which reads `available`.
+Stock per variant and location, with reservations and low-stock alerts. Exports `StockService`
+(reserve, release) to orders, which calls it as a compensated workflow step, and to catalogue, which
+reads `available`.
 
 | Kind       | File                                            | Shows                                                                          |
 | ---------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |

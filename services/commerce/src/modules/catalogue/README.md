@@ -1,7 +1,7 @@
 # catalogue
 
-Products and variants. Never stores a price (prices belong to the pricing service) and never stores stock (inventory).
-Exports `ProductService` to sibling modules.
+Products and variants. Never stores a price (prices belong to the pricing service) and never stores
+stock (inventory). Exports `ProductService` to sibling modules.
 
 | Kind        | Files                                                                         | Shows                                                                       |
 | ----------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |

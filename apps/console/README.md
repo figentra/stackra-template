@@ -1,11 +1,12 @@
 # @acme/console
 
-The web, PWA and desktop console of a Stackra project, from one source tree (ADR 0249). Every thing with identity is
-a decorated class (`@App`, `@Panel`, `@Route`, `@Layout`, `@Provider`, `@Store`, `@Menu`, `@Command`, `@Bridge`,
-`@Block`, `@Document`, `@Override`, `@Config`); React components stay functions referenced from decorator options.
-Resources, widgets, documents, navigation and settings pages arrive from the services' manifests through
-`#stackra/*`; the app adds a handful of routes, providers, menus and the desktop bridges. The runtime (Vite, React
-Router 7, the service worker, the Electron shell, Playwright) is generated into `.stackra/`.
+The web, PWA and desktop console of a Stackra project, from one source tree (ADR 0249). Every thing
+with identity is a decorated class (`@App`, `@Panel`, `@Route`, `@Layout`, `@Provider`, `@Store`,
+`@Menu`, `@Command`, `@Bridge`, `@Block`, `@Document`, `@Override`, `@Config`); React components
+stay functions referenced from decorator options. Resources, widgets, documents, navigation and
+settings pages arrive from the services' manifests through `#stackra/*`; the app adds a handful of
+routes, providers, menus and the desktop bridges. The runtime (Vite, React Router 7, the service
+worker, the Electron shell, Playwright) is generated into `.stackra/`.
 
 | Command                    | Does                                                                                           |
 | -------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -49,43 +50,45 @@ apps/console
     └── styles/app.css       Tailwind v4 + HeroUI v3 + the generated brand tokens
 ```
 
-A new console does not need all of this on day one: `pnpm new app --targets web` scaffolds only the `env`,
-`identity` and `i18n` config classes; the desktop, PWA, peripherals, analytics and theming classes, the menus and the
-bridges appear when their target or feature is added.
+A new console does not need all of this on day one: `pnpm new app --targets web` scaffolds only the
+`env`, `identity` and `i18n` config classes; the desktop, PWA, peripherals, analytics and theming
+classes, the menus and the bridges appear when their target or feature is added.
 
 ## The two rules every file follows
 
-1. Decorator options are the static declaration gen reads from the AST (path, layout, title, search, prefetch,
-   submits, document, component, targets, staleTime); the class body is behaviour (`loader`, `submit`, `guard`, `hydrate`, `run`,
-   `handle`, store methods). A component is always an option, never a body member.
-2. Identities are never strings outside their declaration site: permissions, queries, actions, events, override points,
-   widgets, i18n keys, settings keys, slots, panels, flags and assets are the generated constants of `#stackra/*`;
-   routes are referenced by `Routes.<key>` (a layout, menu, page or document never imports a route class); commands,
-   providers and blocks are referenced by class; closed value sets are class enums. Each keyboard shortcut has one
-   owner, its `@Command`, and every key hint is drawn by the kbd package with the platform's modifier.
+1. Decorator options are the static declaration gen reads from the AST (path, layout, title, search,
+   prefetch, submits, document, component, targets, staleTime); the class body is behaviour
+   (`loader`, `submit`, `guard`, `hydrate`, `run`, `handle`, store methods). A component is always
+   an option, never a body member.
+2. Identities are never strings outside their declaration site: permissions, queries, actions,
+   events, override points, widgets, i18n keys, settings keys, slots, panels, flags and assets are
+   the generated constants of `#stackra/*`; routes are referenced by `Routes.<key>` (a layout, menu,
+   page or document never imports a route class); commands, providers and blocks are referenced by
+   class; closed value sets are class enums. Each keyboard shortcut has one owner, its `@Command`,
+   and every key hint is drawn by the kbd package with the platform's modifier.
 
-Config is read with `useConfig(X)` in components and hooks and with `ctx.config(X)` in route, command and menu code;
-never as a static.
+Config is read with `useConfig(X)` in components and hooks and with `ctx.config(X)` in route,
+command and menu code; never as a static.
 
 ## Which file owns which fact
 
-| Fact                                                              | File                                                  | Consumed by                                                                         |
-| ----------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| What the app is: key, targets, area, env class, e2e               | `stackra.config.ts`                                   | every generated file                                                                |
-| Dev port and host, domains, public values, channels, health       | `runway.yaml`                                         | `vite.config.ts`, `playwright.config.ts`, `desktop/main.ts`, `electron-builder.yml` |
-| The env contract (`VITE_*`)                                       | `src/config/env.config.ts`                            | `gen/env.ts`, `env.d.ts`                                                            |
-| Locales, default, RTL, fallbacks, numerals                        | `src/config/i18n.config.ts`                           | `gen/i18n.ts`, `chromium-rtl`, `index.html`, manifest, menus                        |
-| The logo, schemes, theme colours                                  | `src/config/theming.config.ts`                        | icons, `index.html`, the theme toggle                                               |
-| Worker build, manifest fields, caching, offline, push, updates    | `src/config/pwa.config.ts`                            | `pwa/manifest.<locale>.webmanifest`, `pwa/offline.html`, `sw.ts`, `vite.config.ts`  |
-| Windows, menus, tray, deep links, updates, packaging              | `src/config/desktop.config.ts`                        | `desktop/main.ts`, `electron-builder.yml`, `entitlements.mac.plist`                 |
-| CSP additions                                                     | `src/config/csp.config.ts`                            | `desktop/main.ts`, the web targets' headers                                         |
-| Cache scope and age, queue replay and leader                      | `src/config/query.config.ts`                          | `providers/tenant-query`, `gen/wiring.ts`                                           |
-| Analytics driver and consent                                      | `src/config/analytics.config.ts`, `consent.config.ts` | `gen/wiring.ts`, the settings page's privacy tab                                    |
-| Panels, provider order                                            | `src/console.app.ts`, `src/panels/`                   | `gen/panels.ts` in every member, `gen/wiring.ts`, `createApp`                       |
-| Screens                                                           | `src/routes/*.route.ts` + `*.layout.ts`               | `.stackra/routes.tsx`, `gen/routes.ts`                                              |
-| Main-process behaviour                                            | `src/bridges/*.bridge.ts` + `schemas/`                | `desktop/wiring.ts`, `preload.ts`, `bridge-client.ts`, `handlers.ts`                |
-| Shadowed module points                                            | `src/overrides/<module>/`                             | `gen/overrides.ts`                                                                  |
-| Default L2 documents                                              | `src/documents/*.document.ts`                         | the `document:` routes; a published tenant document wins                            |
+| Fact                                                           | File                                                  | Consumed by                                                                         |
+| -------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| What the app is: key, targets, area, env class, e2e            | `stackra.config.ts`                                   | every generated file                                                                |
+| Dev port and host, domains, public values, channels, health    | `runway.yaml`                                         | `vite.config.ts`, `playwright.config.ts`, `desktop/main.ts`, `electron-builder.yml` |
+| The env contract (`VITE_*`)                                    | `src/config/env.config.ts`                            | `gen/env.ts`, `env.d.ts`                                                            |
+| Locales, default, RTL, fallbacks, numerals                     | `src/config/i18n.config.ts`                           | `gen/i18n.ts`, `chromium-rtl`, `index.html`, manifest, menus                        |
+| The logo, schemes, theme colours                               | `src/config/theming.config.ts`                        | icons, `index.html`, the theme toggle                                               |
+| Worker build, manifest fields, caching, offline, push, updates | `src/config/pwa.config.ts`                            | `pwa/manifest.<locale>.webmanifest`, `pwa/offline.html`, `sw.ts`, `vite.config.ts`  |
+| Windows, menus, tray, deep links, updates, packaging           | `src/config/desktop.config.ts`                        | `desktop/main.ts`, `electron-builder.yml`, `entitlements.mac.plist`                 |
+| CSP additions                                                  | `src/config/csp.config.ts`                            | `desktop/main.ts`, the web targets' headers                                         |
+| Cache scope and age, queue replay and leader                   | `src/config/query.config.ts`                          | `providers/tenant-query`, `gen/wiring.ts`                                           |
+| Analytics driver and consent                                   | `src/config/analytics.config.ts`, `consent.config.ts` | `gen/wiring.ts`, the settings page's privacy tab                                    |
+| Panels, provider order                                         | `src/console.app.ts`, `src/panels/`                   | `gen/panels.ts` in every member, `gen/wiring.ts`, `createApp`                       |
+| Screens                                                        | `src/routes/*.route.ts` + `*.layout.ts`               | `.stackra/routes.tsx`, `gen/routes.ts`                                              |
+| Main-process behaviour                                         | `src/bridges/*.bridge.ts` + `schemas/`                | `desktop/wiring.ts`, `preload.ts`, `bridge-client.ts`, `handlers.ts`                |
+| Shadowed module points                                         | `src/overrides/<module>/`                             | `gen/overrides.ts`                                                                  |
+| Default L2 documents                                           | `src/documents/*.document.ts`                         | the `document:` routes; a published tenant document wins                            |
 
 ## Tests
 
@@ -103,11 +106,12 @@ never as a static.
 
 Runtime dependencies:
 `@stackra/{actions,analytics,app,assets,brand,clients,config,consent,container,contracts,coordinator,errors,experience,feature-flags,filesystem,i18n,iam,identity,kbd,media,navigation,panel,peripherals,platform,query,realtime,schema,settings,state,storage,tenancy,theming,ui,validation}`
-and `@stackra-pro/ui` (HeroUI Pro, ADR 0113) in `catalog:stackra` (`@acme/brand` is the workspace package);
-`react`, `react-dom` and `react-router` in the default catalog; `@heroui/styles` in `catalog:ui`; `tailwindcss` and
-`workbox-*` in `catalog:frontend`.
+and `@stackra-pro/ui` (HeroUI Pro, ADR 0113) in `catalog:stackra` (`@acme/brand` is the workspace
+package); `react`, `react-dom` and `react-router` in the default catalog; `@heroui/styles` in
+`catalog:ui`; `tailwindcss` and `workbox-*` in `catalog:frontend`.
 
-Development dependencies: `@stackra/{cli,runway,testing,vite-plugin}` in `catalog:stackra`; the workspace presets
-`@stackra/{typescript,vitest}-config`; `@types/{node,react,react-dom}` in the default catalog; `electron`, `typescript`
-and `vite` in `catalog:build`; `@playwright/test`, `jsdom`, `oxfmt`, `oxlint` and `vitest` in `catalog:quality`.
-electron-builder is a dependency of `@stackra/platform`, which runs it for `stackra build --target desktop`.
+Development dependencies: `@stackra/{cli,runway,testing,vite-plugin}` in `catalog:stackra`; the
+workspace presets `@stackra/{typescript,vitest}-config`; `@types/{node,react,react-dom}` in the
+default catalog; `electron`, `typescript` and `vite` in `catalog:build`; `@playwright/test`,
+`jsdom`, `oxfmt`, `oxlint` and `vitest` in `catalog:quality`. electron-builder is a dependency of
+`@stackra/platform`, which runs it for `stackra build --target desktop`.

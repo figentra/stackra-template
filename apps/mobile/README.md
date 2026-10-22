@@ -103,9 +103,9 @@ apps/mobile
 `@stackra/{actions,analytics,app,cli,clients,config,consent,container,contracts,errors,experience,feature-flags,i18n,iam,identity,navigation,panel,platform,query,realtime,runway,schema,settings,state,storage,tenancy,testing,theming,ui,validation}`
 in `catalog:stackra`; the `mobile` catalog (expo, react-native, heroui-native, uniwind, the Expo
 modules, react-native-bottom-tabs, Sentry, `@types/react`); `react` and `@types/node` from the
-default catalog, `tailwindcss` from `frontend` and `typescript` from `build`. `@acme/brand` and
-the `@stackra/{typescript,vitest}-config` presets are `workspace:*`. Maestro and eas-cli are
-mise-pinned CLIs, not npm dependencies.
+default catalog, `tailwindcss` from `frontend` and `typescript` from `build`. `@acme/brand` and the
+`@stackra/{typescript,vitest}-config` presets are `workspace:*`. Maestro and eas-cli are mise-pinned
+CLIs, not npm dependencies.
 
 ## The repository-root `.easignore`
 
