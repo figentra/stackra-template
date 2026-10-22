@@ -9,8 +9,8 @@
  * Governing contract: ADR 0078, ADR 0265, guides/programming-model.mdx#listeners
  */
 import { OnEvent } from "@stackra/events";
-import { memberId } from "@stackra/loyalty-kit";
-import { AccountService } from "@stackra/loyalty-kit/node";
+import { memberId } from "@acme/loyalty-kit";
+import { AccountService } from "@acme/loyalty-kit/node";
 import { Queues } from "#stackra/queues";
 import { OrderPaid } from "#modules/orders/events/order-paid.event";
 

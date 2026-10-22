@@ -1,19 +1,19 @@
 /**
  * Stackra file contract:
  * Purpose: `inventory.stock.list_low`: variants at or below the tenant's low-stock threshold.
- * Boundary: read only; L1 (stock levels are internal), so it is an MCP tool for users who may read
- *           stock.
+ * Boundary: read only; L1 (stock levels are internal): an MCP tool and an app-area endpoint for
+ *           users who may read stock (the console's low-stock widget calls it over HTTP).
  * Runtime: node
  * Governing contract: ADR 0098, 0155, guides/programming-model.mdx#queries
  */
-import { Query, type QueryContext } from "@stackra/actions";
+import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { SettingsReader } from "@stackra/settings";
 import { StockLevelRepository } from "#modules/inventory/repositories/stock-level.repository";
 import { StockPermissions } from "#modules/inventory/permissions/stock.permission";
 import { InventorySettings } from "#modules/inventory/settings/inventory.setting";
 import { LowStockInput } from "#modules/inventory/schemas/low-stock-input.schema";
 import { LowStockOutput } from "#modules/inventory/schemas/low-stock-output.schema";
-import { ActorKind } from "@stackra/contracts";
+import { ActorKind, HttpMethod } from "@stackra/contracts";
 
 /**
  * The query behind the low-stock widget; the threshold is read from settings at call time, not
@@ -26,6 +26,7 @@ import { ActorKind } from "@stackra/contracts";
   permission: StockPermissions.read,
   actors: [ActorKind.User, ActorKind.Agent],
 })
+@AsEndpoint({ method: HttpMethod.Get, path: "/stock/low" })
 export class ListLowStockQuery {
   constructor(
     private readonly levels: StockLevelRepository,

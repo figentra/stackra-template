@@ -3,9 +3,9 @@
  * Purpose: the outcome of one sender-authentication check (DKIM or SPF) on an inbound mail, as the
  *          provider reports it.
  * Boundary: a house enum (class); codes are the RFC 8601 result names in snake_case. The inbound
- *           webhook acts only on `pass` for both checks (ADR 0207 safeguard b).
+ *           webhook acts only on `pass` for both checks (its safeguard b).
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended), ADR 0231, ADR 0207
+ * Governing contract: ADR 0231, guides/programming-model.mdx#enums
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

@@ -30,7 +30,7 @@ describe(SendMessageAction, () => {
       .useDrivers("memory")
       .override(
         IdentityResolver,
-        fakeIdentity({ [customer.id]: { email: "a@example.test", locale: "ar" } }),
+        fakeIdentity({ [customer.id]: { email: "a@acme.example", locale: "ar" } }),
       )
       .compile();
     const input = {

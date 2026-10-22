@@ -7,11 +7,11 @@
  *           by class. Every id comes from a factory, never a literal.
  * Runtime: node
  * Governing contract: ADR 0098 (one pipeline), 0132 (policy), 0022, ADR 0007 (test docblocks),
- *                     guides/programming-model.mdx#tests, ADR 0207
+ *                     guides/programming-model.mdx#tests
  */
 import { describe, expect, it } from "@stackra/testing";
-import { AccessLogSink } from "@stackra/access-log/contracts";
-import "@stackra/access-log/testing"; // registers toHaveLoggedAccess
+import { AccessLogSink } from "@acme/access-log/contracts";
+import "@acme/access-log/testing"; // registers toHaveLoggedAccess
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { createTestingModule } from "@stackra/container/testing";
@@ -81,7 +81,7 @@ describe(CancelOrderAction, () => {
   });
 
   /**
-   * The inbound-mail path (ADR 0207): a service may cancel only as the customer it acts for.
+   * The inbound-mail path: a service may cancel only as the customer it acts for.
    * Without `onBehalfOf`, or on behalf of someone else, the policy denies; on behalf of the owner
    * it succeeds and the access record names the owner, so the relay is auditable.
    */

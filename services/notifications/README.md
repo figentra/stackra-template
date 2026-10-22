@@ -17,12 +17,12 @@ rendered parts of its mails.
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | `stackra.config.ts`, `runway.yaml`                                  | What the member is; how and where it runs (queues `delivery` with a dead letter, `inbox`) |
 | `.stackra/app-manifest.json`, `.stackra/openapi.json`               | COMMITTED contract and its projection                                                     |
-| `src/config/notifications.config.ts`                                | `@DriverOf(MailTransport) transport`, the platform sender, two `@Secret` references       |
+| `src/config/notifications.config.ts`                                | `@DriverOf(MailTransport) transport`, the platform sender, three `@Secret` references (Resend, inbound signing, the Web Push VAPID private key) |
 | `src/modules/messages/actions/send-message.action.ts`               | the command target: opens the dedup row, dispatches delivery                              |
 | `src/modules/messages/actions/deliver-message.action.ts`            | the job: five exponential retries, then the dead letter and `markFailed` (ADR 0148)       |
 | `src/modules/messages/queries/list-notifications.query.ts`          | `messages.notification.list`: the caller's inbox, with the inbox-wide `unread` count      |
 | `src/modules/messages/actions/mark-notification-read.action.ts`     | `messages.notification.mark_read`: `PUT /notifications/:notificationId/read`, own entries |
-| `src/modules/messages/events/notification-created.event.ts`         | `messages.notification.created.v1`, broadcast on `principal.{principalId}.notifications`  |
+| `src/modules/messages/events/notification-created.event.ts`         | `messages.notification.created` (private, no version), on `principal.{principalId}.notifications` |
 | `src/modules/messages/settings/notification-preferences.setting.ts` | user-scope `orderUpdates`, `orderReceipts`, `productUpdates`, `marketing`                 |
 | `src/modules/messages/webhooks/inbound-mail.webhook.ts`             | `@Webhook` receiver, `ApiArea.Public`, with the three inbound-cancel safeguards           |
 | `src/modules/messages/integrations/`, `connections/`                | Resend as an integration, and a tenant's own Resend credentials as a connection           |

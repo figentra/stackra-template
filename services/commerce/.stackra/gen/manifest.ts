@@ -20,7 +20,7 @@ export const manifest = json as AppManifest;
  * error.
  */
 export const Refusals = refusalRefs({
-  orders: ["order_not_payable", "tenant_suspended"],
+  orders: ["order_not_payable", "orders_paused"],
   catalogue: ["variant_unavailable", "variant_not_found", "product_not_found"],
   inventory: ["insufficient_stock"],
   loyalty_kit: ["insufficient_points", "not_a_member", "account_frozen", "not_own_principal"],

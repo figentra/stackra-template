@@ -5,7 +5,9 @@
  *           events. `broadcast` pushes it to every console session of the tenant holding stock
  *           read, so the low-stock tile updates live.
  * Runtime: isomorphic
- * Governing contract: ADR 0141, ADR 0225 (realtime), guides/programming-model.mdx#events
+ * Governing contract: ADR 0141, ADR 0078 decision 3 (domain events are not versioned: the wire
+ *                     name is `inventory.stock.low`), ADR 0225 (realtime),
+ *                     guides/programming-model.mdx#events
  */
 import { DomainEvent, Event, z } from "@stackra/events";
 import { StockPermissions } from "#modules/inventory/permissions/stock.permission";

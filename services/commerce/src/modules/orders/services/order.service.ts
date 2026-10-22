@@ -10,8 +10,8 @@
  *                     guides/programming-model.mdx#services, ADR 0212
  */
 import { Crud, CrudService, Repository } from "@stackra/database";
-import { AccessLogged } from "@stackra/access-log";
-import { DataClassification } from "@stackra/access-log/contracts";
+import { AccessLogged } from "@acme/access-log";
+import { DataClassification } from "@acme/access-log/contracts";
 import { Order } from "#modules/orders/models/order.model";
 import { OrderLine } from "#modules/orders/models/order-line.model";
 import { OrderRepository } from "#modules/orders/repositories/order.repository";

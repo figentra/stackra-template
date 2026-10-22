@@ -165,7 +165,7 @@
       "public": true
     },
     {
-      "name": "messages.notification.created.v1",
+      "name": "messages.notification.created",
       "module": "messages",
       "class": "NotificationCreated",
       "public": false,
@@ -307,7 +307,7 @@
     "queues": ["delivery", "inbox"],
     "crons": [],
     "buckets": [],
-    "secrets": ["RESEND_API_KEY", "RESEND_INBOUND_SIGNING_SECRET"],
+    "secrets": ["RESEND_API_KEY", "RESEND_INBOUND_SIGNING_SECRET", "WEB_PUSH_VAPID_PRIVATE_KEY"],
     "configKeys": ["notifications.service"]
   },
   "assets": {

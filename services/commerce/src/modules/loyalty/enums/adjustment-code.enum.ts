@@ -5,8 +5,7 @@
  *           the kit's namespace. Singular name : one case is one code; not to be confused with the
  *           `OrderAdjustment` schema that carries it.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended), ADR 0231 (snake_case codes),
- *                     guides/programming-model.mdx#enums, D.2
+ * Governing contract: ADR 0231 (snake_case codes), guides/programming-model.mdx#enums
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

@@ -5,7 +5,7 @@
  * Boundary: one schema class and its inferred type (ADR 0006). @stackra/webhooks parses the
  *           verified body with it, so the receiver never sees an unverified or malformed payload.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0207 (ADR 0207 safeguards a and b)
+ * Governing contract: ADR 0095; safeguards a and b of webhooks/inbound-mail.webhook.ts
  */
 import { Schema, z } from "@stackra/schema";
 import { MailAuthResult } from "#modules/messages/enums/mail-auth-result.enum";

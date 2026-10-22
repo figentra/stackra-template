@@ -4,7 +4,7 @@
  * Boundary: a house enum (class); no state family because the only move is queued → sent, done by
  *           MessageService.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended), guides/programming-model.mdx#enums
+ * Governing contract: guides/programming-model.mdx#enums
  */
 import { Tone } from "@stackra/contracts";
 import { Enum } from "@stackra/schema";

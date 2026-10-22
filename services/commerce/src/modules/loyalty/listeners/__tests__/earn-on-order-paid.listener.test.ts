@@ -11,8 +11,8 @@
 import { describe, expect, it } from "@stackra/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { drainOutbox } from "@stackra/events/testing";
-import { LoyaltyKitConfig } from "@stackra/loyalty-kit";
-import { PointsEarned } from "@stackra/loyalty-kit/node";
+import { LoyaltyKitConfig } from "@acme/loyalty-kit";
+import { PointsEarned } from "@acme/loyalty-kit/node";
 import { CommerceModule } from "#src/commerce.module";
 import { EarnOnOrderPaidListener } from "#modules/loyalty/listeners/earn-on-order-paid.listener";
 import { OrderService } from "#modules/orders/services/order.service";

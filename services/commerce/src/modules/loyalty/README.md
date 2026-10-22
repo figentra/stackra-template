@@ -1,7 +1,7 @@
 # loyalty
 
 The extender. Shows how a module changes another module's behaviour without touching its files, and how a service
-hosts a package (`@stackra/loyalty-kit`).
+hosts a package (`@acme/loyalty-kit`).
 
 | Need                                  | Mechanism                                                       | File                                             |
 | ------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------ |

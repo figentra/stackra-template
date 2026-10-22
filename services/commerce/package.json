@@ -46,8 +46,9 @@
     "format:check": "oxfmt --check ."
   },
   "dependencies": {
+    "@acme/access-log": "workspace:*",
+    "@acme/loyalty-kit": "workspace:*",
     "@react-email/components": "catalog:",
-    "@stackra/access-log": "workspace:*",
     "@stackra/actions": "catalog:stackra",
     "@stackra/ai": "catalog:stackra",
     "@stackra/app": "catalog:stackra",
@@ -66,7 +67,6 @@
     "@stackra/iam": "catalog:stackra",
     "@stackra/locking": "catalog:stackra",
     "@stackra/logger": "catalog:stackra",
-    "@stackra/loyalty-kit": "workspace:*",
     "@stackra/mail": "catalog:stackra",
     "@stackra/media": "catalog:stackra",
     "@stackra/model": "catalog:stackra",

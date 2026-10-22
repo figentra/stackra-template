@@ -6,13 +6,17 @@
  *           event per class; recorded on the Notification by the inbox listener when it creates the
  *           entry. The channel is per principal, so no other user's session receives it.
  * Runtime: isomorphic
- * Governing contract: ADR 0141, ADR 0225 (broadcast), guides/programming-model.mdx#events
+ * Governing contract: ADR 0141, ADR 0078 decision 3 (domain events are not versioned), ADR 0225
+ *                     (broadcast), guides/programming-model.mdx#events
  */
 import { DomainEvent, Event, z } from "@stackra/events";
 import { NotificationKind } from "#modules/messages/enums/notification-kind.enum";
 import { NotificationPermissions } from "#modules/messages/permissions/notification.permission";
 
-/** `messages.notification.created.v1`; carries ids and the kind only, never the entry's data. */
+/**
+ * `messages.notification.created`, with no version because a domain event never leaves the
+ * service; carries ids and the kind only, never the entry's data.
+ */
 @Event({
   name: "notification.created",
   public: false,

@@ -8,7 +8,7 @@
  * Governing contract: ADR 0265, ADR 0140, guides/programming-model.mdx#hooks
  */
 import { Hook, type HookContext, type Implements } from "@stackra/actions";
-import { LoyaltyService, memberId } from "@stackra/loyalty-kit";
+import { LoyaltyService, memberId } from "@acme/loyalty-kit";
 import { OrderHooks } from "#modules/orders/hooks/order.hook-point";
 import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 import { RedeemPointsExtension } from "#modules/loyalty/schemas/redeem-points-extension.schema";

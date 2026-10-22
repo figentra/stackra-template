@@ -4,13 +4,14 @@
  * Boundary: single aggregate, so inline in one transaction (ADR 0101). The payment void is a queued
  *           command to the payments service sent after commit, so a payments outage never rolls
  *           back the cancel. A `Service` caller must act on behalf of a customer; the policy then
- *           decides as that customer (ADR 0207 safeguard c), and every cancel is access-logged.
+ *           decides as that customer (the inbound-mail receiver's safeguard c), and every cancel is
+ *           access-logged.
  * Runtime: node
  * Governing contract: ADR 0098, 0136, 0260 (call, command, event),
- *                     guides/programming-model.mdx#actions, ADR 0207
+ *                     guides/programming-model.mdx#actions
  */
-import { AccessLogged } from "@stackra/access-log";
-import { DataClassification } from "@stackra/access-log/contracts";
+import { AccessLogged } from "@acme/access-log";
+import { DataClassification } from "@acme/access-log/contracts";
 import { Action, type ActionContext, AsEndpoint, AsTool, UxAfter } from "@stackra/actions";
 import { ActorKind, HttpMethod, Realm, Tone } from "@stackra/contracts";
 import { PaymentsClient } from "#stackra/clients";
@@ -21,7 +22,6 @@ import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { CancelOrderInput } from "#modules/orders/schemas/cancel-order-input.schema";
 import { CancelOrderOutput } from "#modules/orders/schemas/cancel-order-output.schema";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
-import { TenantActiveGuard } from "#modules/orders/guards/tenant-active.guard";
 
 /**
  * Cancels a pending order: releases its stock, records the reason by the realm of the principal
@@ -35,7 +35,6 @@ import { TenantActiveGuard } from "#modules/orders/guards/tenant-active.guard";
   output: CancelOrderOutput,
   permission: OrderPermissions.cancel,
   actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],
-  guards: [TenantActiveGuard],
   ux: {
     requiresConfirmation: { text: I18n.orders.order.cancel_confirm, color: Tone.Danger },
     success: I18n.orders.order.cancelled,

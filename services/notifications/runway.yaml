@@ -1,24 +1,31 @@
-# yaml-language-server: $schema=../../schemas/runway-service.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/service.json
 # Stackra file contract:
-# Purpose: how and where the notifications service runs, per environment. The root runway holds the destinations.
-# Boundary: what it needs (database `notifications`, queues `delivery` and `inbox`, two secrets) is
-#           derived into the manifest `infra`; this file sizes it. No secret value, no business
+# Purpose: how and where the notifications service runs, per environment. The root runway holds the
+#          destinations.
+# Boundary: what it needs (database `notifications`, queues `delivery` and `inbox`, three secrets)
+#           is derived into the manifest `infra`; this file sizes it. No secret value, no business
 #           value, no identity (stackra.config.ts). Health checks are declared in stackra.config.ts;
 #           this file tunes thresholds only (ADR 0190). The `delivery` dead-letter queue is what
 #           DeliverMessageAction's `deadLetter: true` lands in. Validated by
 #           `@stackra/runway/schema/service.json`.
 # Runtime: node
-# Governing contract: ADR 0168; ADR 0169, 0238, 0266, 0173
+# Governing contract: ADR 0168; ADR 0169, 0238, 0266, 0173, ADR 0223 (notifications is the one
+#                     delivery layer, web push included)
 $schema: "@stackra/runway/schema/service.json"
 version: 2
+# must equal stackra.config.ts `key`
 member: notifications
 
+# Every @Secret of src/config/*, by name; values live in Infisical and runway syncs them on deploy.
+# The Web Push private key lives here, not in a client: this service signs the pushes, and the
+# console holds only the public half (`VITE_WEB_PUSH_VAPID_PUBLIC_KEY`).
 secrets:
   RESEND_API_KEY: {}
   RESEND_INBOUND_SIGNING_SECRET: {}
+  WEB_PUSH_VAPID_PRIVATE_KEY: {}
 
+# thresholds only; the path and checks are stackra.config.ts `health`
 health:
-  # thresholds only; the path and checks are stackra.config.ts `health`
   readiness:
     requireMigrations: true
     timeoutSeconds: 2
@@ -48,14 +55,15 @@ environments:
     deployable: core
     database:
       plan: shared
-    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET]
+    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
+    # previews never mail a real address
     config:
       notifications.service:
         transport: memory
-      # previews never mail a real address
 
   staging:
-    deployable: core # grouped with commerce: both clients call in-process
+    # grouped with commerce: both clients call in-process
+    deployable: core
     isolate: false
     resources:
       cpu: 0.25
@@ -81,7 +89,7 @@ environments:
       events: encore-pubsub
       workflow: native
       webhooks: native
-    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET]
+    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
     config:
       notifications.service:
         transport: resend
@@ -89,7 +97,8 @@ environments:
       split: false
 
   production:
-    deployable: notifications # split: the same code reaches commerce over RPC
+    # split: the same code reaches commerce over RPC
+    deployable: notifications
     isolate: false
     resources:
       cpu: 0.5
@@ -119,7 +128,7 @@ environments:
       events: encore-pubsub
       workflow: native
       webhooks: native
-    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET]
+    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
     config:
       notifications.service:
         transport: resend

@@ -4,7 +4,7 @@
  * Boundary: a house enum (class); replaces a literal `z.enum([...])` in the input (lint
  *           `stackra/no-string-identity`).
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended), guides/programming-model.mdx#enums, D.2
+ * Governing contract: ADR 0231 (snake_case codes), guides/programming-model.mdx#enums
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

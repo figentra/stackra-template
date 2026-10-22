@@ -1,7 +1,7 @@
 # @acme/service-commerce
 
-A deployable that hosts four modules (a subset of the real commerce catalogue in acme-platform) and two package modules
-(`@stackra/loyalty-kit`, `@stackra/access-log`). It owns no behaviour of its own (ADR 0111, 0259): the root module
+A deployable that hosts four modules of the Acme example product's commerce domain and two package modules
+(`@acme/loyalty-kit`, `@acme/access-log`). It owns no behaviour of its own (ADR 0111, 0259): the root module
 imports the package modules it hosts; everything else is in `src/modules/*` and discovered by kind folder and decorator.
 
 | Path                                                 | What it is                                                                                                   |

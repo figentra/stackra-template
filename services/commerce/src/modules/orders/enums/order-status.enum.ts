@@ -1,12 +1,11 @@
 /**
  * Stackra file contract:
  * Purpose: the order lifecycle codes; `cancelled` and `expired` are terminal.
- * Boundary: a house enum (class, ADR 0128 d1 as amended): one case per static member; `value` is
+ * Boundary: a house enum (a class): one case per static member; `value` is
  *           the wire and column value, `label` an i18n key, `meta` what the console needs.
  *           Transitions live in states/order.state.ts.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended: class enums), ADR 0231 (snake_case codes),
- *                     guides/programming-model.mdx#enums
+ * Governing contract: ADR 0231 (snake_case codes), guides/programming-model.mdx#enums
  */
 import { Tone } from "@stackra/contracts";
 import { Enum } from "@stackra/schema";

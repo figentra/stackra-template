@@ -6,7 +6,7 @@
  * Boundary: unit tier; the policy is called directly with factory records (`make`, not persisted)
  *           and fake settings. Customer ids are the ones the factory minted.
  * Runtime: node
- * Governing contract: ADR 0132 d4, 0022, guides/programming-model.mdx#policies-and-guards, ADR 0207
+ * Governing contract: ADR 0132 d4, 0022, guides/programming-model.mdx#policies-and-guards
  */
 import { describe, expect, it } from "@stackra/testing";
 import { actors } from "@stackra/iam/testing";

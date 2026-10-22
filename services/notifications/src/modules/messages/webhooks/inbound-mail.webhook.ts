@@ -3,8 +3,8 @@
  * Purpose: the receiver the mail provider posts inbound replies to. A customer replying "CANCEL
  *          <order id>" to their confirmation cancels that unpaid order through commerce's action,
  *          as a command.
- * Boundary: a `@Webhook` receiver (@stackra/webhooks), `ApiArea.Public`, not an action. The three
- *           safeguards of ADR 0207 all hold before anything is queued: (a) the package verifies the
+ * Boundary: a `@Webhook` receiver (@stackra/webhooks), `ApiArea.Public`, not an action. Its three
+ *           safeguards all hold before anything is queued: (a) the package verifies the
  *           provider's Standard Webhooks signature before this class runs; (b) the sender acts for
  *           a customer only on a DKIM and SPF pass plus an exact match with that customer's
  *           verified email; (c) the cancel runs `onBehalfOf` the customer, so commerce's
@@ -12,7 +12,7 @@
  *           every such cancel. Anything else is accepted and dropped, so the provider stops
  *           retrying.
  * Runtime: node
- * Governing contract: ADR 0082 (areas), ADR 0260 d4 (command mode), ADR 0207
+ * Governing contract: ADR 0082 (areas), ADR 0260 d4 (command mode)
  */
 import { ApiArea, IdentityResolver } from "@stackra/contracts";
 import { SignatureScheme, Webhook } from "@stackra/webhooks";

@@ -19,7 +19,7 @@ export const manifest = json as AppManifest;
  */
 export const Refusals = refusalRefs({
   messages: ["mail_provider_unavailable", "notification_not_found"],
-  orders: ["order_not_payable", "tenant_suspended"], // consumed: commerce
+  orders: ["order_not_payable", "orders_paused"], // consumed: commerce
   webhooks: ["invalid_signature"], // @stackra/webhooks
   core: [
     "forbidden",

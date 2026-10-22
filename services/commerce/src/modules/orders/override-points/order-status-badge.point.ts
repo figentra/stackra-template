@@ -7,7 +7,7 @@
  *           colours. Declarations live in `override-points/` (`*.point.ts`); `overrides/` holds
  *           only bindings of other modules' points (ADR 0264).
  * Runtime: isomorphic
- * Governing contract: ADR 0234 d9 (amended), ADR 0164,
+ * Governing contract: ADR 0164,
  *                     guides/programming-model.mdx#override-points, ADR 0231
  */
 import { OverridePoint, PanelDefaults } from "@stackra/panel";

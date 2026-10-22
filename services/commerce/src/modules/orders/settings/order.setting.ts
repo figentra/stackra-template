@@ -16,10 +16,9 @@ import { I18n } from "#stackra/i18n";
 
 /**
  * A tenant admin changes these in the console without a deploy. Gen emits the settings page under
- * `settings/orders` in
- * every panel that hosts the listed realms, gated by the generated `orders.settings.update` permission, and the group's
- * JSON Schema into the
- * manifest. Labels default to `orders::settings.<field>` (snake_case of the field name).
+ * `settings/orders` in every panel that hosts the listed realms, gated by the generated
+ * `orders.settings.update` permission, and the group's JSON Schema into the manifest. Labels
+ * default to `orders::settings.<field>` (snake_case of the field name).
  */
 @Settings({
   scopes: [SettingScope.Platform, SettingScope.Tenant],
@@ -38,4 +37,9 @@ export class OrderSettings {
    * regulated tenants.
    */
   @Bool() @Setting({ lockable: true }) customersMayCancel = true;
+  /**
+   * Whether new orders are taken; switching it off pauses ordering (stocktake, holidays) while
+   * cancels and reads go on. AcceptingOrdersGuard reads it on every placement.
+   */
+  @Bool() @Setting() acceptingOrders = true;
 }

@@ -4,7 +4,7 @@
  *          kept for order history.
  * Boundary: a house enum (class); transitions live in states/product.state.ts.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended: class enums), guides/programming-model.mdx#enums
+ * Governing contract: guides/programming-model.mdx#enums
  */
 import { Tone } from "@stackra/contracts";
 import { Enum } from "@stackra/schema";
