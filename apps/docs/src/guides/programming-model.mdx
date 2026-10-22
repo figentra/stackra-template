@@ -1,0 +1,326 @@
+---
+title: "The programming model"
+description: "Classes with kind decorators, in the folder of their kind; gen writes the rest."
+icon: "shapes"
+---
+
+> Actions are the only behaviour; everything else reaches, extends, schedules or reacts to one.
+
+## The one rule
+
+Everything that has identity (a permission, an event, a hook point, a config, a route, a document)
+is a **class with a kind decorator**, in the folder of its kind. Gen discovers it from the folder,
+writes the wiring, and emits the typed constants code references (`#stackra/clients`,
+`#stackra/i18n`, `#stackra/routes`, `#stackra/flags`, …). There is no `define…` call to register
+anything, no providers array and no string key at a reference site: a string appears only where an
+identity is declared (`@Action({ key: "order.cancel" })`).
+
+The only factory-style helpers left are `createApp`, `createDecorator`, `createMatcher`, `Schema()`,
+`Enum.case()`, `transform()`, `verify()` and `override()`, plus the build-config carve-out
+`defineApp` / `defineService` in `stackra.config.ts`.
+
+## A feature, end to end
+
+| Step                       | File in `services/commerce/src/modules/`                   | Form                                                   |
+| -------------------------- | ---------------------------------------------------------- | ------------------------------------------------------ |
+| the permission             | `orders/permissions/order.permission.ts`                   | `@Permissions(Order)` class, `@Permission` statics     |
+| the event                  | `orders/events/order-placed.event.ts` (one event per file) | `@Event({ name: "order.placed", public: true })` class |
+| the action                 | `orders/actions/create-order.action.ts`                    | `@Action` + `@AsEndpoint` + `@AsTool`                  |
+| the long work behind it    | `orders/workflows/create-order.workflow.ts`                | `@Workflow()` class with `@Step` methods               |
+| the hook point others use  | `orders/hooks/order.hook-point.ts`                         | `@HookPoint()` class with `transform()` / `verify()`   |
+| another module's extension | `loyalty/hooks/redeem-points.hook.ts`                      | `@Hook(OrderHooks, { order: 200 })` class              |
+| the reaction to an event   | `loyalty/listeners/earn-on-order-paid.listener.ts`         | an `@OnEvent(OrderPaid)` method                        |
+| a replaceable component    | `orders/override-points/revenue-sparkline.point.ts`        | `@OverridePoint` class named for the slot              |
+| the console screen         | `orders/resources/order.resource.ts`                       | `@Resource`, data only                                 |
+| what gen derived           | `services/commerce/.stackra/gen/wiring.ts`, `hooks.ts`     | generated, never edited                                |
+
+Closed sets are class enums from the package that owns the option: `Risk.L1` on a permission (an
+action's risk is its permission's), `ActorKind.User` in `actors`, `HttpMethod.Post` on an endpoint,
+`UxAfter.OpenRecord` in `ux.after`, `ErrorCategory.PreconditionFailed` on an error. A driver choice
+is a checked literal typed by `DriverName<Port>`.
+
+```ts
+@Action({
+  key: "order.cancel",
+  input: CancelOrderInput,
+  output: CancelOrderOutput,
+  permission: OrderPermissions.cancel,
+  actors: [ActorKind.User, ActorKind.Agent],
+  ux: {
+    requiresConfirmation: { text: I18n.orders.order.cancel_confirm },
+    after: [UxAfter.Refresh],
+  },
+})
+@AsEndpoint({ method: HttpMethod.Put, path: "/orders/:orderId/cancel" })
+export class CancelOrderAction {
+  /* … */
+}
+```
+
+## Words that mean one thing
+
+Each term below names exactly one kind. The right-hand column is the other thing it is easy to
+confuse it with.
+
+| Term           | Means                                                                        | Not to be confused with                                                                           |
+| -------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| action         | a service `@Action`, and its remote face `Commerce.actions.X`                | a desktop **bridge** (`bridges/<name>.bridge.ts`, `@Bridge`) or a route's **`submit`**            |
+| provider       | an app `@Provider` class (`providers/<name>/<name>.provider.ts`)             | a wiring **binding** (`bindings` in `wiring.ts`) or AI **facts** (`ai/<name>.facts.ts`, `@Facts`) |
+| context        | `providers/<name>/<name>.context.tsx`, exporting `<Name>ContextProvider`     | a `@Provider` class, which exists only when it runs code before mount                             |
+| override point | the declaration: `override-points/<name>.point.ts`, class named for the slot | the binding: `overrides/<module>/components/<name>.override.tsx`, class `<Name>Override`          |
+| hook point     | `hooks/<name>.hook-point.ts`, class `<Name>Hooks`                            | an implementer (`hooks/<name>.hook.ts`) or a React hook (`use-*.ts`)                              |
+| service        | a deployable under `services/<name>`                                         | `*.service.ts`, an injectable class inside a module                                               |
+| document       | an L2 screen composed of blocks (`@Document`), in services and apps          | a page component (`components/pages/<name>/`)                                                     |
+
+File suffixes are singular (`.permission.ts`, `.setting.ts`, `.hook-point.ts`, `.seed.ts`,
+`.token.ts`); class names stay plural where they hold a set (`OrderPermissions`). A kind is marked
+by its folder plus exactly one form: there is no `@Injectable`, listeners need no class decorator
+(the `@OnEvent` method marks them), guards `extends Guard`.
+
+## Links point down
+
+References between decorated app classes point down one graph: app shell ← layout ← route → page. A
+route names its layout and its page component by class:
+
+```ts
+@Route({
+  path: "/",
+  layout: ShellLayout,
+  tab: { order: 1, icon: Icons.House, label: I18n.console.pages.dashboard },
+  component: DashboardPage,
+})
+export class DashboardRoute {}
+```
+
+Nothing above a route imports it. A layout, menu, frame, header, page or document refers to a route by its
+generated key, `Routes.dashboard` from `#stackra/routes`, which imports route classes as types only:
+`navigate.to(Routes.order_detail, { orderId })`, `ctx.redirect(Routes.sign_in)`, `m.route(Routes.store)`,
+`<Link to={Routes.store} />`. Layouts carry no `tabs:` list; each tab route declares `tab`, and gen builds the tab
+bar and the menus into `#stackra/navigation`. The key → class table the router mounts is gen's own
+`route-table.ts`, imported only by the generated entry and tree, so no import cycle among decorated classes can
+form. A planned lint rule, `no-upward-route-import`, will fail an upward import.
+
+## Reaching a sibling module
+
+A module imports from a sibling module in the same member only:
+
+1. a class listed in the sibling's `@Module({ exports })`, to inject it;
+2. a declaration-kind file, as a value or a type: `events/` (for `@OnEvent`),
+   `hooks/*.hook-point.ts` (for `@Hook`), `enums/`, `schemas/`, `errors/` (for `isRefusal`) and
+   `permissions/`;
+3. a sibling's model, only inside `links/*.link.ts`.
+
+Everything else in a sibling (services it does not export, repositories, actions, queries, policies,
+models outside links) is internal, and gen fails on the import. A package is reached the same way,
+through its public entries only.
+
+One carve-out: a test file under `__tests__/` may also import a sibling's `factories/` and `models/`
+to arrange its data (an orders test seeds a catalogue variant with `VariantFactory`). Production code
+never does.
+
+## Reaching another service
+
+Three ways, one per question: `client.x.y(input)` when you need the answer now;
+`client.x.y.queue(input)` when it must happen but you do not need the answer; `@OnEvent(Producer.x)`
+when something happened. The client is generated from the producer's committed `app-manifest.json`;
+`runway.yaml` decides whether it runs in-process or over RPC, and the calling code never changes.
+You never import another service's code, tables or package.
+
+## Config
+
+Behaviour is a `@Config` class in `src/config/`, with field rules from `@stackra/validation`. It is
+read through the container, never by importing an instance:
+
+| Where                                        | How                                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| services and server package code             | constructor injection by type: `constructor(private readonly config: CommerceConfig)` |
+| React and React Native components            | `const site = useConfig(SiteConfig)` from `@stackra/config/react`                     |
+| route `loader`, `submit`, `guard`, `hydrate` | `ctx.config(SiteConfig)` on the context it receives                                   |
+
+## Clients and sites
+
+The console (`apps/console`), the mobile app (`apps/mobile`) and the public site (`apps/web`)
+consume manifests the same way: gen infers the consumed services from their `#stackra/clients`
+imports (there is no `consumes` list anywhere), and emits one family of Zod descriptors
+(`actionRef`, `queryRef`, `eventRef`, …) in every app. Types come from the descriptor,
+`ActionInput<typeof Commerce.actions.CancelOrder>`, never from a hand-written type. Routes are keyed
+by their snake_case route key in `#stackra/routes`, so data that must name a route holds a
+`RouteKey`. The site is restricted to the `public` API area; a reference to anything else is a gen
+error.
+
+Ready to change something? [Add a field end to end](/guides/add-a-field) walks one change through
+every file.
+
+## Kind reference
+
+One short entry per kind; every template file cites the entry for its kind in its `Governing contract` line. The
+folder, suffix and decorator of each kind are also in the `AGENTS.md` glossary.
+
+### Enums
+
+A closed set of codes is a class: `class OrderStatus extends Enum<OrderStatus>` with `static readonly` cases built by
+`Enum.case(code, { label })`. Codes are snake_case (ADR 0128, 0231). Example: `orders/enums/order-status.enum.ts`.
+
+### Models
+
+A table is a `@Model()` class composed from traits (`Model.with(HasPublicId("ord"), BelongsToTenant, Timestamps)`);
+columns and indexes live on the model and migrations are generated from it (ADR 0097, 0159).
+
+### Traits
+
+A trait is a reusable column-and-behaviour mixin passed to `Model.with(...)` (ADR 0096).
+
+### States
+
+A model's lifecycle is a `ModelState` class with `Transition` subclasses from `@stackra/state-machine` (ADR 0161).
+
+### Links
+
+A relation across modules is a `@Link()` class with `@Link({ relation, to })` properties in `links/`; the only place a
+sibling's model is imported (ADR 0104).
+
+### Migrations
+
+`migrations/NNNN-<verb>-<what>.migration.ts`, generated by `stackra db diff`, forward-only, with `up(schema:
+Blueprint)` (ADR 0159).
+
+### Factories
+
+`class XFactory extends Factory<X>` with named states; tests take ids from factories (ADR 0269).
+
+### Seeds
+
+`seeds/<name>.seed.ts`: a `Seeder` with `static profiles`; the key is `<module>.<name>` (ADR 0190).
+
+### Schemas
+
+One schema class per file (`class X extends Schema(z.object(...))`); an action's input and output are two files (ADR
+0095, 0006).
+
+### Permissions
+
+`@Permissions(Model)` with `@Permission({ risk })` static members; names are `<module>.<snake class>.<member>`, and
+risk lives here only (ADR 0132, 0208).
+
+### Events
+
+`@Event({ name, public, broadcast? })` on a class extending `IntegrationEvent(schema)`; the wire name is
+`<module>.<aggregate>.<verb>.v<n>` (ADR 0141).
+
+### Listeners
+
+A class whose method carries `@OnEvent(Event, { queue })`; no class decorator (ADR 0078, 0260).
+
+### Hooks
+
+A hook point is a `@HookPoint()` class in `hooks/<name>.hook-point.ts`; an implementer is `@Hook(Point, { order })` in
+`hooks/<name>.hook.ts` (ADR 0265).
+
+### Actions
+
+`@Action({ key, input, output, permission, actors, ... })` plus `@AsEndpoint`, `@AsJob` or `@AsTool`; the unit of
+behaviour (ADR 0098, 0136, 0137).
+
+### Queries
+
+`@Query({ key, input, output, permission })`; read only, exposed as MCP tools automatically (ADR 0098, 0155).
+
+### Policies and guards
+
+A `@Policy(Model)` class answers per-record questions; a guard `extends Guard` and runs before the action (ADR 0209).
+
+### Repositories
+
+`repositories/<name>.repository.ts` for queries a service reuses; optional (ADR 0097).
+
+### Services
+
+`services/<name>.service.ts`: an injectable class inside a module; `@Crud` generates the standard actions (ADR 0105,
+0263).
+
+### Errors
+
+`class XError extends AppError` with `category = ErrorCategory.X` and a snake_case `code` (ADR 0140, 0232).
+
+### Workflows
+
+A multi-step action runs as a `@Workflow()` class that `extends WorkflowBase<Input, Output>`, with `@Step`
+methods and compensations (ADR 0101, 0151, 0152).
+
+### Resources
+
+`@Resource(Model, { panels, permission })` with `table()`, `form()` and `infolist()` builders, rendered by the panel
+(ADR 0164).
+
+### Settings
+
+`@Settings({ scopes })` with `@Setting()` fields; a flag is `@Flag` in the same folder (ADR 0108, 0213).
+
+### Widgets
+
+`@Widget({ key, query, slot })` binds a query to a dashboard slot (ADR 0164).
+
+### Documents
+
+`@Document({ key, path, layout })` with `Blocks.*` content; one document key form (ADR 0110, 0270).
+
+### Mails
+
+`@Mail` classes render in the producing service and send through `Mailer` (ADR 0223).
+
+### Override points
+
+`override-points/<name>.point.ts` declares a slot (`@OverridePoint`); an app binds it with `@Override` in
+`overrides/<module>/components/` (ADR 0164, 0234).
+
+### AI
+
+Skills, prompts and `@Facts` classes in `ai/`; queries become MCP tools, writes opt in with `@AsTool` (ADR 0245,
+0155).
+
+### Config files
+
+`src/config/<name>.config.ts`: a `@Config(key)` class with typed fields and `@defaultValue` docs; a host overrides a
+package's config with `override(...)` (ADR 0146).
+
+### Modules
+
+`<key>.module.ts`: `@Module({ key, exports })`, nothing else; gen writes the wiring (ADR 0111, 0263, 0264).
+
+### Entry
+
+A member's entry (`.stackra/main.ts`) is generated: `createApp(Root, { wiring })` (ADR 0090, 0263).
+
+### Tests
+
+`__tests__/<name>.<kind>.test.ts` beside the subject; `describe` names the class (ADR 0022, 0182, 0269).
+
+### Versioning
+
+`versions/<name>.change.ts` (`@Change`) and `<name>.upcast.ts` (`@Upcast`) keep old API dates and event versions
+working (ADR 0118, 0141).
+
+### Apps
+
+An app is decorated classes in kind folders (`routes/`, `providers/`, `stores/`, `menus/`, `blocks/`); it never
+imports a service (ADR 0249, 0260).
+
+### Routes
+
+`@Route({ path, layout, component, tab? })`; links point down (see "Links point down" above) (ADR 0165).
+
+### Layouts
+
+`@Layout({ kind: LayoutKind.X, component })` with an optional `guard` (ADR 0165).
+
+### Providers, stores and menus
+
+`@Provider` runs code before mount; `@Store` holds client state (ADR 0079); `@Menu` builds menu items by route key.
+
+### Overrides
+
+An app's bindings of other modules' override points and lang keys, in `overrides/<module>/` (ADR 0234).
+
+### i18n
+
+`assets/lang/<locale>/<namespace>.json`, ICU messages, typed keys through `#stackra/i18n` (ADR 0080, 0192).

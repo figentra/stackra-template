@@ -1,0 +1,53 @@
+---
+title: "0001 — The loyalty ledger is a port with a postgres driver and a memory driver"
+description: "Accepted · 2026-10-21"
+---
+
+## Context
+
+Loyalty points are earned on every paid order and redeemed at checkout. The commerce service needs a
+balance and an append-only ledger, and the same logic will be reused by a second product on the
+platform. Writing it inside the orders module would tie the rules to one service; writing it against
+Postgres directly would make every unit test an integration test.
+
+## Decision
+
+1. **`@stackra/loyalty-kit` owns the rules** (earn, redeem, tiers) as a module with no product rules
+   in it. Commerce earns through `AccountService.earn`, which enrolls a customer on the first paid
+   order.
+2. **The ledger is a port**: `LoyaltyLedger`, an abstract class in the kit's `./contracts` entry
+   that is its own DI token (no separate token constant). Two drivers register themselves with
+   `@Driver(LoyaltyLedger, name)`: `postgres` (over the `loyalty_ledger_entries` table, one row per
+   member and reference) and `memory` (unit tests and the e2e tier).
+3. **Config chooses the driver**: `LoyaltyKitConfig.ledger` is a `@DriverOf(LoyaltyLedger)` field
+   typed `DriverName<LoyaltyLedger>`, so a misspelt driver is a type error; runway's
+   `drivers.ledger` sets it per environment. Code never picks a driver.
+4. **Commerce implements `LoyaltyMembers`** itself (who may earn) and extends order pricing by
+   implementing `OrderHooks.adjustTotals` (`@Hook(OrderHooks, { order: 200 })`); it never edits the
+   orders module.
+
+## Consequences
+
+- A second product adds the kit as a dependency and implements `LoyaltyMembers`; no commerce code
+  moves.
+- The orders module gains a typed `extensions.loyalty` input it did not write; the manifest shows
+  who extended it.
+- Two drivers to keep in step. Today only the postgres driver has an integration test; a shared
+  conformance suite in the kit's `./testing` entry, run against both drivers, is the follow-up that
+  closes the gap.
+
+## Enforcement
+
+- `packages/commerce/loyalty-kit/src/core/services/__tests__/loyalty.service.test.ts` runs the rules
+  against the memory driver.
+- `packages/commerce/loyalty-kit/src/node/drivers/__tests__/postgres-loyalty-ledger.driver.int.test.ts`
+  runs the postgres driver against a real database.
+- `services/commerce/src/modules/loyalty/hooks/__tests__/redeem-points.hook.test.ts` proves the hook
+  cuts the total.
+- `services/commerce/src/__tests__/app-manifest.contract.test.ts` fails if the extension leaves the
+  manifest.
+
+## Supersedes and sources
+
+Supersedes: none. Sources: `stackra/0142` (transport through drivers), `stackra/0263` (DI: a port is
+its own token, drivers self-register), `stackra/0265` (hook points).
