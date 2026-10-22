@@ -1,16 +1,19 @@
 <p align="center">
-  <img src=".github/assets/banner.svg" alt="Stackra: decorated services, every surface, AI-ready" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/brand/stackra-endorsed-en-dark.svg" />
+    <img src=".github/assets/brand/stackra-endorsed-en-light.svg" alt="stackra, by figentra" height="48" />
+  </picture>
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-366bd3.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-F8BD40.svg"></a>
   <a href="https://github.com/figentra/stackra-template/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/figentra/stackra-template/actions/workflows/ci.yml/badge.svg"></a>
-  <a href=".node-version"><img alt="Node 24" src="https://img.shields.io/badge/node-24-339933.svg?logo=node.js&logoColor=white"></a>
-  <a href="https://pnpm.io"><img alt="pnpm 12" src="https://img.shields.io/badge/pnpm-12-f69220.svg?logo=pnpm&logoColor=white"></a>
-  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6.svg?logo=typescript&logoColor=white"></a>
-  <a href="https://turborepo.com"><img alt="Turborepo" src="https://img.shields.io/badge/Turborepo-monorepo-ef4444.svg?logo=turborepo&logoColor=white"></a>
-  <a href="https://www.conventionalcommits.org"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196.svg?logo=conventionalcommits&logoColor=white"></a>
-  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-22c55e.svg"></a>
+  <a href=".node-version"><img alt="Node 24" src="https://img.shields.io/badge/node-24-0B0D0F.svg?logo=node.js&logoColor=white"></a>
+  <a href="https://pnpm.io"><img alt="pnpm 12" src="https://img.shields.io/badge/pnpm-12-0B0D0F.svg?logo=pnpm&logoColor=white"></a>
+  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-0B0D0F.svg?logo=typescript&logoColor=white"></a>
+  <a href="https://turborepo.com"><img alt="Turborepo" src="https://img.shields.io/badge/Turborepo-monorepo-0B0D0F.svg?logo=turborepo&logoColor=white"></a>
+  <a href="https://www.conventionalcommits.org"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-0B0D0F.svg?logo=conventionalcommits&logoColor=white"></a>
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-1F7A3A.svg"></a>
 </p>
 
 # Stackra monorepo template
@@ -178,7 +181,7 @@ window.
 ├── mise.toml · .node-version     toolchain pins
 ├── .mcp.yaml                     the Stackra MCP (local `stackra mcp` + hosted); rendered to .mcp.json
 ├── .claude/launch.json           dev-server launch configuration for the assistant's preview
-├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE
+├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE · TRADEMARKS.md
 ├── apps/                         tier:app (apps/README.md)
 │   ├── console/                  @acme/console: tenant console, targets web + pwa + desktop
 │   │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
@@ -454,3 +457,4 @@ lives in your secret store (Infisical by default, ADR 0173).
 ## Licence
 
 MIT, see [`LICENSE`](LICENSE). Brand assets, fonts and paid-licence code are excluded, see [`NOTICE`](NOTICE).
+The Stackra and Figentra names and logos are trademarks, see [`TRADEMARKS.md`](TRADEMARKS.md).
