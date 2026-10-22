@@ -217,5 +217,6 @@
   // ── Git: the repo's own hooks run through lefthook ─────────────────────────────────────────────
   "git.allowNoVerifyCommit": false,
   "git.branchProtection": ["main"],
-  "git.branchProtectionPrompt": "alwaysPrompt"
+  "git.branchProtectionPrompt": "alwaysPrompt",
+  "[jsonc]": { "editor.defaultFormatter": "vscode.json-language-features" }
 }
