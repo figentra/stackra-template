@@ -40,8 +40,11 @@
   "editor.insertSpaces": true,
 
   // ── TypeScript: the repo's version, project-relative imports, `#` subpath imports ──────────────
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
-  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  // TypeScript 7 ships only the native `tsc` (no tsserver.js), so the editor runs the official
+  // "TypeScript 7" extension (TypeScriptTeam.native-preview) with its bundled native build instead of
+  // a `tsdk.path`. Members compile with the catalog's TypeScript 7; the stackra root's TypeScript 6
+  // exists only for doc-standard and must not drive the editor.
+  "js/ts.experimental.useTsgo": true,
   "js/ts.preferences.importModuleSpecifier": "non-relative",
   "js/ts.preferences.preferTypeOnlyAutoImports": true,
   "js/ts.updateImportsOnFileMove.enabled": "always",
@@ -71,7 +74,7 @@
     "https://biomejs.dev/": true,
     "https://mintlify.com/": true,
     "https://spec.openapis.org/": true,
-    "https://schemas.stackra.figentra.com/": true
+    "https://static.stackra.figentra.com/schemas/": true
   },
   // A file's own `$schema` wins over these mappings, so they cover only files that carry none. The
   // preview cannot install packages, so no schema here points into node_modules: tools are pinned
@@ -122,7 +125,7 @@
   "yaml.schemaStore.enable": true,
   "yaml.schemas": {
     // Stackra's own schemas, copied from the framework (stackra tools/schemas) into schemas/. They
-    // work offline and keep their schemas.stackra.figentra.com $id for later hosting.
+    // work offline and keep their static.stackra.figentra.com $id for later hosting.
     "./schemas/runway-root.schema.json": "/runway.yaml",
     "./schemas/runway-app.schema.json": "apps/*/runway.yaml",
     "./schemas/runway-service.schema.json": "services/*/runway.yaml",
