@@ -17,18 +17,18 @@ describe("refs-issue-key", () => {
 
   it("requires the footer on keyed types", () => {
     for (const type of ["feat", "fix", "refactor", "perf"]) {
-      expect(ok(commit(type, `${type}: x`), "STA")).toBe(false);
-      expect(ok(commit(type, `${type}: x\n\nRefs: STA-12`), "STA")).toBe(true);
+      expect(ok(commit(type, `${type}: x`), "PROJ")).toBe(false);
+      expect(ok(commit(type, `${type}: x\n\nRefs: PROJ-12`), "PROJ")).toBe(true);
     }
   });
 
   it("does not require it on unkeyed types", () => {
-    expect(ok(commit("docs", "docs: x"), "STA")).toBe(true);
-    expect(ok(commit("build", "build: x"), "STA")).toBe(true);
+    expect(ok(commit("docs", "docs: x"), "PROJ")).toBe(true);
+    expect(ok(commit("build", "build: x"), "PROJ")).toBe(true);
   });
 
   it("rejects a wrong prefix and accepts a configured one", () => {
-    expect(ok(commit("fix", "fix: x\n\nRefs: ABC-1"), "STA")).toBe(false);
+    expect(ok(commit("fix", "fix: x\n\nRefs: ABC-1"), "PROJ")).toBe(false);
     expect(ok(commit("fix", "fix: x\n\nRefs: ABC-1"), "ABC")).toBe(true);
   });
 });

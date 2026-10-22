@@ -2,11 +2,12 @@
  * Stackra file contract:
  * Purpose: the shared commitlint preset. Conventional commits plus the house type list, subject case and lengths,
  *          and the `refs-issue-key` plugin rule, which is OFF until a repo sets it with its issue prefix as the value
- *          (`[2, "always", "STA"]`). When on, keyed types need a `Refs: <PREFIX>-n` footer (ADR 0065 rule 4).
- *          Scope is the member's short name (contracts, ir, console, adr, deps, release); a root change uses `repo`.
+ *          (`[2, "always", "PROJ"]`). When on, keyed types need a `Refs: <PREFIX>-n` footer.
+ *          Scope is the member's short name (console, commerce, brand, adr, deps, release); a root change uses
+ *          `repo`.
  * Boundary: rules only; no repo-specific prefix lives here.
  * Runtime: node
- * Governing contract: ADR 0065 (Linear gate checked offline); ADR 0007 (documentation).
+ * Governing contract: ADR 0007 (documentation).
  * Owner: release-operations · Secrets: forbidden
  */
 
