@@ -1,0 +1,9 @@
+{
+  // Stackra file contract:
+  // Purpose: TypeScript settings of the mobile app; the Expo preset (react-native condition, JSX, legacy decorators, no emit), nothing local.
+  // Boundary: `#src/*` and `#stackra/*` resolve through package.json imports; `.stackra/` is included so generated code is checked.
+  // Runtime: node
+  // Governing contract: ADR 0061
+  "extends": "@stackra/typescript-config/expo.json",
+  "include": ["src", "stackra.config.ts", ".stackra"]
+}

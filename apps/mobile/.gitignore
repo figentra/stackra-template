@@ -1,0 +1,22 @@
+# Stackra file contract:
+# Purpose: the committed-manifest exception of this member: everything under .stackra/ is generated except the
+#          contract artefacts other members build their clients from (app-manifest.json) and the OpenAPI projection.
+#          Same rule set as the root .gitignore, repeated so the member folder keeps it when copied elsewhere.
+# Boundary: ignore rules only.
+# Runtime: node
+# Governing contract: ADR 0158, ADR 0268
+.stackra/*
+!.stackra/app-manifest.json
+!.stackra/openapi.json
+# preview only: the generated samples are committed so they can be read; a real project drops the next line
+!.stackra/**
+# generated root shims (Expo CLI and EAS read the member root; each re-exports its .stackra/ file)
+/app.config.ts
+/babel.config.js
+/metro.config.js
+/eas.json
+dist/
+.expo/
+ios/
+android/
+maestro-report/

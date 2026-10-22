@@ -1,0 +1,69 @@
+{
+  "nav": {
+    "sales": "المبيعات"
+  },
+  "resource": {
+    "orders": "الطلبات"
+  },
+  "status": {
+    "pending_payment": "بانتظار الدفع",
+    "paid": "مدفوع",
+    "cancelled": "ملغى",
+    "expired": "منتهي"
+  },
+  "cancel_reason": {
+    "customer": "ألغاه العميل",
+    "staff": "ألغاه الموظف",
+    "expired": "انتهى دون دفع",
+    "payment_failed": "فشل الدفع"
+  },
+  "permissions": {
+    "order": {
+      "create": "إنشاء الطلبات",
+      "read": "عرض الطلبات",
+      "cancel": "إلغاء الطلبات",
+      "expire": "إنهاء الطلبات غير المدفوعة"
+    }
+  },
+  "settings": {
+    "title": "الطلبات",
+    "auto_cancel_after_minutes": "إلغاء الطلبات غير المدفوعة بعد (دقائق)",
+    "customers_may_cancel": "يمكن للعملاء إلغاء الطلبات غير المدفوعة"
+  },
+  "order": {
+    "placed": "تم إنشاء الطلب",
+    "cancel_confirm": "إلغاء هذا الطلب؟ سيتم تحرير المخزون المحجوز.",
+    "cancelled": "تم إلغاء الطلب",
+    "lines_count": "{count, plural, zero {لا بنود} one {بند واحد} two {بندان} few {# بنود} many {# بندًا} other {# بند}}"
+  },
+  "widgets": {
+    "revenue_today": "إيرادات اليوم"
+  },
+  "documents": {
+    "sales_today": "مبيعات اليوم"
+  },
+  "quick_order": {
+    "title": "طلب سريع",
+    "variant": "المتغير",
+    "quantity": "الكمية",
+    "submit": "إنشاء الطلب"
+  },
+  "mail": {
+    "order_placed": {
+      "subject": "طلبك {id}",
+      "body": "شكرًا لطلبك. الإجمالي: {total}. الطلب قيد التحضير.",
+      "cta": "عرض الطلب"
+    },
+    "order_receipt": {
+      "subject": "إيصال الطلب {id}",
+      "intro": "شكرًا، تم دفع طلبك {id}."
+    }
+  },
+  "refusals": {
+    "order_not_payable": "لم يعد بإمكان هذا الطلب قبول دفعة.",
+    "tenant_suspended": "هذا المتجر موقوف؛ لا يمكن تعديل الطلبات الآن."
+  },
+  "flags": {
+    "quick_order": "شاشة الطلب السريع"
+  }
+}

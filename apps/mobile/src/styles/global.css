@@ -1,0 +1,17 @@
+/* Stackra file contract:
+   Purpose: the one stylesheet Uniwind compiles: Tailwind, Uniwind, the UI kit's theme and the
+            Stackra brand tokens mapped onto the kit's semantic variables (light and dark).
+   Boundary: imports and the source hints only; no component styles. Colours come from
+             @stackra/brand, never literals. Compiled by Metro through the generated metro.config.js.
+   Runtime: react-native
+   Governing contract: ADR 0056, ADR 0080 */
+@import "tailwindcss";
+@import "uniwind";
+
+@import "heroui-native/styles";
+@import "@stackra/brand/css/native.css";
+
+@source "../../node_modules/heroui-native/lib";
+@source "../../node_modules/@stackra/ui/dist/native";
+@source "../../node_modules/@stackra/panel/dist/native";
+@source "../../node_modules/@stackra/experience/dist/native";

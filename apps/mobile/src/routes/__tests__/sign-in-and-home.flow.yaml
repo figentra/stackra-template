@@ -1,0 +1,18 @@
+# Stackra file contract:
+# Purpose: the hosted sign-in round trip (the e2e identity stub answers the PKCE redirect), then the
+#          tab bar and the home page are visible. The e2e test login is the demo customer
+#          `usr_01JA0000000000000000000001` (1,000 demo points from `loyalty_kit.demo`). Other flows `runFlow` this one first.
+# Boundary: one journey; no assertions about internals. `MAESTRO_LOCALE` is set by gen from
+#           i18n.config.ts; `appId` is gen-checked against release.config.ts.
+# Runtime: node
+# Governing contract: ADR 0182, ADR 0206, ADR 0022
+appId: dev.acme.mobile
+tags: [gate]
+---
+- launchApp:
+    clearState: true
+    arguments: { locale: "${MAESTRO_LOCALE}" }
+- assertVisible: { id: "sign-in-page" }
+- tapOn: { id: "sign-in-button" }
+- assertVisible: { id: "home-page", timeout: 15000 }
+- assertVisible: { id: "tab-orders" }
