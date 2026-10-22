@@ -1,0 +1,17 @@
+{
+  "nav": { "audit": "سجل التدقيق", "access_log": "سجل الوصول" },
+  "resource": { "entries": "سجلات الوصول" },
+  "classifications": {
+    "personal": "شخصية",
+    "financial": "مالية",
+    "health": "صحية",
+    "pseudonymous": "مستعارة"
+  },
+  "permissions": {
+    "access_log_entry": {
+      "read": "قراءة سجل التدقيق",
+      "purge": "حذف سجلات الوصول القديمة"
+    }
+  },
+  "errors": { "access_log_write_failed": "سجل الوصول غير متاح؛ تمت القراءة." }
+}
