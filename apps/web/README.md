@@ -12,7 +12,7 @@ through `@stackra/ui`, like the console.
 | ------------------------ | -------------------------------------------------------------------------------------------------------- |
 | `pnpm gen`               | `stackra gen`: rewrites `.stackra/` from the config, the runway, the decorated classes and the manifests |
 | `pnpm dev`               | React Router dev on the Workers runtime on the port of `runway.yaml`, HMR on `#stackra/*`                |
-| `pnpm build`             | `stackra build --target web-ssr`: client + server build, prerender per locale                            |
+| `pnpm build`             | `stackra build --target web`: client + server build (render: server), prerender per locale               |
 | `pnpm start`             | the built site on `wrangler dev` (what the e2e tier measures)                                            |
 | `pnpm test` / `test:e2e` | vitest (jsdom; workers env under `src/server`) / Playwright with axe after `build`                       |
 | `pnpm typecheck`         | gen, then tsc over `src`, `.stackra`                                                                     |

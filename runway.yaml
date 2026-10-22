@@ -105,7 +105,7 @@ environments:
       # where each kind of member runs; a member runway may override its own
       # `stackra dev` = gen --watch + `encore run` + the compose infra below (ADR 0199 d3)
       services: compose
-      # apps with web/pwa/desktop/web-ssr targets run their own dev server on the member's port
+      # apps with web/pwa/desktop targets run their own dev server on the member's port
       web: vite-dev
       mobile: expo-dev # Metro on the member's port
     # the containers `stackra dev` brings; a driver set to `memory` in every service removes its

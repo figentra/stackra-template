@@ -6,12 +6,12 @@ from their kind folders (guides/programming-model.mdx#apps). Apps never import a
 built from the producer's committed `.stackra/app-manifest.json`, and gen copies consumed services' lang files into
 `.stackra/lang/` (ADR 0003, 0261).
 
-| App       | Targets                | Shows                                                                                                       |
-| --------- | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `console` | web, pwa, desktop      | the tenant console: panel shell, resources from services, `@Flag`-gated QuickOrder, Electron bridge actions |
-| `web`     | web-ssr (Workers), pwa | the public site and storefront: L2 blocks, `StorefrontProductView`, the contact form with `RouteForm`       |
-| `mobile`  | ios, android           | Expo with native tabs: offline queue, barcode scan by `Capability`, push, `modules` + `priority`            |
-| `docs`    | Mintlify               | the project docs; the API reference is generated from the service manifests                                 |
+| App       | Targets                               | Shows                                                                                                       |
+| --------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `console` | web, pwa, desktop                     | the tenant console: panel shell, resources from services, `@Flag`-gated QuickOrder, Electron bridge actions |
+| `web`     | web (server-rendered on Workers), pwa | the public site and storefront: L2 blocks, `StorefrontProductView`, the contact form with `RouteForm`       |
+| `mobile`  | ios, android                          | Expo with native tabs: offline queue, barcode scan by `Capability`, push, `modules` + `priority`            |
+| `docs`    | Mintlify                              | the project docs; the API reference is generated from the service manifests                                 |
 
 Layout per app (not docs):
 

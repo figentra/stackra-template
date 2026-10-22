@@ -188,7 +188,7 @@ window.
 │   │   │        hooks/, styles/, __tests__/}
 │   │   └── .stackra/{main.tsx, routes.tsx, index.html, sw.ts, pwa/, desktop/, vite.config.ts,
 │   │                 gen/, app-manifest.json}
-│   ├── web/                      @acme/web: public site and storefront, targets web-ssr + pwa
+│   ├── web/                      @acme/web: public site and storefront, targets web + pwa (server-rendered)
 │   │   │                         (React Router 7 on Workers)
 │   │   ├── assets/{lang/<locale>/web.json, public/logo.svg}
 │   │   ├── vite.extend.ts        the Vite hatch: a function file merged after the stackra plugin

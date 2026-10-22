@@ -9,7 +9,6 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "entry": [],
       "project": ["*.mjs"],
       // Run by lefthook's pre-commit hook and by the CLI, which knip does not read.
       "ignoreDependencies": ["oxfmt", "@stackra/cli"],
@@ -44,7 +43,6 @@
     },
     "apps/docs": {
       // Mintlify content is MDX rendered by the `mint` CLI; there is no JS entry.
-      "entry": [],
       "project": [],
     },
   },
