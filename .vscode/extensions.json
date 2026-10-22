@@ -1,12 +1,32 @@
-// Editor setup for this repo: one formatter (oxfmt via Oxc), no Prettier, no ESLint.
+// Recommended extensions for this repo. One formatter (oxfmt) and one linter (oxlint), both through Oxc;
+// Prettier and ESLint are rejected (not-built-yet rule), so they are listed as unwanted.
 {
   "recommendations": [
+    // Format and lint: oxfmt + oxlint
     "oxc.oxc-vscode",
-    "vitest.explorer",
-    "redhat.vscode-yaml",
     "editorconfig.editorconfig",
+    // Tests: vitest (unit, int, contract) and Playwright (e2e)
+    "vitest.explorer",
+    "ms-playwright.playwright",
+    // Config files: YAML (runway, workflows, lefthook), TOML (mise), MDX (docs)
+    "redhat.vscode-yaml",
+    "tamasfe.even-better-toml",
+    "unifiedjs.vscode-mdx",
+    "github.vscode-github-actions",
+    // UI: Tailwind v4 / Uniwind class names, Expo
+    "bradlc.vscode-tailwindcss",
     "expo.vscode-expo-tools",
-    "bradlc.vscode-tailwindcss"
+    // TypeScript errors you can read, inline
+    "yoavbls.pretty-ts-errors",
+    "usernamehw.errorlens",
+    // Spelling in code and docs (English and the Arabic-ready word list lives in .cspell.json)
+    "streetsidesoftware.code-spell-checker",
+    // AI pair: Claude Code
+    "anthropic.claude-code"
   ],
-  "unwantedRecommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+  "unwantedRecommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "rvest.vs-code-prettier-eslint"
+  ]
 }
