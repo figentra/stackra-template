@@ -5,3 +5,4 @@ This project is MIT-licensed (LICENSE), with these exclusions:
 - Fonts keep their own licence: the licence text sits beside each font file.
 - Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed. It is consumed as a dependency
   (here through @stackra-pro/ui) under its vendor's terms and is not covered by the MIT licence.
+- The Stackra and Figentra names and logos are trademarks of Figentra, see TRADEMARKS.md.
