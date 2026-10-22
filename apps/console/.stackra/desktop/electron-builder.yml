@@ -25,12 +25,17 @@ mac:
   hardenedRuntime: true
   # baseline + com.apple.security.device.usb (desktop.config.ts)
   entitlementsInherit: "@stackra/platform/electron/entitlements.plist"
-  target: [dmg, zip] # runway release.desktop.platforms.mac ∩ desktop.config.ts packaging.mac
-  arch: [universal]
+  # runway release.desktop.platforms.mac ∩ desktop.config.ts packaging.mac; `arch` belongs to a target
+  target:
+    - target: dmg
+      arch: [universal]
+    - target: zip
+      arch: [universal]
 win:
   icon: dist/icons/icon.ico
-  target: [nsis]
-  arch: [x64, arm64]
+  target:
+    - target: nsis
+      arch: [x64, arm64]
 nsis:
   perMachine: false
 linux:
