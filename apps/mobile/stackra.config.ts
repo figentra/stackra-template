@@ -16,8 +16,7 @@
  * Governing contract: ADR 0061, ADR 0145, ADR 0180, ADR 0231
  */
 import { defineApp } from "@stackra/app";
-import { ApiArea } from "@stackra/contracts";
-import { Target } from "@stackra/platform";
+import { ApiArea, Target } from "@stackra/contracts";
 import { MobileEnv } from "./src/config/env.config";
 
 /**

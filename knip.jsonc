@@ -1,0 +1,59 @@
+// Stackra file contract:
+// Purpose: unused files, exports and dependencies detection. Runs in `pnpm verify`.
+// Boundary: knip settings only. In v2 gen discovers every declaration by its kind folder (ADR 0264) and
+//           imports it from the generated `.stackra/` entries and `#stackra/wiring`, so the generated files
+//           are the entries: a kind file nothing generated reaches is the unused file knip reports.
+// Runtime: node
+// Governing contract: ADR 0264 (kind folders), ADR 0261 (generated imports), ADR 0003 (members)
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["commitlint.config.mjs"],
+      "project": ["*.mjs"],
+      // Run by lefthook's pre-commit hook and by the CLI, which knip does not read.
+      "ignoreDependencies": ["oxfmt", "@stackra/cli"],
+      "ignoreBinaries": ["stackra"],
+    },
+    "packages/tooling/*": {
+      // Config packages export presets by subpath (package.json exports); the only TS besides them is their test.
+      "entry": ["src/*.ts", "src/**/__tests__/**/*.test.ts"],
+      "project": ["*.ts", "src/**/*.ts"],
+      // Extended by each preset package's tsconfig.json, which knip doesn't trace where no typecheck script runs.
+      "ignoreDependencies": ["@stackra/typescript-config"],
+    },
+    "packages/*/*": {
+      // package.json `exports` are entries already; gen reaches the node module through `stackra.module`.
+      "entry": [".stackra/gen/*.ts", "src/node/*.module.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+    },
+    "apps/*": {
+      // App entries are generated (.stackra/main.tsx, entry.client.tsx, main.ts); authored code starts at the app root.
+      "entry": [
+        ".stackra/*.{ts,tsx}",
+        ".stackra/gen/*.{ts,tsx}",
+        "stackra.config.ts",
+        "src/*.app.ts",
+      ],
+      "project": ["src/**/*.{ts,tsx}"],
+    },
+    "services/*": {
+      // src/main.ts is the only authored entry; gen reaches every module through #stackra/wiring.
+      "entry": ["src/main.ts", ".stackra/gen/*.ts", "stackra.config.ts"],
+      "project": ["src/**/*.ts"],
+    },
+    "apps/docs": {
+      // Mintlify content is MDX rendered by the `mint` CLI; there is no JS entry.
+      "entry": [],
+      "project": [],
+    },
+  },
+  // `mint`: Swift's Mint runner, a fallback in lefthook's generated hooks.
+  "ignore": ["**/__tests__/fixtures/**"],
+  "ignoreBinaries": ["gitleaks", "mint"],
+  "rules": {
+    // Catalog entries are declared ahead of the members that consume them; `warn` keeps a dead one visible.
+    "catalog": "warn",
+  },
+  "includeEntryExports": false,
+}

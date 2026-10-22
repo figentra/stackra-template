@@ -2,7 +2,7 @@
  * Stackra file contract:
  * Purpose: the `catalogue.product_limit` entitlement: how many products a tenant's plan allows.
  * Boundary: a declaration (`@Entitlement`, @stackra/entitlements). The plan values live in the
- *           figentra-os entitlements service; this class only names the limit and what it counts.
+ *           acme-platform entitlements service; this class only names the limit and what it counts.
  *           ProductService's `@Crud` gates `catalogue.product.create` with it, and the web pricing
  *           page names the same entitlement. A commercial right, never a release flag.
  * Runtime: node

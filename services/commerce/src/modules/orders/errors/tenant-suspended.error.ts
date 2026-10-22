@@ -9,10 +9,10 @@
  */
 import { AppError, ErrorCategory } from "@stackra/errors";
 
-/** `failed_precondition` / `tenant_suspended`; not retryable until the tenant is reinstated. */
+/** `precondition_failed` / `tenant_suspended`; not retryable until the tenant is reinstated. */
 export class TenantSuspendedError extends AppError {
   /** The category every caller branches on. */
-  readonly category = ErrorCategory.FailedPrecondition;
+  readonly category = ErrorCategory.PreconditionFailed;
   /** The code the console maps to `orders::refusals.tenant_suspended`. */
   readonly code = "tenant_suspended";
   /** Waiting does not help; the tenant must be reinstated first. */

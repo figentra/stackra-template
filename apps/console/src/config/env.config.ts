@@ -10,7 +10,7 @@
  * Governing contract: ADR 0231 d4 (prefixes), ADR 0173 (no values in files)
  */
 import { Config, Env } from "@stackra/config";
-import { Target } from "@stackra/platform";
+import { Target } from "@stackra/contracts";
 import { OneOf, Str, Url } from "@stackra/validation";
 
 /** Read as `env` from `#stackra/env`, validated once at boot. */

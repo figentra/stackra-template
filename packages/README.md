@@ -3,8 +3,8 @@
 `packages/<category>/<name>`, one category per member, never a package directly under `packages/`
 (workspace-layout rule). Categories: application, commerce, communication, cross-cutting, data,
 developer, experience, foundation, infrastructure, runtime, security, state. In a framework project
-these are `@stackra/*` public packages (home A, no product rules); in Figentra OS, `@figentra/*`
-private packages hold logic two OS services share (home B, ADR 0259) and use the same categories. A
+these are `@stackra/*` public packages (home A, no product rules); in a product repository, `@acme/*`
+private packages hold logic two services share (home B, ADR 0259) and use the same categories. A
 package's module contributes exactly like a service's.
 
 All three follow the decorator authoring model (ADR 0094): everything with identity is a class with a kind decorator;

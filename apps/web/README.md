@@ -1,4 +1,4 @@
-# @figentra/web
+# @acme/web
 
 The public site of a Stackra project: the landing page, pricing, a storefront and the tenant's page-builder pages, on
 one hostname per site, in English and Arabic, written in the decorator model (ADR 0094): routes and the layout are decorated classes
@@ -21,7 +21,7 @@ through `@stackra/ui`, like the console.
 
 ```
 apps/web
-├── stackra.config.ts        defineApp: key, root class, Target.WebSsr, ApiArea.Public, env class, e2e seeds, health
+├── stackra.config.ts        defineApp: key, root class, Target.WebSsr + Target.Pwa, ApiArea.Public, env class, e2e seeds, health
 ├── vite.extend.ts           the one build hatch: extra Vite plugin instances, merged after the stackra plugin
 ├── runway.yaml              dev port/host, domains and aliases, public + server vars, secret names, Worker knobs
 ├── package.json             three aliases: #src/*, #assets/* and #stackra/*

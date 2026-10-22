@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: what the public site is: key, root class, the one target (`web-ssr`), the public API
- *          area, the env contract, e2e projects and seeds, health. Read by `stackra gen`, `dev`,
+ * Purpose: what the public site is: key, root class, its targets (`web-ssr` and `pwa`), the public
+ *          API area, the env contract, e2e projects and seeds, health. Read by `stackra gen`, `dev`,
  *          `build`, `test` and `validate`.
  * Boundary: identity and build shape only. Where it runs (port, domains, vars, Worker knobs) is
  *           `runway.yaml`; how its packages behave is `src/config/*`. Consumed services are
@@ -9,17 +9,17 @@
  *           other area a gen error. The build hatch is `vite.extend.ts`.
  * Runtime: node
  * Governing contract: ADR 0165 (RR7 framework mode), ADR 0176 (SSR on Workers), ADR 0082 (public
- *                     area), ADR 0145
+ *                     area), ADR 0145, ADR 0281 (targets per app)
  */
 import { defineApp } from "@stackra/app";
-import { ApiArea } from "@stackra/contracts";
-import { Target } from "@stackra/platform";
+import { ApiArea, Target } from "@stackra/contracts";
 import { WebEnv } from "./src/config/env.config";
 
 export default defineApp({
   key: "web",
   module: "./src/web.app.ts",
-  targets: [Target.WebSsr],
+  // The web target here is server-rendered; `Pwa` adds the manifest and worker (ADR 0281 d7).
+  targets: [Target.WebSsr, Target.Pwa],
   area: ApiArea.Public,
   env: WebEnv,
   e2e: {

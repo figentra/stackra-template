@@ -42,7 +42,7 @@ export class ListOrderLinesQuery {
 
   /**
    * Reads the order, checks the policy, then follows the link to the variants.
-   * @throws AppError `permission_denied` when OrderPolicy.read denies a customer another customer's
+   * @throws AppError `forbidden` when OrderPolicy.read denies a customer another customer's
    * order.
    */
   async handle(input: OrderLinesInput, ctx: QueryContext): Promise<OrderLinesOutput> {

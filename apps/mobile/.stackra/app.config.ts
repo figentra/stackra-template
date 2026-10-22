@@ -68,12 +68,12 @@ const config: ExpoConfig = {
   extra: { eas: { projectId: easProjectId }, stackra: { environment } },
   ios: {
     supportsTablet: true, // release.ios
-    bundleIdentifier: "com.figentra.stackra",
+    bundleIdentifier: "dev.acme.mobile",
     associatedDomains: [`applinks:${appHost}`], // env.appOrigin
     config: { usesNonExemptEncryption: false },
   },
   android: {
-    package: "com.figentra.stackra", // release.android
+    package: "dev.acme.mobile", // release.android
     predictiveBackGestureEnabled: false,
     adaptiveIcon: {
       foregroundImage: "./icons/adaptive-foreground-1024.png",
@@ -101,10 +101,10 @@ const config: ExpoConfig = {
     ],
     // push.config.ts; theming.themeColor.dark
     ["expo-notifications", { icon: "./icons/notification-96.png", color: "#0b0d0f" }],
-    ["expo-updates", { username: "figentra" }], // root runway providers.expo.account
+    ["expo-updates", { username: "acme" }], // root runway providers.expo.account
     // telemetry.errors.enabled; org from root providers.sentry.org, project from runway.yaml
     // telemetry.sentryProject; DSN is a var; the upload token is a CI secret
-    ["@sentry/react-native/expo", { organization: "figentra", project: "figentra-mobile" }],
+    ["@sentry/react-native/expo", { organization: "acme", project: "acme-mobile" }],
     [
       "expo-splash-screen",
       {

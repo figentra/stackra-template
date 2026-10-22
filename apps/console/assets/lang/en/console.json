@@ -1,7 +1,7 @@
 {
   "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
   "shell": {
-    "brand": "Figentra Console",
+    "brand": "Acme Console",
     "top_bar": "Top bar",
     "menu": "Menu",
     "sidebar": "Toggle sidebar",
@@ -156,7 +156,7 @@
       "title": "Page not found",
       "body": "The page may have moved or you may not have access to it."
     },
-    "permission_denied": {
+    "forbidden": {
       "title": "You do not have access",
       "body": "Ask an administrator for the permission named in the code."
     },
@@ -164,7 +164,7 @@
       "title": "Service unavailable",
       "body": "The service did not answer. Your change was not lost."
     },
-    "invalid_argument": {
+    "validation": {
       "title": "Check the form",
       "body": "A value was refused by the server."
     },

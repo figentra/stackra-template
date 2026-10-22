@@ -7,11 +7,11 @@
  */
 import { AppError, ErrorCategory } from "@stackra/errors";
 
-/** `failed_precondition` / `insufficient_stock`; not retryable. */
+/** `precondition_failed` / `insufficient_stock`; not retryable. */
 export class InsufficientStockError extends AppError {
   constructor(variantId: string, available: number) {
     super({
-      category: ErrorCategory.FailedPrecondition,
+      category: ErrorCategory.PreconditionFailed,
       code: "insufficient_stock",
       retryable: false,
       details: { variantId, available },

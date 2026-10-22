@@ -8,7 +8,7 @@
 #           100-point redemption succeeds.
 # Runtime: node
 # Governing contract: ADR 0182, ADR 0022
-appId: com.figentra.stackra
+appId: dev.acme.mobile
 tags: [gate]
 ---
 - runFlow: sign-in-and-home.flow.yaml

@@ -6,7 +6,7 @@
 #           i18n.config.ts; `appId` is gen-checked against release.config.ts.
 # Runtime: node
 # Governing contract: ADR 0182, ADR 0206, ADR 0022
-appId: com.figentra.stackra
+appId: dev.acme.mobile
 tags: [gate]
 ---
 - launchApp:

@@ -8,17 +8,17 @@
 #           from Infisical /ci. Fuses are `fuses.json`, set by the afterPack hook @stackra/platform
 #           ships (ADR 0251).
 # Runtime: node
-appId: com.figentra.console
+appId: dev.acme.console
 productName: Console
-copyright: © Figentra
+copyright: © Acme
 directories:
   output: dist/desktop-release
 files:
   - dist/renderer/**
   - dist/desktop/**
 protocols:
-  - name: Figentra Console
-    schemes: [figentra-console]
+  - name: Acme Console
+    schemes: [acme-console]
 afterPack: "@stackra/platform/electron/after-pack" # applies fuses.json
 mac:
   icon: dist/icons/icon.icns
@@ -39,5 +39,5 @@ linux:
 publish:
   provider: generic
   # root targets.electron-release.feed.publicOrigin + runway release.desktop.feedPath
-  url: https://downloads.figentra.com/console/${channel}/
+  url: https://downloads.acme.dev/console/${channel}/
   channel: latest # runway environments.production.desktop.channel; staging builds carry `beta`

@@ -19,8 +19,8 @@
 # Governing contract: ADR 0168, 0169, 0170, 0171, 0173, 0175, 0179, 0180, 0184, 0238, 0254
 $schema: "@stackra/runway/schema/root.json"
 version: 2
-# prefix for stacks (`figentra-os/staging`), images (`figentra-os-core`), Workers, tags
-project: figentra-os
+# prefix for stacks (`acme-platform/staging`), images (`acme-platform-core`), Workers, tags
+project: acme-platform
 
 # ── Providers: every account and vendor, named once ───────────────────────────────────────────────
 providers:
@@ -37,13 +37,13 @@ providers:
     ecr: { account: shared, scan: trivy, sbom: syft, sign: cosign } # DP17/DP18
     budgets: { thresholds: [50, 80, 100], stopNonProdAt: 100 } # DP20
     requiredTags: [env, service, tenant]
-  encore: { app: figentra-os } # Encore Cloud app id (public)
+  encore: { app: acme-platform } # Encore Cloud app id (public)
   cloudflare:
     accountId: ref:cloudflare.accountId
     # zone → id; member runways name hosts under these zones
-    zones: { figentra.com: ref:cloudflare.zones.figentra }
+    zones: { acme.dev: ref:cloudflare.zones.acme }
   # ADR 0170 d6
-  github: { org: figentra, repo: figentra-os, environments: { production: { reviewers: [owner] } } }
+  github: { org: acme, repo: acme-platform, environments: { production: { reviewers: [owner] } } }
   infisical:
     domain: https://eu.infisical.com # Infisical Cloud EU (0171 d6)
     workspace: ref:infisical.workspace
@@ -51,11 +51,11 @@ providers:
     environments: { dev: dev, preview: preview, staging: staging, production: prod }
     # default secret paths; a member may name `path: ci`
     paths: { runtime: /runtime, ci: /ci, agents: /agents }
-  sentry: { org: figentra } # projects are named per member (app runway `telemetry.sentryProject`)
+  sentry: { org: acme } # projects are named per member (app runway `telemetry.sentryProject`)
   betterstack: { source: ref:betterstack.source }
   # the collector every service exports to (0184 d1); on-prem: bundled LGTM
   otlp: { endpoint: ref:otlp.endpoint }
-  expo: { account: figentra, projectId: ref:expo.projectId } # EAS project (ADR 0180)
+  expo: { account: acme, projectId: ref:expo.projectId } # EAS project (ADR 0180)
   apple: { teamId: ref:apple.teamId }
   google: { playDeveloperId: ref:google.playDeveloperId }
   keygen: { account: ref:keygen.account } # Pro distribution and licences (0177/0178)
@@ -112,7 +112,7 @@ environments:
         }
       app: { https: false, open: false }
 
-  preview: # Figentra OS only (DP7/DP8); Stackra has none
+  preview: # optional per-pull-request environments; delete the block if you do not use them
     destinations: { services: encore-cloud, web: cloudflare-workers, mobile: eas }
     encore: { env: "preview-${pr}" } # one Encore environment per pull request
     ttl: 7d
@@ -141,8 +141,8 @@ environments:
               webhooks: native,
             },
         }
-    # members get `<key>-pr-N.preview.figentra.com` unless they say otherwise
-    domains: { zone: figentra.com, pattern: "${member}-pr-${pr}.preview" }
+    # members get `<key>-pr-N.preview.acme.dev` unless they say otherwise
+    domains: { zone: acme.dev, pattern: "${member}-pr-${pr}.preview" }
     deploy: { on: pull-request, gate: health } # DP24: previews gate on the health endpoint only
 
   staging:
@@ -196,7 +196,7 @@ environments:
             },
         }
       app: { workers: { observability: { headSamplingRate: 0.1 } } }
-    domains: { zone: figentra.com, pattern: "${member}.staging" }
+    domains: { zone: acme.dev, pattern: "${member}.staging" }
     deploy: { on: merge-to-main } # DP6
     mobile: { channel: staging } # EAS update channel members inherit
     desktop: { channel: beta }
@@ -254,7 +254,7 @@ environments:
     # ADR 0169 d1: these services are never packed with another; a member runway cannot undo it
     isolate: [identity, payments]
     # DP26; on-prem: customer certificates
-    domains: { zone: figentra.com, pattern: "${member}", tenantDomains: cloudflare-for-saas }
+    domains: { zone: acme.dev, pattern: "${member}", tenantDomains: cloudflare-for-saas }
     # DP6: `runway promote <sha>` behind the owner's approval
     deploy: { on: promote, approval: github-environment }
     mobile: { channel: production }
@@ -270,9 +270,9 @@ targets:
   compose: # single-host on-prem (0179 PK9) and dev
     # on-prem footprint (D-14 open: which are required)
     bundled: [postgres, valkey, minio, zitadel, mailpit, otel-lgtm, clamav]
-    registry: ghcr.io/figentra # or the customer's registry / `docker load` (PK11)
+    registry: ghcr.io/acme # or the customer's registry / `docker load` (PK11)
   # Kubernetes on-prem; Zarf for air-gap (PK10/PK12)
-  helm: { namespace: figentra-os, ingressClass: nginx, storageClass: default, zarf: true }
+  helm: { namespace: acme-platform, ingressClass: nginx, storageClass: default, zarf: true }
   cloudflare-workers: { compatibilityDate: "2026-10-01", observability: { headSamplingRate: 0.1 } }
   eas:
     # MR2: native fingerprint change, the `build:mobile` label, or a release
@@ -292,7 +292,7 @@ targets:
       }
   electron-release:
     # members append `/<key>/<channel>/`
-    feed: { bucket: r2:figentra-downloads, publicOrigin: https://downloads.figentra.com }
+    feed: { bucket: r2:acme-downloads, publicOrigin: https://downloads.acme.dev }
     rollout: { startPercent: 20, endPercent: 100, stepHours: 24 } # ADR 0181 d3
     # tooling; ON/OFF is the member's `release.desktop.signing`
     signing: { mac: notarize, windows: azure-trusted-signing, linux: none }

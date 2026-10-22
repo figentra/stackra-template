@@ -19,7 +19,7 @@ secrets:
 
 health: { path: /healthz, expects: sha } # the Worker answers with the release SHA (ADR 0170 DP24)
 
-telemetry: { sentryProject: figentra-web } # org is root `providers.sentry.org`; DSN is a var below
+telemetry: { sentryProject: acme-web } # org is root `providers.sentry.org`; DSN is a var below
 
 environments:
   dev:
@@ -43,37 +43,37 @@ environments:
     e2e: { baseUrl: from-port, seeds: from-stackra-config, turnstile: test-keys }
 
   preview:
-    domain: "web-pr-${pr}.preview.figentra.com"
+    domain: "web-pr-${pr}.preview.acme.dev"
     vars:
       VITE_POSTHOG_KEY: ""
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.preview
-      STACKRA_API_URL: "https://api-pr-${pr}.preview.figentra.com"
-      STACKRA_SITE_URL: "https://web-pr-${pr}.preview.figentra.com"
+      STACKRA_API_URL: "https://api-pr-${pr}.preview.acme.dev"
+      STACKRA_SITE_URL: "https://web-pr-${pr}.preview.acme.dev"
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
     config: { web.site: { previewHostPrefixes: [web-pr-] } } # never indexed
 
   staging:
-    domain: staging.figentra.com
+    domain: staging.acme.dev
     destination: cloudflare-workers # inherited from root `destinations.web`; shown for completeness
     vars:
       VITE_POSTHOG_KEY: ref:posthog.key.web
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.staging
-      STACKRA_API_URL: https://api.staging.figentra.com
-      STACKRA_SITE_URL: https://staging.figentra.com
+      STACKRA_API_URL: https://api.staging.acme.dev
+      STACKRA_SITE_URL: https://staging.acme.dev
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
     config: { web.telemetry: { traces: { sampleRate: 0.5 } } }
     workers: { observability: { headSamplingRate: 0.5 } }
 
   production:
-    domain: www.figentra.com
-    aliases: [figentra.com] # redirect to `domain`
+    domain: www.acme.dev
+    aliases: [acme.dev] # redirect to `domain`
     vars:
       VITE_POSTHOG_KEY: ref:posthog.key.web
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.production
-      STACKRA_API_URL: https://api.figentra.com
-      STACKRA_SITE_URL: https://www.figentra.com
+      STACKRA_API_URL: https://api.acme.dev
+      STACKRA_SITE_URL: https://www.acme.dev
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
     # SSR Worker: CPU limit per request

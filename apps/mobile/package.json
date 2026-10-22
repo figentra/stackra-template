@@ -1,7 +1,8 @@
 {
-  "name": "@figentra/mobile",
+  "name": "@acme/mobile",
   "version": "0.1.0",
   "private": true,
+  "description": "The mobile app for iOS and Android: Expo with code-based React Navigation, declared with @App/@Route/@Layout/@Provider/@Store/@Block classes; stackra gen writes the runtime into .stackra/.",
   "license": "UNLICENSED",
   "main": ".stackra/main.ts",
   "imports": {
@@ -91,8 +92,8 @@
     "@stackra/cli": "catalog:stackra",
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
-    "@stackra/typescript-config": "catalog:stackra",
-    "@stackra/vitest-config": "catalog:stackra",
+    "@stackra/typescript-config": "workspace:*",
+    "@stackra/vitest-config": "workspace:*",
     "@types/react": "catalog:mobile",
     "babel-preset-expo": "catalog:mobile",
     "typescript": "catalog:build"

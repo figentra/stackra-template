@@ -8,7 +8,7 @@
 // Runtime: node
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "figentra-web",
+  "name": "acme-web",
   "main": "./workers/app.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -19,32 +19,32 @@
     "preview": {
       // runway.yaml environments.preview; `${pr}` is filled by the deploy job
       "vars": {
-        "STACKRA_API_URL": "https://api-pr-${pr}.preview.figentra.com",
-        "STACKRA_SITE_URL": "https://web-pr-${pr}.preview.figentra.com",
+        "STACKRA_API_URL": "https://api-pr-${pr}.preview.acme.dev",
+        "STACKRA_SITE_URL": "https://web-pr-${pr}.preview.acme.dev",
         "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web",
       },
-      "routes": [{ "pattern": "web-pr-${pr}.preview.figentra.com", "custom_domain": true }],
+      "routes": [{ "pattern": "web-pr-${pr}.preview.acme.dev", "custom_domain": true }],
       "observability": { "enabled": true, "head_sampling_rate": 1 },
     },
     "staging": {
       "vars": {
-        "STACKRA_API_URL": "https://api.staging.figentra.com",
-        "STACKRA_SITE_URL": "https://staging.figentra.com",
+        "STACKRA_API_URL": "https://api.staging.acme.dev",
+        "STACKRA_SITE_URL": "https://staging.acme.dev",
         "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web",
       },
-      "routes": [{ "pattern": "staging.figentra.com", "custom_domain": true }],
+      "routes": [{ "pattern": "staging.acme.dev", "custom_domain": true }],
       "observability": { "enabled": true, "head_sampling_rate": 0.5 },
     },
     "production": {
       "vars": {
-        "STACKRA_API_URL": "https://api.figentra.com",
-        "STACKRA_SITE_URL": "https://www.figentra.com",
+        "STACKRA_API_URL": "https://api.acme.dev",
+        "STACKRA_SITE_URL": "https://www.acme.dev",
         "STACKRA_SENTRY_DSN": "ref:sentry.dsn.web",
       },
       "routes": [
-        { "pattern": "www.figentra.com", "custom_domain": true },
+        { "pattern": "www.acme.dev", "custom_domain": true },
         // alias: the Worker redirects it to `domain`
-        { "pattern": "figentra.com", "custom_domain": true },
+        { "pattern": "acme.dev", "custom_domain": true },
       ],
       "observability": { "enabled": true, "head_sampling_rate": 0.1 },
       "limits": { "cpu_ms": 50 },

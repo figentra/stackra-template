@@ -1,7 +1,7 @@
 # apps/web/.stackra/gen (generated, gitignored; committed here only to read)
 
 Built from the manifests of the services this app imports from `#stackra/clients` (inferred), filtered to the
-`public` API area, the pinned figentra-os manifests of `stackra-manifests.lock.yaml`, plus the app's config classes,
+`public` API area, the pinned acme-platform manifests of `stackra.lock.yaml`, plus the app's config classes,
 route classes, flags, assets and overrides. App code imports these only as `#stackra/<name>`. Every file is complete.
 
 | File                | What gen derived                                                                                    |

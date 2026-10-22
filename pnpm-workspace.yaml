@@ -2,8 +2,8 @@
 # Purpose: workspace members and the only source of versions (catalogs). Every version referenced by
 #          any member is here.
 # Boundary: versions only; no scripts. Exact pins, no ranges (versions rule). Workspace members
-#           (@stackra/loyalty-kit, @stackra/access-log, @stackra/brand) are `workspace:*`, never
-#           catalog entries.
+#           (@stackra/loyalty-kit, @stackra/access-log, @stackra/brand and the packages/tooling
+#           presets) are `workspace:*`, never catalog entries.
 # Runtime: node
 # Governing contract: ADR 0013 (versions come only from catalogs and workspace references)
 packages:
@@ -11,6 +11,8 @@ packages:
   - packages/*/*
   - services/*
 catalogMode: strict
+# Refuse an unsupported Node (engines).
+engineStrict: true
 catalogs:
   stackra:
     "@stackra/actions": 1.0.0
@@ -51,7 +53,6 @@ catalogs:
     "@stackra/money": 1.0.0
     "@stackra/navigation": 1.0.0
     "@stackra/outbox": 1.0.0
-    "@stackra/oxlint-config": 1.0.0
     "@stackra/panel": 1.0.0
     "@stackra/peripherals": 1.0.0
     "@stackra/platform": 1.0.0
@@ -72,13 +73,10 @@ catalogs:
     "@stackra/testing": 1.0.0
     "@stackra/theming": 1.0.0
     "@stackra/transport": 1.0.0
-    "@stackra/tsdown-config": 1.0.0
-    "@stackra/typescript-config": 1.0.0
     "@stackra/ui": 1.0.0
     "@stackra/validation": 1.0.0
     "@stackra/versioning": 1.0.0
     "@stackra/vite-plugin": 1.0.0
-    "@stackra/vitest-config": 1.0.0
     "@stackra/webhooks": 1.0.0
     "@stackra/workflow": 1.0.0
     "@stackra-pro/ui": 1.0.0
@@ -89,6 +87,7 @@ catalogs:
     resend: 6.1.2
     isbot: 5.1.31
     "@react-email/components": 0.5.2
+    "@types/node": 26.6.4
   ui:
     "@heroui/styles": 3.0.0
   frontend:
@@ -133,18 +132,36 @@ catalogs:
     react-native-mmkv: 3.3.0
     react-native-svg: 15.13.0
     react-native-worklets: 0.5.1
+  # Tool versions match the real repository's catalogs: the tooling presets in packages/tooling were written
+  # against them.
   build:
-    turbo: 2.5.8
-    typescript: 5.9.3
+    turbo: 2.11.9
+    typescript: 7.0.2
     vite: 7.1.10
-    tsdown: 0.15.6
+    tsdown: 0.23.1
     electron: 38.2.0
     "@react-router/dev": 7.9.4
   quality:
-    vitest: 3.2.4
+    vitest: 5.0.5
+    "@vitest/coverage-v8": 5.0.3
+    knip: 6.41.0
     "@playwright/test": 1.56.1
     oxlint: 1.86.0
-    oxfmt: 0.9.0
+    oxfmt: 0.71.0
     "@lhci/cli": 0.15.1
+  # Release tooling: changesets, commitlint, git hooks.
+  release:
+    "@changesets/cli": 3.0.3
+    "@changesets/changelog-git": 1.0.0
+    "@commitlint/cli": 21.2.3
+    "@commitlint/config-conventional": 21.2.3
+    lefthook: 2.2.2
   docs:
     mint: 4.2.0
+
+# Dependency lifecycle scripts are blocked by default (pnpm supply-chain security). Every entry here was
+# reviewed; a new one must be, too.
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  sharp: true

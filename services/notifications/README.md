@@ -1,4 +1,4 @@
-# @figentra/service-notifications
+# @acme/service-notifications
 
 The second deployable. It shows **cross-service reach** in all three modes against commerce without importing a line
 of commerce code (ADR 0260), and it is the one home of delivery, notification preferences, the message log and the

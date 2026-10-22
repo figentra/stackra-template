@@ -17,42 +17,42 @@
  */
 export const modules = {
   identity: {
-    member: "@figentra/service-identity",
+    member: "@acme/service-identity",
     version: "0.3.0",
     dependsOn: [],
     namespaces: [],
     entitlement: null,
   },
   devices: {
-    member: "@figentra/service-identity",
+    member: "@acme/service-identity",
     version: "0.3.0",
     dependsOn: ["identity"],
     namespaces: [],
     entitlement: null,
   },
   catalogue: {
-    member: "@figentra/service-commerce",
+    member: "@acme/service-commerce",
     version: "0.1.0",
     dependsOn: ["inventory"],
     namespaces: ["catalogue"],
     entitlement: "commerce.catalogue",
   },
   orders: {
-    member: "@figentra/service-commerce",
+    member: "@acme/service-commerce",
     version: "0.1.0",
     dependsOn: ["catalogue", "inventory"],
     namespaces: ["orders"],
     entitlement: "commerce.orders",
   },
   experience: {
-    member: "@figentra/service-experience",
+    member: "@acme/service-experience",
     version: "0.2.0",
     dependsOn: [],
     namespaces: [],
     entitlement: null,
   },
   messages: {
-    member: "@figentra/service-notifications",
+    member: "@acme/service-notifications",
     version: "0.1.0",
     dependsOn: [],
     namespaces: ["messages"],

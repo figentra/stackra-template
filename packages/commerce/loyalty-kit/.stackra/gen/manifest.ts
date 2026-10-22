@@ -18,14 +18,14 @@ export const manifest = json as AppManifest;
 
 /**
  * Every refusal code of this member's modules (from the `errors/` folders) and `core`, the
- * pipeline's own: forbidden, invalid_argument, not_found, rate_limited, workflow_timed_out,
+ * pipeline's own: forbidden, validation, not_found, rate_limited, workflow_timed_out,
  * unresolved_port.
  */
 export const Refusals = refusalRefs({
   loyalty_kit: ["insufficient_points", "not_a_member", "account_frozen", "not_own_principal"],
   core: [
     "forbidden",
-    "invalid_argument",
+    "validation",
     "not_found",
     "rate_limited",
     "workflow_timed_out",

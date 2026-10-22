@@ -1,0 +1,22 @@
+// Stackra file contract:
+// Purpose: a tsdown-built library (packages/*/*) or service — node + vitest globals; `config/` (CF1 defaults)
+//          is typechecked beside `src/`. The declaration flags in base feed tsdown's dts step; a library
+//          therefore declares `@types/node` and `vitest` as devDependencies.
+// Owner: release-operations · Secrets: forbidden
+{
+  "display": "@stackra/typescript-config — library",
+  "extends": "./node.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"],
+    // v2: decorators everywhere (ADR 0094); legacy decorators, never emitDecoratorMetadata (ADR 0005).
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": false,
+    "erasableSyntaxOnly": false
+  },
+  "include": [
+    "${configDir}/src",
+    "${configDir}/config",
+    "${configDir}/tsdown.config.ts",
+    "${configDir}/vitest.config.ts"
+  ]
+}

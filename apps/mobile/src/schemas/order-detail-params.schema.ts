@@ -9,7 +9,7 @@
 import { PublicId, Schema, z } from "@stackra/schema";
 
 /**
- * `orders/:orderId`; a malformed id refuses the deep link with `invalid_argument` before any query
+ * `orders/:orderId`; a malformed id refuses the deep link with `validation` before any query
  * runs.
  */
 export class OrderDetailParams extends Schema(z.object({ orderId: PublicId("ord") })) {}

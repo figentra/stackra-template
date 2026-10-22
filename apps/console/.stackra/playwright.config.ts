@@ -13,11 +13,11 @@ import { baseUrlOf } from "@stackra/runway/ports";
 
 export default e2ePreset({
   root: new URL("..", import.meta.url).pathname,
-  app: "@figentra/console",
+  app: "@acme/console",
   baseURL: baseUrlOf("console"),
   services: [
-    "@figentra/service-commerce",
-    "@figentra/service-notifications",
+    "@acme/service-commerce",
+    "@acme/service-notifications",
     "experience",
     "platform",
     "identity",

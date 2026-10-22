@@ -7,7 +7,7 @@
  *           the hook point it implements.
  * Runtime: node
  * Governing contract: ADR 0263, ADR 0265 (extension), guides/programming-model.mdx#modules;
- *                     figentra-os docs/catalogue/commerce.yaml#loyalty
+ *                     acme-platform docs/catalogue/commerce.yaml#loyalty
  */
 import { Module } from "@stackra/container";
 

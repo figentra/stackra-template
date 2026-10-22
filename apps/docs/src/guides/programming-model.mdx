@@ -36,7 +36,7 @@ The only factory-style helpers left are `createApp`, `createDecorator`, `createM
 
 Closed sets are class enums from the package that owns the option: `Risk.L1` on a permission (an
 action's risk is its permission's), `ActorKind.User` in `actors`, `HttpMethod.Post` on an endpoint,
-`UxAfter.OpenRecord` in `ux.after`, `ErrorCategory.FailedPrecondition` on an error. A driver choice
+`UxAfter.OpenRecord` in `ux.after`, `ErrorCategory.PreconditionFailed` on an error. A driver choice
 is a checked literal typed by `DriverName<Port>`.
 
 ```ts

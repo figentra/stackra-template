@@ -35,7 +35,7 @@ release:
     platforms: { mac: [dmg, zip], windows: [nsis], linux: [AppImage] }
 
 # the org is root `providers.sentry.org`; the DSN is a var below
-telemetry: { sentryProject: figentra-console }
+telemetry: { sentryProject: acme-console }
 
 environments:
   dev:
@@ -60,18 +60,18 @@ environments:
     e2e: { baseUrl: from-port, seeds: from-stackra-config }
 
   preview:
-    domain: "console-pr-${pr}.preview.figentra.com"
+    domain: "console-pr-${pr}.preview.acme.dev"
     vars:
-      VITE_API_ORIGIN: "https://api-pr-${pr}.preview.figentra.com"
-      VITE_REALTIME_ORIGIN: "https://api-pr-${pr}.preview.figentra.com"
+      VITE_API_ORIGIN: "https://api-pr-${pr}.preview.acme.dev"
+      VITE_REALTIME_ORIGIN: "https://api-pr-${pr}.preview.acme.dev"
       VITE_SENTRY_DSN: ref:sentry.dsn.console
     secrets: [] # push is off in previews
 
   staging:
-    domain: console.staging.figentra.com
+    domain: console.staging.acme.dev
     vars:
-      VITE_API_ORIGIN: https://api.staging.figentra.com
-      VITE_REALTIME_ORIGIN: https://api.staging.figentra.com
+      VITE_API_ORIGIN: https://api.staging.acme.dev
+      VITE_REALTIME_ORIGIN: https://api.staging.acme.dev
       VITE_SENTRY_DSN: ref:sentry.dsn.console
       VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ref:push.vapidPublic.staging
       VITE_POSTHOG_KEY: ref:posthog.key.console
@@ -83,11 +83,11 @@ environments:
     pwa: { updates: immediate } # staging testers reload at once
 
   production:
-    domain: console.figentra.com
-    aliases: [app.figentra.com] # redirect to `domain`
+    domain: console.acme.dev
+    aliases: [app.acme.dev] # redirect to `domain`
     vars:
-      VITE_API_ORIGIN: https://api.figentra.com
-      VITE_REALTIME_ORIGIN: https://api.figentra.com
+      VITE_API_ORIGIN: https://api.acme.dev
+      VITE_REALTIME_ORIGIN: https://api.acme.dev
       VITE_SENTRY_DSN: ref:sentry.dsn.console
       VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ref:push.vapidPublic.production
       VITE_POSTHOG_KEY: ref:posthog.key.console

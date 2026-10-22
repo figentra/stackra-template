@@ -1,5 +1,5 @@
 {
-  "name": "@figentra/docs",
+  "name": "@acme/docs",
   "version": "0.1.0",
   "private": true,
   "description": "The project's documentation site: Mintlify (docs.json + MDX), with the API reference generated from the consumed services' manifests.",

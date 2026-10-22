@@ -35,8 +35,8 @@
   },
   "devDependencies": {
     "@stackra/gen": "catalog:stackra",
-    "@stackra/tsdown-config": "catalog:stackra",
-    "@stackra/typescript-config": "catalog:stackra",
+    "@stackra/tsdown-config": "workspace:*",
+    "@stackra/typescript-config": "workspace:*",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "tsdown": "catalog:build",

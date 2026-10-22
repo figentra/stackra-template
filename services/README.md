@@ -1,6 +1,6 @@
 # services
 
-One folder per deployable service (`@figentra/service-<name>`, `tier:service`). A service hosts modules and owns no
+One folder per deployable service (`@acme/service-<name>`, `tier:service`). A service hosts modules and owns no
 behaviour itself (ADR 0111, 0259). Services never import each other: they inject each other's generated clients and
 listen to each other's public events (ADR 0260), both generated from the producer's committed
 `.stackra/app-manifest.json`.

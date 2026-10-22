@@ -1,5 +1,5 @@
 {
-  "name": "@figentra/web",
+  "name": "@acme/web",
   "version": "0.1.0",
   "private": true,
   "description": "The public site: landing, pricing, storefront and tenant pages. React Router 7 framework mode on a Cloudflare Worker, declared with @Route/@Layout/@Block/@Menu/@Flag classes; stackra gen writes the runtime into .stackra/.",
@@ -64,9 +64,9 @@
     "@stackra/cli": "catalog:stackra",
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
-    "@stackra/typescript-config": "catalog:stackra",
+    "@stackra/typescript-config": "workspace:*",
     "@stackra/vite-plugin": "catalog:stackra",
-    "@stackra/vitest-config": "catalog:stackra",
+    "@stackra/vitest-config": "workspace:*",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "typescript": "catalog:build",

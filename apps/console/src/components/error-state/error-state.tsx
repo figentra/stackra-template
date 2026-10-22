@@ -25,9 +25,9 @@ export interface ErrorStateProps {
 
 /** Categories that do not get a retry button because retrying cannot change the answer. */
 const NO_RETRY: ReadonlySet<ErrorCategory> = new Set([
-  ErrorCategory.PermissionDenied,
+  ErrorCategory.Forbidden,
   ErrorCategory.NotFound,
-  ErrorCategory.InvalidArgument,
+  ErrorCategory.Validation,
   ErrorCategory.EntitlementRequired,
 ]);
 
@@ -37,9 +37,9 @@ const NO_RETRY: ReadonlySet<ErrorCategory> = new Set([
  */
 const MESSAGES = new Map([
   [ErrorCategory.NotFound, I18n.console.errors.not_found],
-  [ErrorCategory.PermissionDenied, I18n.console.errors.permission_denied],
+  [ErrorCategory.Forbidden, I18n.console.errors.forbidden],
   [ErrorCategory.Unavailable, I18n.console.errors.unavailable],
-  [ErrorCategory.InvalidArgument, I18n.console.errors.invalid_argument],
+  [ErrorCategory.Validation, I18n.console.errors.validation],
   [ErrorCategory.EntitlementRequired, I18n.console.errors.entitlement_required],
 ]);
 

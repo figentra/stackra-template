@@ -100,11 +100,11 @@ apps/<name>/src/<kind>/                        an app: routes/, components/, pro
 
 `z`, `Schema`, `Enum` → `@stackra/schema` · `isRefusal`, `AppError`, `ErrorCategory` →
 `@stackra/errors` (`refusal(ref)` from `@stackra/errors/testing`) · `hydrateEnv` →
-`@stackra/config/env` · `Actor`, `ActorKind`, `HttpMethod`, `ApiArea`, `IdentityResolver` →
+`@stackra/config/env` · `Actor`, `ActorKind`, `HttpMethod`, `ApiArea`, `Target`, `IdentityResolver` →
 `@stackra/contracts` · `Risk`, `SystemRole` → `@stackra/iam` · `UxAfter` → `@stackra/actions` ·
 `Scope`, `DriverName` → `@stackra/container` · `SettingScope` → `@stackra/settings` · `QueryScope` →
 `@stackra/query` · `StorageArea` → `@stackra/storage` · `ColorScheme` → `@stackra/theming` ·
-`NumberingSystem`, `Locale` → `@stackra/i18n` · `PromptMoment`, `Capability`, `Target` →
+`NumberingSystem`, `Locale` → `@stackra/i18n` · `PromptMoment`, `Capability`, `DesktopMode`, `OverlayStyle`, `OverlayAnchor` →
 `@stackra/platform` · connectivity → `usePlatform().network` (`@stackra/platform` owns the PWA
 service worker and network) · `Queues` → `#stackra/queues` · `Slots`, `Panels`, `Flags` →
 `#stackra/*` · `RouteForm` → `@stackra/navigation/react` · brand CSS →
@@ -182,3 +182,12 @@ under an alias.
   `search`, `stats`, qualifier last; events `<module>.<aggregate>.<verb>.v<n>` on the wire; codes,
   route keys and panel keys snake_case; files kebab-case with a singular kind suffix; constants
   SCREAMING_SNAKE; namespace lookups `<module>::<path>`; secrets `<PROVIDER>_<PURPOSE>`.
+
+## Commands
+
+Every repo operation is a `stackra` command behind a root script: `pnpm gen` (after any declaration change; commit
+the member's `.stackra/app-manifest.json` and a service's `openapi.json`), `pnpm new <kind> <name>`, `pnpm verify`
+(the gate CI runs), `pnpm validate`, `pnpm structure` (the kind → folder → test table), `pnpm db:diff`,
+`pnpm doctor`. Agent skills, sub-agents, rules and guard hooks are not in this repository: install them once per
+machine with `stackra agents setup` (`@stackra/skills`), and read framework know-how through the Stackra MCP server
+in `.mcp.yaml`.

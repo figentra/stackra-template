@@ -1,10 +1,153 @@
-# stackra-template-preview
+<p align="center">
+  <img src=".github/assets/banner.svg" alt="Stackra: decorated services, every surface, AI-ready" width="100%">
+</p>
 
-What `pnpm create stackra` renders, and the shape of the Figentra OS repository, under the Stackra
-programming model. Nothing is installed and nothing needs to compile: the files use `@stackra/*`
-packages that do not exist yet, so a human or an agent can read one feature end to end. Every file
-kind appears at least once with its test. Generated output under `.stackra/` is committed here only
-so it can be read (see `.gitignore`), and every generated file is complete.
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-366bd3.svg"></a>
+  <a href="https://github.com/figentra/stackra-template/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/figentra/stackra-template/actions/workflows/ci.yml/badge.svg"></a>
+  <a href=".node-version"><img alt="Node 24" src="https://img.shields.io/badge/node-24-339933.svg?logo=node.js&logoColor=white"></a>
+  <a href="https://pnpm.io"><img alt="pnpm 12" src="https://img.shields.io/badge/pnpm-12-f69220.svg?logo=pnpm&logoColor=white"></a>
+  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6.svg?logo=typescript&logoColor=white"></a>
+  <a href="https://turborepo.com"><img alt="Turborepo" src="https://img.shields.io/badge/Turborepo-monorepo-ef4444.svg?logo=turborepo&logoColor=white"></a>
+  <a href="https://www.conventionalcommits.org"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196.svg?logo=conventionalcommits&logoColor=white"></a>
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-22c55e.svg"></a>
+</p>
+
+# Stackra monorepo template
+
+Stackra is a TypeScript framework for products that ship one backend to many surfaces. You declare
+behaviour as decorated classes (actions, queries, models, events, routes) and `stackra gen` derives
+the rest: the dependency wiring, the HTTP and MCP endpoints, typed clients for every consumer, the app
+entries and the runtime config for web, PWA, desktop and mobile. This repository is the reference
+monorepo that `pnpm create stackra` will render: two services, three apps, two packages and the docs
+site, each showing every file kind with its test.
+
+> [!NOTE]
+> **Pre-release.** The `@stackra/*` packages and the `stackra` CLI are not published yet. Nothing here
+> installs or compiles today; the template exists so humans and agents can read a complete project end
+> to end and review the programming model before the first release. Generated output under
+> `.stackra/` is committed only so it can be read next to its source (see `.gitignore`).
+
+## Quick start
+
+1. Click **Use this template** on GitHub, then clone your new repository. Once the CLI is published,
+   `pnpm create stackra my-app` renders the same shape.
+2. Run:
+
+   ```sh
+   mise install                 # node, pnpm, gitleaks, infisical, maestro at the pinned versions
+   pnpm install                 # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`)
+   stackra agents setup         # once per machine: Stackra skills, sub-agents and guard hooks for your assistant
+   pnpm gen && pnpm dev         # generate .stackra/ and run every member
+   pnpm verify                  # the gate CI runs
+   ```
+
+3. Replace the example identity, see [Make it yours](#make-it-yours).
+
+## Structure
+
+| Path                               | What it holds                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| `services/commerce`                | the reference service: catalogue, inventory, orders and loyalty modules      |
+| `services/notifications`           | a consumer service: reaches commerce by event, call and command, never code  |
+| `apps/console`                     | tenant console: web, PWA and desktop (Electron) from one source tree         |
+| `apps/web`                         | public site and storefront: server-rendered on Workers, installable as a PWA |
+| `apps/mobile`                      | Expo app for iOS and Android                                                 |
+| `apps/docs`                        | Mintlify docs: guides, ADRs and the API reference generated from manifests   |
+| `packages/commerce/loyalty-kit`    | a feature package: every kind a package can hold                             |
+| `packages/security/access-log`     | a decorator package: `@AccessLogged` with its explorer                       |
+| `packages/cross-cutting/brand`     | brand tokens as TypeScript, CSS and native CSS                               |
+| `packages/tooling/*`               | TypeScript, oxlint, Vitest and tsdown presets                                |
+| `runway.yaml`, `stackra.lock.yaml` | infrastructure and environments; pinned external producer manifests          |
+
+The full annotated tree is in [Tree](#tree) below.
+
+## The programming model in one screen
+
+An **action** is the only unit of behaviour. One declaration becomes an HTTP endpoint, an MCP tool,
+a typed client method and a permission:
+
+```ts
+@Action({
+  key: "order.cancel",
+  input: CancelOrderInput,
+  output: CancelOrderOutput,
+  permission: OrderPermissions.cancel,
+  actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],
+})
+@AsEndpoint({ method: HttpMethod.Put, path: "/orders/:orderId/cancel" })
+@AsTool()
+export class CancelOrderAction {
+  constructor(private readonly orders: OrderService) {}
+
+  async handle(input: CancelOrderInput, ctx: ActionContext): Promise<CancelOrderOutput> {
+    const order = await this.orders.findOneOrFail({ id: input.orderId });
+    await ctx.authorize(OrderPermissions.cancel, order);
+    await this.orders.cancel(order, CancelReason.Staff);
+    return { orderId: order.id, status: order.status.value };
+  }
+}
+```
+
+A **model** is a class; traits add the public id, tenancy, timestamps and optimistic locking:
+
+```ts
+@Model()
+@Index(["tenantId", "status", "createdAt"])
+export class Order extends Model.with(HasPublicId("ord"), BelongsToTenant, Timestamps, Versioned) {
+  @Str({ max: 64 }) customerId!: string;
+  @HasState(OrderState) status!: OrderState;
+  @MoneyColumn({ currencyField: "currency" }) totalMinor!: number;
+  @HasMany(() => OrderLine, (line) => line.order) lines!: OrderLine[];
+}
+```
+
+A **route** names its path, layout and component, and submits to an action through the generated
+client:
+
+```ts
+@Route({
+  path: "/quick-order",
+  layout: ShellLayout,
+  component: QuickOrderPage,
+  flag: Flags.orders.quick_order,
+  submits: { action: Commerce.actions.CreateOrder, form: QuickOrderForm },
+})
+export class QuickOrderRoute {}
+```
+
+Strings appear only where an identity is declared; every reference (`Commerce.actions.*`,
+`Flags.*`, `I18n.*`) is a generated constant. The full model is in
+[`apps/docs/src/guides/programming-model.mdx`](apps/docs/src/guides/programming-model.mdx).
+
+## Surfaces
+
+Each app lists its targets in `stackra.config.ts`, and `stackra gen` builds only those (ADR 0281).
+
+| Surface | Where                      | What you get                                                                     |
+| ------- | -------------------------- | -------------------------------------------------------------------------------- |
+| Web     | `apps/console`, `apps/web` | a client-rendered console and a server-rendered site on Cloudflare Workers       |
+| PWA     | `apps/console`, `apps/web` | manifest, service worker, push, offline mutation queue                           |
+| Desktop | `apps/console`             | Electron with the hardening baseline, tray, deep links, auto-update and overlays |
+| Mobile  | `apps/mobile`              | Expo with native tabs, EAS builds and over-the-air updates                       |
+
+The console's desktop target runs in `Hybrid` mode (a window plus a tray icon) with two overlays in
+`src/config/desktop.config.ts`: `quick`, a launcher bar on `CommandOrControl+Shift+Space`, and
+`assistant`, a panel docked to the right edge. Any route renders in an overlay as well as in the main
+window.
+
+## Developer experience
+
+- **`stackra` CLI** (pre-release): `gen`, `dev`, `verify`, `validate`, `new <kind> <name>`,
+  `structure`, `doctor`, `db` and `infra`, wrapped by the root `pnpm` scripts. `pnpm verify` is the one
+  gate, locally and in CI.
+- **`stackra agents setup`** installs the Stackra skills, sub-agents and guard hooks for Claude Code,
+  OpenCode or Kiro at user level, so the repository holds only this project's facts in
+  [`AGENTS.md`](AGENTS.md).
+- **Stackra MCP** ([`.mcp.yaml`](.mcp.yaml)): a local server that answers from this project's
+  generated facts (kinds, manifests, routes, wiring) and a hosted one for framework know-how.
+- **Quality tooling**: oxlint and oxfmt, Vitest, knip, lefthook, commitlint, changesets and gitleaks,
+  all pinned through pnpm catalogs and `mise.toml`.
 
 ## The one-line model
 
@@ -24,13 +167,20 @@ so it can be read (see `.gitignore`), and every generated file is complete.
 ├── turbo.jsonc                   task graph (`gen` before typecheck/test/build) and tier boundaries
 ├── .oxlintrc.jsonc               lint entry: extends `@stackra/oxlint-config`, no rules of its own
 ├── .oxfmtrc.jsonc                formatting at 100 columns
-├── stackra-manifests.lock.yaml   pinned revision of every external producer manifest, once
+├── stackra.lock.yaml             pinned revision of every external producer manifest, once
 ├── runway.yaml                   ROOT runway: infrastructure only (providers, four environments,
 │                                 shared resources, member defaults, targets, edge, secrets and
 │                                 release policy)
 ├── .gitignore                    `.stackra/*` except the committed app-manifest.json, openapi.json
+├── .github/                      Quality Gate (`pnpm verify`) and release workflows, issue and PR templates
+├── .changeset/                   pending release notes for packages (apps and services deploy by SHA)
+├── lefthook.yml · commitlint.config.mjs · knip.jsonc · .gitleaks.toml · .editorconfig · .gitattributes
+├── mise.toml · .node-version     toolchain pins
+├── .mcp.yaml                     the Stackra MCP (local `stackra mcp` + hosted); rendered to .mcp.json
+├── .claude/launch.json           dev-server launch configuration for the assistant's preview
+├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE
 ├── apps/                         tier:app (apps/README.md)
-│   ├── console/                  @figentra/console: tenant console, targets web + pwa + desktop
+│   ├── console/                  @acme/console: tenant console, targets web + pwa + desktop
 │   │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
 │   │   ├── assets/{lang/<locale>/console.json, public/logo.svg}
 │   │   ├── src/{console.app.ts, config/, panels/, routes/, components/, providers/, stores/,
@@ -38,7 +188,7 @@ so it can be read (see `.gitignore`), and every generated file is complete.
 │   │   │        hooks/, styles/, __tests__/}
 │   │   └── .stackra/{main.tsx, routes.tsx, index.html, sw.ts, pwa/, desktop/, vite.config.ts,
 │   │                 gen/, app-manifest.json}
-│   ├── web/                      @figentra/web: public site and storefront, target web-ssr
+│   ├── web/                      @acme/web: public site and storefront, targets web-ssr + pwa
 │   │   │                         (React Router 7 on Workers)
 │   │   ├── assets/{lang/<locale>/web.json, public/logo.svg}
 │   │   ├── vite.extend.ts        the Vite hatch: a function file merged after the stackra plugin
@@ -46,14 +196,14 @@ so it can be read (see `.gitignore`), and every generated file is complete.
 │   │   │        hooks/, server/, overrides/, enums/, schemas/, styles/}
 │   │   └── .stackra/{root.tsx, entry.client.tsx, entry.server.tsx, routes.ts, routes/, workers/,
 │   │                 wrangler.jsonc, gen/, …}
-│   ├── mobile/                   @figentra/mobile: Expo app, targets ios + android
+│   ├── mobile/                   @acme/mobile: Expo app, targets ios + android
 │   │   ├── assets/{lang/<locale>/mobile.json, public/logo.svg}
 │   │   ├── src/{mobile.app.ts, config/, routes/, components/{pages,ui}/, providers/, stores/,
 │   │   │        blocks/, documents/, analytics/, overrides/, enums/, schemas/, styles/,
 │   │   │        __tests__/}
 │   │   └── .stackra/{main.ts, app.config.ts, eas.json, metro.config.js, babel.config.js,
 │   │                 maestro/, gen/, …}
-│   └── docs/                     @figentra/docs: Mintlify; content root is src/ (docs.json, pages,
+│   └── docs/                     @acme/docs: Mintlify; content root is src/ (docs.json, pages,
 │                                 guides/, adr/, api-reference/, assets/)
 ├── packages/                     tier:lib, packages/<category>/<name> (packages/README.md)
 │   ├── commerce/loyalty-kit/     @stackra/loyalty-kit: the SHAPES CATALOGUE, every kind a package
@@ -62,17 +212,18 @@ so it can be read (see `.gitignore`), and every generated file is complete.
 │   │   └── src/{index.ts, config/, contracts/, core/, node/, react/, testing/, __tests__/}
 │   ├── security/access-log/      @stackra/access-log: a DECORATOR package (createDecorator +
 │   │                             Explorer + @Driver sinks, a retention job, the audit resource)
-│   └── cross-cutting/brand/      @stackra/brand: one TypeScript token source, css/tokens.css and
-│                                 css/native.css generated from it, the mark
+│   ├── cross-cutting/brand/      @stackra/brand: one TypeScript token source, css/tokens.css and
+│   │                             css/native.css generated from it, the mark
+│   └── tooling/                  tier:config presets: typescript, oxlint (boundaries), vitest, tsdown
 └── services/                     tier:service (services/README.md)
-    ├── commerce/                 @figentra/service-commerce: the reference service
+    ├── commerce/                 @acme/service-commerce: the reference service
     │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
     │   ├── assets/{lang/<locale>/<module>.json, ai/orders/, public/orders/}
     │   ├── src/{main.ts, commerce.module.ts, config/, contracts/, __tests__/}
     │   ├── src/modules/{orders,catalogue,inventory,loyalty}/<kind>/   orders is THE reference
     │   │                                                              module (its README)
     │   └── .stackra/{app-manifest.json, openapi.json}  committed; gen/ is generated
-    └── notifications/            @figentra/service-notifications: the consumer (event + call +
+    └── notifications/            @acme/service-notifications: the consumer (event + call +
                                   `.queue()`), delivery, the in-app inbox, preferences and the
                                   log; a port with two @Driver classes, a signed @Webhook receiver,
                                   an @Integration
@@ -97,7 +248,7 @@ One fact lives in exactly one file. The test that places it:
 | How does a package or the app BEHAVE? Would change if I shipped another product | `src/config/<fact>.config.ts`    | `@Config("<member-key>.<name>")` classes (packages use their module key, e.g. `loyalty_kit`): TTLs, locales, PWA display, Electron windows, driver choice (`@DriverOf`)                                                              |
 | How and where does THIS member run, per environment?                            | `runway.yaml` (member)           | dev port and host, domains, public `vars`, resources and scaling, the deployable it joins, buckets, crons, secret NAMES, release channels, health thresholds                                                                         |
 | What is the infrastructure? Would change if the company moved cloud or vendor   | `runway.yaml` (root)             | accounts, zones, the shared Postgres server, cache, queue provider, VPC, EAS project, defaults members inherit (`drivers.mail`: memory in dev and preview, notifications in staging and production), `isolate`, edge, release policy |
-| Which revision of another team's service contract do the clients use?           | `stackra-manifests.lock.yaml`    | producer to revision, once per workspace                                                                                                                                                                                             |
+| Which revision of another team's service contract do the clients use?           | `stackra.lock.yaml`              | producer to revision, once per workspace                                                                                                                                                                                             |
 | Can it be derived from declarations?                                            | nowhere: `stackra gen` writes it | the deployable list, one database per service, topics, entries, Vite/Metro/Expo/Electron config, wiring, migrations (`stackra db diff`)                                                                                              |
 | Is it a version?                                                                | `pnpm-workspace.yaml` catalogs   | every external and `@stackra/*` version; members say `catalog:<name>` or `workspace:*`                                                                                                                                               |
 
@@ -250,23 +401,56 @@ complete. Consumed services' lang files are copied into `.stackra/lang/`, so an 
 service package. `.stackra/app-manifest.json` and `.stackra/openapi.json` are committed: they are
 the contract consumers generate their clients from, and `apps/docs` publishes projections of them.
 
-## Framework project vs Figentra OS
+## Framework project vs product repository
 
-`pnpm create stackra my-app` renders this shape with one example service. Figentra OS uses the same
-generator: many `services/<name>`, private `@figentra/*` packages for logic two OS services share
+`pnpm create stackra my-app` renders this shape with one example service. A larger product uses the
+same generator: many `services/<name>`, private `@acme/*` packages for logic two of its services share
 (ADR 0259 home B), and the apps. Nothing in a service file differs between the two.
+
+## Make it yours
+
+The template uses a neutral example organisation, `acme`, wherever a project-specific value belongs.
+Replace `acme` with your own names, and the placeholders below, before the first push:
+
+| Placeholder                                           | Where                                                              | Put                                                    |
+| ----------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
+| `@acme/*` member names                                | every app and service `package.json`, filters                      | your npm scope                                         |
+| `acme-platform`, `acme`                               | `runway.yaml` (project, GitHub, Sentry, Expo), `stackra.lock.yaml` | your project and organisation names                    |
+| `acme.dev`, `*.acme.dev`                              | `runway.yaml`, app `runway.yaml`, config defaults                  | your domains                                           |
+| `dev.acme.console`, `dev.acme.mobile`, `acme-console` | `desktop.config.ts`, `release.config.ts`, Maestro flows            | your bundle ids and URL scheme                         |
+| `@your-org/your-team`                                 | `.github/CODEOWNERS`                                               | your GitHub team or user                               |
+| `security@your-domain.example`, `your-repo`           | `SECURITY.md`, `.github/ISSUE_TEMPLATE/config.yml`                 | your security contact and repository                   |
+| `ISSUE_KEY = null`                                    | `commitlint.config.mjs`                                            | your tracker's footer pattern, to require an issue key |
+| `GITHUB_TOKEN` in the release job                     | `.github/workflows/release.yml`                                    | a GitHub App token if the version PR must run the gate |
+| `<stackra-mcp-host>`                                  | `.mcp.yaml`                                                        | the hosted Stackra MCP URL of your plan                |
+| copyright holder, brand assets                        | `LICENSE`, `packages/cross-cutting/brand/assets`                   | yours                                                  |
+
+Secret values never go in a file: a config field is `@Secret`/`@Env`, `runway.yaml` names the secret, and the value
+lives in your secret store (Infisical by default, ADR 0173).
+
+## Docs
+
+- Guides: [`apps/docs/src/guides`](apps/docs/src/guides) (programming model, adding a field, testing); run `pnpm docs`.
+- Architecture decisions: [`apps/docs/src/adr`](apps/docs/src/adr).
+- API reference: [`apps/docs/src/api-reference`](apps/docs/src/api-reference), projected from the committed manifests.
+- Review notes for this template: [`REVIEW.md`](REVIEW.md).
 
 ## Reading order
 
-1. `AGENTS.md` (glossary and rules)
-2. `services/commerce/src/modules/orders/README.md`, then `actions/create-order.action.ts` and
+1. The monorepo root (`REVIEW.md` step 1 lists every root file and folder)
+2. `AGENTS.md` (glossary and rules)
+3. `services/commerce/src/modules/orders/README.md`, then `actions/create-order.action.ts` and
    `workflows/create-order.workflow.ts`
-3. `services/commerce/src/modules/loyalty/hooks/redeem-points.hook.ts` (extending another module)
-4. `services/commerce/.stackra/gen/wiring.ts` and `hooks.ts` (what gen derived)
-5. `services/notifications/README.md` (reaching another service: event, call, command)
-6. `packages/commerce/loyalty-kit/README.md` (shapes index) and
+4. `services/commerce/src/modules/loyalty/hooks/redeem-points.hook.ts` (extending another module)
+5. `services/commerce/.stackra/gen/wiring.ts` and `hooks.ts` (what gen derived)
+6. `services/notifications/README.md` (reaching another service: event, call, command)
+7. `packages/commerce/loyalty-kit/README.md` (shapes index) and
    `packages/security/access-log/README.md` (decorators)
-7. `apps/console/README.md` (an app: routes, flags, the generated entry), then `runway.yaml` and
+8. `apps/console/README.md` (an app: routes, flags, the generated entry), then `runway.yaml` and
    `apps/console/runway.yaml`
-8. `apps/docs/src/guides/add-a-field.mdx` (the first change every newcomer makes: a field from the
+9. `apps/docs/src/guides/add-a-field.mdx` (the first change every newcomer makes: a field from the
    model to the test)
+
+## Licence
+
+MIT, see [`LICENSE`](LICENSE). Brand assets, fonts and paid-licence code are excluded, see [`NOTICE`](NOTICE).

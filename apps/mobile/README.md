@@ -1,4 +1,4 @@
-# @figentra/mobile
+# @acme/mobile
 
 The iOS and Android app of a Stackra project: Expo SDK 57, **code-based** React Navigation 7 (native
 stack + native tabs, iOS 26 Liquid Glass), `@stackra/ui/native` (HeroUI Native underneath) + Uniwind

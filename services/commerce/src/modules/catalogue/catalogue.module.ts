@@ -5,7 +5,7 @@
  *           stores a price (pricing service) and never stores stock: the storefront projection
  *           reads inventory's exported StockService (gen records `dependsOn`).
  * Runtime: node
- * Governing contract: ADR 0263, ADR 0264 d1, guides/programming-model.mdx#modules; figentra-os
+ * Governing contract: ADR 0263, ADR 0264 d1, guides/programming-model.mdx#modules; acme-platform
  *                     docs/catalogue/commerce.yaml#catalogue
  */
 import { Module } from "@stackra/container";

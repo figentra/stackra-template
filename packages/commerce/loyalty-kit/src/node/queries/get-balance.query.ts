@@ -53,7 +53,7 @@ export class GetBalanceQuery {
    * Loads the account first so the policy can see it; the balance is read after authorization
    * passes.
    * @throws a `NotFound` refusal when the account does not exist in this tenant.
-   * @throws a `PermissionDenied` refusal when LoyaltyAccountPolicy.read denies a customer another
+   * @throws a `Forbidden` refusal when LoyaltyAccountPolicy.read denies a customer another
    * member's account.
    */
   async handle(input: GetBalanceInput, ctx: QueryContext): Promise<BalanceView> {

@@ -9,8 +9,8 @@
  * Runtime: node
  * Governing contract: ADR 0058 (Electron), ADR 0139 (row actions declared by the module)
  */
+import { Target } from "@stackra/contracts";
 import { Menu, MenuKind, type MenuBuilder } from "@stackra/navigation";
-import { Target } from "@stackra/platform";
 
 /** Right-click menu of the desktop target: spellcheck suggestions, edit roles and element items. */
 @Menu({ kind: MenuKind.Context, targets: [Target.Desktop] })

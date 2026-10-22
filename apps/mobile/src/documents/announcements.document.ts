@@ -13,8 +13,8 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0110, ADR 0112, ADR 0114, ADR 0154
  */
+import { Target } from "@stackra/contracts";
 import { Blocks, Document, DocumentLayout } from "@stackra/panel";
-import { Target } from "@stackra/platform";
 import { PromoBannerBlock } from "#src/blocks/promo-banner";
 import { Commerce } from "#stackra/clients";
 import { I18n } from "#stackra/i18n";

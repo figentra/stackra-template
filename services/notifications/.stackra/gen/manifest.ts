@@ -23,7 +23,7 @@ export const Refusals = refusalRefs({
   webhooks: ["invalid_signature"], // @stackra/webhooks
   core: [
     "forbidden",
-    "invalid_argument",
+    "validation",
     "not_found",
     "rate_limited",
     "workflow_timed_out",

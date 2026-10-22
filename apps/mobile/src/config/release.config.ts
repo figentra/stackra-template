@@ -18,7 +18,7 @@ import { Bool, Int, Nested, OneOf, Str } from "@stackra/validation";
 /** iOS identity and capabilities gen writes into the Expo config. */
 class IosConfig {
   /** The App Store bundle id; frozen after the first upload. */
-  @Str() bundleIdentifier = "com.figentra.stackra";
+  @Str() bundleIdentifier = "dev.acme.mobile";
   /** Ship an iPad layout. @defaultValue true */
   @Bool() supportsTablet = true;
   /** Export compliance: the app uses only exempt encryption. @defaultValue false */
@@ -28,7 +28,7 @@ class IosConfig {
 /** Android identity gen writes into the Expo config. */
 class AndroidConfig {
   /** The Play Store package name; frozen after the first upload. */
-  @Str() package = "com.figentra.stackra";
+  @Str() package = "dev.acme.mobile";
   /** Opt in to Android's predictive back gesture. @defaultValue false */
   @Bool() predictiveBackGesture = false;
 }

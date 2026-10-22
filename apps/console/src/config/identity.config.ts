@@ -10,8 +10,8 @@
  *                     scope)
  */
 import { Config } from "@stackra/config";
+import { Target } from "@stackra/contracts";
 import { AuthFlow } from "@stackra/identity";
-import { Target } from "@stackra/platform";
 import { Bool, Int, List, Map, OneOf, Str } from "@stackra/validation";
 
 /** How the console authenticates: BFF cookie session on web and PWA, PKCE on desktop. */

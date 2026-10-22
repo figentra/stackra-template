@@ -10,8 +10,8 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0058 (Electron), ADR 0245
  */
+import { Target } from "@stackra/contracts";
 import { Menu, type MenuBuilder, type MenuContext } from "@stackra/navigation";
-import { Target } from "@stackra/platform";
 import { Commerce } from "#stackra/clients";
 import { Flags } from "#stackra/flags";
 import { I18n } from "#stackra/i18n";

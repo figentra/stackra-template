@@ -20,7 +20,7 @@ export class OrderFacts {
 
   /**
    * Reads the order as the agent's principal and summarises it in one sentence.
-   * @throws AppError `permission_denied` when the principal may not read this order; the gateway
+   * @throws AppError `forbidden` when the principal may not read this order; the gateway
    *         then omits the facts.
    */
   async provide(orderId: string, ctx: ContextRequest): Promise<ContextFacts> {

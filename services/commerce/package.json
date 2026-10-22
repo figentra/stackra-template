@@ -1,7 +1,8 @@
 {
-  "name": "@figentra/service-commerce",
+  "name": "@acme/service-commerce",
   "version": "0.1.0",
   "private": true,
+  "description": "The reference service: catalogue, inventory, orders and loyalty modules as decorated actions, queries, models, workflows and events; stackra gen emits the Encore app into .stackra/.",
   "type": "module",
   "imports": {
     "#src/*": "./src/*",
@@ -74,8 +75,8 @@
     "@stackra/gen": "catalog:stackra",
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
-    "@stackra/typescript-config": "catalog:stackra",
-    "@stackra/vitest-config": "catalog:stackra",
+    "@stackra/typescript-config": "workspace:*",
+    "@stackra/vitest-config": "workspace:*",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "typescript": "catalog:build",

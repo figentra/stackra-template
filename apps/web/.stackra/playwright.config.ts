@@ -13,10 +13,10 @@ import { baseUrlOf } from "@stackra/runway/ports";
 
 export default e2ePreset({
   root: new URL("..", import.meta.url).pathname,
-  app: "@figentra/web",
+  app: "@acme/web",
   target: "web-ssr", // builds, then serves `build/` with wrangler dev on the member's dev port
   baseURL: baseUrlOf("web"),
-  services: ["@figentra/service-commerce", "billing", "experience", "content", "marketing"],
+  services: ["@acme/service-commerce", "billing", "experience", "content", "marketing"],
   seeds: ["orders.demo", "billing.ladder", "content.marketing"], // stackra.config.ts e2e.seeds
   // runway.yaml environments.dev.e2e.turnstile: the Worker gets Cloudflare's always-pass test
   // secret

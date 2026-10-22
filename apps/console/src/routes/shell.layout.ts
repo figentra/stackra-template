@@ -12,8 +12,8 @@
  * Governing contract: ADR 0164 (panel shell), ADR 0214 (gate-filtered navigation), ADR 0241
  *                     (session guard)
  */
+import { Target } from "@stackra/contracts";
 import { Layout, LayoutKind, type RouteContext } from "@stackra/navigation";
-import { Target } from "@stackra/platform";
 import { Shell } from "#src/components/shell";
 import { RouteErrorState } from "#src/components/error-state";
 import { Routes } from "#stackra/routes";

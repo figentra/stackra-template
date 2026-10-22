@@ -4,7 +4,7 @@
  * Boundary: exports StockService for orders; nothing else is shared. The key equals the folder name
  *           (ADR 0264).
  * Runtime: node
- * Governing contract: ADR 0263, ADR 0264 d1, guides/programming-model.mdx#modules; figentra-os
+ * Governing contract: ADR 0263, ADR 0264 d1, guides/programming-model.mdx#modules; acme-platform
  *                     docs/catalogue/commerce.yaml#inventory
  */
 import { Module } from "@stackra/container";

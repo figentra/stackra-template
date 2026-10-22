@@ -1,7 +1,7 @@
 # apps/console/.stackra/gen (generated, gitignored; committed here only to read)
 
 Built from the manifests of the services this app imports from `#stackra/clients` (inferred, no `consumes` list), the
-pinned figentra-os manifests of `stackra-manifests.lock.yaml`, the app's own `assets/lang`, `src/overrides`, the
+pinned acme-platform manifests of `stackra.lock.yaml`, the app's own `assets/lang`, `src/overrides`, the
 config classes and the capability map of the active target (`web`, `pwa` or `desktop`, ADR 0249 and 0250). In Vite
 the same modules are served virtually with HMR by `@stackra/vite-plugin`; tests, the Electron main process and agents
 read these files. App code imports them only as `#stackra/<name>` (ADR 0261). Every file is complete; none is an

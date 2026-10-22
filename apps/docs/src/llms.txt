@@ -16,7 +16,7 @@
 - [Using the API](https://docs.example.com/api-reference/introduction.md): areas, auth, idempotency, errors, versions
 - [Events](https://docs.example.com/api-reference/events.md): public integration events
 
-## API (from @figentra/service-commerce 0.1.0; Stackra-Version 2026-10-01, 2027-03-01)
+## API (from @acme/service-commerce 0.1.0; Stackra-Version 2026-10-01, 2027-03-01)
 
 - catalogue.product.get_by_slug (query) — GET /public/products/by-slug/{slug} — public, L0; refusals: product_not_found
 - catalogue.product.list_storefront (query) — GET /public/products — public, L0

@@ -7,11 +7,11 @@
  */
 import { AppError, ErrorCategory } from "@stackra/errors";
 
-/** `failed_precondition` / `variant_unavailable`; not retryable. */
+/** `precondition_failed` / `variant_unavailable`; not retryable. */
 export class VariantUnavailableError extends AppError {
   constructor(variantIds: readonly string[]) {
     super({
-      category: ErrorCategory.FailedPrecondition,
+      category: ErrorCategory.PreconditionFailed,
       code: "variant_unavailable",
       retryable: false,
       details: { variantIds: [...variantIds] },

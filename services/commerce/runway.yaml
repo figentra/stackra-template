@@ -50,7 +50,7 @@ environments:
     database: { plan: shared }
     drivers: { mail: memory } # previews never mail a real address
     secrets: [PRICING_API_KEY]
-    config: { commerce.service: { storefrontBaseUrl: "https://web-pr-${pr}.preview.figentra.com" } }
+    config: { commerce.service: { storefrontBaseUrl: "https://web-pr-${pr}.preview.acme.dev" } }
 
   staging:
     deployable: core # grouped with notifications: the NotificationsClient calls in-process (ADR 0260 d4)
@@ -76,7 +76,7 @@ environments:
       search: postgres
       media: s3
     secrets: [PRICING_API_KEY]
-    config: { commerce.service: { storefrontBaseUrl: https://staging.figentra.com } }
+    config: { commerce.service: { storefrontBaseUrl: https://staging.acme.dev } }
     workers: { split: false }
 
   production:
@@ -103,5 +103,5 @@ environments:
       search: postgres
       media: s3
     secrets: [PRICING_API_KEY]
-    config: { commerce.service: { storefrontBaseUrl: https://www.figentra.com } }
+    config: { commerce.service: { storefrontBaseUrl: https://www.acme.dev } }
     workers: { split: true, resources: { cpu: 0.5, memory: 1Gi, instances: { min: 1, max: 4 } } } # queue, cron and outbox in `commerce-worker`

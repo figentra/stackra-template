@@ -1,4 +1,4 @@
-# @figentra/console
+# @acme/console
 
 The web, PWA and desktop console of a Stackra project, from one source tree (ADR 0249). Every thing with identity is
 a decorated class (`@App`, `@Panel`, `@Route`, `@Layout`, `@Provider`, `@Store`, `@Menu`, `@Command`, `@Bridge`,
@@ -20,7 +20,7 @@ Router 7, the service worker, the Electron shell, Playwright) is generated into 
 ```
 apps/console
 ├── stackra.config.ts        defineApp: key, root class, Target cases, ApiArea, env class, e2e, health (what it IS)
-├── runway.yaml              dev port/host, domains, vars per environment, secret names, PWA/Electron channels (where it RUNS)
+├── runway.yaml              dev port/host, domains, vars per environment, PWA/Electron channels, secret names (where it RUNS)
 ├── package.json             aliases: #src/*, #assets/*, #stackra/* (gen) and #stackra-desktop/* (the generated Electron files)
 ├── .stackra/                GENERATED (see .stackra/README.md); app-manifest.json committed
 └── src/

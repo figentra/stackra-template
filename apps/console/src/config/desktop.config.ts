@@ -1,7 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: the Electron desktop target. Windows (including a quick-entry panel), global
- *          shortcuts, menus, tray, deep links, auto-update behaviour, renderer permissions, tighten-only hardening knobs and packaging.
+ * Purpose: one fact: the Electron desktop target. Desktop mode, windows, named overlays (each with
+ *          its global shortcut), menus, tray, deep links, auto-update behaviour, renderer
+ *          permissions, tighten-only hardening knobs and packaging.
  * Boundary: no identity, password, certificate, feed domain or origin list: signing switches and
  *           the feed path are `runway.yaml` `release.desktop`, the feed URL is derived by gen, and
  *           `connect-src` is csp.config.ts. The hardening baseline (context isolation, sandbox,
@@ -9,10 +10,17 @@
  *           `channels`, `allow` and the packaging targets are Electron's and electron-builder's own
  *           values, typed by their unions, not house enums.
  * Runtime: isomorphic
- * Governing contract: ADR 0249, ADR 0251, ADR 0254, ADR 0181
+ * Governing contract: ADR 0249, ADR 0251, ADR 0254, ADR 0181, ADR 0281
  */
 import { Config } from "@stackra/config";
-import { InstallMoment, TrayClickAction, WindowKind } from "@stackra/platform";
+import {
+  DesktopMode,
+  InstallMoment,
+  OverlayAnchor,
+  OverlayStyle,
+  TrayClickAction,
+  WindowKind,
+} from "@stackra/platform";
 import { OfflineStore } from "@stackra/storage";
 import { Bool, Duration, Int, List, Map, Nested, OneOf, Str, Url } from "@stackra/validation";
 
@@ -39,20 +47,38 @@ class WindowConfig {
   @OneOf(WindowKind) kind = WindowKind.Normal;
   /** Open at launch. @defaultValue true */
   @Bool() openOnLaunch = true;
-  /** Float above other apps, for a quick-entry panel. @defaultValue false */
-  @Bool() alwaysOnTop = false;
-  /** Hide when the window loses focus, for a quick-entry panel. @defaultValue false */
-  @Bool() hideOnBlur = false;
 }
 
-/** One system-wide keyboard shortcut; it works while the app is in the background. */
-class GlobalShortcutConfig {
-  /** Electron accelerator, for example `CommandOrControl+Shift+Space`. */
-  @Str() accelerator = "";
-  /** Window key it toggles, from `windows`. */
-  @Str() window = "";
-  /** The user may rebind or turn it off in settings. @defaultValue true */
+/**
+ * One floating overlay (ADR 0281 d4): any route rendered inside `LauncherOverlay` or
+ * `PanelOverlay` from `@stackra/platform/react`; the same route also works in the main window.
+ */
+class OverlayConfig {
+  /** Launcher bar or docked panel. @defaultValue OverlayStyle.Launcher */
+  @OneOf(OverlayStyle) style = OverlayStyle.Launcher;
+  /** Route the overlay renders. @defaultValue "/" */
+  @Str({ pattern: /^\// }) route = "/";
+  /**
+   * Electron accelerator that toggles it, registered by main only; empty means none.
+   * @defaultValue ""
+   */
+  @Str() shortcut = "";
+  /** The user may rebind or turn the shortcut off in settings. @defaultValue true */
   @Bool() userConfigurable = true;
+  /** Where it opens. @defaultValue OverlayAnchor.ScreenCenter */
+  @OneOf(OverlayAnchor) anchor = OverlayAnchor.ScreenCenter;
+  /** Float above other apps. @defaultValue true */
+  @Bool() alwaysOnTop = true;
+  /** Hide when it loses focus (launcher behaviour). @defaultValue true */
+  @Bool() hideOnBlur = true;
+  /** The user may pin it open (panel behaviour). @defaultValue false */
+  @Bool() pinnable = false;
+  /** The user may resize it; size and position are remembered. @defaultValue false */
+  @Bool() resizable = false;
+  /** Vibrancy or blur background; opaque where the OS has none. @defaultValue true */
+  @Bool() vibrancy = true;
+  /** Displays it may open on: the active one or any. @defaultValue "active" */
+  @OneOf(["active", "any"]) displays = "active";
 }
 
 /** Shell switches of the application and context menus; the items are the `@Menu` classes. */
@@ -63,8 +89,8 @@ class MenusConfig {
   @Bool() contextMenu = true;
   /** Electron menu roles kept besides the contributed items. */
   @List(Str) standardRoles: string[] = ["undo", "redo", "cut", "copy", "paste", "selectAll"];
-  /** The Help menu's documentation link. @defaultValue "https://docs.figentra.com/console" */
-  @Url() docsUrl = "https://docs.figentra.com/console";
+  /** The Help menu's documentation link. @defaultValue "https://docs.acme.dev/console" */
+  @Url() docsUrl = "https://docs.acme.dev/console";
 }
 
 /** The tray icon. */
@@ -86,9 +112,9 @@ class TrayConfig {
 class DeepLinksConfig {
   /**
    * Custom scheme, registered as the default handler at install.
-   * @defaultValue "figentra-console"
+   * @defaultValue "acme-console"
    */
-  @Str({ pattern: /^[a-z][a-z0-9-]+$/ }) scheme = "figentra-console";
+  @Str({ pattern: /^[a-z][a-z0-9-]+$/ }) scheme = "acme-console";
   /** Also claim the app's https origin as universal links. @defaultValue false */
   @Bool() claimHttpsOrigin = false;
   /** Route a deep link opens; `%s` is the path after the scheme. @defaultValue "/open?url=%s" */
@@ -152,12 +178,12 @@ class HardeningConfig {
 
 /** electron-builder packaging; runway's `release.desktop.platforms` may only narrow it. */
 class PackagingConfig {
-  /** Bundle identifier. @defaultValue "com.figentra.console" */
-  @Str() appId = "com.figentra.console";
+  /** Bundle identifier. @defaultValue "dev.acme.console" */
+  @Str() appId = "dev.acme.console";
   /** Name in the dock and the start menu. @defaultValue "Console" */
   @Str() productName = "Console";
-  /** Copyright line of the installers. @defaultValue "© Figentra" */
-  @Str() copyright = "© Figentra";
+  /** Copyright line of the installers. @defaultValue "© Acme" */
+  @Str() copyright = "© Acme";
   /** macOS targets; `zip` is required by electron-updater. @defaultValue ["dmg", "zip"] */
   @List(OneOf(["dmg", "zip", "pkg", "mas"])) mac = ["dmg", "zip"];
   /** Windows targets. @defaultValue ["nsis"] */
@@ -180,32 +206,36 @@ class PackagingConfig {
   @Map(Str) fileAssociations: Record<string, string> = {};
 }
 
-/** The Electron desktop target: windows, menus, tray, deep links, auto-update and permissions. */
+/**
+ * The Electron desktop target: mode, windows, overlays, menus, tray, deep links, auto-update and
+ * permissions.
+ */
 @Config("console.desktop")
 export class DesktopConfig {
+  /** Dock app, menu-bar app or both (ADR 0281 d3). @defaultValue DesktopMode.Hybrid */
+  @OneOf(DesktopMode) mode = DesktopMode.Hybrid;
   /** One window per key; `main` is required. */
   @Map(Nested(WindowConfig)) windows: Record<string, WindowConfig> = {
     main: new WindowConfig(),
-    // A quick-entry panel summoned by the global shortcut below, like a menu-bar launcher.
-    quick: Object.assign(new WindowConfig(), {
-      route: "/quick-order",
-      width: 680,
-      height: 120,
-      minWidth: 480,
-      minHeight: 120,
-      resizable: false,
-      titleBarStyle: "hidden",
-      kind: WindowKind.Panel,
-      openOnLaunch: false,
-      alwaysOnTop: true,
-      hideOnBlur: true,
-    }),
   };
-  /** System-wide shortcuts, shortcut key → binding; registered by main, never by the renderer. */
-  @Map(Nested(GlobalShortcutConfig)) globalShortcuts: Record<string, GlobalShortcutConfig> = {
-    quick: Object.assign(new GlobalShortcutConfig(), {
-      accelerator: "CommandOrControl+Shift+Space",
-      window: "quick",
+  /** Named overlays, each opened by its shortcut, the tray menu or an in-app button. */
+  @Map(Nested(OverlayConfig)) overlays: Record<string, OverlayConfig> = {
+    // Claude-style prompt bar centred on the active display; Esc or blur closes it.
+    quick: Object.assign(new OverlayConfig(), {
+      style: OverlayStyle.Launcher,
+      route: "/quick-order",
+      shortcut: "CommandOrControl+Shift+Space",
+      anchor: OverlayAnchor.ScreenCenter,
+    }),
+    // Gemini-style card docked to the right edge. The dashboard stands in until an assistant
+    // route exists.
+    assistant: Object.assign(new OverlayConfig(), {
+      style: OverlayStyle.Panel,
+      route: "/",
+      anchor: OverlayAnchor.EdgeRight,
+      hideOnBlur: false,
+      pinnable: true,
+      resizable: true,
     }),
   };
   /** Which shell menus are shown and where Help points. */

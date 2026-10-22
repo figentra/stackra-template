@@ -42,7 +42,7 @@ describe(PrintReceiptBridge, () => {
     ).rejects.toRefuseWith(bridged);
     await expect(
       handlers.invoke({ key: "console.receipt.print", input: { orderId: "x", lines: [] } }, SENDER),
-    ).rejects.toRefuseWith(refusal(CoreRefusals.invalid_argument));
+    ).rejects.toRefuseWith(refusal(CoreRefusals.validation));
     const foreign = { ...SENDER, senderUrl: "https://evil.example" };
     const valid = { orderId: "ord_01J9Z3K4M5N6P7Q8R9S0T1V2W3", lines: ["a"] };
     await expect(

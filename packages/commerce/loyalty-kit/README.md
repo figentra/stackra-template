@@ -1,7 +1,7 @@
 # @stackra/loyalty-kit
 
 A generic capability kit (ADR 0259 home A) at `packages/commerce/loyalty-kit` (`tier:lib`, category
-`commerce`): points accounts, tiers, earning and redemption maths, no Figentra business rule. It is
+`commerce`): points accounts, tiers, earning and redemption maths, no product business rule. It is
 also the **shapes catalogue**: every declaration kind a package can hold appears here once, in its
 own file and kind folder (ADR 0128), in the decorator authoring model (ADR 0094): **everything with identity is a
 class with a kind decorator; strings declare, values reference; the define family is retired.**

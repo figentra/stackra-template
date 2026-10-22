@@ -30,7 +30,7 @@ export const Refusals = refusalRefs({
   media: ["upload_expired", "upload_bucket_mismatch", "upload_incomplete"], // @stackra/media
   core: [
     "forbidden",
-    "invalid_argument",
+    "validation",
     "not_found",
     "rate_limited",
     "workflow_timed_out",

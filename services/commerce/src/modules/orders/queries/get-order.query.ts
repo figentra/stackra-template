@@ -27,7 +27,7 @@ export class GetOrderQuery {
   /**
    * Loads the record first so the policy can see it; the view is built after authorization passes.
    * @throws AppError `not_found` when no order has this id in the actor's tenant;
-   *   `permission_denied` when the
+   *   `forbidden` when the
    *         policy denies.
    */
   async handle(input: GetOrderInput, ctx: QueryContext): Promise<OrderView> {

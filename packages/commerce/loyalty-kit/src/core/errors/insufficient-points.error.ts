@@ -11,7 +11,7 @@
 import { AppError, ErrorCategory } from "@stackra/errors";
 
 /**
- * `FailedPrecondition` / `insufficient_points`; shown to the member as
+ * `PreconditionFailed` / `insufficient_points`; shown to the member as
  * `loyalty_kit::refusals.insufficient_points`.
  */
 export class InsufficientPointsError extends AppError {
@@ -21,7 +21,7 @@ export class InsufficientPointsError extends AppError {
    */
   constructor(balance: number, requested: number) {
     super({
-      category: ErrorCategory.FailedPrecondition,
+      category: ErrorCategory.PreconditionFailed,
       code: "insufficient_points",
       retryable: false,
       details: { balance, requested },

@@ -1,4 +1,4 @@
-# @figentra/docs
+# @acme/docs
 
 The project's documentation site, built with Mintlify. Everything Mintlify reads lives in `src/`:
 `docs.json`, the MDX pages, and the API reference. Three things are written by hand; the rest is

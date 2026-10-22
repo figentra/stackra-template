@@ -12,8 +12,7 @@
  *                     0145 (carve-out)
  */
 import { defineApp } from "@stackra/app";
-import { ApiArea } from "@stackra/contracts";
-import { Target } from "@stackra/platform";
+import { ApiArea, Target } from "@stackra/contracts";
 import { ConsoleEnv } from "./src/config/env.config";
 
 /**

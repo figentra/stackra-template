@@ -12,7 +12,7 @@ import { AppError, ErrorCategory } from "@stackra/errors";
 /** `useSite()` was called where no `SiteLayout` resolved a site. */
 export class SiteContextMissingError extends AppError {
   /** A precondition of the hook, not a missing record. */
-  readonly category = ErrorCategory.FailedPrecondition;
+  readonly category = ErrorCategory.PreconditionFailed;
   /** Stable code for the reporter. */
   readonly code = "site_context_missing";
 }

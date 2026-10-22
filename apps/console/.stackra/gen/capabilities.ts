@@ -9,7 +9,8 @@
  *           each port are wiring.ts's.
  * Runtime: browser
  */
-import { Capability, Target } from "@stackra/platform";
+import { Target } from "@stackra/contracts";
+import { Capability } from "@stackra/platform";
 
 /** Capabilities of the active target. */
 export const target = {

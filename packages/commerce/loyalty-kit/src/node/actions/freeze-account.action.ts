@@ -37,7 +37,7 @@ export class FreezeAccountAction {
   /**
    * Loads the account, authorizes the freeze against it and sets the flag.
    * @throws a `NotFound` refusal when no account has this id in the actor's tenant;
-   * `PermissionDenied` when the policy denies.
+   * `Forbidden` when the policy denies.
    */
   async handle(input: FreezeAccountInput, ctx: ActionContext): Promise<FreezeAccountOutput> {
     const account = await this.accounts.findOneOrFail({ id: input.accountId });

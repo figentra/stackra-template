@@ -5,7 +5,7 @@
 #           advisory on iOS.
 # Runtime: node
 # Governing contract: ADR 0059, ADR 0252, ADR 0022
-appId: com.figentra.stackra
+appId: dev.acme.mobile
 tags: [gate, android]
 ---
 - runFlow: sign-in-and-home.flow.yaml

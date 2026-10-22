@@ -16,7 +16,7 @@ describe(ErrorState, () => {
   /** Retrying a permission refusal can never succeed, so offering it would mislead the user. */
   it("shows no retry for a permission refusal", () => {
     const denied = new AppError({
-      category: ErrorCategory.PermissionDenied,
+      category: ErrorCategory.Forbidden,
       code: "order_cancel_denied",
     });
     render(<ErrorState error={denied} onRetry={vi.fn()} />, { locale: "en" });

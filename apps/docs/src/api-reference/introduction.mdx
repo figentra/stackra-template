@@ -34,11 +34,11 @@ body returns the first response; the same key with a different body is refused w
 ## Errors
 
 Every error is the same envelope, `{ "code": "insufficient_stock", "category":
-"failed_precondition", "retryable": false, "details": {…}, "errorId": "err_…" }`. The `code` is
-snake_case and specific; the `category` is one of a fixed list (`invalid_argument`,
-`unauthenticated`, `permission_denied`, `not_found`, `conflict`, `failed_precondition`,
-`resource_exhausted`, `unavailable`, …) and decides the HTTP status: `400`, `401`, `403`, `404`,
-`409`, `412`, `429`, `503`. Each operation lists its codes under its responses. Quote the `errorId`
+"precondition_failed", "retryable": false, "details": {…}, "errorId": "err_…" }`. The `code` is
+snake_case and specific; the `category` is one of ten (`validation`, `unauthenticated`,
+`entitlement_required`, `forbidden`, `not_found`, `conflict`, `precondition_failed`,
+`rate_limited`, `unavailable`, `internal`) and decides the HTTP status: `400`, `401`, `402`, `403`,
+`404`, `409`, `412`, `429`, `503`, `500`. Each operation lists its codes under its responses. Quote the `errorId`
 to support.
 
 ## Versions

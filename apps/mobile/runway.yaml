@@ -43,7 +43,7 @@ release:
 
 # ── Telemetry destination that is per member, not per environment (org is root
 # providers.sentry.org)
-telemetry: { sentryProject: figentra-mobile }
+telemetry: { sentryProject: acme-mobile }
 
 # ── Environments (names fixed by ADR 0170 DP5 as amended: dev | preview | staging | production)
 environments:
@@ -76,9 +76,9 @@ environments:
     mobile: { channel: preview, profile: preview }
     vars:
       EXPO_PUBLIC_EAS_PROJECT_ID: ref:expo.projectId
-      EXPO_PUBLIC_API_ORIGIN: "https://api-pr-${pr}.preview.figentra.com"
-      EXPO_PUBLIC_REALTIME_ORIGIN: "wss://api-pr-${pr}.preview.figentra.com/realtime"
-      EXPO_PUBLIC_APP_ORIGIN: "https://console-pr-${pr}.preview.figentra.com"
+      EXPO_PUBLIC_API_ORIGIN: "https://api-pr-${pr}.preview.acme.dev"
+      EXPO_PUBLIC_REALTIME_ORIGIN: "wss://api-pr-${pr}.preview.acme.dev/realtime"
+      EXPO_PUBLIC_APP_ORIGIN: "https://console-pr-${pr}.preview.acme.dev"
       EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.nonprod
       EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.nonprod
       EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
@@ -90,9 +90,9 @@ environments:
     mobile: { channel: staging, profile: staging }
     vars:
       EXPO_PUBLIC_EAS_PROJECT_ID: ref:expo.projectId
-      EXPO_PUBLIC_API_ORIGIN: https://api.staging.figentra.com
-      EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.staging.figentra.com/realtime
-      EXPO_PUBLIC_APP_ORIGIN: https://console.staging.figentra.com
+      EXPO_PUBLIC_API_ORIGIN: https://api.staging.acme.dev
+      EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.staging.acme.dev/realtime
+      EXPO_PUBLIC_APP_ORIGIN: https://console.staging.acme.dev
       EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.nonprod
       EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.nonprod
       EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
@@ -104,9 +104,9 @@ environments:
     mobile: { channel: production, profile: production }
     vars:
       EXPO_PUBLIC_EAS_PROJECT_ID: ref:expo.projectId
-      EXPO_PUBLIC_API_ORIGIN: https://api.figentra.com
-      EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.figentra.com/realtime
-      EXPO_PUBLIC_APP_ORIGIN: https://console.figentra.com
+      EXPO_PUBLIC_API_ORIGIN: https://api.acme.dev
+      EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.acme.dev/realtime
+      EXPO_PUBLIC_APP_ORIGIN: https://console.acme.dev
       EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.prod
       EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.prod
       EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile

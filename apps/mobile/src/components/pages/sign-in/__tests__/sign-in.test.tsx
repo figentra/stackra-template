@@ -26,7 +26,7 @@ describe("SignInPage", () => {
   /** A cancelled browser flow is an inline error, not a crash and not a navigation. */
   it("shows an inline error when the flow is cancelled", async () => {
     const cancelled = new AppError({
-      category: ErrorCategory.Cancelled,
+      category: ErrorCategory.Unauthenticated,
       code: "sign_in_cancelled",
       retryable: true,
     });

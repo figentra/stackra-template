@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="title desc">
+  <title id="title">Stackra</title>
+  <desc id="desc">Stackra: decorated services, every surface, AI-ready.</desc>
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f1216"/>
+      <stop offset="1" stop-color="#07090e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.5" r="0.45">
+      <stop offset="0" stop-color="#366bd3" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#366bd3" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#282e38" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.15"/>
+      <stop offset="0.55" stop-color="#fff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.9"/>
+    </linearGradient>
+    <mask id="gridMask">
+      <rect width="1280" height="320" fill="url(#fade)"/>
+    </mask>
+    <clipPath id="clip">
+      <rect width="1280" height="320" rx="24"/>
+    </clipPath>
+    <linearGradient id="l1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6fa2ff"/>
+      <stop offset="1" stop-color="#366bd3"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#clip)">
+    <rect width="1280" height="320" fill="url(#card)"/>
+    <rect width="1280" height="320" fill="url(#grid)" mask="url(#gridMask)" opacity="0.6"/>
+    <rect width="1280" height="320" fill="url(#glow)"/>
+
+    <!-- stack motif: three isometric layers -->
+    <g transform="translate(1050 160)">
+      <path d="M0 52 L120 112 L0 172 L-120 112 Z" fill="#366bd3" fill-opacity="0.18" stroke="#366bd3" stroke-opacity="0.55" stroke-width="1.5" transform="translate(0 -60)"/>
+      <path d="M0 -8 L120 52 L0 112 L-120 52 Z" fill="#366bd3" fill-opacity="0.32" stroke="#6fa2ff" stroke-opacity="0.7" stroke-width="1.5" transform="translate(0 -60)"/>
+      <path d="M0 -68 L120 -8 L0 52 L-120 -8 Z" fill="url(#l1)" stroke="#f2f2ef" stroke-opacity="0.35" stroke-width="1.5" transform="translate(0 -60)"/>
+      <circle cx="0" cy="-68" r="4" fill="#f2f2ef" transform="translate(0 0)"/>
+    </g>
+
+    <!-- wordmark and tagline -->
+    <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+      <rect x="96" y="92" width="10" height="56" rx="3" fill="#6fa2ff"/>
+      <text x="124" y="146" font-size="64" font-weight="700" letter-spacing="-1.5" fill="#f2f2ef">Stackra</text>
+      <text x="98" y="204" font-size="26" font-weight="500" fill="#9b9fa5">Decorated services. Every surface. AI-ready.</text>
+      <text x="98" y="252" font-size="15" font-weight="600" letter-spacing="2.5" fill="#6fa2ff">WEB · PWA · DESKTOP · MOBILE · MCP</text>
+    </g>
+  </g>
+  <rect x="0.5" y="0.5" width="1279" height="319" rx="23.5" fill="none" stroke="#282e38"/>
+</svg>

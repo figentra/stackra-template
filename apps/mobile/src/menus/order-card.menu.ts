@@ -10,8 +10,8 @@
  * Governing contract: ADR 0061, ADR 0139
  */
 import type { QueryOutput } from "@stackra/clients";
+import { Target } from "@stackra/contracts";
 import { Menu, MenuKind, type MenuBuilder } from "@stackra/navigation";
-import { Target } from "@stackra/platform";
 import { Icons } from "@stackra/ui/icons";
 import { Commerce } from "#stackra/clients";
 import { I18n } from "#stackra/i18n";

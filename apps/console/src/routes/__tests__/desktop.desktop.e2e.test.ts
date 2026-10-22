@@ -45,7 +45,7 @@ test("boots hardened, bridges a declared action, routes a deep link", async () =
   );
   expect(result).toMatchObject({ ok: true, data: { printer: "fake-escpos" } });
 
-  await app.openUrl("figentra-console://orders/orders/ord_01JA0000000000000000000001");
+  await app.openUrl("acme-console://orders/orders/ord_01JA0000000000000000000001");
   await expect(window.getByRole("heading", { level: 1 })).toHaveText(
     /ord_01JA0000000000000000000001/,
   );

@@ -65,7 +65,7 @@ export class ArchiveProductAction {
 
   /**
    * The evict runs after commit, keyed like the cached `view` (model tag + the id in the input).
-   * @throws AppError `not_found` when the id is unknown in this tenant; `permission_denied` when
+   * @throws AppError `not_found` when the id is unknown in this tenant; `forbidden` when
    *   ProductPolicy.archive denies.
    */
   @CacheEvict({ tags: [Product], key: (input: ArchiveProductInput) => input.productId })

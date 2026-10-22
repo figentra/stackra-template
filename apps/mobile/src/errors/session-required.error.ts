@@ -13,7 +13,7 @@ import { AppError, ErrorCategory } from "@stackra/errors";
 /** Thrown by `useRequireSession` under a route that declares `auth: false`. */
 export class SessionRequiredError extends AppError {
   /** The session precondition failed; retrying cannot help. */
-  readonly category = ErrorCategory.FailedPrecondition;
+  readonly category = ErrorCategory.PreconditionFailed;
   /** The wire code; its lang key is `mobile::refusals.session_required`. */
   readonly code = "session_required";
   /** A programming error, so never retried. */

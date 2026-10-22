@@ -1,0 +1,19 @@
+# Stackra file contract:
+# Purpose: secret scanning policy for pre-commit (lefthook) and CI (secrets:scan)
+# Boundary: scan policy only; allowlisted paths hold deliberately fake keys.
+# Runtime: node
+# Governing contract: ADR 0173 (secrets never in git)
+
+title = "stackra"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fixtures with deliberately fake keys; generated i18n key references (I18n.<ns>.<path>) are names, not values"
+paths = ['''.*/__fixtures__/.*''']
+regexes = [
+  '''sk_test_[A-Za-z0-9]{8,}''',
+  '''rk_test_[A-Za-z0-9]{8,}''',
+  '''^I18n(\.[a-z][a-z0-9_]*)+$''',
+]

@@ -10,7 +10,7 @@
 # Governing contract: ADR 0158 (the manifest is the contract), ADR 0260 (clients are generated from
 #                     manifests)
 version: 1
-repository: figentra-os
+repository: acme-platform
 producers:
   billing: 8e1b3d2
   content: 4a9c7f1

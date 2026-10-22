@@ -4,19 +4,38 @@
 //          tag; `boundaries` enforces the tier direction.
 // Boundary: task order and outputs only. A member's own committed manifest and OpenAPI file are
 //           outputs of its `gen`, never its inputs; an app's `gen` reads the services' committed
-//           manifests as inputs, so a service change re-runs the apps' gen.
+//           manifests as inputs, so a service change re-runs the apps' gen. TURBO_TOKEN and
+//           TURBO_TEAM come from the environment (CI: Infisical; local: optional), never this file.
 // Runtime: node
 // Governing contract: ADR 0261 (gen before build), ADR 0003 (tier direction), ADR 0158 (committed
 //                     manifest)
 {
   "$schema": "https://turborepo.dev/schema.json",
+
+  // Remote cache: active when TURBO_TOKEN/TURBO_TEAM are present; a no-op otherwise. `signature: true`
+  // HMAC-signs every artifact (TURBO_REMOTE_CACHE_SIGNATURE_KEY, from the vault).
+  "remoteCache": { "enabled": true, "signature": true },
+  "ui": "tui",
+  // Strict env mode: a task only sees the env vars it declares.
+  "envMode": "strict",
+  "cacheMaxAge": "7d",
+  "cacheMaxSize": "10GB",
+
   // every member runway is a task input below
   "globalDependencies": [
     "pnpm-workspace.yaml",
     "runway.yaml",
     "mise.toml",
-    "stackra-manifests.lock.yaml",
+    "stackra.lock.yaml",
+    ".oxlintrc.jsonc",
+    ".oxfmtrc.jsonc",
   ],
+  "globalEnv": ["NODE_ENV", "CI"],
+  // Read without entering the cache key: they change how a tool runs, never what it produces.
+  "globalPassThroughEnv": ["HOME", "PATH", "ENCORE_*", "TURBO_*", "DOCKER_HOST"],
+
+  // tier:config — packages/tooling/*; tier:lib — packages/<category>/<name>; tier:app — apps/*, reach
+  // services over the wire only (#stackra/clients); tier:service — services/*, never another service.
   "boundaries": {
     "tags": {
       "tier:config": { "dependencies": { "deny": ["tier:lib", "tier:app", "tier:service"] } },
@@ -27,9 +46,10 @@
   },
   "tasks": {
     "gen": {
+      "description": "stackra gen: .stackra/gen (#stackra/*), the generated entries, and the committed app-manifest.json and openapi.json.",
       "dependsOn": ["^gen"],
       // an app's clients come from the in-repo service manifests (committed outputs of their own
-      // `gen`) plus the external manifests pinned in stackra-manifests.lock.yaml
+      // `gen`) plus the external manifests pinned in stackra.lock.yaml
       "inputs": [
         "src/**",
         "assets/**",
@@ -40,8 +60,13 @@
       ],
       "outputs": [".stackra/**", "css/**"],
     },
-    "typecheck": { "dependsOn": ["gen", "^build"] },
-    "test": { "dependsOn": ["gen"], "outputs": ["coverage/**"] },
+    "typecheck": { "description": "tsc --noEmit.", "dependsOn": ["gen", "^build"] },
+    "test": { "description": "Each member's vitest suite.", "dependsOn": ["gen"] },
+    "test:coverage": {
+      "description": "vitest run --coverage against the shared gate; packages only.",
+      "dependsOn": ["gen"],
+      "outputs": ["coverage/**"],
+    },
     "test:e2e": {
       "dependsOn": ["build"],
       "outputs": [
@@ -51,9 +76,26 @@
         ".maestro/output/**",
       ],
     },
-    "build": { "dependsOn": ["gen", "^build"], "outputs": ["dist/**"] },
-    "lint": {},
-    "format:check": {},
+    "build": { "dependsOn": ["gen", "^build"], "outputs": ["dist/**", "build/**"] },
+    "lint": {
+      "description": "oxlint, no fixes; no ^build: linting a member's own source needs nothing built.",
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxlintrc.jsonc"],
+    },
+    "format": {
+      "description": "Rewrite files with oxfmt. Never cached: its job is to mutate the tree.",
+      "cache": false,
+    },
+    "format:check": {
+      "description": "Fail if anything is unformatted, without writing.",
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxfmtrc.jsonc"],
+    },
     "validate": { "dependsOn": ["gen"] },
+    "clean": { "description": "Remove a member's build output and local caches.", "cache": false },
+    "dev": {
+      "description": "Long-running dev/watch process (stackra dev).",
+      "cache": false,
+      "persistent": true,
+      "interruptible": true,
+    },
   },
 }

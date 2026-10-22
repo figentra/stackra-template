@@ -7,8 +7,8 @@
  * Runtime: node
  * Governing contract: ADR 0058 (Electron), ADR 0254 (opt-in tray keep-alive)
  */
+import { Target } from "@stackra/contracts";
 import { Menu, MenuKind, type MenuBuilder } from "@stackra/navigation";
-import { Target } from "@stackra/platform";
 import { I18n } from "#stackra/i18n";
 import { OpenPendingChangesCommand } from "#src/commands/open-pending-changes.command";
 

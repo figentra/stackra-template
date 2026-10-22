@@ -58,8 +58,8 @@ class ManifestConfig {
   @List(Str) categories: string[] = ["business", "productivity"];
   /** Manifest `shortcuts`; icons are derived. */
   @List(Nested(Shortcut)) shortcuts: Shortcut[] = [new Shortcut()];
-  /** `web+figentra://…` opens the matching route. */
-  @Map(Str) protocolHandlers: Record<string, string> = { "web+figentra": "/open?url=%s" };
+  /** `web+acme://…` opens the matching route. */
+  @Map(Str) protocolHandlers: Record<string, string> = { "web+acme": "/open?url=%s" };
   /** Web manifest `launch_handler.client_mode`. @defaultValue "navigate-existing" */
   @OneOf(["auto", "navigate-existing", "navigate-new", "focus-existing"])
   launchClientMode = "navigate-existing";

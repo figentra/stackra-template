@@ -1,7 +1,8 @@
 {
-  "name": "@figentra/service-notifications",
+  "name": "@acme/service-notifications",
   "version": "0.1.0",
   "private": true,
+  "description": "The consumer service: delivery, notification preferences, the message log and the in-app inbox. Reaches commerce by event, call and command through the generated client, never its code.",
   "type": "module",
   "imports": {
     "#src/*": "./src/*",
@@ -54,8 +55,8 @@
   "devDependencies": {
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
-    "@stackra/typescript-config": "catalog:stackra",
-    "@stackra/vitest-config": "catalog:stackra",
+    "@stackra/typescript-config": "workspace:*",
+    "@stackra/vitest-config": "workspace:*",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "typescript": "catalog:build",

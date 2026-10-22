@@ -22,7 +22,7 @@ describe("app-manifest.json", () => {
   /** The manifest published with the last git tag is the baseline; anything narrowed fails here. */
   it("only adds to the last release", async () => {
     const next = await loadManifest("./.stackra/app-manifest.json");
-    const previous = await previousRelease("@figentra/service-commerce");
+    const previous = await previousRelease("@acme/service-commerce");
 
     expectBackwardCompatible(previous, next);
   });

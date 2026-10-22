@@ -59,7 +59,7 @@ export class CancelOrderAction {
    * Runs inside one transaction; the void is deferred to `afterCommit` so a rolled-back cancel
    * never sends it. The access record names the principal the cancel was for, so a cancel that
    * arrived by mail is traceable to the customer and to the service that relayed it.
-   * @throws AppError `permission_denied` when OrderPolicy.cancel denies the principal for this
+   * @throws AppError `forbidden` when OrderPolicy.cancel denies the principal for this
    *   record.
    */
   @AccessLogged({
