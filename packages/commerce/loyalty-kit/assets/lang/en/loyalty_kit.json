@@ -1,0 +1,39 @@
+{
+  "nav": { "loyalty": "Loyalty" },
+  "tiers": { "bronze": "Bronze", "silver": "Silver", "gold": "Gold" },
+  "kinds": { "earn": "Earned", "redeem": "Redeemed", "expire": "Expired", "adjust": "Adjusted" },
+  "widgets": { "points_issued": "Points today" },
+  "documents": {
+    "overview": "My points",
+    "redeem_title": "Spend points",
+    "expiry_note": "Some of your points expire soon."
+  },
+  "settings": {
+    "title": "Loyalty",
+    "expiry_months": "Points expire after (months)",
+    "silver_from": "Silver from (points)",
+    "gold_from": "Gold from (points)"
+  },
+  "permissions": {
+    "loyalty_account": {
+      "read": "View loyalty accounts",
+      "enroll": "Enroll members",
+      "freeze": "Freeze accounts",
+      "redeem": "Redeem points",
+      "expire": "Expire points"
+    }
+  },
+  "account": {
+    "enrolled": "Member enrolled",
+    "freeze_confirm": "Freeze this account? The member cannot earn or spend until it is unfrozen.",
+    "frozen": "Account updated",
+    "frozen_badge": "Frozen"
+  },
+  "adjustment": { "points": "Loyalty points" },
+  "refusals": {
+    "insufficient_points": "You do not have enough points.",
+    "not_a_member": "You are not enrolled in the loyalty programme.",
+    "account_frozen": "This account is frozen.",
+    "not_own_principal": "You can only enroll yourself."
+  }
+}

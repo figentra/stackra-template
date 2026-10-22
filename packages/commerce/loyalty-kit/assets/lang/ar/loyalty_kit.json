@@ -1,0 +1,39 @@
+{
+  "nav": { "loyalty": "الولاء" },
+  "tiers": { "bronze": "برونزي", "silver": "فضي", "gold": "ذهبي" },
+  "kinds": { "earn": "مكتسبة", "redeem": "مستخدمة", "expire": "منتهية", "adjust": "معدّلة" },
+  "widgets": { "points_issued": "نقاط اليوم" },
+  "documents": {
+    "overview": "نقاطي",
+    "redeem_title": "استخدام النقاط",
+    "expiry_note": "ستنتهي صلاحية بعض نقاطك قريباً."
+  },
+  "settings": {
+    "title": "الولاء",
+    "expiry_months": "انتهاء صلاحية النقاط بعد (أشهر)",
+    "silver_from": "الفضي من (نقاط)",
+    "gold_from": "الذهبي من (نقاط)"
+  },
+  "permissions": {
+    "loyalty_account": {
+      "read": "عرض حسابات الولاء",
+      "enroll": "تسجيل الأعضاء",
+      "freeze": "تجميد الحسابات",
+      "redeem": "استخدام النقاط",
+      "expire": "إنهاء صلاحية النقاط"
+    }
+  },
+  "account": {
+    "enrolled": "تم تسجيل العضو",
+    "freeze_confirm": "تجميد هذا الحساب؟ لن يتمكن العضو من كسب النقاط أو استخدامها حتى يُرفع التجميد.",
+    "frozen": "تم تحديث الحساب",
+    "frozen_badge": "مجمّد"
+  },
+  "adjustment": { "points": "نقاط الولاء" },
+  "refusals": {
+    "insufficient_points": "ليس لديك نقاط كافية.",
+    "not_a_member": "أنت غير مسجل في برنامج الولاء.",
+    "account_frozen": "هذا الحساب مجمّد.",
+    "not_own_principal": "يمكنك تسجيل نفسك فقط."
+  }
+}
