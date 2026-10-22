@@ -1,0 +1,11 @@
+{
+  "permissions": { "stock": { "read": "View stock", "manage": "Adjust stock" } },
+  "settings": {
+    "title": "Inventory",
+    "low_stock_threshold": "Low-stock threshold",
+    "allow_backorders": "Allow backorders"
+  },
+  "widgets": { "low_stock": "Low stock" },
+  "adjust_reason": { "count": "Stock count", "delivery": "Delivery", "damage": "Damage write-off" },
+  "refusals": { "insufficient_stock": "Not enough stock." }
+}

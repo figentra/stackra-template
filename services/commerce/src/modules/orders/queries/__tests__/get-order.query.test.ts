@@ -1,0 +1,38 @@
+/**
+ * Stackra file contract:
+ * Purpose: proves a customer reads their own order and is refused another customer's, and that a
+ *          service acting for the owner reads it too.
+ * Boundary: unit tier through the pipeline; memory drivers; records from the factory.
+ * Runtime: node
+ * Governing contract: ADR 0098, ADR 0132 d4, ADR 0022, guides/programming-model.mdx#queries
+ */
+import { describe, expect, it } from "@stackra/testing";
+import { actors } from "@stackra/iam/testing";
+import { createTestingModule } from "@stackra/container/testing";
+import { run } from "@stackra/actions/testing";
+import { refusal } from "@stackra/errors/testing";
+import { Refusals } from "#stackra/manifest";
+import { CommerceModule } from "#src/commerce.module";
+import { GetOrderQuery } from "#modules/orders/queries/get-order.query";
+import { OrderFactory } from "#modules/orders/factories/order.factory";
+
+/** Guards the one-order read, where OrderPolicy.read narrows customers to their own orders. */
+describe(GetOrderQuery, () => {
+  /** Owner allowed, stranger refused, the notifications service on behalf of the owner allowed. */
+  it("applies OrderPolicy.read per record", async () => {
+    const app = await createTestingModule(CommerceModule).useDrivers("memory").compile();
+    const [order, other] = await new OrderFactory(app.em).createMany(2);
+    const input = { orderId: order.id };
+    const relay = actors.service("notifications", {
+      onBehalfOf: actors.customer(order.customerId),
+    });
+
+    const own = await run(GetOrderQuery, input, { as: actors.customer(order.customerId) });
+    const foreign = await run(GetOrderQuery, input, { as: actors.customer(other.customerId) });
+    const relayed = await run(GetOrderQuery, input, { as: relay });
+
+    expect(own.output.id).toBe(order.id);
+    expect(foreign).toRefuseWith(refusal(Refusals.core.forbidden));
+    expect(relayed.output.id).toBe(order.id);
+  });
+});

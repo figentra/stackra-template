@@ -1,0 +1,107 @@
+# Stackra file contract:
+# Purpose: how and where THIS service runs, per environment: dev port and host, the deployable it joins, resources and
+#          scaling, the sizes of what it needs (its logical database, cache keyspace, queues, crons), drivers per
+#          environment, secret NAMES, health checks, per-environment config values. The root runway holds the
+#          destinations (accounts, zones, the shared server) and the defaults this file may override.
+# Boundary: what the service IS is stackra.config.ts; what it NEEDS is derived by gen from the module declarations into
+#           .stackra/app-manifest.json `infra` (database, queues from @AsJob/@OnEvent, crons from @Cron, secrets from
+#           @Secret) and this file only sizes those. No secret value, no business value (src/config/*, settings).
+#           Health checks are declared in stackra.config.ts; this file tunes only their thresholds
+#           (ADR 0190). The mail driver is chosen here per environment (`drivers.mail`), the one home
+#           of that choice (ADR 0266). Validated by `@stackra/runway/schema/service.json`.
+# Runtime: node
+# Governing contract: ADR 0168; ADR 0169, 0238, 0266, 0148, 0173, 0147 d2
+$schema: "@stackra/runway/schema/service.json"
+version: 2
+member: commerce # must equal stackra.config.ts `key`
+
+# Every @Secret of src/config/*; gen fails on a missing one. Path `runtime` (root default), per environment.
+secrets:
+  PRICING_API_KEY: {}
+
+health: # thresholds only; the path and checks are stackra.config.ts `health`
+  readiness: { requireMigrations: true, timeoutSeconds: 2 }
+  liveness: { eventLoopLagMs: 1000 }
+
+environments:
+  dev:
+    port: 4001 # the service's own listener when run standalone; under `encore run` the root gateway fronts it
+    host: localhost
+    devConsolePort: 4901
+    deployable: core # dev is a monolith (ADR 0169 d2)
+    drivers:
+      queue: memory
+      cache: memory
+      events: memory
+      workflow: native
+      realtime: memory
+      mail: memory
+      search: memory
+      media: memory
+    database: { extensions: [ltree, pg_trgm] } # one logical db `commerce` per lane (ADR 0238 d2)
+    config: # the last config layer (ADR 0146 CF3): per-environment @Env values and driver names
+      commerce.service: { storefrontBaseUrl: { from-member: web } } # ADR 0170: no literal ports
+      loyalty_kit: { ledger: memory }
+      access_log: { sink: memory }
+    crons: { enabled: false } # `encore run` does not run crons (ADR 0091); the dev console triggers them
+
+  preview:
+    deployable: core
+    database: { plan: shared }
+    drivers: { mail: memory } # previews never mail a real address
+    secrets: [PRICING_API_KEY]
+    config: { commerce.service: { storefrontBaseUrl: "https://web-pr-${pr}.preview.acme.dev" } }
+
+  staging:
+    deployable: core # grouped with notifications: the NotificationsClient calls in-process (ADR 0260 d4)
+    isolate: false
+    resources:
+      { cpu: 0.5, memory: 1Gi, instances: { min: 1, max: 2 }, scaling: { metric: cpu, target: 70 } }
+    poolBudget: 20
+    database: { storageGb: 20, extensions: [ltree, pg_trgm] }
+    cache: { keyspaceMb: 256 }
+    buckets: { product_images: { storageGb: 5 } } # `@Bucket` declarations from the manifest
+    queues: # names come from the manifest (`@AsJob` / `@OnEvent` queues); sizes here
+      default: { visibilityTimeoutSeconds: 300, dlq: true }
+      maintenance: { visibilityTimeoutSeconds: 180, dlq: true }
+      notifications: { visibilityTimeoutSeconds: 120, dlq: true }
+    crons: { enabled: true }
+    drivers:
+      queue: encore-pubsub
+      cache: valkey
+      events: encore-pubsub
+      workflow: native
+      realtime: sse
+      mail: notifications
+      search: postgres
+      media: s3
+    secrets: [PRICING_API_KEY]
+    config: { commerce.service: { storefrontBaseUrl: https://staging.acme.dev } }
+    workers: { split: false }
+
+  production:
+    deployable: commerce # split: its own process; the same code reaches notifications over RPC
+    isolate: false
+    resources:
+      { cpu: 1, memory: 2Gi, instances: { min: 2, max: 10 }, scaling: { metric: cpu, target: 60 } }
+    poolBudget: 50
+    database: { storageGb: 100, extensions: [ltree, pg_trgm], readReplica: false }
+    cache: { keyspaceMb: 1024 }
+    buckets: { product_images: { storageGb: 50 } }
+    queues:
+      default: { visibilityTimeoutSeconds: 300, dlq: true }
+      maintenance: { visibilityTimeoutSeconds: 180, dlq: true }
+      notifications: { visibilityTimeoutSeconds: 120, dlq: true }
+    crons: { enabled: true }
+    drivers:
+      queue: encore-pubsub
+      cache: valkey
+      events: encore-pubsub
+      workflow: native
+      realtime: sse
+      mail: notifications
+      search: postgres
+      media: s3
+    secrets: [PRICING_API_KEY]
+    config: { commerce.service: { storefrontBaseUrl: https://www.acme.dev } }
+    workers: { split: true, resources: { cpu: 0.5, memory: 1Gi, instances: { min: 1, max: 4 } } } # queue, cron and outbox in `commerce-worker`
