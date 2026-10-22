@@ -94,7 +94,7 @@
   "explorer.fileNesting.patterns": {
     "package.json": "pnpm-workspace.yaml, pnpm-lock.yaml, turbo.jsonc, knip.jsonc, .npmrc, mise.toml, .node-version",
     ".oxlintrc.jsonc": ".oxfmtrc.jsonc, .editorconfig, .gitattributes, .gitleaks.toml",
-    "lefthook.yml": ".commitlintrc.yaml",
+    "lefthook.yml": ".commitlintrc.yaml, cspell.config.yaml",
     "README.md": "CONTRIBUTING.md, SECURITY.md, LICENSE, NOTICE, REVIEW.md, AGENTS.md, CLAUDE.md",
     "runway.yaml": "stackra.lock.yaml",
     "*.ts": "${capture}.test.ts"

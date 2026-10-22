@@ -19,7 +19,7 @@
     // TypeScript errors you can read, inline
     "yoavbls.pretty-ts-errors",
     "usernamehw.errorlens",
-    // Spelling in code and docs (English and the Arabic-ready word list lives in .cspell.json)
+    // Spelling in code and docs (English and the Arabic-ready word list lives in cspell.config.yaml)
     "streetsidesoftware.code-spell-checker",
     // AI pair: Claude Code
     "anthropic.claude-code"
