@@ -19,7 +19,7 @@ coverage/
 .stackra/*
 !.stackra/app-manifest.json
 !.stackra/openapi.json
-# preview only: the generated samples are committed so they can be read; a real project drops the
+# template only: the generated samples are committed so they can be read; a real project drops the
 # next line
 !.stackra/**
 test-results/
@@ -51,4 +51,5 @@ android/
 .claude/settings.local.json
 # rendered from .mcp.yaml by `stackra mcp sync` (run by `prepare`)
 .mcp.json
+# template only: a real project commits pnpm-lock.yaml (Release skips until it does)
 pnpm-lock.yaml

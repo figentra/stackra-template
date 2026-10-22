@@ -1,4 +1,4 @@
-# apps/mobile/.stackra (generated; gitignored except `app-manifest.json`; committed in this preview only to be read)
+# apps/mobile/.stackra (generated; gitignored except `app-manifest.json`; committed in this template only to be read)
 
 Everything here is written by `stackra gen` from `stackra.config.ts` (S), `runway.yaml` (RM), the
 root `runway.yaml` (RR), `src/config/*.config.ts` (C/<fact>), `mise.toml` (T), the decorated classes

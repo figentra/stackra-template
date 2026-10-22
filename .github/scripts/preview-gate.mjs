@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Stackra file contract:
- * Purpose: the preview Quality Gate, one command for CI and for agents: `node .github/scripts/preview-gate.mjs`.
+ * Purpose: the pre-release Quality Gate, one command for CI and for agents: `node .github/scripts/preview-gate.mjs`.
  *          It runs every check that needs no workspace install (commit messages, format, config files parse,
  *          secrets scan), because the `@stackra/*` packages and the `stackra` CLI are not published yet.
  * Boundary: reads tracked files and git history and reports findings; it never edits a file. Tools are pinned
@@ -73,7 +73,7 @@ function tracked(...patterns) {
 
 /**
  * Lint the commit messages of the pull request range with the conventional preset. The repo's own
- * `.commitlintrc.yaml` extends `@stackra/commitlint-config`, which needs an install, so the preview uses
+ * `.commitlintrc.yaml` extends `@stackra/commitlint-config`, which needs an install, so this gate uses
  * `@commitlint/config-conventional` directly.
  */
 function commits() {
@@ -160,6 +160,6 @@ for (const name of wanted.length > 0 ? wanted : Object.keys(CHECKS)) {
   if (!CHECKS[name]()) failed.push(name);
 }
 console.log(
-  failed.length > 0 ? `\nfailed: ${failed.join(", ")}` : "\npreview gate: all checks passed",
+  failed.length > 0 ? `\nfailed: ${failed.join(", ")}` : "\npre-release gate: all checks passed",
 );
 process.exit(failed.length > 0 ? 1 : 0);

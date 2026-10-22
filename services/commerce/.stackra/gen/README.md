@@ -1,4 +1,4 @@
-# .stackra/gen (generated, gitignored; committed in this preview only so it can be read)
+# .stackra/gen (generated, gitignored; committed in this template only so it can be read)
 
 `stackra gen` writes these from one discovery IR (ADR 0261). Code imports them as `#stackra/<name>`. Never edit: the
 next run overwrites. `stackra gen --check` fails CI when they are stale. Every file is complete (no excerpts) and uses

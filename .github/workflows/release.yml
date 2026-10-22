@@ -7,8 +7,9 @@
 #        id-token write for npm trusted publishing. No npm token and no repository secret.
 # Skips: until the repository commits pnpm-lock.yaml (`preflight` below), every job is skipped and
 #        the run is green: `pnpm install --frozen-lockfile` cannot run without a lockfile, which is
-#        the case in the template preview while `@stackra/*` is unpublished.
-# Owner: the repository maintainers (CODEOWNERS). Runbook: Stackra docs `/runbooks/release`.
+#        the case in the template while `@stackra/*` is unpublished (pre-release).
+# Owner: the repository maintainers (CODEOWNERS). Runbook:
+#        https://docs.stackra.figentra.com/runbooks/release
 name: Release
 
 on:
@@ -63,7 +64,7 @@ jobs:
     needs: preflight
     # No lockfile, no install: skip instead of failing (see the header).
     if: needs.preflight.outputs.has-lockfile == 'true'
-    # Stackra docs `/runbooks/release` ("Before the first release"): a human
+    # https://docs.stackra.figentra.com/runbooks/release ("Before the first release"): a human
     # configures this environment as protected and restricted to main, so a branch that
     # edits the workflow cannot obtain a credential.
     environment: release
