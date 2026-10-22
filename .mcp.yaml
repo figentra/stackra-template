@@ -1,0 +1,17 @@
+# Stackra file contract:
+# Purpose: the project's MCP servers: the Stackra MCP, locally (`stackra mcp`, this project's generated facts:
+#          kinds, manifests, routes, wiring) and hosted (framework know-how). `stackra mcp sync`, run by
+#          `pnpm install` through `prepare`, renders this file into the gitignored .mcp.json that Claude Code reads.
+# Boundary: server definitions only; never a token. Third-party servers (docs, design system, GitHub, errors) are
+#           user-level, installed by `stackra agents setup`, not here. The hosted server authenticates with OAuth on
+#           first use (/mcp).
+# Runtime: node
+# Governing contract: ADR 0173 (secret values never in files)
+mcpServers:
+  stackra:
+    command: pnpm
+    args: [exec, stackra, mcp]
+  # Replace with the hosted Stackra MCP URL of your plan (README, "Make it yours").
+  stackra-cloud:
+    type: http
+    url: https://<stackra-mcp-host>/mcp
