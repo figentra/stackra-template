@@ -1,0 +1,23 @@
+# Stackra file contract:
+# Purpose: the pinned revision of every external producer manifest this workspace builds clients
+#          from, once per workspace. `stackra gen` reads a producer's committed
+#          `.stackra/app-manifest.json` at this revision, and every member's generated `clients.ts`
+#          header cites the same revision.
+# Boundary: producer to revision only; no secret and no URL. A producer that lives in this
+#           repository is not listed: its manifest is read from the working tree. Bumping a revision
+#           is one commit that regenerates every member.
+# Runtime: node
+# Governing contract: ADR 0158 (the manifest is the contract), ADR 0260 (clients are generated from
+#                     manifests)
+version: 1
+repository: acme-platform
+producers:
+  billing: 8e1b3d2
+  content: 4a9c7f1
+  experience: b82d913
+  identity: 2d4f6c8
+  marketing: c3d8e07
+  payments: 9be0d44
+  platform: a77e9b0
+  pricing: 3f9c2a1
+  tenants: 71ac0e2
