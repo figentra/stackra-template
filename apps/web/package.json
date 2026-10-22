@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "The public site: landing, pricing, storefront and tenant pages. React Router 7 framework mode on a Cloudflare Worker, declared with @Route/@Layout/@Block/@Menu/@Flag classes; stackra gen writes the runtime into .stackra/.",
+  "license": "UNLICENSED",
   "type": "module",
   "imports": {
     "#src/*": [

@@ -3,7 +3,20 @@
   "version": "0.1.0",
   "description": "@AccessLogged: every call of a marked method is written to an access-log sink; self-registering postgres and memory drivers.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/figentra/stackra-template.git",
+    "directory": "packages/security/access-log"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "type": "module",
+  "sideEffects": false,
   "imports": {
     "#src/*": [
       "./src/*",
@@ -76,7 +89,8 @@
       "./assets/*": "./assets/*"
     },
     "access": "public",
-    "provenance": true
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "gen": "stackra gen",

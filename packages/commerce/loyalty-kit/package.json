@@ -3,7 +3,20 @@
   "version": "0.1.0",
   "description": "Points, tiers and redemption as a module: a ledger port with self-registering postgres and memory drivers.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/figentra/stackra-template.git",
+    "directory": "packages/commerce/loyalty-kit"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "type": "module",
+  "sideEffects": false,
   "imports": {
     "#src/*": [
       "./src/*",
@@ -87,7 +100,8 @@
       "./assets/*": "./assets/*"
     },
     "access": "public",
-    "provenance": true
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "gen": "stackra gen",

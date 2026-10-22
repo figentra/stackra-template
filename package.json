@@ -1,5 +1,5 @@
 {
-  "name": "stackra-template-preview",
+  "name": "acme-platform",
   "version": "0.0.0",
   "private": true,
   "description": "Stackra reference template: the v2 programming model in one pnpm + Turborepo workspace (apps, services, packages by category, tooling presets).",

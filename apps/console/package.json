@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "The tenant console as web, PWA and desktop from one source tree. Decorated classes (@App, @Panel, @Route, @Layout, @Provider, @Store, @Menu, @Command, @Bridge, @Block, @Override) declare the app; stackra gen writes the runtime into .stackra/.",
+  "license": "UNLICENSED",
   "type": "module",
   "imports": {
     "#src/*": [
