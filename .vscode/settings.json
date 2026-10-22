@@ -14,23 +14,25 @@
   "editor.formatOnSaveMode": "file",
   "editor.formatOnType": false,
   "editor.formatOnPaste": false,
-  "editor.rulers": [100],
+  "editor.rulers": [
+    100
+  ],
   "prettier.enable": false,
   "eslint.enable": false,
   "[typescript][typescriptreact][javascript][javascriptreact][json][jsonc][json5][yaml][markdown][mdx][toml][css][scss][less][html][graphql][vue]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   // .editorconfig keeps trailing whitespace in Markdown (hard line breaks).
-  "[markdown]": { "files.trimTrailingWhitespace": false },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
   // Even Better TOML stays for validation, completion and schemas only; the [toml] formatter above is
   // oxfmt, so its own formatter (no on/off setting in 0.21) is never picked.
-
   // ── Lint: oxlint (config .oxlintrc.jsonc), fixes on save ───────────────────────────────────────
   "oxc.enable": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "explicit"
   },
-
   // ── .editorconfig ───────────────────────────────────────────────────────────────────────────
   "files.eol": "\n",
   "files.insertFinalNewline": true,
@@ -38,7 +40,6 @@
   "files.trimTrailingWhitespace": true,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
-
   // ── TypeScript: the repo's version, project-relative imports, `#` subpath imports ──────────────
   // TypeScript 7 ships only the native `tsc` (no tsserver.js), so the editor runs the official
   // "TypeScript 7" extension (TypeScriptTeam.native-preview) with its bundled native build instead of
@@ -48,7 +49,6 @@
   "js/ts.preferences.importModuleSpecifier": "non-relative",
   "js/ts.preferences.preferTypeOnlyAutoImports": true,
   "js/ts.updateImportsOnFileMove.enabled": "always",
-
   // ── JSON with comments: trailing commas are allowed (oxfmt writes them) ───────────────────────
   "files.associations": {
     "*.jsonc": "jsonc",
@@ -82,41 +82,58 @@
   "json.schemas": [
     // JSONC files: oxfmt writes trailing commas, so the JSON service must accept them.
     {
-      "fileMatch": ["*.jsonc", "**/tsconfig*.json", "**/.vscode/*.json"],
-      "schema": { "allowTrailingCommas": true }
+      "fileMatch": [
+        "*.jsonc",
+        "**/tsconfig*.json",
+        "**/.vscode/*.json"
+      ],
+      "schema": {
+        "allowTrailingCommas": true
+      }
     },
     // Claude Code's preview servers (.claude/launch.json), from SchemaStore.
     {
-      "fileMatch": ["**/.claude/launch.json"],
+      "fileMatch": [
+        "**/.claude/launch.json"
+      ],
       "url": "https://www.schemastore.org/claude-code-launch.json"
     },
     // tsconfig presets have no tsconfig*.json name, so VS Code would not recognise them.
     {
-      "fileMatch": ["**/packages/tooling/typescript/src/*.json"],
+      "fileMatch": [
+        "**/packages/tooling/typescript/src/*.json"
+      ],
       "url": "https://www.schemastore.org/tsconfig.json"
     },
     // oxlint presets: oxlint's own schema at the catalog version (1.86.0).
     {
-      "fileMatch": ["**/packages/tooling/oxlint/src/*.jsonc"],
+      "fileMatch": [
+        "**/packages/tooling/oxlint/src/*.jsonc"
+      ],
       "url": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json"
     },
     // EAS build profiles, including the generated apps/mobile/.stackra/eas.json.
     {
-      "fileMatch": ["**/eas.json"],
+      "fileMatch": [
+        "**/eas.json"
+      ],
       "url": "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json"
     },
     // Generated OpenAPI documents (`openapi: 3.1.0`): the official OAS 3.1 schema.
     {
-      "fileMatch": ["**/openapi.json"],
+      "fileMatch": [
+        "**/openapi.json"
+      ],
       "url": "https://spec.openapis.org/oas/3.1/schema/2022-10-07"
     },
     // Stackra's own schema; mapped here so the GitHub API payload carries no $schema key.
     {
-      "fileMatch": ["**/.github/branch-protection.json"],
+      "fileMatch": [
+        "**/.github/branch-protection.json"
+      ],
       "url": "./schemas/branch-protection.schema.json"
     }
   ],
-
   // ── YAML: schemas for the config files that have one ──────────────────────────────────────────
   // A `# yaml-language-server: $schema=` comment in a file wins over these mappings. SchemaStore
   // stays on as a fallback for files listed nowhere.
@@ -149,21 +166,28 @@
     "https://json.schemastore.org/pnpm-workspace.json": "pnpm-workspace.yaml",
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
   },
-
   // ── TOML: Even Better TOML (keys are regexes on the file URI; files also carry `#:schema`) ────────
   "evenBetterToml.schema.associations": {
     // mise publishes its own schema; gitleaks has one on SchemaStore.
     ".*/mise\\.toml$": "https://mise.jdx.dev/schema/mise.json",
     ".*/\\.gitleaks\\.toml$": "https://www.schemastore.org/gitleaks.json"
   },
-
   // ── Tailwind v4 / Uniwind class names in className, cn() and tv() ─────────────────────────────
   "tailwindCSS.experimental.classRegex": [
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"],
-    ["tv\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"]
+    [
+      "cn\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*)[\"'`]"
+    ],
+    [
+      "tv\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*)[\"'`]"
+    ]
   ],
-  "tailwindCSS.classAttributes": ["class", "className", "classNames"],
-
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "classNames"
+  ],
   // ── i18n: assets/lang/<locale>/<namespace>.json in every member ───────────────────────────────
   "i18n-ally.localesPaths": [
     "apps/*/assets/lang",
@@ -175,17 +199,16 @@
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "en",
   "i18n-ally.displayLanguage": "en",
-  "i18n-ally.enabledFrameworks": ["general"],
-
+  "i18n-ally.enabledFrameworks": [
+    "general"
+  ],
   // ── Markdown: oxfmt formats, markdownlint checks structure (rules in .markdownlint.yaml) ────────
   "markdown.validate.enabled": true,
-
   // ── Tests ──────────────────────────────────────────────────────────────────────────────────
   // The @stackra/* packages are pre-release and not installable yet, so the Vitest extension cannot
   // resolve vitest in any member. Remove this line once they are published.
   "vitest.configSearchPatternExclude": "**/*",
   "playwright.reuseBrowser": true,
-
   // ── Explorer: nest generated and companion files under their source ───────────────────────────
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
@@ -196,7 +219,6 @@
     "README.md": "CONTRIBUTING.md, SECURITY.md, LICENSE, NOTICE, REVIEW.md, AGENTS.md, CLAUDE.md",
     "runway.yaml": "stackra.lock.yaml"
   },
-
   // ── Search and watching: skip build output and caches ────────────────────────────────────────
   "files.watcherExclude": {
     "**/node_modules/**": true,
@@ -212,9 +234,13 @@
     "**/coverage": true,
     "pnpm-lock.yaml": true
   },
-
   // ── Git: the repo's own hooks run through lefthook ─────────────────────────────────────────────
   "git.allowNoVerifyCommit": false,
-  "git.branchProtection": ["main"],
-  "git.branchProtectionPrompt": "alwaysPrompt"
+  "git.branchProtection": [
+    "main"
+  ],
+  "git.branchProtectionPrompt": "alwaysPrompt",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
 }
