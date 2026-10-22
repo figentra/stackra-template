@@ -66,14 +66,42 @@
     "https://raw.githubusercontent.com/": true,
     "https://turborepo.com/": true,
     "https://turbo.build/": true,
+    "https://turborepo.dev/": true,
     "https://biomejs.dev/": true,
     "https://mintlify.com/": true,
+    "https://spec.openapis.org/": true,
     "https://schemas.stackra.dev/": true
   },
   "json.schemas": [
     {
       "fileMatch": ["*.jsonc", "**/tsconfig*.json", "**/.vscode/*.json"],
       "schema": { "allowTrailingCommas": true }
+    },
+    // Files with no inline $schema: SchemaStore or the tool's own schema, pinned where the URL allows.
+    // The preview cannot install packages, so no schema here points into node_modules.
+    {
+      "fileMatch": ["**/.claude/launch.json"],
+      "url": "https://www.schemastore.org/claude-code-launch.json"
+    },
+    {
+      "fileMatch": ["**/packages/tooling/typescript/src/*.json"],
+      "url": "https://www.schemastore.org/tsconfig.json"
+    },
+    {
+      "fileMatch": ["**/packages/tooling/oxlint/src/*.jsonc"],
+      "url": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json"
+    },
+    {
+      "fileMatch": ["**/eas.json"],
+      "url": "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json"
+    },
+    {
+      "fileMatch": ["**/openapi.json"],
+      "url": "https://spec.openapis.org/oas/3.1/schema/2022-10-07"
+    },
+    {
+      "fileMatch": ["**/.github/branch-protection.json"],
+      "url": "./schemas/branch-protection.schema.json"
     }
   ],
 
@@ -81,11 +109,33 @@
   "yaml.format.enable": false,
   "yaml.validate": true,
   "yaml.schemaStore.enable": true,
+  // Stackra's own schemas are copied from the framework (stackra tools/schemas) into schemas/; they
+  // work offline and keep their schemas.stackra.dev $id for later hosting.
   "yaml.schemas": {
-    "https://json.schemastore.org/lefthook.json": "lefthook.yml",
+    "./schemas/runway-root.schema.json": "/runway.yaml",
+    "./schemas/runway-app.schema.json": "apps/*/runway.yaml",
+    "./schemas/runway-service.schema.json": "services/*/runway.yaml",
+    "./schemas/stackra-lock.schema.json": "stackra.lock.yaml",
+    "./schemas/mcp.schema.json": ".mcp.yaml",
+    "https://raw.githubusercontent.com/evilmartians/lefthook/v2.2.2/schema.json": "lefthook.yml",
+    "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json": ".markdownlint.yaml",
+    "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/packages/cspell-types/cspell.schema.json": "cspell.config.yaml",
+    "https://unpkg.com/app-builder-lib@26/scheme.json": "**/electron-builder.yml",
+    "https://www.schemastore.org/github-issue-config.json": ".github/ISSUE_TEMPLATE/config.yml",
+    "https://www.schemastore.org/github-issue-forms.json": [
+      ".github/ISSUE_TEMPLATE/bug_report.yml",
+      ".github/ISSUE_TEMPLATE/feature_request.yml"
+    ],
+    "https://www.schemastore.org/maestro-flow.json": "**/*.flow.yaml",
     "https://json.schemastore.org/commitlintrc.json": ".commitlintrc.yaml",
     "https://json.schemastore.org/pnpm-workspace.json": "pnpm-workspace.yaml",
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
+  },
+
+  // ── TOML: Even Better TOML (keys are regexes on the file URI; files also carry `#:schema`) ────────
+  "evenBetterToml.schema.associations": {
+    ".*/mise\\.toml$": "https://mise.jdx.dev/schema/mise.json",
+    ".*/\\.gitleaks\\.toml$": "https://www.schemastore.org/gitleaks.json"
   },
 
   // ── Tailwind v4 / Uniwind class names in className, cn() and tv() ─────────────────────────────
