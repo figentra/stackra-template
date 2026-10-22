@@ -9,7 +9,7 @@ and the Stackra docs. The short version:
 3. Versions come only from `pnpm-workspace.yaml` catalogs or `workspace:*`. Tests sit in `__tests__/` beside their
    subject. Run `pnpm gen` after changing a declaration; commit the member's `.stackra/app-manifest.json` (and a
    service's `openapi.json`) with the change, never the rest of `.stackra/`.
-4. Use conventional commits (`commitlint.config.mjs`).
+4. Use conventional commits (`.commitlintrc.yaml`, rules from `@stackra/commitlint-config`).
 5. `pnpm verify` must be green (format, lint, typecheck, test, build, gen check, validate, boundaries, knip).
 6. Open a pull request using the template. A reviewer other than the author approves.
 

@@ -27,286 +27,450 @@ providers:
   aws:
     region: me-central-1 # one region (ADR 0186); a tenant's region is immutable (0210 d4)
     accounts:
-      {
-        shared: ref:aws.accounts.shared,
-        nonprod: ref:aws.accounts.nonprod,
-        prod: ref:aws.accounts.prod,
-      } # DP11
+      shared: ref:aws.accounts.shared
+      nonprod: ref:aws.accounts.nonprod
+      prod: ref:aws.accounts.prod
+      # DP11
     # Pulumi state, S3 + KMS (0171 d4)
-    state: { bucket: ref:aws.state.bucket, kmsKey: ref:aws.state.kmsKey }
-    ecr: { account: shared, scan: trivy, sbom: syft, sign: cosign } # DP17/DP18
-    budgets: { thresholds: [50, 80, 100], stopNonProdAt: 100 } # DP20
+    state:
+      bucket: ref:aws.state.bucket
+      kmsKey: ref:aws.state.kmsKey
+    ecr:
+      account: shared
+      scan: trivy
+      sbom: syft
+      sign: cosign
+      # DP17/DP18
+    budgets:
+      thresholds: [50, 80, 100]
+      stopNonProdAt: 100
+      # DP20
     requiredTags: [env, service, tenant]
-  encore: { app: acme-platform } # Encore Cloud app id (public)
+  encore:
+    app: acme-platform
+    # Encore Cloud app id (public)
   cloudflare:
     accountId: ref:cloudflare.accountId
     # zone → id; member runways name hosts under these zones
-    zones: { acme.dev: ref:cloudflare.zones.acme }
+    zones:
+      acme.dev: ref:cloudflare.zones.acme
   # ADR 0170 d6
-  github: { org: acme, repo: acme-platform, environments: { production: { reviewers: [owner] } } }
+  github:
+    org: acme
+    repo: acme-platform
+    environments:
+      production:
+        reviewers: [owner]
   infisical:
     domain: https://eu.infisical.com # Infisical Cloud EU (0171 d6)
     workspace: ref:infisical.workspace
     # runway env → Infisical env
-    environments: { dev: dev, preview: preview, staging: staging, production: prod }
+    environments:
+      dev: dev
+      preview: preview
+      staging: staging
+      production: prod
     # default secret paths; a member may name `path: ci`
-    paths: { runtime: /runtime, ci: /ci, agents: /agents }
-  sentry: { org: acme } # projects are named per member (app runway `telemetry.sentryProject`)
-  betterstack: { source: ref:betterstack.source }
+    paths:
+      runtime: /runtime
+      ci: /ci
+      agents: /agents
+  sentry:
+    org: acme
+    # projects are named per member (app runway `telemetry.sentryProject`)
+  betterstack:
+    source: ref:betterstack.source
   # the collector every service exports to (0184 d1); on-prem: bundled LGTM
-  otlp: { endpoint: ref:otlp.endpoint }
-  expo: { account: acme, projectId: ref:expo.projectId } # EAS project (ADR 0180)
-  apple: { teamId: ref:apple.teamId }
-  google: { playDeveloperId: ref:google.playDeveloperId }
-  keygen: { account: ref:keygen.account } # Pro distribution and licences (0177/0178)
+  otlp:
+    endpoint: ref:otlp.endpoint
+  expo:
+    account: acme
+    projectId: ref:expo.projectId
+    # EAS project (ADR 0180)
+  apple:
+    teamId: ref:apple.teamId
+  google:
+    playDeveloperId: ref:google.playDeveloperId
+  keygen:
+    account: ref:keygen.account
+    # Pro distribution and licences (0177/0178)
   # SaaS identity (0206 d4); dev and on-prem run the container
-  zitadel: { cloud: ref:zitadel.instance }
+  zitadel:
+    cloud: ref:zitadel.instance
 
 # ── Environments: exactly these four names in every tool (ADR 0170 DP5; `local` is `dev`) ───
 environments:
   dev:
-    destinations: # where each kind of member runs; a member runway may override its own
+    destinations:
+      # where each kind of member runs; a member runway may override its own
       # `stackra dev` = gen --watch + `encore run` + the compose infra below (ADR 0199 d3)
       services: compose
-      # apps with web/pwa/desktop/web-ssr targets run their own dev server on the member's port
+      # apps with web/pwa/desktop targets run their own dev server on the member's port
       web: vite-dev
       mobile: expo-dev # Metro on the member's port
     # the containers `stackra dev` brings; a driver set to `memory` in every service removes its
     # container
     infra:
       # `encore run`: every service behind one port; the Encore dev dashboard
-      gateway: { port: 4000, dashboard: 9400 }
+      gateway:
+        port: 4000
+        dashboard: 9400
       postgres:
-        { image: postgres:17, port: 5432, extensions: [pgvector, ltree, pg_trgm], perLane: true }
+        image: postgres:17
+        port: 5432
+        extensions: [pgvector, ltree, pg_trgm]
+        perLane: true
       # only when a service picks the valkey driver
-      valkey: { image: valkey/valkey:8, port: 6379, when: driver }
-      minio: { image: minio/minio, port: 9000, consolePort: 9001, when: driver }
+      valkey:
+        image: valkey/valkey:8
+        port: 6379
+        when: driver
+      minio:
+        image: minio/minio
+        port: 9000
+        consolePort: 9001
+        when: driver
       # seeded from the apps' identity configs
-      zitadel: { image: ghcr.io/zitadel/zitadel:v3, port: 8080, seed: .stackra/zitadel/seed.yaml }
-      mailpit: { image: axllent/mailpit, smtpPort: 1025, uiPort: 8025 }
+      zitadel:
+        image: ghcr.io/zitadel/zitadel:v3
+        port: 8080
+        seed: .stackra/zitadel/seed.yaml
+      mailpit:
+        image: axllent/mailpit
+        smtpPort: 1025
+        uiPort: 8025
       otel-lgtm:
-        { image: grafana/otel-lgtm, grpcPort: 4317, httpPort: 4318, uiPort: 3000, when: opt-in }
+        image: grafana/otel-lgtm
+        grpcPort: 4317
+        httpPort: 4318
+        uiPort: 3000
+        when: opt-in
     # worktree N adds N*100 to every dev port (member and infra)
-    lanes: { enabled: true, portStep: 100, from: STACKRA_LANE }
+    lanes:
+      enabled: true
+      portStep: 100
+      from: STACKRA_LANE
     # on → a local CA, `<key>.localhost` names, one proxy
-    https: { enabled: false, tool: mkcert, hosts: "*.localhost" }
+    https:
+      enabled: false
+      tool: mkcert
+      hosts: "*.localhost"
     # routes by Host to member dev ports; needed only for *.localhost or https
-    proxy: { enabled: false, port: 4443 }
+    proxy:
+      enabled: false
+      port: 4443
     defaults:
       service:
-        {
-          drivers:
-            {
-              queue: memory,
-              cache: memory,
-              events: memory,
-              workflow: native,
-              realtime: memory,
-              scheduler: croner,
-              storage: local,
-              mail: memory,
-              search: postgres,
-              media: memory,
-              webhooks: memory,
-            },
-        }
-      app: { https: false, open: false }
+        drivers:
+          queue: memory
+          cache: memory
+          events: memory
+          workflow: native
+          realtime: memory
+          scheduler: croner
+          storage: local
+          mail: memory
+          search: postgres
+          media: memory
+          webhooks: memory
+      app:
+        https: false
+        open: false
 
-  preview: # optional per-pull-request environments; delete the block if you do not use them
-    destinations: { services: encore-cloud, web: cloudflare-workers, mobile: eas }
-    encore: { env: "preview-${pr}" } # one Encore environment per pull request
+  preview:
+    # optional per-pull-request environments; delete the block if you do not use them
+    destinations:
+      services: encore-cloud
+      web: cloudflare-workers
+      mobile: eas
+    encore:
+      env: "preview-${pr}"
+      # one Encore environment per pull request
     ttl: 7d
     data: synthetic # golden tenant only
     shared:
       # one small server for every preview; one logical db per service (0238)
-      database: { plan: shared, class: db.t4g.small }
-      cache: { engine: none }
-      queues: { provider: sns-sqs }
+      database:
+        plan: shared
+        class: db.t4g.small
+      cache:
+        engine: none
+      queues:
+        provider: sns-sqs
     defaults:
       service:
-        {
-          resources: { cpu: 0.25, memory: 512Mi, instances: { min: 1, max: 1 } },
-          deployable: core,
-          drivers:
-            {
-              queue: encore-pubsub,
-              cache: memory,
-              events: encore-pubsub,
-              workflow: native,
-              realtime: sse,
-              storage: s3,
-              mail: memory,
-              search: postgres,
-              media: s3,
-              webhooks: native,
-            },
-        }
+        resources:
+          cpu: 0.25
+          memory: 512Mi
+          instances:
+            min: 1
+            max: 1
+        deployable: core
+        drivers:
+          queue: encore-pubsub
+          cache: memory
+          events: encore-pubsub
+          workflow: native
+          realtime: sse
+          storage: s3
+          mail: memory
+          search: postgres
+          media: s3
+          webhooks: native
     # members get `<key>-pr-N.preview.acme.dev` unless they say otherwise
-    domains: { zone: acme.dev, pattern: "${member}-pr-${pr}.preview" }
-    deploy: { on: pull-request, gate: health } # DP24: previews gate on the health endpoint only
+    domains:
+      zone: acme.dev
+      pattern: "${member}-pr-${pr}.preview"
+    deploy:
+      on: pull-request
+      gate: health
+      # DP24: previews gate on the health endpoint only
 
   staging:
     destinations:
-      { services: encore-cloud, web: cloudflare-workers, mobile: eas, desktop: electron-release }
+      services: encore-cloud
+      web: cloudflare-workers
+      mobile: eas
+      desktop: electron-release
     # Encore Cloud process allocation = the deployables gen collected
-    encore: { env: staging, account: nonprod, processAllocation: from-deployables }
+    encore:
+      env: staging
+      account: nonprod
+      processAllocation: from-deployables
     shared:
       network:
-        {
-          vpc: { cidr: 10.40.0.0/16, azs: 2, natGateways: 1 },
-          loadBalancer: { type: alb, idleTimeoutSeconds: 60 },
-        } # used by aws-ecs and by Encore Cloud's own VPC settings where it accepts them
+        vpc:
+          cidr: 10.40.0.0/16
+          azs: 2
+          natGateways: 1
+        loadBalancer:
+          type: alb
+          idleTimeoutSeconds: 60
+        # used by aws-ecs and by Encore Cloud's own VPC settings where it accepts them
       database:
-        {
-          engine: rds-postgres,
-          class: db.t4g.medium,
-          storageGb: 50,
-          multiAz: false,
-          extensions: [pgvector, ltree, pg_trgm],
-          pool: { proxy: rds-proxy },
-        } # ONE server per environment (0238 d1)
-      cache: { engine: valkey, node: cache.t4g.small, replicas: 0 }
-      queues: { provider: sns-sqs, dlq: true }
+        engine: rds-postgres
+        class: db.t4g.medium
+        storageGb: 50
+        multiAz: false
+        extensions: [pgvector, ltree, pg_trgm]
+        pool:
+          proxy: rds-proxy
+        # ONE server per environment (0238 d1)
+      cache:
+        engine: valkey
+        node: cache.t4g.small
+        replicas: 0
+      queues:
+        provider: sns-sqs
+        dlq: true
       # defaults for every member bucket
-      buckets: { versioning: true, lifecycle: { expireNoncurrentDays: 30 } }
+      buckets:
+        versioning: true
+        lifecycle:
+          expireNoncurrentDays: 30
     defaults:
       service:
-        {
-          resources:
-            {
-              cpu: 0.5,
-              memory: 1Gi,
-              instances: { min: 1, max: 2 },
-              scaling: { metric: cpu, target: 70 },
-            },
-          deployable: core,
-          poolBudget: 20,
-          drivers:
-            {
-              queue: encore-pubsub,
-              cache: valkey,
-              events: encore-pubsub,
-              workflow: native,
-              realtime: sse,
-              storage: s3,
-              mail: notifications,
-              search: postgres,
-              media: s3,
-              webhooks: native,
-            },
-        }
-      app: { workers: { observability: { headSamplingRate: 0.1 } } }
-    domains: { zone: acme.dev, pattern: "${member}.staging" }
-    deploy: { on: merge-to-main } # DP6
-    mobile: { channel: staging } # EAS update channel members inherit
-    desktop: { channel: beta }
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+          instances:
+            min: 1
+            max: 2
+          scaling:
+            metric: cpu
+            target: 70
+        deployable: core
+        poolBudget: 20
+        drivers:
+          queue: encore-pubsub
+          cache: valkey
+          events: encore-pubsub
+          workflow: native
+          realtime: sse
+          storage: s3
+          mail: notifications
+          search: postgres
+          media: s3
+          webhooks: native
+      app:
+        workers:
+          observability:
+            headSamplingRate: 0.1
+    domains:
+      zone: acme.dev
+      pattern: "${member}.staging"
+    deploy:
+      on: merge-to-main
+      # DP6
+    mobile:
+      channel: staging
+      # EAS update channel members inherit
+    desktop:
+      channel: beta
 
   production:
     destinations:
       # switch `services` to aws-ecs | helm | compose and the matching `targets.*` block applies
-      { services: encore-cloud, web: cloudflare-workers, mobile: eas, desktop: electron-release }
-    encore: { env: production, account: prod, processAllocation: from-deployables }
+      services: encore-cloud
+      web: cloudflare-workers
+      mobile: eas
+      desktop: electron-release
+    encore:
+      env: production
+      account: prod
+      processAllocation: from-deployables
     shared:
       network:
-        {
-          vpc: { cidr: 10.50.0.0/16, azs: 3, natGateways: 3 },
-          loadBalancer: { type: alb, idleTimeoutSeconds: 60 },
-        }
+        vpc:
+          cidr: 10.50.0.0/16
+          azs: 3
+          natGateways: 3
+        loadBalancer:
+          type: alb
+          idleTimeoutSeconds: 60
       database:
-        {
-          engine: rds-postgres,
-          class: db.r7g.large,
-          storageGb: 200,
-          multiAz: true,
-          backups: { retentionDays: 35, pitr: true },
-          extensions: [pgvector, ltree, pg_trgm],
-          pool: { proxy: rds-proxy },
-        }
-      cache: { engine: valkey, node: cache.r7g.large, replicas: 1 }
-      queues: { provider: sns-sqs, dlq: true }
-      buckets: { versioning: true }
+        engine: rds-postgres
+        class: db.r7g.large
+        storageGb: 200
+        multiAz: true
+        backups:
+          retentionDays: 35
+          pitr: true
+        extensions: [pgvector, ltree, pg_trgm]
+        pool:
+          proxy: rds-proxy
+      cache:
+        engine: valkey
+        node: cache.r7g.large
+        replicas: 1
+      queues:
+        provider: sns-sqs
+        dlq: true
+      buckets:
+        versioning: true
     defaults:
       service:
-        {
-          resources:
-            {
-              cpu: 1,
-              memory: 2Gi,
-              instances: { min: 2, max: 10 },
-              scaling: { metric: cpu, target: 60 },
-            },
-          deployable: core,
-          poolBudget: 50,
-          drivers:
-            {
-              queue: encore-pubsub,
-              cache: valkey,
-              events: encore-pubsub,
-              workflow: native,
-              realtime: sse,
-              storage: s3,
-              mail: notifications,
-              search: postgres,
-              media: s3,
-              webhooks: native,
-            },
-        }
+        resources:
+          cpu: 1
+          memory: 2Gi
+          instances:
+            min: 2
+            max: 10
+          scaling:
+            metric: cpu
+            target: 60
+        deployable: core
+        poolBudget: 50
+        drivers:
+          queue: encore-pubsub
+          cache: valkey
+          events: encore-pubsub
+          workflow: native
+          realtime: sse
+          storage: s3
+          mail: notifications
+          search: postgres
+          media: s3
+          webhooks: native
     # ADR 0169 d1: these services are never packed with another; a member runway cannot undo it
     isolate: [identity, payments]
     # DP26; on-prem: customer certificates
-    domains: { zone: acme.dev, pattern: "${member}", tenantDomains: cloudflare-for-saas }
+    domains:
+      zone: acme.dev
+      pattern: "${member}"
+      tenantDomains: cloudflare-for-saas
     # DP6: `runway promote <sha>` behind the owner's approval
-    deploy: { on: promote, approval: github-environment }
-    mobile: { channel: production }
-    desktop: { channel: latest }
+    deploy:
+      on: promote
+      approval: github-environment
+    mobile:
+      channel: production
+    desktop:
+      channel: latest
 
 # ── Target blocks: provider shape, selected by `environments.<env>.destinations.*` ────────────────
 targets:
-  encore-cloud: { cloud: aws } # managed (DP3); sizes come from `shared` and member `resources`
-  aws-ecs: # self-host on AWS (DP2 fallback; the @stackra-pro runtime stack, 0171 d5)
+  encore-cloud:
+    cloud: aws
+    # managed (DP3); sizes come from `shared` and member `resources`
+  aws-ecs:
+    # self-host on AWS (DP2 fallback; the @stackra-pro runtime stack, 0171 d5)
     compute: fargate # fargate | ec2
-    cloudfront: { enabled: true } # in front of static apps that do not run on Workers
-    images: { arch: [amd64, arm64] }
-  compose: # single-host on-prem (0179 PK9) and dev
+    cloudfront:
+      enabled: true
+      # in front of static apps that do not run on Workers
+    images:
+      arch: [amd64, arm64]
+  compose:
+    # single-host on-prem (0179 PK9) and dev
     # on-prem footprint (D-14 open: which are required)
     bundled: [postgres, valkey, minio, zitadel, mailpit, otel-lgtm, clamav]
     registry: ghcr.io/acme # or the customer's registry / `docker load` (PK11)
   # Kubernetes on-prem; Zarf for air-gap (PK10/PK12)
-  helm: { namespace: acme-platform, ingressClass: nginx, storageClass: default, zarf: true }
-  cloudflare-workers: { compatibilityDate: "2026-10-01", observability: { headSamplingRate: 0.1 } }
+  helm:
+    namespace: acme-platform
+    ingressClass: nginx
+    storageClass: default
+    zarf: true
+  cloudflare-workers:
+    compatibilityDate: "2026-10-01"
+    observability:
+      headSamplingRate: 0.1
   eas:
     # MR2: native fingerprint change, the `build:mobile` label, or a release
     buildTrigger: fingerprint
     monthlyBuildCap: 60 # MR3
     credentials: eas-managed # signing certificates live in EAS, never in the repo
     # which CI secrets the submit step reads
-    submit: { ios: app-store-connect-api-key, android: service-account }
+    submit:
+      ios: app-store-connect-api-key
+      android: service-account
     # OTA (expo-updates): the channel is `environments.<env>.mobile.channel`; the runtime version is
     # the member's `release.runtimePolicy` (fingerprint), so an update never reaches a binary whose
     # native layer differs. A staged rollout widens by `stepHours` unless the crash rate gate trips.
     ota:
-      {
-        rollout: { startPercent: 10, endPercent: 100, stepHours: 24 },
-        gate: { crashFreeSessions: 99.5 },
-        rollback: republish-previous,
-      }
+      rollout:
+        startPercent: 10
+        endPercent: 100
+        stepHours: 24
+      gate:
+        crashFreeSessions: 99.5
+      rollback: republish-previous
   electron-release:
     # members append `/<key>/<channel>/`
-    feed: { bucket: r2:acme-downloads, publicOrigin: https://downloads.acme.dev }
-    rollout: { startPercent: 20, endPercent: 100, stepHours: 24 } # ADR 0181 d3
+    feed:
+      bucket: r2:acme-downloads
+      publicOrigin: https://downloads.acme.dev
+    rollout:
+      startPercent: 20
+      endPercent: 100
+      stepHours: 24
+      # ADR 0181 d3
     # tooling; ON/OFF is the member's `release.desktop.signing`
-    signing: { mac: notarize, windows: azure-trusted-signing, linux: none }
+    signing:
+      mac: notarize
+      windows: azure-trusted-signing
+      linux: none
     # release jobs only (CI6)
-    runners: { mac: macos-latest, windows: windows-latest, linux: ubuntu-latest }
+    runners:
+      mac: macos-latest
+      windows: windows-latest
+      linux: ubuntu-latest
 
 # ── Edge (ADR 0175, 0237 layer 1) ─────────────────────────────────────────────────────────────────
 edge:
   proxy: all # Cloudflare proxies every public hostname (DP27)
   waf: managed
-  bots: { mode: likely-automated-challenge }
+  bots:
+    mode: likely-automated-challenge
   # coarse per-IP; per-area limits are rate-limit.config.ts
-  rateLimit: { perIp: { requests: 600, periodSeconds: 60 } }
-  tls: { minVersion: "1.2", hsts: true }
+  rateLimit:
+    perIp:
+      requests: 600
+      periodSeconds: 60
+  tls:
+    minVersion: "1.2"
+    hsts: true
   apiHost: api # `api.<zone>/{public,app,admin,platform}` routes to the Encore gateway (0237 d1)
   analyticsProxy: /ingest # reverse proxy path for PostHog on app origins
 
@@ -316,7 +480,8 @@ secrets:
   # (outside git) / k8s Secret
   sync: on-deploy
   defaultPath: runtime
-  ci: # CI-only names the release workflows read over OIDC; never a runtime
+  ci:
+    # CI-only names the release workflows read over OIDC; never a runtime
     - EXPO_TOKEN
     - APPLE_ASC_KEY_ID
     - APPLE_ASC_ISSUER_ID
@@ -334,17 +499,44 @@ secrets:
 
 # ── Release policy (ADR 0170) ─────────────────────────────────────────────────────────────────────
 release:
-  promote: { unit: sha } # SaaS promotes the SHA (DP4); on-prem bundles promote the image digest
-  gate: { health: sha, smoke: playwright, errorWatchMinutes: 15 } # DP24
-  strategy: { kind: all-at-once, healthGate: true, autoRollback: true } # DP16
-  rollback: { withinMinutes: 15, by: owner } # DP14
+  promote:
+    unit: sha
+    # SaaS promotes the SHA (DP4); on-prem bundles promote the image digest
+  gate:
+    health: sha
+    smoke: playwright
+    errorWatchMinutes: 15
+    # DP24
+  strategy:
+    kind: all-at-once
+    healthGate: true
+    autoRollback: true
+    # DP16
+  rollback:
+    withinMinutes: 15
+    by: owner
+    # DP14
   records: [github-deployments, linear-release, "slack:#deploys"] # DP23
   buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm] # DP21
   # PK14
-  onPrem: { upgrades: sequential-minor, preflight: true, backup: mandatory, migrationsAsJob: true }
+  onPrem:
+    upgrades: sequential-minor
+    preflight: true
+    backup: mandatory
+    migrationsAsJob: true
 
 # ── Observability defaults (ADR 0184) ─────────────────────────────────────────────────────────────
 observability:
-  logs: { hotDays: 30, coldMonths: 13, coldStore: s3 } # OB11
-  heartbeats: { crons: true, relays: true, workers: true } # OB10
-  slos: { startAt: first-paying-tenant } # OB3
+  logs:
+    hotDays: 30
+    coldMonths: 13
+    coldStore: s3
+    # OB11
+  heartbeats:
+    crons: true
+    relays: true
+    workers: true
+    # OB10
+  slos:
+    startAt: first-paying-tenant
+    # OB3

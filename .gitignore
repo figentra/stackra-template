@@ -44,6 +44,8 @@ android/
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 # Claude Code worktrees and per-user settings
 .claude/worktrees/
 .claude/settings.local.json

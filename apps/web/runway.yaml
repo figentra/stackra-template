@@ -17,9 +17,14 @@ member: web
 secrets:
   TURNSTILE_SECRET_KEY: {} # the contact form's captcha check in the Worker
 
-health: { path: /healthz, expects: sha } # the Worker answers with the release SHA (ADR 0170 DP24)
+health:
+  path: /healthz
+  expects: sha
+  # the Worker answers with the release SHA (ADR 0170 DP24)
 
-telemetry: { sentryProject: acme-web } # org is root `providers.sentry.org`; DSN is a var below
+telemetry:
+  sentryProject: acme-web
+  # org is root `providers.sentry.org`; DSN is a var below
 
 environments:
   dev:
@@ -37,10 +42,16 @@ environments:
       STACKRA_SITE_URL: from-port
       STACKRA_SENTRY_DSN: ""
     config:
-      web.telemetry: { traces: { sampleRate: 1 } }
-      web.analytics: { driver: none }
+      web.telemetry:
+        traces:
+          sampleRate: 1
+      web.analytics:
+        driver: none
     # the Worker gets Cloudflare's always-pass test secret
-    e2e: { baseUrl: from-port, seeds: from-stackra-config, turnstile: test-keys }
+    e2e:
+      baseUrl: from-port
+      seeds: from-stackra-config
+      turnstile: test-keys
 
   preview:
     domain: "web-pr-${pr}.preview.acme.dev"
@@ -51,7 +62,10 @@ environments:
       STACKRA_SITE_URL: "https://web-pr-${pr}.preview.acme.dev"
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
-    config: { web.site: { previewHostPrefixes: [web-pr-] } } # never indexed
+    config:
+      web.site:
+        previewHostPrefixes: [web-pr-]
+      # never indexed
 
   staging:
     domain: staging.acme.dev
@@ -63,8 +77,13 @@ environments:
       STACKRA_SITE_URL: https://staging.acme.dev
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
-    config: { web.telemetry: { traces: { sampleRate: 0.5 } } }
-    workers: { observability: { headSamplingRate: 0.5 } }
+    config:
+      web.telemetry:
+        traces:
+          sampleRate: 0.5
+    workers:
+      observability:
+        headSamplingRate: 0.5
 
   production:
     domain: www.acme.dev
@@ -77,4 +96,8 @@ environments:
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
     # SSR Worker: CPU limit per request
-    workers: { observability: { headSamplingRate: 0.1 }, limits: { cpuMs: 50 } }
+    workers:
+      observability:
+        headSamplingRate: 0.1
+      limits:
+        cpuMs: 50

@@ -12,7 +12,8 @@ ci:
     startServerCommand: stackra start
     startServerReadyPattern: Ready on
     numberOfRuns: 3
-    url: # ${origin} = ports.json web.url (runway.yaml environments.dev: localhost:5175 on lane 0)
+    url:
+      # ${origin} = ports.json web.url (runway.yaml environments.dev: localhost:5175 on lane 0)
       - ${origin}/
       - ${origin}/pricing
       - ${origin}/store
