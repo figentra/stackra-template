@@ -51,3 +51,4 @@ android/
 .claude/settings.local.json
 # rendered from .mcp.yaml by `stackra mcp sync` (run by `prepare`)
 .mcp.json
+pnpm-lock.yaml
