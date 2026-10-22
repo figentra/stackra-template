@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/runway-app.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/app.json
 # Stackra file contract:
 # Purpose: how and where the public site runs, per environment: the dev port and host (the ONLY
 #          place a port is written; gen puts it into the generated Vite server, Playwright and
@@ -6,35 +6,42 @@
 #          Workers-with-assets knobs. These are what `wrangler.jsonc` is generated from.
 # Boundary: identity is stackra.config.ts; behaviour is src/config/*; the Cloudflare account, zone
 #           and the edge rules are the root runway. A value here may override a root default, never
-#           the reverse. Validated by `@stackra/runway/schema/app.json`.
+#           the reverse. Validated by `@stackra/runway/schema/app.json`. The health check lives
+#           here alone; stackra.config.ts does not repeat it.
 # Runtime: node
-# Governing contract: ADR 0176, ADR 0175, ADR 0173, ADR 0231 d4
+# Governing contract: ADR 0175, ADR 0173, ADR 0231 d4
 $schema: "@stackra/runway/schema/app.json"
 version: 2
+# = stackra.config.ts `key`
 member: web
 
 # Every @Secret of the env class, by NAME; the value lives in Infisical and runway syncs it into the
 # Worker on deploy.
 secrets:
-  TURNSTILE_SECRET_KEY: {} # the contact form's captcha check in the Worker
+  # the contact form's captcha check in the Worker
+  TURNSTILE_SECRET_KEY: {}
 
+# The deploy gate's check: the Worker answers with the release SHA (ADR 0170 DP24).
 health:
   path: /healthz
   expects: sha
-  # the Worker answers with the release SHA (ADR 0170 DP24)
 
+# the org is root `providers.sentry.org`; the DSN is a var below
 telemetry:
   sentryProject: acme-web
-  # org is root `providers.sentry.org`; DSN is a var below
 
 environments:
   dev:
-    port: 5175 # the React Router dev server on the Workers runtime; hmr defaults to 5176
+    # the React Router dev server on the Workers runtime; HMR defaults to port + 1
+    port: 5175
     host: localhost
+    # plain http on localhost; the browser treats localhost as a secure context
     https: false
+    # `stackra dev` prints the URL instead of opening a browser
     open: false
     # names are the env class fields; gen checks the VITE_ (public) and STACKRA_ (server) prefixes
     vars:
+      # empty disables analytics and error reporting in dev
       VITE_POSTHOG_KEY: ""
       # Cloudflare's published always-pass test site key
       VITE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
@@ -42,42 +49,48 @@ environments:
       # this member's own dev origin; gen expands host:port so the number is never repeated
       STACKRA_SITE_URL: from-port
       STACKRA_SENTRY_DSN: ""
+    # the last config layer (ADR 0146): every trace in dev, no analytics
     config:
       web.telemetry:
         traces:
           sampleRate: 1
       web.analytics:
         driver: none
-    # the Worker gets Cloudflare's always-pass test secret
+    # Playwright's base URL derives from port/host; the Worker gets Cloudflare's always-pass test
+    # secret, so the contact journey runs without a real captcha
     e2e:
       baseUrl: from-port
       seeds: from-stackra-config
       turnstile: test-keys
 
+  # one deployment per pull request; never indexed (the preview host prefix makes every page
+  # `noindex` and robots.txt disallow everything)
   preview:
-    domain: "web-pr-${pr}.preview.acme.dev"
+    domain: "web-pr-${pr}.preview.acme.example"
     vars:
       VITE_POSTHOG_KEY: ""
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.preview
-      STACKRA_API_URL: "https://api-pr-${pr}.preview.acme.dev"
-      STACKRA_SITE_URL: "https://web-pr-${pr}.preview.acme.dev"
+      STACKRA_API_URL: "https://api-pr-${pr}.preview.acme.example"
+      STACKRA_SITE_URL: "https://web-pr-${pr}.preview.acme.example"
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
     config:
       web.site:
         previewHostPrefixes: [web-pr-]
-      # never indexed
 
   staging:
-    domain: staging.acme.dev
-    destination: cloudflare-workers # inherited from root `destinations.web`; shown for completeness
+    domain: staging.acme.example
+    # inherited from root `destinations.web`; written here so the reviewer sees where it runs
+    destination: cloudflare-workers
+    # `ref:` values resolve from the root runway's provider outputs at deploy time
     vars:
       VITE_POSTHOG_KEY: ref:posthog.key.web
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.staging
-      STACKRA_API_URL: https://api.staging.acme.dev
-      STACKRA_SITE_URL: https://staging.acme.dev
+      STACKRA_API_URL: https://api.staging.acme.example
+      STACKRA_SITE_URL: https://staging.acme.example
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
+    # half of the traces and half of the Worker's requests are sampled
     config:
       web.telemetry:
         traces:
@@ -87,16 +100,17 @@ environments:
         headSamplingRate: 0.5
 
   production:
-    domain: www.acme.dev
-    aliases: [acme.dev] # redirect to `domain`
+    domain: www.acme.example
+    # hosts that redirect to `domain`
+    aliases: [acme.example]
     vars:
       VITE_POSTHOG_KEY: ref:posthog.key.web
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.production
-      STACKRA_API_URL: https://api.acme.dev
-      STACKRA_SITE_URL: https://www.acme.dev
+      STACKRA_API_URL: https://api.acme.example
+      STACKRA_SITE_URL: https://www.acme.example
       STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     secrets: [TURNSTILE_SECRET_KEY]
-    # SSR Worker: CPU limit per request
+    # one request in ten is sampled; the SSR Worker gets 50 ms of CPU per request
     workers:
       observability:
         headSamplingRate: 0.1

@@ -1,11 +1,11 @@
 /**
  * Stackra file contract:
- * Purpose: the analytics event a visitor's contact-form submission records, with the plan they came
- *          from.
+ * Purpose: the analytics event of an accepted contact-form submission, with the plan the visitor
+ *          came from; the contact page records it once the route's `submit` answered `sent`.
  * Boundary: a class per event; sent only after the visitor granted the analytics consent category,
  *           and never with the visitor's name or email (the analytics config strips them too).
  * Runtime: browser
- * Governing contract: ADR 0071 d6 (no personal data without consent)
+ * Governing contract: the `@stackra/analytics` package contract
  */
 import { AnalyticsEvent } from "@stackra/analytics";
 

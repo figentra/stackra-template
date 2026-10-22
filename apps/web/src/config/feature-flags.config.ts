@@ -7,7 +7,7 @@
  *           without analytics consent is evaluated anonymously at each flag's default, so no
  *           identifier is stored.
  * Runtime: isomorphic
- * Governing contract: ADR 0213 d3 (flags are a settings kind), ADR 0071 (consent)
+ * Governing contract: ADR 0213 d3 (flags are a settings kind)
  */
 import { Config, DriverOf } from "@stackra/config";
 import type { DriverName } from "@stackra/container";

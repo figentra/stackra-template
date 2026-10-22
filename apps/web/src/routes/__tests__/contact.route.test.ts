@@ -25,14 +25,14 @@ const SITE = {
   dir: "rtl",
   market: { key: "sa", currency: "SAR" },
   indexable: true,
-  origin: "https://www.example.com",
-  signupUrl: "https://www.example.com/signup",
+  origin: "https://www.acme.example",
+  signupUrl: "https://www.acme.example/signup",
   brand: {},
 } as const;
 /** A complete, valid submission. */
 const GOOD = {
   name: "Lina",
-  email: "lina@example.com",
+  email: "lina@northwind.example",
   message: "We need a store for two brands.",
   consent: "true",
   captchaToken: "tok",
@@ -74,7 +74,7 @@ describe(ContactRoute, () => {
       fake.actions.CreateLead.returns({ leadId: "lead_1" }),
     );
     const ok = await submit(GOOD, marketing);
-    expect(ok.data.sent).toEqual({ name: "Lina", email: "lina@example.com" });
+    expect(ok.data.sent).toEqual({ name: "Lina", email: "lina@northwind.example" });
     expect(marketing.called(Marketing.actions.CreateLead)[0]).toMatchObject({
       locale: Locale.Ar,
       consent: true,

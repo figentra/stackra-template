@@ -3,7 +3,7 @@
  * Purpose: one fact: the look. The one logo source (favicon and the OG template mark derive from
  *          it), schemes, theme colours, and whether a resolved site's brand may override the
  *          defaults.
- * Boundary: tokens themselves are `@stackra/brand`; a tenant site's brand arrives at runtime with
+ * Boundary: tokens themselves are `@acme/brand`; a tenant site's brand arrives at runtime with
  *           the resolved site and is layered over the defaults by the site frame. This is the one
  *           app where per-tenant brand is real.
  * Runtime: isomorphic

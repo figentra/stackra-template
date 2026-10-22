@@ -4,7 +4,7 @@
  * Boundary: an app-local class enum (only the Worker-rendered site has edge profiles); a route
  *           never names a profile by string.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (enums are classes), ADR 0176 (SSR on Workers), ADR 0237 (edge)
+ * Governing contract: ADR 0237 (edge)
  */
 import { Enum } from "@stackra/schema";
 

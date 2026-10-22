@@ -2,13 +2,13 @@
  * Stackra file contract:
  * Purpose: a visitor lands, sees the ladder, declines analytics (nothing is sent), switches to
  *          Arabic (the page flips to RTL and stays on the same page), with no accessibility
- *          violations on either screen.
+ *          violations on either screen; and no GET HTML response anywhere on the site sets a
+ *          cookie, so every page stays cacheable and a first visit stores nothing.
  * Boundary: end-to-end tier: the built site on the Worker against the consumed services on memory
  *           drivers with the demo seed. Runs in `chromium`, `chromium-rtl` and `mobile-safari`
  *           (playwright.config.ts).
  * Runtime: node
- * Governing contract: ADR 0182, ADR 0183 (axe fails on serious or critical), ADR 0071 (consent
- *                     before analytics)
+ * Governing contract: ADR 0182, ADR 0183 (axe fails on serious or critical)
  */
 import { test, expect, axe, seed } from "@stackra/testing/e2e";
 
@@ -45,6 +45,18 @@ test("landing: ladder, consent, locale switch", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("أسعار واضحة بلا مفاجآت");
   await expect(await axe(page)).toHaveNoViolations();
+});
+
+/**
+ * The site's rule: a GET for HTML never answers with `Set-Cookie`. Consent and the locale choice
+ * are written by the browser after the visitor acts, never by a page load.
+ */
+test("no GET HTML response sets a cookie", async ({ request }) => {
+  for (const path of ["/", "/pricing", "/contact", "/store", "/store/demo-tee", "/ar", "/nope"]) {
+    const response = await request.get(path, { headers: { accept: "text/html" } });
+    expect(response.headers()["content-type"], path).toContain("text/html");
+    expect(response.headers()["set-cookie"], path).toBeUndefined();
+  }
 });
 
 /** SEO data must be in the prerendered HTML, since crawlers may not run JavaScript. */

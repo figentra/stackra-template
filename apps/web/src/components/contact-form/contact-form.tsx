@@ -2,24 +2,20 @@
  * Stackra file contract:
  * Purpose: the contact form: a React Router `<RouteForm method="post">` (works without JavaScript)
  *          whose fields are the @stackra/ui adapters over the schema, so the browser shows the same
- *          messages the route's `submit` returns; a valid submission records the `LeadSubmitted`
- *          analytics event.
+ *          messages the route's `submit` returns.
  * Boundary: UI and client-side validation only; `ContactRoute.submit` is the authority. Server
  *           field errors arrive as props and show immediately; the Turnstile widget supplies
- *           `captchaToken`. The event carries the plan the visitor came from, never their name or
- *           email, and is dropped without consent.
+ *           `captchaToken`. The form records no analytics: a lead exists only once the server
+ *           accepted it, so the contact page records `LeadSubmitted` from the submit's answer.
  * Runtime: browser
- * Governing contract: ADR 0165 decision 2 (form adapters live in @stackra/ui), ADR 0055, ADR 0071
- *                     d6
+ * Governing contract: ADR 0165 decision 2 (form adapters live in @stackra/ui), ADR 0055
  */
-import { useAnalytics } from "@stackra/analytics/react";
 import { useTranslation } from "@stackra/i18n/react";
 import { RouteForm, useNavigation } from "@stackra/navigation/react";
 import { Button } from "@stackra/ui";
 import { CheckboxField, TextAreaField, TextField, useSchemaForm } from "@stackra/ui/form";
 import { Turnstile } from "@stackra/ui/turnstile";
 import { I18n, type I18nKey } from "#stackra/i18n";
-import { LeadSubmitted } from "#src/analytics/lead-submitted.event";
 import { ContactInput } from "#src/schemas/contact.schema";
 
 /** What the route passes back after a POST, and where the visitor came from. */
@@ -32,11 +28,10 @@ export interface ContactFormProps {
   readonly plan?: string;
 }
 
-/** The adapter validates on submit; a valid form posts natively and records the analytics event. */
+/** The adapter validates on submit; a valid form posts natively, an invalid one never leaves. */
 export function ContactForm({ fieldErrors, formError, plan = "" }: ContactFormProps) {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const analytics = useAnalytics();
   const form = useSchemaForm(ContactInput, { serverErrors: fieldErrors });
 
   return (
@@ -44,7 +39,7 @@ export function ContactForm({ fieldErrors, formError, plan = "" }: ContactFormPr
       method="post"
       className="mt-8 flex flex-col gap-4"
       aria-label={t(I18n.web.contact.title)}
-      onSubmit={form.handleNativeSubmit(() => analytics.track(new LeadSubmitted({ plan })))}
+      onSubmit={form.handleNativeSubmit()}
     >
       <TextField
         {...form.field("name")}

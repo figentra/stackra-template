@@ -11,11 +11,11 @@
  * Governing contract: ADR 0114 (every page is an L2 document), ADR 0110, ADR 0112
  */
 import { RenderMode, Route, type MetaContext, type RouteContext } from "@stackra/navigation";
-import { OgKind, seoMeta } from "@stackra/seo";
+import { OgKind, type Seo } from "@stackra/seo";
 import { Experience } from "#stackra/clients";
-import { TenantPage, TenantPageFallback } from "#src/components/pages/page";
+import { TenantPage } from "#src/components/pages/page";
+import { TenantPageFallback } from "#src/components/pages/tenant-page-fallback";
 import { CacheProfile } from "#src/enums/cache-profile.enum";
-import { alternates } from "#src/server/alternates.server";
 import { SiteLayout } from "#src/routes/site.layout";
 
 /**
@@ -25,7 +25,7 @@ import { SiteLayout } from "#src/routes/site.layout";
   path: "*",
   layout: SiteLayout,
   render: RenderMode.Client,
-  fallback: TenantPageFallback,
+  hydrateFallback: TenantPageFallback,
   cache: CacheProfile.Page,
   component: TenantPage,
 })
@@ -40,23 +40,13 @@ export class PageRoute {
   }
 
   /** The document's own SEO fields; a page the tenant marked `noindex` stays out of search. */
-  meta(ctx: MetaContext<PageRoute>) {
-    const {
-      data: { page },
-      site,
-      path,
-    } = ctx;
-    const url = alternates(ctx, path);
-    return seoMeta({
+  meta({ data: { page }, site }: MetaContext<PageRoute>): Seo {
+    return {
       title: page.seo.title,
       description: page.seo.description,
-      siteName: site.name,
-      locale: site.locale,
-      canonical: url[site.locale.value]!,
-      alternates: url,
-      noindex: !site.indexable || page.seo.noindex,
+      noindex: page.seo.noindex,
       image:
         page.seo.image ?? `${site.origin}/og/${OgKind.Page.value}/${encodeURIComponent(page.key)}`,
-    });
+    };
   }
 }

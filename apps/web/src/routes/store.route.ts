@@ -11,13 +11,13 @@
  *                     pagination)
  */
 import { Route, type MetaContext, type RouteContext } from "@stackra/navigation";
-import { seoMeta } from "@stackra/seo";
+import type { Seo } from "@stackra/seo";
 import { Commerce } from "#stackra/clients";
 import { I18n } from "#stackra/i18n";
 import { StorePage } from "#src/components/pages/store";
 import { SeoConfig } from "#src/config/seo.config";
 import { CacheProfile } from "#src/enums/cache-profile.enum";
-import { alternates } from "#src/server/alternates.server";
+import { StoreSearch } from "#src/schemas/store-search.schema";
 import { SiteLayout } from "#src/routes/site.layout";
 
 /** Cards per page of the listing. */
@@ -26,7 +26,14 @@ const PAGE_SIZE = 24;
 const MIN_SEARCH_LENGTH = 2;
 
 /** Route `/store`: the product listing with search and cursor pagination. */
-@Route({ path: "/store", layout: SiteLayout, cache: CacheProfile.Catalogue, component: StorePage })
+@Route({
+  path: "/store",
+  layout: SiteLayout,
+  title: I18n.web.store.title,
+  search: StoreSearch,
+  cache: CacheProfile.Catalogue,
+  component: StorePage,
+})
 export class StoreRoute {
   /** `?q=` searches the index, `?collection=` filters, `?cursor=` continues. */
   async loader(ctx: RouteContext) {
@@ -44,18 +51,8 @@ export class StoreRoute {
     return { page, search: q || undefined, noindex };
   }
 
-  /** Title and description of the store; a search result page is never indexed. */
-  meta(ctx: MetaContext<StoreRoute>) {
-    const { data, site, t, path } = ctx;
-    const url = alternates(ctx, path);
-    return seoMeta({
-      title: t(I18n.web.store.title),
-      description: t(I18n.web.hero.subtitle),
-      siteName: site.name,
-      locale: site.locale,
-      canonical: url[site.locale.value]!,
-      alternates: url,
-      noindex: !site.indexable || data.noindex,
-    });
+  /** The store's description; a search result page is never indexed. */
+  meta({ data, t }: MetaContext<StoreRoute>): Seo {
+    return { description: t(I18n.web.hero.subtitle), noindex: data.noindex };
   }
 }

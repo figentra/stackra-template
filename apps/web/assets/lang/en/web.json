@@ -1,5 +1,5 @@
 {
-  "$comment": "Stackra file contract — Purpose: the public site's own strings in en (namespace `web::`); Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries zero, one, two, few, many and other; other modules' strings are overrides under src/overrides/<module>/lang/; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the public site's own strings in en (namespace `web::`); Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries zero, one, two, few, many and other; another namespace's strings are overridden in assets/overrides/<namespace>/<locale>.json; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0192 (ICU plurals)",
   "nav": {
     "home": "Home",
     "pricing": "Pricing",

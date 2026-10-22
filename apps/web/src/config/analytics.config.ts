@@ -5,8 +5,7 @@
  * Boundary: the key is env (`VITE_POSTHOG_KEY`). No identity is ever attached on the public site;
  *           the driver runs cookieless until consent. Drivers self-register.
  * Runtime: isomorphic
- * Governing contract: ADR 0071 d6 (no personal data without consent), ADR 0231 (checked driver
- *                     names)
+ * Governing contract: ADR 0231 (checked driver names)
  */
 import { AnalyticsDriver } from "@stackra/analytics/contracts";
 import { Config, DriverOf } from "@stackra/config";

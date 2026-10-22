@@ -11,10 +11,10 @@
 import { routeContext } from "@stackra/navigation/router";
 import { OgKind } from "@stackra/seo";
 import { renderOgImage } from "@stackra/seo/og";
-import type { Route } from "./+types/og-image.route";
+import type { Route } from "./+types/og-image";
 import { Commerce, Experience } from "#stackra/clients";
 import { SeoConfig } from "#src/config/seo.config";
-import { resolveSite } from "#src/server/resolve-site.server";
+import { resolveSite } from "#src/providers/site/resolve-site";
 import logo from "#assets/public/logo.svg?raw";
 
 export async function loader(args: Route.LoaderArgs) {

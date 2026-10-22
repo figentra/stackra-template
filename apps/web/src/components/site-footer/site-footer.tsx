@@ -1,17 +1,15 @@
 /**
  * Stackra file contract:
- * Purpose: the site's footer: rights line and the legal links, which are tenant builder pages
- *          (`privacy`, `terms`) served by the catch-all `Routes.page`.
- * Boundary: presentation only; links are the page route with its splat, so they land in the
- *           visitor's locale.
+ * Purpose: the site's footer: rights line and the legal navigation from `FooterMenu`.
+ * Boundary: presentation only; the items are the menu's, so they land in the visitor's locale and
+ *           a tenant adds a legal page by changing the menu, never this component.
  * Runtime: browser
- * Governing contract: ADR 0128, ADR 0114 (legal pages are builder pages), ADR 0071 (privacy page is
- *                     required)
+ * Governing contract: ADR 0114 (legal pages are builder pages)
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Link } from "@stackra/navigation/react";
+import { Link, useMenu } from "@stackra/navigation/react";
 import { I18n } from "#stackra/i18n";
-import { Routes } from "#stackra/routes";
+import { FooterMenu } from "#src/menus/footer.menu";
 
 /** What the footer shows beyond its keys. */
 export interface SiteFooterProps {
@@ -22,6 +20,7 @@ export interface SiteFooterProps {
 /** A `<footer>` landmark with a labelled legal navigation. */
 export function SiteFooter({ siteName }: SiteFooterProps) {
   const { t } = useTranslation();
+  const items = useMenu(FooterMenu);
   return (
     <footer className="mt-16 border-t border-ink-muted/20 py-8 text-sm text-ink-muted">
       <div
@@ -30,12 +29,11 @@ export function SiteFooter({ siteName }: SiteFooterProps) {
       >
         <p>{t(I18n.web.footer.rights, { year: new Date().getFullYear(), name: siteName })}</p>
         <nav aria-label={t(I18n.web.footer.legal)} className="flex gap-4">
-          <Link to={Routes.page} params={{ "*": "privacy" }}>
-            {t(I18n.web.footer.privacy)}
-          </Link>
-          <Link to={Routes.page} params={{ "*": "terms" }}>
-            {t(I18n.web.footer.terms)}
-          </Link>
+          {items.map((item) => (
+            <Link key={item.label} to={item.to}>
+              {t(item.label)}
+            </Link>
+          ))}
         </nav>
       </div>
     </footer>

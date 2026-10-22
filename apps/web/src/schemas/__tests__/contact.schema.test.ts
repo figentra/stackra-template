@@ -11,7 +11,7 @@ import { ContactInput } from "#src/schemas/contact.schema";
 
 const valid = {
   name: "Lina",
-  email: "lina@example.com",
+  email: "lina@northwind.example",
   message: "We need a store for two brands.",
   consent: true,
   captchaToken: "tok",

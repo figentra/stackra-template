@@ -4,13 +4,13 @@
  *          URL) and the component that provides it below the site layout, on the server render and
  *          after hydration alike.
  * Boundary: a context with no behaviour before mount, so no `@Provider` class; its value is what
- *           `SiteLayout.resolve` produced. The folder holds this file and `use-site.ts`, nothing
- *           else.
+ *           `SiteLayout.resolve` produced. The folder holds the context, its accessor
+ *           (`use-site.ts`) and the resolution that produces the value (`resolve-site.ts`).
  * Runtime: isomorphic
  * Governing contract: ADR 0175 (sites by host)
  */
 import { createContext, type ReactNode } from "react";
-import type { ResolvedSite } from "#src/server/resolve-site.server";
+import type { ResolvedSite } from "#src/providers/site/resolve-site";
 
 /** The context; `undefined` outside the layout (the root error boundary). */
 export const SiteContext = createContext<ResolvedSite | undefined>(undefined);

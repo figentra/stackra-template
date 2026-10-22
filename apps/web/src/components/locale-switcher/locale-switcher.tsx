@@ -5,7 +5,7 @@
  *           locale mount and keeps the search string; the server sets `lang` and `dir` from the new
  *           URL. A native select on purpose: it works before hydration and on every screen reader.
  * Runtime: browser
- * Governing contract: ADR 0080 (locale as a path prefix)
+ * Governing contract: ADR 0165 (React Router 7 navigation)
  */
 import { useConfig } from "@stackra/config/react";
 import { Locale } from "@stackra/i18n";
@@ -31,7 +31,7 @@ export function LocaleSwitcher({ locale }: LocaleSwitcherProps) {
     <label className="flex items-center gap-2 text-sm">
       <span className="sr-only">{t(I18n.web.nav.locale)}</span>
       <select
-        className="rounded-field border border-ink-muted/20/30 bg-background px-2 py-1"
+        className="rounded-field border border-ink-muted/20 bg-background px-2 py-1"
         value={locale.value}
         onChange={(event) => navigate(hrefFor(Locale.from(event.target.value)))}
       >

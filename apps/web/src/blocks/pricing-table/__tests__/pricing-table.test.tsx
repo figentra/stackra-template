@@ -40,7 +40,7 @@ const LADDER = {
   ],
 };
 /** The resolved site of the cases. */
-const SITE = { locale: Locale.En, signupUrl: "https://www.example.com/signup" };
+const SITE = { locale: Locale.En, signupUrl: "https://www.acme.example/signup" };
 
 /** Guards the plan ladder, where a wrong price is a commercial error. */
 describe(PricingTable, () => {
@@ -57,7 +57,7 @@ describe(PricingTable, () => {
     render(<PricingTable data={LADDER} product="retail-os" />, { locale: "en", site: SITE });
     const href = screen.getByRole("link", { name: "Start trial" }).getAttribute("href");
     expect(href).toBe(
-      "https://www.example.com/signup?product=retail-os&plan=starter&interval=month",
+      "https://www.acme.example/signup?product=retail-os&plan=starter&interval=month",
     );
   });
 

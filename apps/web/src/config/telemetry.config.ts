@@ -7,7 +7,7 @@
  *           `telemetry.sentryProject`. The public site has no user, so nothing personal is sent; a
  *           replay would need the analytics consent category.
  * Runtime: isomorphic
- * Governing contract: ADR 0232 (reporter port), ADR 0184, ADR 0183 (budgets), ADR 0071 (consent)
+ * Governing contract: ADR 0232 (reporter port), ADR 0184, ADR 0183 (budgets)
  */
 import { Config } from "@stackra/config";
 import { ConsentCategory } from "@stackra/consent";
