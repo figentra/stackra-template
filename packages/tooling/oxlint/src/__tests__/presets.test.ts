@@ -22,6 +22,6 @@ describe("@stackra/oxlint-config presets", () => {
   it("boundaries.jsonc keeps the tier rule", () => {
     const text = readFileSync(join(root, "src", "boundaries.jsonc"), "utf8");
     expect(text).toContain('"**/apps/**"');
-    expect(text).toContain('"@stackra/*/src/*"');
+    expect(text).toContain('"@*/*/src/*"');
   });
 });

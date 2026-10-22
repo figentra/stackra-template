@@ -1,6 +1,9 @@
 // Stackra file contract:
-// Purpose: React 19 libraries (packages/<category>/<name> with a React entry): DOM lib + automatic JSX.
-// Owner: release-operations · Secrets: forbidden
+// Purpose: building block for React code: the base plus the DOM library and the automatic JSX
+//          runtime (React 19).
+// Boundary: not a role; vite extends it for the app role. A member extends a role preset.
+// Runtime: node
+// Governing contract: Stackra ADR 0165 (web client stack)
 {
   "display": "@stackra/typescript-config — react",
   "extends": "./base.json",
@@ -8,6 +11,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
     "types": ["vitest/globals"]
-  },
-  "include": ["${configDir}/src", "${configDir}/tsdown.config.ts", "${configDir}/vitest.config.ts"]
+  }
 }

@@ -7,7 +7,6 @@
  * Boundary: the shared coverage block and its wrapper; it runs no tests itself.
  * Runtime: node
  * Governing contract: ADR 0007 (documentation); ADR 0022 (test placement).
- * Owner: release-operations · Secrets: forbidden
  * Change policy: a threshold moves only upward, in a changeset; a package that cannot meet it names why in
  *                its own vitest.config.ts (`withCoverage(config, { thresholds: {...} })`).
  */

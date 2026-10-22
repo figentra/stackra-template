@@ -1,7 +1,15 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-issue-forms.json
+# Stackra file contract:
+# Purpose: the feature request form GitHub shows under "New issue": the problem first, then the
+#          proposed change.
+# Boundary: the form only; maintainers add triage labels beyond `enhancement`.
+# Runtime: node
+# Governing contract: GitHub issue forms syntax (docs.github.com, "Syntax for issue forms")
 name: Feature request
 description: Propose a change or a new capability.
 labels: [enhancement]
 body:
+  # The need, stated before any solution, so the proposal can be judged against it.
   - type: textarea
     id: problem
     attributes:
@@ -9,6 +17,7 @@ body:
       description: What you are trying to do and why the current behaviour falls short.
     validations:
       required: true
+  # The suggested change and where it lands (member and file kind).
   - type: textarea
     id: proposal
     attributes:

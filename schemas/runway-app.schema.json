@@ -308,7 +308,7 @@
         "domain": {
           "type": "string",
           "description": "Public host in this environment; `${pr}` is expanded in previews.",
-          "examples": ["console.acme.dev"]
+          "examples": ["console.acme.example"]
         },
         "aliases": {
           "type": "array",

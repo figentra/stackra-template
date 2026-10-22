@@ -22,8 +22,10 @@ Stackra is a TypeScript framework for products that ship one backend to many sur
 behaviour as decorated classes (actions, queries, models, events, routes) and `stackra gen` derives
 the rest: the dependency wiring, the HTTP and MCP endpoints, typed clients for every consumer, the app
 entries and the runtime config for web, PWA, desktop and mobile. This repository is the reference
-monorepo that `pnpm create stackra` will render: two services, three apps, two packages and the docs
-site, each showing every file kind with its test.
+monorepo that `pnpm create stackra` will render: two services, three apps, three packages, five
+tooling presets and the docs site, each showing every file kind with its test. The example product is
+**Acme**, a multi-tenant commerce platform: a staff console, a public storefront, a mobile app, and the
+commerce and notifications services behind them.
 
 > [!NOTE]
 > **Pre-release.** The `@stackra/*` packages and the `stackra` CLI are not published yet. Nothing here
@@ -38,7 +40,7 @@ site, each showing every file kind with its test.
 2. Run:
 
    ```sh
-   mise install                 # node, pnpm, gitleaks, infisical, maestro at the pinned versions
+   mise install                 # node, pnpm, gitleaks, infisical, maestro, encore, eas-cli, pinned
    pnpm install                 # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`)
    stackra agents setup         # once per machine: Stackra skills, sub-agents and guard hooks for your assistant
    pnpm gen && pnpm dev         # generate .stackra/ and run every member
@@ -60,7 +62,7 @@ site, each showing every file kind with its test.
 | `packages/commerce/loyalty-kit`    | a feature package: every kind a package can hold                             |
 | `packages/security/access-log`     | a decorator package: `@AccessLogged` with its explorer                       |
 | `packages/cross-cutting/brand`     | brand tokens as TypeScript, CSS and native CSS                               |
-| `packages/tooling/*`               | TypeScript, oxlint, Vitest and tsdown presets                                |
+| `packages/tooling/*`               | TypeScript, oxlint, Vitest, tsdown and commitlint presets                    |
 | `runway.yaml`, `stackra.lock.yaml` | infrastructure and environments; pinned external producer manifests          |
 
 The full annotated tree is in [Tree](#tree) below.
@@ -125,7 +127,8 @@ Strings appear only where an identity is declared; every reference (`Commerce.ac
 
 ## Surfaces
 
-Each app lists its targets in `stackra.config.ts`, and `stackra gen` builds only those (ADR 0281).
+Each app lists its targets in `stackra.config.ts`, and `stackra gen` builds only those
+([Stackra ADR 0281](https://docs.stackra.figentra.com/adr/0281-desktop-surfaces-targets-desktop-modes-and-overlay-styles)).
 
 | Surface | Where                      | What you get                                                                     |
 | ------- | -------------------------- | -------------------------------------------------------------------------------- |
@@ -134,10 +137,9 @@ Each app lists its targets in `stackra.config.ts`, and `stackra gen` builds only
 | Desktop | `apps/console`             | Electron with the hardening baseline, tray, deep links, auto-update and overlays |
 | Mobile  | `apps/mobile`              | Expo with native tabs, EAS builds and over-the-air updates                       |
 
-The console's desktop target runs in `Hybrid` mode (a window plus a tray icon) with two overlays in
-`src/config/desktop.config.ts`: `quick`, a launcher bar on `CommandOrControl+Shift+Space`, and
-`assistant`, a panel docked to the right edge. Any route renders in an overlay as well as in the main
-window.
+The console's desktop target runs in `Hybrid` mode (a window plus a tray icon) with one overlay in
+`src/config/desktop.config.ts`: `quick`, a launcher bar on `CommandOrControl+Shift+Space`. Any
+route renders in an overlay as well as in the main window.
 
 ## Developer experience
 
@@ -149,8 +151,9 @@ window.
   [`AGENTS.md`](AGENTS.md).
 - **Stackra MCP** ([`.mcp.yaml`](.mcp.yaml)): a local server that answers from this project's
   generated facts (kinds, manifests, routes, wiring) and a hosted one for framework know-how.
-- **Quality tooling**: oxlint and oxfmt, Vitest, knip, lefthook, commitlint, changesets and gitleaks,
-  all pinned through pnpm catalogs and `mise.toml`.
+- **Quality tooling**: oxlint and oxfmt, Vitest, knip, cspell, lefthook, commitlint, changesets and
+  gitleaks, all pinned through pnpm catalogs and `mise.toml`; Renovate (`renovate.json5`) proposes
+  the updates.
 
 ## The one-line model
 
@@ -177,22 +180,23 @@ window.
 ├── .gitignore                    `.stackra/*` except the committed app-manifest.json, openapi.json
 ├── .github/                      Quality Gate (pre-release: `scripts/preview-gate.mjs`; then `pnpm verify`),
 │                                 release (skips until pnpm-lock.yaml is committed), issue and PR
-│                                 templates, CODEOWNERS, branch protection, Stackra brand assets
-│                                 (`assets/`, trademarked)
+│                                 templates, CODEOWNERS, the main ruleset (`rulesets/main.json`),
+│                                 Stackra brand assets (`assets/`, all rights reserved)
 ├── .changeset/                   pending release notes for packages (apps and services deploy by SHA)
 ├── lefthook.yml · .commitlintrc.yaml · knip.jsonc · .gitleaks.toml · .editorconfig · .gitattributes
+├── renovate.json5                dependency update policy (catalogs, mise.toml, actions by SHA)
+├── .easignore                    what EAS uploads for a mobile build (generated; re-includes
+│                                 apps/mobile/.stackra/, which .gitignore keeps out of git)
 ├── .vscode/                      editor: oxfmt and oxlint through Oxc, TypeScript 7 extension
 │                                 (useTsgo), schema mappings, debug configurations, tasks
-├── .markdownlint.yaml · cspell.config.yaml   Markdown structure checks; editor spelling words
-├── schemas/                      JSON Schemas for runway.yaml, stackra.lock.yaml, .mcp.yaml and
-│                                 branch-protection.json; temporary copies until
-│                                 static.stackra.figentra.com/schemas/ is live
+├── .markdownlint.yaml · cspell.config.yaml   Markdown structure checks; spelling (editor, hook, CI)
+├── schemas/                      JSON Schemas for runway.yaml, stackra.lock.yaml and .mcp.yaml;
+│                                 temporary copies until static.stackra.figentra.com/schemas/ is live
 ├── mise.toml · .node-version     toolchain pins
 ├── .mcp.yaml                     every MCP server the project uses (Stackra local + hosted, docs and
 │                                 tool servers); rendered to .mcp.json
 ├── .claude/launch.json           dev-server launch configuration for the assistant's preview
-├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE · TRADEMARKS.md
-├── REVIEW.md                     pre-release review notes; removed before the template is final
+├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE
 ├── apps/                         tier:app (apps/README.md)
 │   ├── console/                  @acme/console: tenant console, targets web + pwa + desktop
 │   │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
@@ -215,18 +219,18 @@ window.
 │   │   ├── src/{mobile.app.ts, config/, routes/, components/{pages,ui}/, providers/, stores/,
 │   │   │        blocks/, documents/, analytics/, overrides/, enums/, schemas/, styles/,
 │   │   │        __tests__/}
-│   │   └── .stackra/{main.ts, app.config.ts, eas.json, metro.config.js, babel.config.js,
+│   │   └── .stackra/{main.ts, app.config.ts, eas.json, eas-sync.json, metro.config.js,
 │   │                 maestro/, gen/, …}
 │   └── docs/                     @acme/docs: Mintlify; content root is src/ (docs.json, pages,
 │                                 guides/, adr/, api-reference/, assets/)
 ├── packages/                     tier:lib, packages/<category>/<name> (packages/README.md)
-│   ├── commerce/loyalty-kit/     @stackra/loyalty-kit: the SHAPES CATALOGUE, every kind a package
+│   ├── commerce/loyalty-kit/     @acme/loyalty-kit: the SHAPES CATALOGUE, every kind a package
 │   │   │                         can hold
 │   │   ├── assets/lang/<locale>/loyalty_kit.json
 │   │   └── src/{index.ts, config/, contracts/, core/, node/, react/, testing/, __tests__/}
-│   ├── security/access-log/      @stackra/access-log: a DECORATOR package (createDecorator +
+│   ├── security/access-log/      @acme/access-log: a DECORATOR package (createDecorator +
 │   │                             Explorer + @Driver sinks, a retention job, the audit resource)
-│   ├── cross-cutting/brand/      @stackra/brand: one TypeScript token source, css/tokens.css and
+│   ├── cross-cutting/brand/      @acme/brand: one TypeScript token source, css/tokens.css and
 │   │                             css/native.css generated from it, the mark
 │   └── tooling/                  tier:config presets: typescript, oxlint (boundaries), vitest,
 │                                 tsdown, commitlint
@@ -246,7 +250,8 @@ window.
 
 ### Package map
 
-The template follows the settled package map, not the earlier ADR 0127 rows. There is no
+The template follows the settled package map, not the earlier
+[Stackra ADR 0127](https://docs.stackra.figentra.com/adr/0127-package-categories-including-infrastructure) rows. There is no
 `@stackra/forms` (forms are `@stackra/ui/form`, `useSchemaForm`), no `@stackra/notifications`
 package (notifications is a service: delivery, the in-app inbox and preferences), no `@stackra/pwa`
 or `@stackra/network` (`@stackra/platform` owns the targets, the service worker runtime `./sw` and
@@ -269,7 +274,7 @@ One fact lives in exactly one file. The test that places it:
 
 A package has no runway: publishing is `publishConfig` (with `exports` pointing at `dist`) plus a
 changeset. A member file may override a root default, never the reverse. Secret values live only in
-Infisical (ADR 0173); files name them. Wrong place, for each row: a port number is runway, not
+Infisical ([Stackra ADR 0173](https://docs.stackra.figentra.com/adr/0173-secrets-infisical-is-the-source-of-production-secrets)); files name them. Wrong place, for each row: a port number is runway, not
 config; a TTL is config, not runway; the list of targets is `stackra.config.ts`, never the `@App`
 class; a column is the model, never a hand-written migration.
 
@@ -284,7 +289,8 @@ class; a column is the model, never a hand-written migration.
 | module  | `pnpm new module <key>` (in a service or package)    | `src/modules/<key>/<key>.module.ts` + README; lang goes to the member's `assets/lang/<locale>/<key>.json`                                                                                     |
 
 `stackra.config.ts` keeps `defineApp` / `defineService`: it is build-config input read from the AST
-(like `vite.config.ts`), the one carve-out from the retired define family, recorded beside ADR 0145.
+(like `vite.config.ts`), the one carve-out from the retired define family, recorded beside
+[Stackra ADR 0145](https://docs.stackra.figentra.com/adr/0145-tokens-are-define-token-values-and-global-helpers-are-banned).
 A package keeps its module root in `package.json#stackra.module`; it has no `stackra.config.ts`. The
 escape hatches are function files, never an object in `stackra.config.ts`: `vite.extend.ts`,
 `metro.extend.ts`, `electron.extend.ts`, merged after the stackra plugin.
@@ -311,7 +317,7 @@ Where the template offers two valid shapes, this is the rule for picking one.
 `--entry core|node|react|testing` in a package). Test suffixes: `.test.ts(x)` unit (memory drivers),
 `.int.test.ts` integration (Postgres container, outbox), `.contract.test.ts`, `.e2e.test.ts`
 (Playwright, always with axe), `.flow.yaml` (Maestro). Every test sits in `__tests__/` beside its
-subject (ADR 0022), opens with the file contract and carries a docblock on every `describe` and
+subject ([Stackra ADR 0022](https://docs.stackra.figentra.com/adr/0022-tests-live-in-tests-folders)), opens with the file contract and carries a docblock on every `describe` and
 `it`.
 
 ### Test header and helpers
@@ -324,7 +330,7 @@ The header of a test file (what `pnpm new test` writes) names the tier and the h
  * Purpose: proves <the behaviour>.
  * Boundary: <the tier>; helpers come from the packages that own them.
  * Runtime: node
- * Governing contract: ADR 0022, ADR 0007 (amended: test docblocks)
+ * Governing contract: Stackra ADR 0022, Stackra ADR 0007 (amended: test docblocks)
  */
 ```
 
@@ -359,7 +365,7 @@ Native.
 | query                              | `queries/*.query.ts`                                                                            | `queries/__tests__/<name>.query.test.ts`                    | `orders/queries/list-orders.query.ts`, `catalogue/queries/get-product-by-slug.query.ts`         |
 | workflow                           | `workflows/*.workflow.ts`                                                                       | `workflows/__tests__/<name>.workflow.int.test.ts`           | `orders/workflows/create-order.workflow.ts`                                                     |
 | module service                     | `services/*.service.ts` (`@Crud` optional)                                                      | `services/__tests__/<name>.service.test.ts`                 | `orders/services/order-pricing.service.ts`                                                      |
-| policy / guard                     | `policies/*.policy.ts`, `guards/*.guard.ts`                                                     | `policies/__tests__/<name>.policy.test.ts`                  | `orders/policies/order.policy.ts`, `orders/guards/tenant-active.guard.ts`                       |
+| policy / guard                     | `policies/*.policy.ts`, `guards/*.guard.ts`                                                     | `policies/__tests__/<name>.policy.test.ts`                  | `orders/policies/order.policy.ts`, `orders/guards/accepting-orders.guard.ts`                    |
 | permissions                        | `permissions/*.permission.ts`                                                                   | the `.contract` test                                        | `orders/permissions/order.permission.ts`                                                        |
 | entitlement                        | `entitlements/*.entitlement.ts` (`@Entitlement`)                                                | through the action that checks it                           | `catalogue/entitlements/product-limit.entitlement.ts`                                           |
 | event                              | `events/*.event.ts` (`@Event`), `versions/*.upcast.ts`                                          | the `.contract` test                                        | `orders/events/order-paid.event.ts`, `loyalty-kit/src/node/versions/points-earned-v1.upcast.ts` |
@@ -420,46 +426,51 @@ the contract consumers generate their clients from, and `apps/docs` publishes pr
 
 `pnpm create stackra my-app` renders this shape with one example service. A larger product uses the
 same generator: many `services/<name>`, private `@acme/*` packages for logic two of its services share
-(ADR 0259 home B), and the apps. Nothing in a service file differs between the two.
+([Stackra ADR 0259](https://docs.stackra.figentra.com/adr/0259-module-placement-three-homes), home B), and the apps. Nothing in a service file differs between the two.
 
 ## Make it yours
 
-The template uses a neutral example organisation, `acme`, wherever a project-specific value belongs.
-Replace `acme` with your own names, and the placeholders below, before the first push:
+Acme is the example product throughout: every project-specific value names it, and none is a
+placeholder. `acme.example` is a reserved example domain. Replace these with your own before the first
+push (`pnpm create stackra` asks for them and rewrites them for you):
 
-| Placeholder                                           | Where                                                                                        | Put                                                                                             |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `@acme/*` member names                                | every app and service `package.json`, filters                                                | your npm scope                                                                                  |
-| `acme-platform`, `acme`                               | root `package.json` name, `runway.yaml` (project, GitHub, Sentry, Expo), `stackra.lock.yaml` | your project and organisation names                                                             |
-| `acme.dev`, `*.acme.dev`                              | `runway.yaml`, app `runway.yaml`, config defaults                                            | your domains                                                                                    |
-| `dev.acme.console`, `dev.acme.mobile`, `acme-console` | `desktop.config.ts`, `release.config.ts`, Maestro flows                                      | your bundle ids and URL scheme                                                                  |
-| `@your-org/your-team`                                 | `.github/CODEOWNERS`                                                                         | your GitHub team or user                                                                        |
-| `security@your-domain.example`, `your-repo`           | `SECURITY.md`, `.github/ISSUE_TEMPLATE/config.yml`                                           | your security contact and repository                                                            |
-| `refs-issue-key` (commented out)                      | `.commitlintrc.yaml`                                                                         | your tracker's prefix, to require an issue-key footer                                           |
-| `GITHUB_TOKEN` in the release job                     | `.github/workflows/release.yml`                                                              | a GitHub App token if the version PR must run the gate                                          |
-| `figentra/stackra-template` repository URL            | `repository` in each `packages/*/*/package.json` (not tooling)                               | your repository (npm provenance checks it)                                                      |
-| copyright holder                                      | `LICENSE` and the copies in each package                                                     | yours                                                                                           |
-| product brand (Acme mark, blue accent)                | `packages/cross-cutting/brand`, `apps/*/assets/public/logo.svg`, `apps/docs/src/docs.json`   | your brand                                                                                      |
-| Stackra brand assets (trademarked)                    | `.github/assets/`, `TRADEMARKS.md`, the README logo block, the trademark line in `NOTICE`    | remove, or keep under `TRADEMARKS.md`; set your own social preview in Settings > Social preview |
+| Value                                                    | Where                                                                                                     | Put                                                                                      |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `acme-platform` (root package `name`)                    | `package.json`, `runway.yaml` (`project`, `providers.encore.app`, GitHub), `stackra.lock.yaml`, `.mcp.yaml` (Encore app id) | your project name and Encore app id                                                     |
+| `@acme/*` member names                                   | every app, service and example package `package.json` and their imports, the root scripts' `--filter`, `.claude/launch.json` (`--filter` of each server) | your npm scope                                                                           |
+| `acme` organisation                                      | `runway.yaml` (GitHub, Sentry, Expo), `.github/ISSUE_TEMPLATE/config.yml` (security advisory URL)      | your GitHub, Sentry and Expo organisations                                               |
+| `@acme/platform-team`                                    | `.github/CODEOWNERS`, `runway.yaml` (production reviewers), `CONTRIBUTING.md` (conduct reports)        | your GitHub team                                                                         |
+| `acme.example`, `*.acme.example`                         | `runway.yaml`, app `runway.yaml`, config defaults                                                       | your domains                                                                             |
+| `example.acme.console`, `example.acme.mobile`, `acme-console`, `acme` | `desktop.config.ts` (app id, scheme), `release.config.ts` (bundle id, package, scheme), Maestro flows | your bundle ids and URL schemes                                                          |
+| `figentra/stackra-template` (CI badge, repository URL)   | the README badges, `repository` in each `packages/*/*/package.json` (not tooling)                       | your repository (npm provenance checks it)                                               |
+| copyright holder                                         | `LICENSE` and the copies in each package                                                                | yours                                                                                    |
+| product brand (Acme mark, blue accent)                   | `packages/cross-cutting/brand`, `apps/*/assets/public/logo.svg`, `apps/docs/src/docs.json`              | your brand                                                                               |
+| Stackra brand assets (all rights reserved)               | `.github/assets/` (see its `NOTICE`), the README logo block, the brand line in `NOTICE`                  | remove them, or keep them unmodified to say the project is built with Stackra            |
+| social preview image                                     | `.github/assets/social-preview.png`, uploaded by hand under **Settings → General → Social preview**      | your own image; GitHub has no file setting for it                                        |
+| `refs-issue-key` rule (off)                              | `.commitlintrc.yaml`                                                                                     | your tracker's prefix under `rules`, to require an issue-key footer                       |
+| `GITHUB_TOKEN` in the release job                        | `.github/workflows/release.yml`                                                                          | a GitHub App token if the version PR must run the gate                                   |
 
-Template-only lines, removed in a real project once `@stackra/*` is published: the `pnpm-lock.yaml` line in
-`.gitignore` (Release skips until a lockfile is committed), `!.stackra/**` in the root and member `.gitignore` files
-with the committed `.stackra/gen` samples, the pre-release step in `.github/workflows/ci.yml` with
-`.github/scripts/preview-gate.mjs`, and `REVIEW.md`.
+Then import `.github/rulesets/main.json` (Settings → Rules → Rulesets), turn on private vulnerability
+reporting (`SECURITY.md`), and install the Renovate app.
 
-Secret values never go in a file: a config field is `@Secret`/`@Env`, `runway.yaml` names the secret, and the value
-lives in your secret store (Infisical by default, ADR 0173).
+Template-only lines, removed in a real project once `@stackra/*` is published: `!.stackra/**` in the
+root and member `.gitignore` files with the committed `.stackra/gen` samples, and the pre-release step
+in `.github/workflows/ci.yml` with `.github/scripts/preview-gate.mjs`.
+
+Secret values never go in a file: a config field is `@Secret`/`@Env`, `runway.yaml` names the secret,
+and the value lives in your secret store (Infisical by default, Stackra ADR 0173).
 
 ## Docs
 
 - Guides: [`apps/docs/src/guides`](apps/docs/src/guides) (programming model, adding a field, testing); run `pnpm docs`.
 - Architecture decisions: [`apps/docs/src/adr`](apps/docs/src/adr).
 - API reference: [`apps/docs/src/api-reference`](apps/docs/src/api-reference), projected from the committed manifests.
-- Review notes for this template: [`REVIEW.md`](REVIEW.md).
+- The framework's guides and ADRs: [docs.stackra.figentra.com](https://docs.stackra.figentra.com).
 
 ## Reading order
 
-1. The monorepo root (`REVIEW.md` step 1 lists every root file and folder)
+1. The monorepo root: this README's [Tree](#tree), then `package.json`, `pnpm-workspace.yaml` and
+   `turbo.jsonc`
 2. `AGENTS.md` (glossary and rules)
 3. `services/commerce/src/modules/orders/README.md`, then `actions/create-order.action.ts` and
    `workflows/create-order.workflow.ts`
@@ -475,6 +486,6 @@ lives in your secret store (Infisical by default, ADR 0173).
 
 ## Licence
 
-MIT, see [`LICENSE`](LICENSE). The bundled Stackra brand images, fonts and paid-licence code are excluded, see
-[`NOTICE`](NOTICE).
-The Stackra and Figentra names and logos are trademarks, see [`TRADEMARKS.md`](TRADEMARKS.md).
+MIT, see [`LICENSE`](LICENSE). The bundled Stackra brand images, fonts and paid-licence code are
+excluded, see [`NOTICE`](NOTICE). The Stackra and Figentra names and logos are trademarks of Figentra
+Technologies L.L.C (`.github/assets/NOTICE`).

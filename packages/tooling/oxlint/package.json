@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@stackra/typescript-config": "workspace:*",
+    "@stackra/vitest-config": "workspace:*",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "vitest": "catalog:quality"

@@ -8,17 +8,15 @@
 #           repository is not listed: its manifest is read from the working tree. Bumping a revision
 #           is one commit that regenerates every member.
 # Runtime: node
-# Governing contract: ADR 0158 (the manifest is the contract), ADR 0260 (clients are generated from
-#                     manifests)
+# Governing contract: Stackra ADR 0158 (the manifest is the contract), Stackra ADR 0260 (clients are
+#                     generated from manifests)
 version: 1
+# The repository these pins belong to (root package.json `name`).
 repository: acme-platform
-producers:
-  billing: 8e1b3d2
-  content: 4a9c7f1
-  experience: b82d913
-  identity: 2d4f6c8
-  marketing: c3d8e07
-  payments: 9be0d44
-  platform: a77e9b0
-  pricing: 3f9c2a1
-  tenants: 71ac0e2
+# Module key → the full 40-character commit SHA of that producer's committed manifest. The members
+# consume acme-platform producers that live outside this repository (identity, experience, platform,
+# billing, content, marketing, pricing and payments; each member's app-manifest.json names them with
+# `pin: stackra.lock.yaml#<key>`). Each gets its SHA here when its repository publishes its
+# manifest; until then the map is empty, the committed `.stackra/gen` client samples stand in, and a
+# revision is never invented.
+producers: {}

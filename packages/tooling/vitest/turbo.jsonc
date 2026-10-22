@@ -1,4 +1,7 @@
-// Turborepo package configuration: extends the root turbo.jsonc and declares this member's one tier tag
-// (pnpm validate checks it matches the directory). Task overrides for this member only go here.
-// Owner: release-operations · Secrets: forbidden
+// Stackra file contract:
+// Purpose: this member's Turborepo configuration: extends the root turbo.jsonc and declares its one
+//          tier tag, `tier:config` (`stackra validate` checks it matches the directory).
+// Boundary: task overrides for this member only; the task graph lives in the root turbo.jsonc.
+// Runtime: node
+// Governing contract: Stackra ADR 0003 (tier direction)
 { "$schema": "https://turborepo.dev/schema.json", "extends": ["//"], "tags": ["tier:config"] }

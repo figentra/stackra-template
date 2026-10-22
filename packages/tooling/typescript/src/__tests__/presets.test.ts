@@ -1,6 +1,7 @@
 /**
  * Proves every preset listed in package.json `exports` exists, parses as JSONC, and resolves its
- * `extends` chain back to base.json — so a broken preset fails here, not in the first consumer's typecheck.
+ * `extends` chain back to base.json — so a broken preset fails here, not in the first consumer's typecheck —
+ * and that the five member roles are exported under one spelling, without `.json`.
  */
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -39,6 +40,14 @@ describe("@stackra/typescript-config presets", () => {
       }
     });
   }
+
+  it("exports the five member roles, each under one spelling without .json", () => {
+    const subpaths = Object.keys(pkg.exports);
+    for (const role of ["app", "mobile", "library", "service", "tooling"]) {
+      expect(subpaths, role).toContain(`./${role}`);
+    }
+    expect(subpaths.filter((subpath) => subpath.endsWith(".json"))).toEqual([]);
+  });
 
   it("base keeps the non-negotiable strictness flags", () => {
     const base = readJsonc(join(root, "src", "base.json")).compilerOptions ?? {};

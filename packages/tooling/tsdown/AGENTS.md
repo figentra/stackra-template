@@ -1,7 +1,8 @@
 # AGENTS — @stackra/tsdown-config
 
 - Owner: release-operations.
-- Do not pass build options in a consuming workspace beyond entries; change the preset and ship a changeset.
+- Do not pass build options in a consuming workspace beyond entries; change the preset and ship a
+  changeset.
 - Secrets: forbidden.
 
 ## PII

@@ -1,7 +1,16 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-issue-forms.json
+# Stackra file contract:
+# Purpose: the bug report form GitHub shows under "New issue": what broke, where, at which version,
+#          and how to reproduce it.
+# Boundary: the form only; triage labels beyond `bug` are added by maintainers. Security reports
+#           never use this form (config.yml links the private advisory form instead).
+# Runtime: node
+# Governing contract: GitHub issue forms syntax (docs.github.com, "Syntax for issue forms")
 name: Bug report
 description: Something does not work as documented.
 labels: [bug]
 body:
+  # The behaviour itself: the one field a report cannot do without.
   - type: textarea
     id: what
     attributes:
@@ -9,18 +18,30 @@ body:
       description: What you did, what you expected, and what happened instead.
     validations:
       required: true
+  # Narrows the report to one member, so the right code owner is asked.
   - type: input
     id: member
     attributes:
       label: Member
       description: The app, service or package (for example services/commerce).
+  # Without a version or commit a maintainer cannot reproduce against the same code.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: The package version, the deployed release, or the commit SHA you ran.
+      placeholder: 1.4.2, or the commit SHA from `git rev-parse --short HEAD`
+    validations:
+      required: true
   - type: textarea
     id: reproduce
     attributes:
       label: Steps to reproduce
-      render: shell
+      description: The smallest sequence of steps or commands that shows the problem.
+  # Rendered as plain text: doctor output is a report, not a script to run.
   - type: textarea
     id: environment
     attributes:
       label: Environment
-      description: Output of `pnpm doctor`. Never paste a secret value; name the secret instead.
+      description: Output of `pnpm run doctor`. Never paste a secret value; name the secret instead.
+      render: text

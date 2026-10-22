@@ -1,9 +1,9 @@
 /**
- * Proves `library()` returns the agreed shape (ESM, dts, sourcemap, clean, treeshake) and that the decorators
+ * Proves `libraryPreset()` returns the agreed shape (ESM, dts, sourcemap, clean, treeshake) and that the decorators
  * flag installs the inputOptions hook which adds the legacy transform and swallows only the known conflict log.
  */
 import { describe, expect, it, vi } from "vitest";
-import { library } from "../index.ts";
+import { libraryPreset } from "../index.ts";
 
 type Resolved = {
   entry: Record<string, string>;
@@ -15,9 +15,9 @@ type Resolved = {
   inputOptions?: (i: Record<string, unknown>) => Record<string, unknown>;
 };
 
-describe("@stackra/tsdown-config library()", () => {
+describe("@stackra/tsdown-config libraryPreset()", () => {
   it("defaults to the barrel entry and the agreed options", () => {
-    const cfg = library() as unknown as Resolved;
+    const cfg = libraryPreset() as unknown as Resolved;
     expect(cfg.entry).toEqual({ index: "src/index.ts" });
     expect(cfg.format).toEqual(["esm"]);
     expect(cfg.dts).toBe(true);
@@ -28,7 +28,10 @@ describe("@stackra/tsdown-config library()", () => {
   });
 
   it("decorators: true adds the legacy transform (no metadata) and filters the duplicate-flag log", () => {
-    const cfg = library({ index: "src/index.ts" }, { decorators: true }) as unknown as Resolved;
+    const cfg = libraryPreset(
+      { index: "src/index.ts" },
+      { decorators: true },
+    ) as unknown as Resolved;
     expect(cfg.inputOptions).toBeTypeOf("function");
     if (!cfg.inputOptions) throw new Error("unreachable: asserted above");
     const out = cfg.inputOptions({ transform: { target: "es2022" } }) as {

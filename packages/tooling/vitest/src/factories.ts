@@ -1,13 +1,13 @@
 /**
  * Stackra file contract:
- * Purpose: the four factories a member's vitest.config.ts calls: `nodePreset` (services), `libraryPreset`
- *          (packages, coverage-gated), `reactPreset` (web apps) and `nativePreset` (the mobile app).
- *          `stackra gen` writes the app configs in `.stackra/` against these same names.
+ * Purpose: the role vocabulary a member's vitest.config.ts uses, one export per member role:
+ *          `libraryPreset` (packages, coverage-gated), `servicePreset` (services), `appPreset` (the Vite
+ *          and React Router apps), `mobilePreset` (the Expo app) and `tooling` (the preset packages'
+ *          own tests). `stackra gen` writes the app configs in `.stackra/` against these same names.
  * Boundary: test layout only (projects, environments, the coverage gate); no setup file, matcher or global
  *           setup is registered here.
  * Runtime: node
- * Governing contract: ADR 0005 (legacy decorators); ADR 0022 (test placement).
- * Owner: release-operations · Secrets: forbidden
+ * Governing contract: Stackra ADR 0005 (legacy decorators), Stackra ADR 0022 (test placement)
  */
 import { configDefaults, defineConfig, mergeConfig, type ViteUserConfig } from "vitest/config";
 import { withCoverage } from "./coverage.ts";
@@ -21,13 +21,15 @@ const ALL_TESTS = "src/**/__tests__/**/*.test.{ts,tsx}";
 /** jsdom plus the decorator transform: the base of the app presets. */
 const reactWithDecorators = mergeConfig(stackraVitestReact, decoratorTransform);
 
-export interface NodePresetOptions {
+/** Options of {@link servicePreset}. */
+export interface ServicePresetOptions {
   /** The member root, usually `import.meta.dirname`. */
   root: string;
   /** Extra globs no project runs. */
   exclude?: string[];
 }
 
+/** Options of {@link libraryPreset}. */
 export interface LibraryPresetOptions {
   /** The member root, usually `import.meta.dirname`. */
   root: string;
@@ -35,7 +37,8 @@ export interface LibraryPresetOptions {
   react?: string;
 }
 
-export interface ReactPresetOptions {
+/** Options of {@link appPreset}. */
+export interface AppPresetOptions {
   /** The app root (the folder above `.stackra/`). */
   root: string;
   /** Source folders whose tests run in the node environment (Electron main, server code). */
@@ -44,13 +47,14 @@ export interface ReactPresetOptions {
   exclude?: string[];
 }
 
-export interface NativePresetOptions {
+/** Options of {@link mobilePreset}. */
+export interface MobilePresetOptions {
   /** The app root (the folder above `.stackra/`). */
   root: string;
 }
 
 /** Unit tests (`.test.ts`) and integration tests (`.int.test.ts`) as two projects, legacy decorators on. */
-export function nodePreset({ root, exclude = [] }: NodePresetOptions): ViteUserConfig {
+export function servicePreset({ root, exclude = [] }: ServicePresetOptions): ViteUserConfig {
   return mergeConfig(
     stackraVitestDecorators,
     defineConfig({
@@ -79,9 +83,9 @@ export function nodePreset({ root, exclude = [] }: NodePresetOptions): ViteUserC
   );
 }
 
-/** The node preset under the shared coverage gate, plus a jsdom project for the `react` folder. */
+/** The service layout under the shared coverage gate, plus a jsdom project for the `react` folder. */
 export function libraryPreset({ root, react }: LibraryPresetOptions): ViteUserConfig {
-  const config = nodePreset({ root });
+  const config = servicePreset({ root });
   if (react === undefined) return withCoverage(config);
   return withCoverage(
     mergeConfig(
@@ -105,11 +109,11 @@ export function libraryPreset({ root, react }: LibraryPresetOptions): ViteUserCo
 }
 
 /** jsdom for every test, except the `nodeFolders`, which get a node-environment project each. */
-export function reactPreset({
+export function appPreset({
   root,
   nodeFolders = [],
   exclude = [],
-}: ReactPresetOptions): ViteUserConfig {
+}: AppPresetOptions): ViteUserConfig {
   return mergeConfig(
     reactWithDecorators,
     defineConfig({
@@ -144,6 +148,15 @@ export function reactPreset({
 }
 
 /** jsdom with legacy decorators for the mobile app's `.test.ts` and `.test.tsx` files. */
-export function nativePreset({ root }: NativePresetOptions): ViteUserConfig {
+export function mobilePreset({ root }: MobilePresetOptions): ViteUserConfig {
   return mergeConfig(reactWithDecorators, defineConfig({ root, test: { include: [ALL_TESTS] } }));
 }
+
+/**
+ * The preset packages' own tests (packages/tooling/*): plain Node, explicit `vitest` imports, no
+ * decorators, no coverage gate and no `@stackra/source` resolution, because a preset is loaded as it
+ * ships. An empty suite fails. A tooling package's vitest.config.ts is `export default tooling;`.
+ */
+export const tooling: ViteUserConfig = defineConfig({
+  test: { environment: "node", include: [UNIT_TESTS], passWithNoTests: false },
+});

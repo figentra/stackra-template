@@ -8,7 +8,6 @@
  * Boundary: rules only; no repo-specific prefix lives here.
  * Runtime: node
  * Governing contract: ADR 0007 (documentation).
- * Owner: release-operations · Secrets: forbidden
  */
 
 /** Commit types that must name an issue. */

@@ -11,7 +11,6 @@
  * Boundary: adds the legacy decorator transform to the base preset; it does not emit metadata.
  * Runtime: node
  * Governing contract: ADR 0005 (legacy decorators); ADR 0007 (documentation).
- * Owner: release-operations · Secrets: forbidden
  */
 import { defineConfig, mergeConfig } from "vitest/config";
 import { stackraVitest } from "./preset.ts";

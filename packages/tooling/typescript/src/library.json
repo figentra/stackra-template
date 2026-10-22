@@ -1,22 +1,24 @@
 // Stackra file contract:
-// Purpose: a tsdown-built library (packages/*/*) or service — node + vitest globals; `config/` (CF1 defaults)
-//          is typechecked beside `src/`. The declaration flags in base feed tsdown's dts step; a library
-//          therefore declares `@types/node` and `vitest` as devDependencies.
-// Owner: release-operations · Secrets: forbidden
+// Purpose: the `library` role: a tsdown-built package (packages/<category>/<name>) with its core,
+//          node, react and native entries. Node and vitest-global types, the DOM library and the
+//          automatic JSX runtime (for the react and native entries), and legacy decorators. The
+//          declaration flags in base feed tsdown's dts step, so a library declares `@types/node` and
+//          `vitest` as devDependencies.
+// Boundary: a member's tsconfig.json is exactly `{ "extends": "@stackra/typescript-config/library" }`;
+//           it covers src and the package's tsdown and vitest configs.
+// Runtime: node
+// Governing contract: Stackra ADR 0004 (package entries), Stackra ADR 0005 (legacy decorators, no
+//                     metadata), Stackra ADR 0094 (decorators in every member)
 {
   "display": "@stackra/typescript-config — library",
   "extends": "./node.json",
   "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "types": ["node", "vitest/globals"],
-    // v2: decorators everywhere (ADR 0094); legacy decorators, never emitDecoratorMetadata (ADR 0005).
     "experimentalDecorators": true,
     "emitDecoratorMetadata": false,
     "erasableSyntaxOnly": false
   },
-  "include": [
-    "${configDir}/src",
-    "${configDir}/config",
-    "${configDir}/tsdown.config.ts",
-    "${configDir}/vitest.config.ts"
-  ]
+  "include": ["${configDir}/src", "${configDir}/tsdown.config.ts", "${configDir}/vitest.config.ts"]
 }

@@ -5,37 +5,33 @@
 #          tools get their own format from the same source through `stackra agents setup`.
 # Boundary: server definitions only, never a token. A server that needs a token runs through
 #           `stackra mcp exec --`, which injects `$NAME` values from the project's secret store into
-#           that one process. Remote (http) servers sign in with OAuth on first use (/mcp). Keep
-#           production access read-only unless a human approves writes. npx servers are pinned to
-#           exact versions (no @latest); bump them as you would a catalog entry.
+#           that one process. Remote (http) servers sign in with OAuth on first use (/mcp), and what
+#           they may do is the scope granted at that sign-in: grant production read access only unless
+#           a human approves writes. npx servers are pinned to exact versions (no @latest); bump them
+#           as you would a catalog entry.
 # Runtime: node
 # Governing contract: Stackra ADR 0173 (secret values never in files), Stackra ADR 0282 (developer MCP)
 mcpServers:
   # --------------------------------------------------------------------------------------------
-  # 01. Stackra: this project's generated facts, the framework, and the spec workflow
+  # 01. Stackra: this project's generated facts and the framework
   # --------------------------------------------------------------------------------------------
   # Local: manifests, routes, wiring, kinds; create members, run gen/validate/verify, call actions.
   stackra:
     command: pnpm
     args: [exec, stackra, mcp]
-  # Hosted: docs, ADRs, registry and examples; project data after OAuth sign-in (read-only).
+  # Hosted: Stackra docs, ADRs, the package registry and examples; project data after OAuth sign-in.
   stackra-cloud:
     type: http
     url: https://mcp.stackra.figentra.com/mcp
-  # Spec status: which spec, what blocks it, which tasks are open (read-only). Needs vellum-mcp
-  # installed separately; it is not a dependency of this template.
-  vellum:
-    command: pnpm
-    args: [exec, vellum-mcp]
 
   # --------------------------------------------------------------------------------------------
   # 02. Runtime: the generated Encore app, locally and deployed
   # --------------------------------------------------------------------------------------------
-  # Replace <your-encore-app-id> with the id from `encore app create`. Needs the Encore CLI
-  # installed separately (it is not in mise.toml).
+  # Local: the running Encore app (`encore run`): traces, databases, endpoints. The app id is
+  # runway.yaml `providers.encore.app`; the Encore CLI comes from mise.toml.
   encore:
     command: encore
-    args: [mcp, run, --app=<your-encore-app-id>]
+    args: [mcp, run, --app=acme-platform]
   encore-cloud:
     type: http
     url: https://api.encore.dev/mcp
@@ -142,11 +138,13 @@ mcpServers:
     url: https://resend.com/docs/mcp
 
   # --------------------------------------------------------------------------------------------
-  # 08. Errors, analytics and observability (read-only)
+  # 08. Errors, analytics and observability
   # --------------------------------------------------------------------------------------------
+  # Issues, traces and releases; it can also update issues, within the scopes granted at sign-in.
   sentry:
     type: http
     url: https://mcp.sentry.dev/mcp
+  # `readonly=true`: insights, flags and events can be read, never changed.
   posthog:
     type: http
     url: https://mcp.posthog.com/mcp?readonly=true

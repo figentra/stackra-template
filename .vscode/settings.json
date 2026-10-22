@@ -1,13 +1,16 @@
-// Workspace settings: one formatter (oxfmt) and one linter (oxlint) through the Oxc extension,
-// TypeScript 7 through the TypeScript 7 extension, schemas for every config file, and the
-// .editorconfig rules. Prettier and ESLint are off (rejected). Personal preferences (theme, font,
-// keybindings) belong in user settings.
-//
-// Formatting standard (CONTRIBUTING.md, "Formatting"): oxfmt owns every language it supports and
-// nothing else formats. The editor, lefthook and CI run the same tool with the same config
-// (.oxfmtrc.jsonc, .editorconfig), so a file saved here passes `pnpm format:check`.
+// Stackra file contract:
+// Purpose: shared workspace settings: oxfmt formats and oxlint lints through the Oxc extension,
+//          TypeScript 7 runs through its native extension, config files get their schemas, and the
+//          editor applies the .editorconfig rules. Personal preferences (theme, font, keybindings)
+//          belong in user settings.
+// Boundary: editor behaviour only. The formatter and linter configs are .oxfmtrc.jsonc and
+//           .oxlintrc.jsonc; the editor, lefthook and CI read the same files, so a file saved here
+//           passes `pnpm format:check` (CONTRIBUTING.md, "Formatting and spelling").
+// Runtime: node
+// Governing contract: Stackra ADR 0227 (Prettier and ESLint are rejected; oxfmt and oxlint replace
+//                     them)
 {
-  // ── Format: oxfmt on save, for every language it owns ─────────────────────────────────────────
+  // ── Format: oxfmt on save ───────────────────────────────────────────────────────────────────────
   // oxfmt formats whole files only: "Format Selection" and format-on-type/paste are unsupported, so
   // save formats the file ("file" mode), never just the modified ranges.
   "editor.defaultFormatter": "oxc.oxc-vscode",
@@ -16,23 +19,25 @@
   "editor.formatOnType": false,
   "editor.formatOnPaste": false,
   "editor.rulers": [100],
-  "prettier.enable": false,
-  "eslint.enable": false,
-  "[typescript][typescriptreact][javascript][javascriptreact][json][jsonc][json5][yaml][markdown][mdx][toml][css][scss][less][html][graphql][vue]": {
+  "[typescript][typescriptreact][javascript][javascriptreact][json][json5][yaml][markdown][mdx][toml][css][html]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
+  // JSONC (turbo.jsonc, knip.jsonc, the oxlint presets) formats on save with VS Code's JSON formatter,
+  // which keeps every comment in place; oxfmt still checks those files in the hook and CI, and with
+  // no trailing commas (.oxfmtrc.jsonc) the two agree.
+  "[jsonc]": { "editor.defaultFormatter": "vscode.json-language-features" },
   // .editorconfig keeps trailing whitespace in Markdown (hard line breaks).
   "[markdown]": { "files.trimTrailingWhitespace": false },
   // Even Better TOML stays for validation, completion and schemas only; the [toml] formatter above is
-  // oxfmt, so its own formatter (no on/off setting in 0.21) is never picked.
+  // oxfmt.
 
-  // ── Lint: oxlint (config .oxlintrc.jsonc), fixes on save ───────────────────────────────────────
+  // ── Lint: oxlint (config .oxlintrc.jsonc), fixes on explicit save action ────────────────────────
   "oxc.enable": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "explicit"
   },
 
-  // ── .editorconfig ───────────────────────────────────────────────────────────────────────────
+  // ── .editorconfig ───────────────────────────────────────────────────────────────────────────────
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
@@ -40,27 +45,24 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
 
-  // ── TypeScript: the TypeScript 7 extension (native), `#` subpath imports ──────────────────────
-  // TypeScript 7 ships only the native `tsc` (no tsserver.js), so the editor runs the official
-  // "TypeScript 7" extension (TypeScriptTeam.native-preview) with its bundled native build instead of
-  // a `tsdk.path`. Members compile with the catalog's TypeScript 7.
+  // ── TypeScript: the TypeScript 7 extension (native), `#` subpath imports ────────────────────────
+  // TypeScript 7 ships only the native compiler and language server (no tsserver.js), so the editor
+  // runs the "TypeScript 7" extension (TypeScriptTeam.native-preview) with its bundled native build
+  // instead of a `typescript.tsdk` path. Members compile with the catalog's TypeScript 7.
   "js/ts.experimental.useTsgo": true,
   "js/ts.preferences.importModuleSpecifier": "non-relative",
   "js/ts.preferences.preferTypeOnlyAutoImports": true,
   "js/ts.updateImportsOnFileMove.enabled": "always",
 
-  // ── JSON with comments: trailing commas are allowed (oxfmt writes them) ───────────────────────
+  // ── File types the editor cannot guess ──────────────────────────────────────────────────────────
   "files.associations": {
-    "*.jsonc": "jsonc",
-    "turbo.jsonc": "jsonc",
-    ".oxlintrc.jsonc": "jsonc",
-    ".oxfmtrc.jsonc": "jsonc",
-    "**/tsconfig*.json": "jsonc",
-    // the tsconfig presets carry a contract comment but no tsconfig*.json name
+    // The tsconfig presets carry a contract comment but no tsconfig*.json name.
     "**/packages/tooling/typescript/src/*.json": "jsonc",
-    "**/.vscode/*.json": "jsonc",
-    "*.mdx": "mdx"
+    // CODEOWNERS is `path owner` lines with `#` comments, not Markdown.
+    "CODEOWNERS": "ignore"
   },
+
+  // ── JSON schemas ────────────────────────────────────────────────────────────────────────────────
   // Remote $schema URLs load only from trusted hosts (VS Code shows "Location ... is untrusted"
   // otherwise). Local paths (./schemas) need no entry.
   "json.schemaDownload.enable": true,
@@ -68,41 +70,31 @@
     "https://json.schemastore.org/": true,
     "https://www.schemastore.org/": true,
     "https://unpkg.com/": true,
-    "https://cdn.jsdelivr.net/": true,
     "https://raw.githubusercontent.com/": true,
-    "https://turborepo.com/": true,
-    "https://turbo.build/": true,
     "https://turborepo.dev/": true,
-    "https://biomejs.dev/": true,
     "https://mintlify.com/": true,
     "https://spec.openapis.org/": true,
+    "https://docs.renovatebot.com/": true,
     "https://static.stackra.figentra.com/schemas/": true
   },
-  // A file's own `$schema` wins over these mappings, so they cover only files that carry none. The
-  // @stackra/* packages are unpublished, so no schema here points into node_modules: tools are
-  // pinned to an exact version in the URL instead.
+  // A file's own `$schema` wins over these mappings, so they cover only files that carry none.
   "json.schemas": [
-    // JSONC files: oxfmt writes trailing commas, so the JSON service must accept them.
-    {
-      "fileMatch": ["*.jsonc", "**/tsconfig*.json", "**/.vscode/*.json"],
-      "schema": { "allowTrailingCommas": true }
-    },
     // Claude Code's preview servers (.claude/launch.json), from SchemaStore.
     {
       "fileMatch": ["**/.claude/launch.json"],
       "url": "https://www.schemastore.org/claude-code-launch.json"
     },
-    // tsconfig presets have no tsconfig*.json name, so VS Code would not recognise them.
+    // The tsconfig presets have no tsconfig*.json name, so VS Code would not recognise them.
     {
       "fileMatch": ["**/packages/tooling/typescript/src/*.json"],
       "url": "https://www.schemastore.org/tsconfig.json"
     },
-    // oxlint presets: oxlint's own schema at the catalog version (1.86.0).
+    // The oxlint presets: oxlint's own schema at the catalog version (1.86.0).
     {
       "fileMatch": ["**/packages/tooling/oxlint/src/*.jsonc"],
       "url": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json"
     },
-    // EAS build profiles, including the generated apps/mobile/.stackra/eas.json.
+    // EAS build profiles, including the generated apps/mobile/.stackra/eas.json (eas-cli in mise.toml).
     {
       "fileMatch": ["**/eas.json"],
       "url": "https://raw.githubusercontent.com/expo/eas-cli/v25.3.0/packages/eas-json/schema/eas.schema.json"
@@ -111,61 +103,31 @@
     {
       "fileMatch": ["**/openapi.json"],
       "url": "https://spec.openapis.org/oas/3.1/schema/2022-10-07"
-    },
-    // Stackra's own schema; mapped here so the GitHub API payload carries no $schema key.
-    {
-      "fileMatch": ["**/.github/branch-protection.json"],
-      "url": "./schemas/branch-protection.schema.json"
     }
   ],
 
-  // ── YAML: schemas for the config files that have one ──────────────────────────────────────────
-  // A `# yaml-language-server: $schema=` comment in a file wins over these mappings. SchemaStore
-  // stays on as a fallback for files listed nowhere.
+  // ── YAML: schemas for the files that carry no modeline ──────────────────────────────────────────
+  // Most YAML files name their schema in a `# yaml-language-server: $schema=` first line, which wins
+  // over these mappings; SchemaStore stays on as a fallback for files listed nowhere.
   "yaml.format.enable": false,
   "yaml.validate": true,
   "yaml.schemaStore.enable": true,
   "yaml.schemas": {
-    // Stackra's published schemas (served from static.stackra.figentra.com/schemas/ by the stackra
-    // repo's workers/static); local copies in schemas/ until that host is live. Every runway.yaml
-    // carries its own `$schema` modeline: a pattern here matches by suffix, so "/runway.yaml" would
-    // also hit the app and service files.
-    "./schemas/stackra-lock.schema.json": "stackra.lock.yaml",
-    "./schemas/mcp.schema.json": ".mcp.yaml",
-    // Tools' own published schemas; lefthook pinned to the catalog version (2.2.2).
-    "https://raw.githubusercontent.com/evilmartians/lefthook/v2.2.2/schema.json": "lefthook.yml",
-    "https://raw.githubusercontent.com/DavidAnson/markdownlint/v0.42.0/schema/markdownlint-config-schema.json": ".markdownlint.yaml",
-    "https://raw.githubusercontent.com/streetsidesoftware/cspell/v10.4.0/packages/cspell-types/cspell.schema.json": "cspell.config.yaml",
     // electron-builder's own schema (SchemaStore's copy predates the `universal` arch).
     "https://unpkg.com/app-builder-lib@26.15.3/scheme.json": "**/electron-builder.yml",
-    // GitHub issue templates and Maestro flows, from SchemaStore.
-    "https://www.schemastore.org/github-issue-config.json": ".github/ISSUE_TEMPLATE/config.yml",
-    "https://www.schemastore.org/github-issue-forms.json": [
-      ".github/ISSUE_TEMPLATE/bug_report.yml",
-      ".github/ISSUE_TEMPLATE/feature_request.yml"
-    ],
+    // Maestro flows and the GitHub workflows, from SchemaStore.
     "https://www.schemastore.org/maestro-flow.json": "**/*.flow.yaml",
-    // Repository tooling, from SchemaStore.
-    "https://json.schemastore.org/commitlintrc.json": ".commitlintrc.yaml",
-    "https://json.schemastore.org/pnpm-workspace.json": "pnpm-workspace.yaml",
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
   },
 
-  // ── TOML: Even Better TOML (keys are regexes on the file URI; files also carry `#:schema`) ────────
-  "evenBetterToml.schema.associations": {
-    // mise publishes its own schema; gitleaks has one on SchemaStore.
-    ".*/mise\\.toml$": "https://mise.jdx.dev/schema/mise.json",
-    ".*/\\.gitleaks\\.toml$": "https://www.schemastore.org/gitleaks.json"
-  },
+  // ── CSS: Tailwind v4 and Uniwind at-rules (@theme, @source, @custom-variant, @utility) ──────────
+  "css.lint.unknownAtRules": "ignore",
 
-  // ── Tailwind v4 / Uniwind class names in className, cn() and tv() ─────────────────────────────
-  "tailwindCSS.experimental.classRegex": [
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"],
-    ["tv\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"]
-  ],
+  // ── Tailwind v4 / Uniwind class names in className, cn() and tv() ───────────────────────────────
+  "tailwindCSS.classFunctions": ["cn", "tv"],
   "tailwindCSS.classAttributes": ["class", "className", "classNames"],
 
-  // ── i18n: assets/lang/<locale>/<namespace>.json in every member ───────────────────────────────
+  // ── i18n: assets/lang/<locale>/<namespace>.json in every member (BCP 47 tags: `en`, `ar-SA`) ─────
   "i18n-ally.localesPaths": [
     "apps/*/assets/lang",
     "services/*/assets/lang",
@@ -178,27 +140,29 @@
   "i18n-ally.displayLanguage": "en",
   "i18n-ally.enabledFrameworks": ["general"],
 
-  // ── Markdown: oxfmt formats, markdownlint checks structure (rules in .markdownlint.yaml) ────────
+  // ── Markdown: oxfmt formats, markdownlint checks structure (rules in .markdownlint.yaml) ─────────
   "markdown.validate.enabled": true,
 
-  // ── Tests ──────────────────────────────────────────────────────────────────────────────────
-  // The @stackra/* packages are pre-release and not installable yet, so the Vitest extension cannot
-  // resolve vitest in any member. Remove this line once they are published.
-  "vitest.configSearchPatternExclude": "**/*",
+  // ── Tests ───────────────────────────────────────────────────────────────────────────────────────
   "playwright.reuseBrowser": true,
 
-  // ── Explorer: nest generated and companion files under their source ───────────────────────────
+  // ── Explorer: nest companion files under the file they belong to ────────────────────────────────
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "package.json": "pnpm-workspace.yaml, pnpm-lock.yaml, turbo.jsonc, knip.jsonc, .npmrc, mise.toml, .node-version",
-    ".oxlintrc.jsonc": ".oxfmtrc.jsonc, .editorconfig, .gitattributes, .gitleaks.toml",
-    "lefthook.yml": ".commitlintrc.yaml, cspell.config.yaml",
-    "README.md": "CONTRIBUTING.md, SECURITY.md, LICENSE, NOTICE, REVIEW.md, AGENTS.md, CLAUDE.md",
+    // Workspace, toolchain, lint, format and spelling configs under the root manifest.
+    "package.json": "pnpm-workspace.yaml, pnpm-lock.yaml, turbo.jsonc, knip.jsonc, mise.toml, .node-version, .oxlintrc.jsonc, .oxfmtrc.jsonc, .markdownlint.yaml, cspell.config.yaml, .editorconfig, renovate.json5",
+    // Git hooks with the commit and secret rules they run.
+    "lefthook.yml": ".commitlintrc.yaml, .gitleaks.toml",
+    ".gitignore": ".gitattributes",
+    // The policies a reader opens from the README.
+    "README.md": "CONTRIBUTING.md, SECURITY.md, LICENSE, NOTICE",
+    // Claude Code's entry imports AGENTS.md; .mcp.yaml stays top-level, where agents look for it.
+    "AGENTS.md": "CLAUDE.md",
     "runway.yaml": "stackra.lock.yaml"
   },
 
-  // ── Search and watching: skip build output and caches ────────────────────────────────────────
+  // ── Search and watching: skip build output and caches ───────────────────────────────────────────
   "files.watcherExclude": {
     "**/node_modules/**": true,
     "**/dist/**": true,
@@ -214,9 +178,8 @@
     "pnpm-lock.yaml": true
   },
 
-  // ── Git: the repo's own hooks run through lefthook ─────────────────────────────────────────────
+  // ── Git: the repo's own hooks run through lefthook ──────────────────────────────────────────────
   "git.allowNoVerifyCommit": false,
   "git.branchProtection": ["main"],
-  "git.branchProtectionPrompt": "alwaysPrompt",
-  "[jsonc]": { "editor.defaultFormatter": "vscode.json-language-features" }
+  "git.branchProtectionPrompt": "alwaysPrompt"
 }

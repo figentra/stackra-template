@@ -1,9 +1,10 @@
 # `.changeset/`
 
-Pending [Changesets](https://github.com/changesets/changesets): one Markdown file per release note. Changesets
-versions and publishes **packages** only (Stackra ADR 0025).
-Apps and services are not versioned; they deploy by commit SHA (`privatePackages: { version: false, tag: false }`).
-A package publishes to public npmjs, with provenance, once it flips `"private": false`; `access: public` matches.
+Pending [Changesets](https://github.com/changesets/changesets): one Markdown file per release note.
+Changesets versions and publishes **packages** only (Stackra ADR 0025). Apps and services are not
+versioned; they deploy by commit SHA (`privatePackages: { version: false, tag: false }`). A package
+publishes to public npmjs, with provenance, once it flips `"private": false`; `access: public`
+matches.
 
 | File          | Holds                                                                                 |
 | ------------- | ------------------------------------------------------------------------------------- |
@@ -12,10 +13,11 @@ A package publishes to public npmjs, with provenance, once it flips `"private": 
 
 ## Rules
 
-- Add one with `pnpm changeset` in the same change as the code it describes; `pnpm changeset:status` lists what is
-  pending.
-- Versioning and publishing run in CI (`.github/workflows/release.yml`) on `main`, which opens the version pull
-  request; a maintainer merges it. Do not
-  run them locally.
-- Never hand-edit a generated `CHANGELOG.md`; the `guard-paths` hook refuses it.
-- `config.json` stays strict JSON: the Changesets CLI cannot read comments.
+- Add one with `pnpm changeset` in the same change as the code it describes; `pnpm changeset:status`
+  lists what is pending.
+- Versioning and publishing run in CI (`.github/workflows/release.yml`) on `main`, which opens the
+  version pull request; a maintainer merges it. Do not run them locally.
+- Never hand-edit a generated `CHANGELOG.md`; the Stackra guard hooks (`stackra agents setup`)
+  refuse an agent's edit to one.
+- `config.json` stays strict JSON: the Changesets CLI cannot read comments. Its `$schema` version
+  follows the `@changesets/config` that `@changesets/cli` (catalog `release`) depends on.
