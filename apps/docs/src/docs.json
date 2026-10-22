@@ -4,9 +4,9 @@
   "name": "Acme Retail",
   "description": "How the Acme Retail platform is built on Stackra: the commerce service, its decisions, and its public API.",
   "colors": {
-    "primary": "#0B0D0F",
-    "light": "#F5F6F3",
-    "dark": "#0B0D0F"
+    "primary": "#2F6DF6",
+    "light": "#F7F7F5",
+    "dark": "#1C1E22"
   },
   "fonts": {
     "family": "Geist"

@@ -1,7 +1,7 @@
 # markdownlint: structure checks for Markdown and MDX. Formatting (wrapping, spacing, tables) is
 # oxfmt's job, so rules that overlap with the formatter are off.
 default: true
-MD013: false # line length: oxfmt wraps prose at 100 columns
+MD013: false # line length: oxfmt owns Markdown layout and keeps prose wrapping as written
 MD033: false # inline HTML: Mintlify MDX components and README banners
 MD041: false # first line heading: MDX files start with frontmatter
 MD024:

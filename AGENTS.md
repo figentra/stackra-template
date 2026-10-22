@@ -89,7 +89,7 @@ folder even with one file. There is no `features/`, `utils/`, `helpers/`, `dtos/
 A kit is a service module plus a runtime split: the kind folders under `node/` equal a service
 module's, so a file moves between the two without relearning placement.
 
-```
+```text
 services/<name>/src/modules/<key>/<kind>/      a service module
 packages/<category>/<name>/src/node/<kind>/    a package: node/ holds the module's kind folders
 packages/<category>/<name>/src/{core,react,testing}/<kind>/   isomorphic, React and test kinds

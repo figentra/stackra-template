@@ -10,8 +10,21 @@
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["exec", "vitest", "run", "${file}"],
-      // Run from the file's folder so the member's own vitest config applies.
+      // Packages and services: run from the file's folder so the member's own vitest config applies.
       "cwd": "${fileDirname}",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    },
+    {
+      // Apps keep their vitest config in .stackra/ (written by `stackra gen`), which vitest never
+      // finds on its own, so this variant passes it explicitly.
+      "name": "Vitest: current app test file",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "vitest", "run", "--config", ".stackra/vitest.config.ts", "${file}"],
+      "cwd": "${workspaceFolder}/apps/${input:app}",
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
@@ -71,6 +84,12 @@
     }
   ],
   "inputs": [
+    {
+      "id": "app",
+      "type": "pickString",
+      "description": "App whose test file is open",
+      "options": ["console", "web", "mobile"]
+    },
     {
       "id": "devPort",
       "type": "promptString",

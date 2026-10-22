@@ -24,6 +24,8 @@
     // Docs: Markdown rules (oxfmt formats; markdownlint flags structure) and Mermaid in previews
     "davidanson.vscode-markdownlint",
     "bierner.markdown-mermaid",
+    // Spelling: cspell.config.yaml (the editor is the only place it runs)
+    "streetsidesoftware.code-spell-checker",
     // i18n keys in assets/lang/<locale>/<namespace>.json, inline and with missing-key reports
     "lokalise.i18n-ally",
     // Data: Postgres through SQLTools, and SQLite files (the desktop offline store)

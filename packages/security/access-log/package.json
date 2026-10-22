@@ -3,7 +3,20 @@
   "version": "0.1.0",
   "description": "@AccessLogged: every call of a marked method is written to an access-log sink; self-registering postgres and memory drivers.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/figentra/stackra-template.git",
+    "directory": "packages/security/access-log"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "type": "module",
+  "sideEffects": false,
   "imports": {
     "#src/*": [
       "./src/*",
@@ -76,7 +89,8 @@
       "./assets/*": "./assets/*"
     },
     "access": "public",
-    "provenance": true
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "gen": "stackra gen",
@@ -84,6 +98,7 @@
     "lint": "oxlint .",
     "format:check": "oxfmt --check .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "build": "tsdown"
   },
   "dependencies": {
@@ -108,6 +123,7 @@
     "@stackra/tsdown-config": "workspace:*",
     "@stackra/typescript-config": "workspace:*",
     "@stackra/vitest-config": "workspace:*",
+    "@vitest/coverage-v8": "catalog:quality",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "tsdown": "catalog:build",

@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
- * Purpose: the ONE coverage gate for the workspace packages. Every `packages/**` vitest.config.ts wraps its
- *          config in `withCoverage()`; `pnpm test:coverage` and the CI job run `vitest run --coverage` against
- *          these thresholds. Apps are NOT gated here. Provider: @vitest/coverage-v8.
+ * Purpose: the ONE coverage gate for the workspace packages. Every `packages/**` vitest.config.ts gets it
+ *          through `libraryPreset()`, which wraps its config in `withCoverage()`; `pnpm test:coverage` runs
+ *          `vitest run --coverage` against these thresholds (no CI step runs it while @stackra/* is
+ *          unpublished). Apps are NOT gated here. Provider: @vitest/coverage-v8.
  * Boundary: the shared coverage block and its wrapper; it runs no tests itself.
  * Runtime: node
  * Governing contract: ADR 0007 (documentation); ADR 0022 (test placement).

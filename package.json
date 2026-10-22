@@ -1,5 +1,5 @@
 {
-  "name": "stackra-template-preview",
+  "name": "acme-platform",
   "version": "0.0.0",
   "private": true,
   "description": "Stackra reference template: the v2 programming model in one pnpm + Turborepo workspace (apps, services, packages by category, tooling presets).",
@@ -16,6 +16,7 @@
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
     "test:e2e": "turbo run test:e2e",
     "verify": "stackra verify",
     "validate": "stackra validate",

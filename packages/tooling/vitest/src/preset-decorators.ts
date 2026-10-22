@@ -16,10 +16,10 @@
 import { defineConfig, mergeConfig } from "vitest/config";
 import { stackraVitest } from "./preset.ts";
 
+/** The legacy decorator transform alone, for presets that start from another base (react, native). */
+export const decoratorTransform = defineConfig({
+  oxc: { decorator: { legacy: true, emitDecoratorMetadata: false } },
+});
+
 /** Base preset + legacy decorators (no metadata emission). */
-export const stackraVitestDecorators = mergeConfig(
-  stackraVitest,
-  defineConfig({
-    oxc: { decorator: { legacy: true, emitDecoratorMetadata: false } },
-  }),
-);
+export const stackraVitestDecorators = mergeConfig(stackraVitest, decoratorTransform);

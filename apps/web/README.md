@@ -14,12 +14,12 @@ through `@stackra/ui`, like the console.
 | `pnpm dev`               | React Router dev on the Workers runtime on the port of `runway.yaml`, HMR on `#stackra/*`                |
 | `pnpm build`             | `stackra build --target web`: client + server build (render: server), prerender per locale               |
 | `pnpm start`             | the built site on `wrangler dev` (what the e2e tier measures)                                            |
-| `pnpm test` / `test:e2e` | vitest (jsdom; workers env under `src/server`) / Playwright with axe after `build`                       |
+| `pnpm test` / `test:e2e` | vitest (jsdom; node under `src/server`) / Playwright with axe after `build`                              |
 | `pnpm typecheck`         | gen, then tsc over `src`, `.stackra`                                                                     |
 
 ## Tree
 
-```
+```text
 apps/web
 ├── stackra.config.ts        defineApp: key, root class, Target.Web + Target.Pwa, render: RenderMode.Server, ApiArea.Public, env class, e2e seeds, health
 ├── vite.extend.ts           the one build hatch: extra Vite plugin instances, merged after the stackra plugin

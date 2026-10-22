@@ -3,7 +3,21 @@
   "version": "0.1.0",
   "description": "Design tokens and brand assets shared by every app, service template and mail; one TypeScript token source, CSS generated from it.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/figentra/stackra-template.git",
+    "directory": "packages/cross-cutting/brand"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "css",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "type": "module",
+  "sideEffects": false,
   "imports": {
     "#src/*": [
       "./src/*",
@@ -41,7 +55,8 @@
       "./assets/*": "./assets/*"
     },
     "access": "public",
-    "provenance": true
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "gen": "stackra gen",

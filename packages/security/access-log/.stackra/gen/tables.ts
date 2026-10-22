@@ -3,7 +3,7 @@
  * Purpose: one table constant per model with its typed column names, so migrations never spell a
  *          name by hand.
  * Boundary: the column mapping is explicit, so a model field with a `column:` escape works and
- *           nothing is snake-cased at run time. Committed in the preview only.
+ *           nothing is snake-cased at run time. Committed in the template only.
  * Runtime: node
  */
 import { table } from "@stackra/database";

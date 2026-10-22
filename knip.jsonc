@@ -6,7 +6,7 @@
 // Runtime: node
 // Governing contract: ADR 0264 (kind folders), ADR 0261 (generated imports), ADR 0003 (members)
 {
-  "$schema": "https://unpkg.com/knip@6.41.0/schema.json",
+  "$schema": "https://unpkg.com/knip@6.41.0/schema-jsonc.json",
   "workspaces": {
     ".": {
       "project": ["*.mjs"],
@@ -19,7 +19,8 @@
       "entry": ["src/*.ts", "src/**/__tests__/**/*.test.ts"],
       "project": ["*.ts", "src/**/*.ts"],
       // Extended by each preset package's tsconfig.json, which knip doesn't trace where no typecheck script runs.
-      "ignoreDependencies": ["@stackra/typescript-config"],
+      // jsdom: vitest loads it by name for the factories' `environment: "jsdom"`; nothing imports it.
+      "ignoreDependencies": ["@stackra/typescript-config", "jsdom"],
     },
     "packages/*/*": {
       // package.json `exports` are entries already; gen reaches the node module through `stackra.module`.

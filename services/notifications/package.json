@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "The consumer service: delivery, notification preferences, the message log and the in-app inbox. Reaches commerce by event, call and command through the generated client, never its code.",
+  "license": "UNLICENSED",
   "type": "module",
   "imports": {
     "#src/*": [

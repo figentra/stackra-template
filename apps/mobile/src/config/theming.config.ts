@@ -18,9 +18,9 @@ import { Bool, List, Nested, OneOf, Str } from "@stackra/validation";
 /** A light/dark colour pair. */
 class ThemeColors {
   /** The light-scheme colour. */
-  @Str({ pattern: /^#[0-9a-f]{6}$/i }) light = "#f5f6f3";
+  @Str({ pattern: /^#[0-9a-f]{6}$/i }) light = "#f7f7f5";
   /** The dark-scheme colour. */
-  @Str({ pattern: /^#[0-9a-f]{6}$/i }) dark = "#0b0d0f";
+  @Str({ pattern: /^#[0-9a-f]{6}$/i }) dark = "#1c1e22";
 }
 
 /** The native splash: background per scheme; the image is derived from `logo`. */

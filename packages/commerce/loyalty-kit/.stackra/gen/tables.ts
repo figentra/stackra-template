@@ -4,7 +4,7 @@
  *          never spell a name by hand.
  * Boundary: the column mapping is explicit, so a model field with a `column:` escape works and
  *           nothing is snake-cased at run time. Trait columns are included (`tenantId`,
- *           `deletedAt`…). Committed in the preview only.
+ *           `deletedAt`…). Committed in the template only.
  * Runtime: node
  */
 import { table } from "@stackra/database";

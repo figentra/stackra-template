@@ -8,7 +8,7 @@
 # Lockfiles and generated artefacts: keep, never review line-by-line
 pnpm-lock.yaml -diff
 **/CHANGELOG.md merge=union
-# stackra gen output (only shown in the preview; gitignored in a real repo) and the committed contracts it writes
+# stackra gen output (committed only in the template; gitignored in a real repo) and the committed contracts it writes
 **/.stackra/gen/** -diff linguist-generated
 **/.stackra/app-manifest.json linguist-generated
 **/.stackra/openapi.json linguist-generated

@@ -2,7 +2,7 @@
 # Purpose: the Quality Gate. Runs on every pull request to main and every push to main; branch
 #          protection requires the `Quality Gate` job, so keep that job name unchanged.
 # Needs: no secrets and no OIDC token; contents: read only. Tools come from mise.toml (node, gitleaks).
-# Owner: the repository maintainers (CODEOWNERS). Runbook: Stackra docs `/runbooks/ci`.
+# Owner: the repository maintainers (CODEOWNERS). Runbook: https://docs.stackra.figentra.com/runbooks/ci
 name: CI
 
 on:
@@ -20,7 +20,7 @@ jobs:
   gate:
     name: Quality Gate
     runs-on: ubuntu-latest
-    # The preview gate takes under a minute; a hung npx download should fail the run, not hold it 6 h.
+    # The pre-release gate takes under a minute; a hung npx download should fail the run, not hold it 6 h.
     timeout-minutes: 15
     permissions:
       contents: read
@@ -40,13 +40,13 @@ jobs:
         with:
           install_args: node gitleaks
 
-      # Preview gate: the `@stackra/*` packages and the `stackra` CLI are not published yet, so
+      # Pre-release gate: the `@stackra/*` packages and the `stackra` CLI are not published yet, so
       # `pnpm install` and `pnpm verify` cannot run here. Until they are, the gate runs every check that
       # needs no workspace install (commit messages, format, config files parse, secrets scan) through
       # one committed script, the same command a contributor or agent runs locally. Replace this step with
       # `pnpm install --frozen-lockfile`, `pnpm exec commitlint …`, `pnpm verify` and `pnpm secrets:scan`
       # once @stackra/cli is released, and delete .github/scripts/preview-gate.mjs.
-      - name: Preview gate
+      - name: Pre-release gate
         env:
           # Read by the script's commit-message check; empty on push events, where it is skipped.
           BASE_SHA: ${{ github.event.pull_request.base.sha }}

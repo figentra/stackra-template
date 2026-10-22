@@ -1,12 +1,17 @@
 # Spelling for code and docs (Code Spell Checker). Add project words here, not to user settings.
 version: "0.2"
-language: en
+language: en,en-GB
+# Arabic strings appear outside assets/lang/ar too (tests, overrides, generated samples).
+ignoreRegExpList:
+  - "/[\\u0600-\\u06FF]+/gu"
 ignorePaths:
   - "**/node_modules/**"
   - "**/dist/**"
   - "**/.turbo/**"
   - pnpm-lock.yaml
   - "**/assets/lang/ar/**"
+  # publisher ids, not words
+  - .vscode/extensions.json
 words:
   - stackra
   - figentra
@@ -49,3 +54,48 @@ words:
   - tenancy
   - entitlements
   - monorepo
+  - sparkline
+  - posthog
+  - pkce
+  - infolist
+  - vite
+  - docblocks
+  - valkey
+  - refetches
+  - prerendered
+  - endonym
+  - commitlintrc
+  - nonprod
+  - dedup
+  - trgm
+  - oklch
+  - ltree
+  - deployables
+  - mmkv
+  - llms
+  - autocapture
+  - nsis
+  - healthz
+  - siem
+  - sessionless
+  - mailpit
+  - escpos
+  - cldr
+  - worktrees
+  - toggleable
+  - spatie
+  - pressable
+  - pgvector
+  - opencode
+  - isbot
+  - prerender
+  - noindex
+  - worklets
+  - precaching
+  - precached
+  - lighthouserc
+  - lhci
+  - lighthouseci
+  - deeplink
+  - stylesheet
+  - modeline

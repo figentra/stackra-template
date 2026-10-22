@@ -1,9 +1,9 @@
 # `.github/workflows/`
 
-| Workflow      | Runs on                                   | Does                                                                                                                                                                                                                                                                                                            |
-| ------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`      | pull requests to `main`, pushes to `main` | **Quality Gate**: install, commit messages (commitlint), `pnpm verify` (`stackra verify`), `pnpm secrets:scan`. In the preview (no published `@stackra/*` yet) it runs `node .github/scripts/preview-gate.mjs` instead. `deploy-staging` is a placeholder: runway.yaml describes the deploy, a human applies it |
-| `release.yml` | pushes to `main`                          | Changesets: opens or updates the "version packages" PR, publishes released packages to npm with provenance (trusted publishing, no token), uploads a CycloneDX SBOM. Skipped (green) until `pnpm-lock.yaml` is committed                                                                                        |
+| Workflow      | Runs on                                   | Does                                                                                                                                                                                                                                                                                                             |
+| ------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`      | pull requests to `main`, pushes to `main` | **Quality Gate**: install, commit messages (commitlint), `pnpm verify` (`stackra verify`), `pnpm secrets:scan`. While `@stackra/*` is unpublished (pre-release) it runs `node .github/scripts/preview-gate.mjs` instead. `deploy-staging` is a placeholder: runway.yaml describes the deploy, a human applies it |
+| `release.yml` | pushes to `main`                          | Changesets: opens or updates the "version packages" PR, publishes released packages to npm with provenance (trusted publishing, no token), uploads a CycloneDX SBOM. Skipped (green) until `pnpm-lock.yaml` is committed                                                                                         |
 
 ## Rules
 
@@ -15,9 +15,10 @@
 
 ## Run the gate locally
 
-`node .github/scripts/preview-gate.mjs` runs the same checks as the preview Quality Gate (commit
+`node .github/scripts/preview-gate.mjs` runs the same checks as the pre-release Quality Gate (commit
 messages against `origin/main`, format, config files parse, secrets scan); name checks to run a
 subset, for example `node .github/scripts/preview-gate.mjs format config`. It needs only Node and
 the gitleaks pinned in `mise.toml`.
 
-Runbooks: Stackra docs `/runbooks/ci` and `/runbooks/release`.
+Runbooks: [CI](https://docs.stackra.figentra.com/runbooks/ci) and
+[release](https://docs.stackra.figentra.com/runbooks/release).

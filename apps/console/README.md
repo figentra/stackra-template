@@ -17,7 +17,7 @@ Router 7, the service worker, the Electron shell, Playwright) is generated into 
 
 ## Tree
 
-```
+```text
 apps/console
 ├── stackra.config.ts        defineApp: key, root class, Target cases, ApiArea, env class, e2e, health (what it IS)
 ├── runway.yaml              dev port/host, domains, vars per environment, PWA/Electron channels, secret names (where it RUNS)

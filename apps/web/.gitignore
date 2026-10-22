@@ -8,7 +8,7 @@
 .stackra/*
 !.stackra/app-manifest.json
 !.stackra/openapi.json
-# preview only: the generated samples are committed so they can be read; a real project drops the next line
+# template only: the generated samples are committed so they can be read; a real project drops the next line
 !.stackra/**
 build/
 .wrangler/

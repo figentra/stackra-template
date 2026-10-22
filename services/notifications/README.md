@@ -26,7 +26,7 @@ rendered parts of its mails.
 | `src/modules/messages/settings/notification-preferences.setting.ts` | user-scope `orderUpdates`, `orderReceipts`, `productUpdates`, `marketing`                 |
 | `src/modules/messages/webhooks/inbound-mail.webhook.ts`             | `@Webhook` receiver, `ApiArea.Public`, with the three inbound-cancel safeguards           |
 | `src/modules/messages/integrations/`, `connections/`                | Resend as an integration, and a tenant's own Resend credentials as a connection           |
-| `src/modules/messages/drivers/`                                     | `@Driver(MailTransport, "memory"                                                          | "resend")`; config picks one by name |
+| `src/modules/messages/drivers/`                                     | `@Driver(MailTransport, "memory" \| "resend")`; config picks one by name                  |
 | `.stackra/gen/clients.ts`                                           | the generated commerce descriptors and `CommerceClient`                                   |
 
 In `runway.yaml`, staging groups commerce and notifications in one deployable (`core`), so the clients call the other

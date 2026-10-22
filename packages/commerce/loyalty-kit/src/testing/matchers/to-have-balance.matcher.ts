@@ -2,8 +2,8 @@
  * Stackra file contract:
  * Purpose: `expect(ledger).toHaveBalance(member, points)`: a domain matcher over the LoyaltyLedger
  *          port.
- * Boundary: a matcher owned by the package whose port it reads (ADR 0269); registered by the
- *           @stackra/vitest-config preset when it loads `@stackra/loyalty-kit/testing`.
+ * Boundary: a matcher owned by the package whose port it reads (ADR 0269), exported from
+ *           `@stackra/loyalty-kit/testing`.
  * Runtime: isomorphic
  * Governing contract: ADR 0269 (domain matchers live in the owning package's ./testing)
  */

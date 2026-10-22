@@ -1,6 +1,7 @@
 // Stackra file contract:
-// Purpose: oxfmt settings for the whole workspace: 100 columns, which is the width every authored
-//          file is held to, and the generated or upstream files that are never reformatted.
+// Purpose: oxfmt settings for the whole workspace: a code width of 100 columns (Markdown prose keeps
+//          its own wrapping, proseWrap preserve), and the generated or upstream files that are never
+//          reformatted.
 // Boundary: formatter options and ignores only; adding an ignore pattern needs a reason beside it.
 // Runtime: node
 // Governing contract: ADR 0007 (docblocks wrap at the same width)
