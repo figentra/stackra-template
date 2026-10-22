@@ -2,8 +2,8 @@
  * Stackra file contract:
  * Purpose: the base vitest preset every workspace extends. Globals on (describe/it/expect without imports),
  *          `passWithNoTests` OFF so an empty suite is a finding, not a pass, and the v8 coverage provider.
- *          The coverage thresholds themselves live in the repo root `vitest.shared.ts` (`withCoverage`), so one
- *          place owns the gate. Resolution prefers the `@stackra/source` export condition (ADR 0025), so a test reads a
+ *          The coverage thresholds themselves live in `src/coverage.ts` (`@stackra/vitest-config/coverage`,
+ *          `withCoverage`), so one place owns the gate. Resolution prefers the `@stackra/source` export condition (ADR 0025), so a test reads a
  *          workspace package's source, not its built dist; the rest of each list is Vite's default.
  * Boundary: the base config only; it declares no test and no setup file.
  * Runtime: node

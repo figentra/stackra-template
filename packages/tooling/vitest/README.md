@@ -1,22 +1,28 @@
 # @stackra/vitest-config
 
-Shared vitest presets. A workspace's `vitest.config.ts` is:
+Shared vitest presets. A member's `vitest.config.ts` calls one factory and adds nothing else:
 
 ```ts
-import { defineConfig, mergeConfig } from "vitest/config";
-import { stackraVitest } from "@stackra/vitest-config";
-import { withCoverage } from "@stackra/vitest-config/coverage";
+import { libraryPreset } from "@stackra/vitest-config";
 
-export default mergeConfig(
-  stackraVitest,
-  defineConfig(withCoverage({ test: { include: ["src/**/__tests__/**/*.test.ts"] } })),
-);
+export default libraryPreset({ root: import.meta.dirname, react: "src/react" });
 ```
 
-| Export                | Use for                                                         |
-| --------------------- | --------------------------------------------------------------- |
-| `.` / `./preset`      | every Node library                                              |
-| `./preset-decorators` | the DI tier (legacy decorators, no metadata emission; ADR-0005) |
-| `./preset-react`      | React libraries and the console app (jsdom)                     |
+| Factory         | Use for                                    | What it sets                                                                                 |
+| --------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `nodePreset`    | services                                   | legacy decorators; a `unit` project (`*.test.ts`) and an `int` project (`*.int.test.ts`)     |
+| `libraryPreset` | packages                                   | `nodePreset` under the coverage gate, plus a jsdom `react` project for `react: "<folder>"`   |
+| `reactPreset`   | web apps (`stackra gen` writes the config) | jsdom and legacy decorators; a node project per `nodeFolders` entry; `exclude` for e2e files |
+| `nativePreset`  | the mobile app (`stackra gen` writes it)   | jsdom and legacy decorators over every `*.test.ts` and `*.test.tsx`                          |
 
-`passWithNoTests` is off on purpose: a package with no tests fails `pnpm test` until it has one.
+The building blocks stay exported for a config the factories do not cover:
+
+| Export                | Holds                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| `./preset`            | `stackraVitest`, the base (globals, `passWithNoTests` off, node)                       |
+| `./preset-decorators` | `stackraVitestDecorators` and `decoratorTransform` (ADR-0005, no metadata)             |
+| `./preset-react`      | `stackraVitestReact` (jsdom)                                                           |
+| `./coverage`          | `withCoverage`, `coverage` and `COVERAGE_THRESHOLDS` (lines/functions 80, branches 70) |
+
+`passWithNoTests` is off on purpose: a package with no tests fails `pnpm test` until it has one. A package runs
+the coverage gate with `pnpm test:coverage` (`vitest run --coverage`, provider `@vitest/coverage-v8`).
