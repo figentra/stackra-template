@@ -35,5 +35,8 @@ package does not generate.
 
 Exports are explicit: `.`, `./css/tokens.css`, `./css/native.css`, `./assets/*`.
 
+The `#stackra/*` imports key is kept for the same key set in every member; `stackra gen` writes nothing under
+`.stackra/gen` for brand, so the folder does not exist here.
+
 Publishing: `publishConfig` (with `exports` pointing at `dist`) plus a changeset; a package has no
 `runway.yaml`.

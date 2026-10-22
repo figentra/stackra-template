@@ -77,7 +77,7 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
     adaptiveIcon: {
       foregroundImage: "./icons/adaptive-foreground-1024.png",
-      backgroundColor: "#f5f6f3",
+      backgroundColor: "#f7f7f5",
     }, // theming.themeColor.light
     intentFilters: [
       {
@@ -100,7 +100,7 @@ const config: ExpoConfig = {
       // permissions.camera
     ],
     // push.config.ts; theming.themeColor.dark
-    ["expo-notifications", { icon: "./icons/notification-96.png", color: "#0b0d0f" }],
+    ["expo-notifications", { icon: "./icons/notification-96.png", color: "#1c1e22" }],
     ["expo-updates", { username: "acme" }], // root runway providers.expo.account
     // telemetry.errors.enabled; org from root providers.sentry.org, project from runway.yaml
     // telemetry.sentryProject; DSN is a var; the upload token is a CI secret
@@ -110,8 +110,8 @@ const config: ExpoConfig = {
       {
         image: "./icons/splash-256.png",
         imageWidth: 96,
-        backgroundColor: "#f5f6f3",
-        dark: { image: "./icons/splash-dark-256.png", backgroundColor: "#0b0d0f" },
+        backgroundColor: "#f7f7f5",
+        dark: { image: "./icons/splash-dark-256.png", backgroundColor: "#1c1e22" },
       },
     ], // theming.splash
   ],
