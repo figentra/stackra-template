@@ -70,7 +70,7 @@
     "https://biomejs.dev/": true,
     "https://mintlify.com/": true,
     "https://spec.openapis.org/": true,
-    "https://schemas.stackra.dev/": true
+    "https://schemas.stackra.figentra.com/": true
   },
   "json.schemas": [
     {
@@ -110,7 +110,7 @@
   "yaml.validate": true,
   "yaml.schemaStore.enable": true,
   // Stackra's own schemas are copied from the framework (stackra tools/schemas) into schemas/; they
-  // work offline and keep their schemas.stackra.dev $id for later hosting.
+  // work offline and keep their schemas.stackra.figentra.com $id for later hosting.
   "yaml.schemas": {
     "./schemas/runway-root.schema.json": "/runway.yaml",
     "./schemas/runway-app.schema.json": "apps/*/runway.yaml",
