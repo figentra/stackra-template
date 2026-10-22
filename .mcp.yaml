@@ -6,7 +6,8 @@
 # Boundary: server definitions only, never a token. A server that needs a token runs through
 #           `stackra mcp exec --`, which injects `$NAME` values from the project's secret store into
 #           that one process. Remote (http) servers sign in with OAuth on first use (/mcp). Keep
-#           production access read-only unless a human approves writes.
+#           production access read-only unless a human approves writes. npx servers are pinned to
+#           exact versions (no @latest); bump them as you would a catalog entry.
 # Runtime: node
 # Governing contract: Stackra ADR 0173 (secret values never in files), Stackra ADR 0282 (developer MCP)
 mcpServers:
@@ -17,12 +18,12 @@ mcpServers:
   stackra:
     command: pnpm
     args: [exec, stackra, mcp]
-  # Hosted: docs, ADRs, registry and examples; project data after sign-in (read-only).
-  # Replace with the hosted Stackra MCP URL of your plan (README, "Make it yours").
+  # Hosted: docs, ADRs, registry and examples; project data after OAuth sign-in (read-only).
   stackra-cloud:
     type: http
-    url: https://<stackra-mcp-host>/mcp
-  # Spec status: which spec, what blocks it, which tasks are open (read-only).
+    url: https://mcp.stackra.figentra.com/mcp
+  # Spec status: which spec, what blocks it, which tasks are open (read-only). Needs vellum-mcp
+  # installed separately; it is not a dependency of this template.
   vellum:
     command: pnpm
     args: [exec, vellum-mcp]
@@ -30,7 +31,8 @@ mcpServers:
   # --------------------------------------------------------------------------------------------
   # 02. Runtime: the generated Encore app, locally and deployed
   # --------------------------------------------------------------------------------------------
-  # Replace <your-encore-app-id> with the id from `encore app create`.
+  # Replace <your-encore-app-id> with the id from `encore app create`. Needs the Encore CLI
+  # installed separately (it is not in mise.toml).
   encore:
     command: encore
     args: [mcp, run, --app=<your-encore-app-id>]
@@ -51,7 +53,7 @@ mcpServers:
       - --
       - npx
       - -y
-      - "@upstash/context7-mcp@latest"
+      - "@upstash/context7-mcp@4.2.0"
       - --api-key
       - $CONTEXT7_API_KEY
   mintlify:
@@ -63,10 +65,10 @@ mcpServers:
   # --------------------------------------------------------------------------------------------
   heroui-react:
     command: npx
-    args: [-y, "@heroui/react-mcp@latest"]
+    args: [-y, "@heroui/react-mcp@1.1.2"]
   heroui-native:
     command: npx
-    args: [-y, "@heroui/native-mcp@latest"]
+    args: [-y, "@heroui/native-mcp@1.1.2"]
   heroui-pro:
     command: pnpm
     args:
@@ -77,7 +79,7 @@ mcpServers:
       - --
       - npx
       - -y
-      - mcp-remote@latest
+      - mcp-remote@0.14.3
       - https://mcp.heroui.pro/mcp
       - --header
       - x-heroui-personal-token:$HEROUI_PERSONAL_TOKEN
@@ -91,7 +93,7 @@ mcpServers:
       - --
       - npx
       - -y
-      - mcp-remote@latest
+      - mcp-remote@0.14.3
       - https://native-mcp.heroui.pro/mcp
       - --header
       - x-heroui-personal-token:$HEROUI_PERSONAL_TOKEN
@@ -154,4 +156,4 @@ mcpServers:
   # --------------------------------------------------------------------------------------------
   playwright:
     command: npx
-    args: [-y, "@playwright/mcp@latest"]
+    args: [-y, "@playwright/mcp@0.0.83"]
