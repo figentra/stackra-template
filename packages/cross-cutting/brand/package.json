@@ -5,7 +5,24 @@
   "license": "MIT",
   "type": "module",
   "imports": {
-    "#core/*": "./src/core/*"
+    "#src/*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts"
+    ],
+    "#core/*": [
+      "./src/core/*",
+      "./src/core/*.ts",
+      "./src/core/*.tsx",
+      "./src/core/*/index.ts"
+    ],
+    "#stackra/*": [
+      "./.stackra/gen/*",
+      "./.stackra/gen/*.ts",
+      "./.stackra/gen/*.tsx",
+      "./.stackra/gen/*/index.ts"
+    ]
   },
   "exports": {
     ".": "./src/index.ts",

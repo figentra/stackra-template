@@ -5,13 +5,25 @@
   "description": "The tenant console as web, PWA and desktop from one source tree. Decorated classes (@App, @Panel, @Route, @Layout, @Provider, @Store, @Menu, @Command, @Bridge, @Block, @Override) declare the app; stackra gen writes the runtime into .stackra/.",
   "type": "module",
   "imports": {
-    "#src/*": "./src/*",
-    "#assets/*": "./assets/*",
-    "#stackra/*": [
-      "./.stackra/gen/*.ts",
-      "./.stackra/gen/*.tsx"
+    "#src/*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts"
     ],
-    "#stackra-desktop/*": "./.stackra/desktop/*.ts"
+    "#assets/*": "./assets/*",
+    "#stackra-desktop/*": [
+      "./.stackra/desktop/*",
+      "./.stackra/desktop/*.ts",
+      "./.stackra/desktop/*.tsx",
+      "./.stackra/desktop/*/index.ts"
+    ],
+    "#stackra/*": [
+      "./.stackra/gen/*",
+      "./.stackra/gen/*.ts",
+      "./.stackra/gen/*.tsx",
+      "./.stackra/gen/*/index.ts"
+    ]
   },
   "scripts": {
     "gen": "stackra gen",

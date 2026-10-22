@@ -6,11 +6,18 @@
   "license": "UNLICENSED",
   "main": ".stackra/main.ts",
   "imports": {
-    "#src/*": "./src/*",
+    "#src/*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts"
+    ],
     "#assets/*": "./assets/*",
     "#stackra/*": [
+      "./.stackra/gen/*",
       "./.stackra/gen/*.ts",
-      "./.stackra/gen/*.tsx"
+      "./.stackra/gen/*.tsx",
+      "./.stackra/gen/*/index.ts"
     ]
   },
   "scripts": {

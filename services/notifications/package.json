@@ -5,13 +5,30 @@
   "description": "The consumer service: delivery, notification preferences, the message log and the in-app inbox. Reaches commerce by event, call and command through the generated client, never its code.",
   "type": "module",
   "imports": {
-    "#src/*": "./src/*",
-    "#modules/*": "./src/modules/*",
-    "#config/*": "./src/config/*",
+    "#src/*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts"
+    ],
+    "#modules/*": [
+      "./src/modules/*",
+      "./src/modules/*.ts",
+      "./src/modules/*.tsx",
+      "./src/modules/*/index.ts"
+    ],
+    "#config/*": [
+      "./src/config/*",
+      "./src/config/*.ts",
+      "./src/config/*.tsx",
+      "./src/config/*/index.ts"
+    ],
     "#assets/*": "./assets/*",
     "#stackra/*": [
+      "./.stackra/gen/*",
       "./.stackra/gen/*.ts",
-      "./.stackra/gen/*.tsx"
+      "./.stackra/gen/*.tsx",
+      "./.stackra/gen/*/index.ts"
     ]
   },
   "exports": {
