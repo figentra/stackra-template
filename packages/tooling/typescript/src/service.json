@@ -1,0 +1,16 @@
+// Stackra file contract:
+// Purpose: a service member (services/<name>): plain TypeScript on node with legacy decorators (the decorators
+//          preset), plus the member files gen reads and writes: stackra.config.ts and .stackra/gen (code imports
+//          it as #stackra/*). Hand-written Encore never appears; `stackra gen` emits it into .stackra/encore
+//          with its own tsconfig (ADR 0091, 0124).
+// Owner: release-operations · Secrets: forbidden
+{
+  "display": "@stackra/typescript-config — service",
+  "extends": "./decorators.json",
+  "include": [
+    "${configDir}/src",
+    "${configDir}/stackra.config.ts",
+    "${configDir}/.stackra/gen",
+    "${configDir}/vitest.config.ts"
+  ]
+}
