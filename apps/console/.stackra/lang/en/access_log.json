@@ -1,0 +1,17 @@
+{
+  "nav": { "audit": "Audit trail", "access_log": "Access log" },
+  "resource": { "entries": "Access records" },
+  "classifications": {
+    "personal": "Personal",
+    "financial": "Financial",
+    "health": "Health",
+    "pseudonymous": "Pseudonymous"
+  },
+  "permissions": {
+    "access_log_entry": {
+      "read": "Read the audit trail",
+      "purge": "Purge old access records"
+    }
+  },
+  "errors": { "access_log_write_failed": "Access log unavailable; the read was served." }
+}

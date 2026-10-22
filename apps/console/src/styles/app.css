@@ -1,0 +1,39 @@
+/*
+Stackra file contract:
+Purpose: the console's one stylesheet entry: Tailwind v4, the HeroUI v3 styles and the brand tokens,
+         in that order, with the brand's generated custom properties mapped onto theme values.
+Boundary: imports and the few app-level layers only; components carry utility classes; logical
+          properties only. Only the `--brand-<group>-<name>` names `@stackra/brand` generates from
+          its token source are referenced.
+Runtime: browser
+Governing contract: ADR 0165 (HeroUI v3 on Tailwind v4), ADR 0080 decision 3 (logical CSS),
+                    ADR 0231 (token names)
+*/
+@import "tailwindcss";
+@import "@heroui/styles";
+/* generated from the brand's TS tokens: --brand-color-*, --brand-font-*, --brand-radius-* */
+@import "@stackra/brand/css/tokens.css";
+
+/* Tailwind reads the brand tokens as theme values: `text-ink` and `bg-accent` are the brand's. */
+@theme inline {
+  --color-ink: var(--brand-color-ink);
+  --color-ink-muted: var(--brand-color-ink-muted);
+  --color-surface: var(--brand-color-surface);
+  --color-accent: var(--brand-color-accent);
+  --color-accent-foreground: var(--brand-color-accent-foreground);
+  --color-warning: var(--brand-color-warning);
+  --color-foreground: var(--brand-color-ink);
+  --color-muted: var(--brand-color-ink-muted);
+  --font-sans: var(--brand-font-sans);
+}
+
+/* Arabic switches the sans stack to the brand's Arabic face; everything else is the same tokens. */
+:root[lang="ar"] {
+  --font-sans: var(--brand-font-arabic);
+}
+
+/* The panel's root claims the viewport; `100dvh` and `viewport-fit=cover` handle the phone PWA. */
+#root {
+  min-block-size: 100dvh;
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+}

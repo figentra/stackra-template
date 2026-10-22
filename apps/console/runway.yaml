@@ -1,0 +1,96 @@
+# Stackra file contract:
+# Purpose: how and where the console runs, per environment: the dev port and host (the only place
+#          a port is written; gen puts it into the generated Vite server and Electron dev config),
+#          domains, the public vars of the env class, secret names, release channels (PWA updates,
+#          Electron feed path and signing switches), Workers knobs.
+# Boundary: identity is stackra.config.ts; behaviour is src/config/*; accounts, zones, the feed
+#           bucket and signing tooling are the root runway. A value here may override a root
+#           default, never the reverse. Validated by `@stackra/runway/schema/app.json`. The update
+#           feed URL is derived by gen, never a var here.
+# Runtime: node
+# Governing contract: ADR 0249, ADR 0254, ADR 0255, ADR 0175, ADR 0173, ADR 0231 d4
+$schema: "@stackra/runway/schema/app.json"
+version: 2
+member: console # = stackra.config.ts `key`
+
+# Every @Secret of the env and config classes, by name; values live in Infisical and runway syncs
+# them on deploy.
+secrets:
+  WEB_PUSH_VAPID_PRIVATE_KEY: {} # path `runtime`, per environment; the public half is a var below
+
+health: { path: /healthz, expects: sha } # the web and pwa targets; not applicable to desktop
+
+release:
+  pwa:
+    updates: from-config # the strategy is pwa.config.ts `updates`; staging only adds the beta badge
+    betaBadgeOutsideProduction: true
+  desktop:
+    # subset of the root target's channels; `latest` is electron-updater's stable (ADR 0254)
+    channels: [beta, latest]
+    # unsigned until a deliverable is named (ADR 0254 d1); tooling is root
+    # `targets.electron-release`
+    signing: { mac: false, windows: false }
+    feedPath: console # feed = <root feed.publicOrigin>/console/<channel>/
+    # narrows desktop.config.ts packaging, never widens
+    platforms: { mac: [dmg, zip], windows: [nsis], linux: [AppImage] }
+
+# the org is root `providers.sentry.org`; the DSN is a var below
+telemetry: { sentryProject: acme-console }
+
+environments:
+  dev:
+    port: 5173 # Vite dev server (web, pwa, the desktop renderer); hmr defaults to port+1
+    host: localhost # `console.localhost` once root `dev.proxy` is on
+    https: false
+    open: false
+    # Electron dev; the loopback takes the PKCE redirect
+    desktop: { devtools: true, remoteDebugPort: 9222, pkceLoopbackPort: 5179 }
+    # public values inlined in dev; names are the env class fields (gen checks the VITE_ prefix)
+    vars:
+      # VITE_API_ORIGIN and VITE_REALTIME_ORIGIN are omitted: gen fills them from the root gateway
+      # (lane offsets applied)
+      VITE_SENTRY_DSN: ""
+      VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ""
+      VITE_POSTHOG_KEY: ""
+    config: # last config layer (ADR 0146)
+      console.telemetry: { traces: { sampleRate: 1 } }
+      console.pwa: { install: { prompt: none } }
+      console.analytics: { driver: none }
+    # Playwright's baseURL derives from port/host; never typed elsewhere
+    e2e: { baseUrl: from-port, seeds: from-stackra-config }
+
+  preview:
+    domain: "console-pr-${pr}.preview.acme.dev"
+    vars:
+      VITE_API_ORIGIN: "https://api-pr-${pr}.preview.acme.dev"
+      VITE_REALTIME_ORIGIN: "https://api-pr-${pr}.preview.acme.dev"
+      VITE_SENTRY_DSN: ref:sentry.dsn.console
+    secrets: [] # push is off in previews
+
+  staging:
+    domain: console.staging.acme.dev
+    vars:
+      VITE_API_ORIGIN: https://api.staging.acme.dev
+      VITE_REALTIME_ORIGIN: https://api.staging.acme.dev
+      VITE_SENTRY_DSN: ref:sentry.dsn.console
+      VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ref:push.vapidPublic.staging
+      VITE_POSTHOG_KEY: ref:posthog.key.console
+    secrets: [WEB_PUSH_VAPID_PRIVATE_KEY]
+    config: { console.telemetry: { traces: { sampleRate: 0.5 } } }
+    workers: { observability: { headSamplingRate: 0.5 } }
+    # beta goes to everyone on the channel
+    desktop: { channel: beta, rollout: { startPercent: 100 } }
+    pwa: { updates: immediate } # staging testers reload at once
+
+  production:
+    domain: console.acme.dev
+    aliases: [app.acme.dev] # redirect to `domain`
+    vars:
+      VITE_API_ORIGIN: https://api.acme.dev
+      VITE_REALTIME_ORIGIN: https://api.acme.dev
+      VITE_SENTRY_DSN: ref:sentry.dsn.console
+      VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ref:push.vapidPublic.production
+      VITE_POSTHOG_KEY: ref:posthog.key.console
+    secrets: [WEB_PUSH_VAPID_PRIVATE_KEY]
+    workers: { observability: { headSamplingRate: 0.1 } }
+    desktop: { channel: latest } # staged rollout from the root target (20 → 100, ADR 0181 d3)

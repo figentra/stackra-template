@@ -1,0 +1,12 @@
+<!--
+Stackra file contract:
+Purpose: the one logo source of the console (`console::public/logo.svg`); gen rasterises every icon size, the maskable
+         PWA icon, `.icns`, `.ico` and the tray template from it (theming.config.ts `logo`).
+Boundary: artwork only; brand colours come from the tokens, so the mark uses `currentColor` and one brand fill.
+Runtime: browser
+Governing contract: ADR 0234 (public assets), owner decision T4 (brand over @stackra/brand)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Acme">
+  <rect width="64" height="64" rx="14" fill="oklch(0.83 0.15 82)" />
+  <path d="M18 44V20h26v6H25v5h15v6H25v7z" fill="currentColor" />
+</svg>

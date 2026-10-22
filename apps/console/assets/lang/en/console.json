@@ -1,0 +1,189 @@
+{
+  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "shell": {
+    "brand": "Acme Console",
+    "top_bar": "Top bar",
+    "menu": "Menu",
+    "sidebar": "Toggle sidebar",
+    "navigation": "Main navigation",
+    "account": "Account",
+    "loading_session": "Loading your session"
+  },
+  "shortcuts": {
+    "quick_order": "Quick order"
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "welcome": "Welcome",
+    "settings": "Settings"
+  },
+  "commands": {
+    "palette": "Command palette",
+    "placeholder": "Type a command, a page, or what you want to do…",
+    "clear": "Clear",
+    "no_match": "No matching command",
+    "no_match_hint": "Try a page name, an action, or describe what you want to do.",
+    "group_app": "Console",
+    "group_account": "Account",
+    "group_intent": "Suggested action",
+    "sidebar": "Toggle sidebar",
+    "theme": "Switch theme",
+    "locale": "Switch language",
+    "pending_changes": "Pending changes",
+    "logout": "Sign out",
+    "navigate": "Navigate",
+    "select": "Select",
+    "escape": "Escape"
+  },
+  "tenant": {
+    "switch": "Switch tenant",
+    "none_title": "No workspace yet",
+    "none_body": "Ask an administrator to add you to a tenant.",
+    "switch_blocked_by_queue": "Sync your pending changes before switching tenant."
+  },
+  "roles": {
+    "admin": "Administrator",
+    "staff": "Staff",
+    "viewer": "Viewer"
+  },
+  "locale": {
+    "switch": "Switch language"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Theme: {scheme}"
+  },
+  "offline": {
+    "title": "You are offline",
+    "body": "{count, plural, =0 {Changes you make will sync when you are back online.} one {# change is waiting to sync.} other {# changes are waiting to sync.}}",
+    "page_title": "You are offline",
+    "page_body": "This page was not saved for offline use. Reconnect and try again."
+  },
+  "queue": {
+    "title": "Pending changes",
+    "open": "Pending changes: {count}",
+    "empty_title": "Nothing waiting to sync",
+    "empty_body": "Changes you make offline appear here until they reach the server.",
+    "pending": "Pending",
+    "conflict_hint": "The server changed this record while you were offline. Choose how to resolve it.",
+    "sync_now": "Sync now",
+    "reason": {
+      "version_conflict": "Changed on the server",
+      "permission_denied": "No longer allowed",
+      "stale_offline_mutation": "Too old to replay"
+    },
+    "strategy": {
+      "server_wins": "Keep server version",
+      "client_retry": "Retry on latest",
+      "manual": "Review",
+      "discard": "Discard my change"
+    }
+  },
+  "dashboard": {
+    "today": "Today",
+    "orders_today": "Orders today",
+    "loading": "Loading today's numbers"
+  },
+  "welcome": {
+    "title": "Welcome to your console",
+    "body": "Everything your services declared is already here: products, orders, stock. Start with a quick order.",
+    "cta": "Place your first order",
+    "loading": "Loading the welcome page",
+    "empty_title": "No welcome page published yet",
+    "empty_body": "A tenant admin can build one in the page builder.",
+    "open_builder": "Open the page builder"
+  },
+  "login": {
+    "title": "Signing you in",
+    "body": "You are being taken to the sign-in page.",
+    "redirecting": "Redirecting",
+    "continue": "Continue to sign in"
+  },
+  "settings": {
+    "tabs": "Settings sections",
+    "device": "This device",
+    "tenant": "Tenant",
+    "scheme": "Theme",
+    "locale": "Language",
+    "density": "Table density",
+    "density_comfortable": "Comfortable",
+    "density_compact": "Compact",
+    "local_notifications": "Desktop notifications",
+    "local_notifications_hint": "Shown while the console is open.",
+    "save": "Save",
+    "saved_device": "Device settings saved",
+    "privacy": "Privacy",
+    "analytics_consent": "Share usage analytics",
+    "analytics_consent_hint": "Helps us see which screens matter. Nothing is sent until you turn this on.",
+    "notification_preferences": "Notification preferences"
+  },
+  "capabilities": {
+    "permission_denied": "Notifications were not allowed by the browser.",
+    "unavailable": "This device cannot show notifications."
+  },
+  "quick_order": {
+    "variant_required": "Choose a variant"
+  },
+  "risk": {
+    "l0": "Safe",
+    "l1": "Low",
+    "l2": "Medium",
+    "l3": "High"
+  },
+  "export": {
+    "pick_folder": "Choose an export folder"
+  },
+  "menu": {
+    "file": "File",
+    "view": "View",
+    "go": "Go",
+    "help": "Help",
+    "docs": "Documentation"
+  },
+  "tray": {
+    "show": "Show console"
+  },
+  "errors": {
+    "retry": "Try again",
+    "go_home": "Back to home",
+    "unknown": {
+      "title": "Something went wrong",
+      "body": "The error was reported. Try again, or contact support with the code."
+    },
+    "not_found": {
+      "title": "Page not found",
+      "body": "The page may have moved or you may not have access to it."
+    },
+    "forbidden": {
+      "title": "You do not have access",
+      "body": "Ask an administrator for the permission named in the code."
+    },
+    "unavailable": {
+      "title": "Service unavailable",
+      "body": "The service did not answer. Your change was not lost."
+    },
+    "validation": {
+      "title": "Check the form",
+      "body": "A value was refused by the server."
+    },
+    "entitlement_required": {
+      "title": "Not included in your plan",
+      "body": "Upgrade to use this feature."
+    }
+  },
+  "realtime": {
+    "connected": "Live",
+    "connecting": "Connecting to live updates",
+    "disconnected": "Live updates paused"
+  },
+  "inbox": {
+    "title": "Notifications",
+    "open": "Notifications: {count, plural, =0 {none unread} one {# unread} other {# unread}}",
+    "empty_title": "No notifications yet",
+    "empty_body": "Order updates and messages for you appear here.",
+    "mark_read": "Mark read",
+    "loading": "Loading notifications"
+  }
+}
