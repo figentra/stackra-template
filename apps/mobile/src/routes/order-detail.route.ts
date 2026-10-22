@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
  * Purpose: one order: status, lines, totals with the hook-applied adjustments, and the cancel
- *          action when allowed. Reached by push, by deep link `stackra://orders/<orderId>` and by
+ *          action when allowed. Reached by push, by deep link `acme://orders/<orderId>` and by
  *          the paid-order notification.
  * Boundary: options only. `prefetch` warms `GetOrder` from the validated params before the page
  *           mounts, served from the persisted cache first so a seen order renders offline; the

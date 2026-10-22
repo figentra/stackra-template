@@ -3,7 +3,7 @@
  * Purpose: one order's live data (warmed by the route's `prefetch`) and its cancel action, with the
  *          confirmation the action declares. Used by one page, so it sits beside it.
  * Boundary: data and the one write. The confirmation text is the service's key
- *           (`I18n.orders.order.cancel_confirm`, shortened by `overrides/orders/lang`); the client
+ *           (`I18n.orders.order.cancel_confirm`, shortened by `assets/overrides/orders/`); the client
  *           hook shows it before calling (ADR 0139). Cancel is `OfflineMode.Online` in
  *           `#stackra/offline`, so it refuses at once without a connection.
  * Runtime: react-native

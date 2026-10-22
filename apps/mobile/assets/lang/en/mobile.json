@@ -42,7 +42,7 @@
   "scan": {
     "title": "Scan",
     "hint": "Point the camera at a barcode.",
-    "permission": "Stackra needs the camera to read barcodes.",
+    "permission": "Acme needs the camera to read barcodes.",
     "unavailable": "Scanning is not available on this device.",
     "found": "Found {title}"
   },
@@ -94,7 +94,7 @@
     "channel_orders": "Orders"
   },
   "sign_in": {
-    "title": "Welcome to Stackra",
+    "title": "Welcome to Acme",
     "body": "Sign in with your workspace account.",
     "button": "Sign in"
   },
@@ -111,7 +111,7 @@
     "empty": "Nothing here yet"
   },
   "permissions": {
-    "camera": "Stackra scans product barcodes to add them to an order."
+    "camera": "Acme scans product barcodes to add them to an order."
   },
   "refusals": {
     "session_required": "This screen needs you to be signed in."

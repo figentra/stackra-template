@@ -20,13 +20,13 @@
     {
       "service": "identity",
       "manifest": "acme-platform services/identity/.stackra/app-manifest.json",
-      "pin": "stackra.lock.yaml#identity@2d4f6c8",
+      "pin": "stackra.lock.yaml#identity",
       "modules": ["devices"]
     },
     {
       "service": "experience",
       "manifest": "acme-platform services/experience/.stackra/app-manifest.json",
-      "pin": "stackra.lock.yaml#experience@b82d913",
+      "pin": "stackra.lock.yaml#experience",
       "modules": ["experience"]
     }
   ],

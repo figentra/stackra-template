@@ -1,10 +1,11 @@
 /**
  * Stackra file contract:
  * Purpose: the colour scheme (light, dark, system) over the brand tokens, remembered per install,
- *          applied through Uniwind, which the UI kit follows. Named as `theme` in `@App`, so the
- *          generated entry mounts it above the provider list.
+ *          applied through Uniwind, which the UI kit follows, and the UI kit itself, whose provider
+ *          renders the one toast region. Named as `theme` in `@App`, so the generated entry mounts
+ *          it above the provider list.
  * Boundary: a context component with no behaviour before mount. The tokens are
- *           `@stackra/brand/css/native.css`; the schemes and the default are `ThemingConfig`. Pages
+ *           `@acme/brand/css/native.css`; the schemes and the default are `ThemingConfig`. Pages
  *           read and set the scheme with `useColorScheme` from @stackra/theming/react, the one hook
  *           every app shares.
  * Runtime: react-native

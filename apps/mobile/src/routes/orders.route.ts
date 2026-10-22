@@ -4,7 +4,7 @@
  * Boundary: options only. The page's hook owns the infinite query (a cursor list is live state, not
  *           a one-shot load), so the route neither prefetches nor loads and declares its permission
  *           itself; the server re-checks every call. `params` pre-applies a status from a widget or
- *           `stackra://orders?status=paid`.
+ *           `acme://orders?status=paid`.
  * Runtime: react-native
  * Governing contract: ADR 0061, ADR 0080
  */

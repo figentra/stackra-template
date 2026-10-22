@@ -15,7 +15,7 @@ import { env } from "#stackra/env";
 import type { RouteParams } from "#stackra/routes";
 
 export const linking: LinkingOptions<RouteParams & { tabs: undefined }> = {
-  prefixes: [Linking.createURL("/", { scheme: "stackra" }), `${env.appOrigin}/m`],
+  prefixes: [Linking.createURL("/", { scheme: "acme" }), `${env.appOrigin}/m`],
   filter: (url) => !url.includes("auth/callback"),
   config: {
     screens: {

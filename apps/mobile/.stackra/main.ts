@@ -3,10 +3,12 @@
  * gen/env.ts, gen/navigation.tsx, gen/linking.ts — do not edit
  * Purpose: the Expo entry: three lines over `createApp`, which validates
  *          the env, starts telemetry, boots the client container with the native drivers and every
- *          config class, applies the RTL switch from `I18nConfig`, mounts `theme` then the `@App`
- *          provider list then the navigation container with the generated tree and linking, hides
- *          the splash when stores are hydrated (`StateConfig.hydration`) and the first route is
- *          laid out, and registers the root component.
+ *          config class, applies the RTL switch from `I18nConfig`, mounts `theme` (the UI kit and
+ *          its toast region) then the `@App` provider list, with the feature-flags context from
+ *          `FeatureFlagsConfig` inside the session and tenant contexts it targets by, then the
+ *          navigation container with the generated tree and linking, hides the splash when stores
+ *          are hydrated (`StateConfig.hydration`) and the first route is laid out, and registers
+ *          the root component.
  * Boundary: the entry only; nothing here is authored, and the app root names what it is, never how
  *           it boots.
  * Runtime: react-native

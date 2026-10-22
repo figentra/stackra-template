@@ -3,9 +3,10 @@
  * Purpose: one fact: feature flags on the device: the provider by name, its public key, build-time
  *          values and how often values refresh.
  * Boundary: a flag is a release switch, never a commercial right (entitlements are). Flags are
- *           declared by services (`@Flag`) and read through `#stackra/flags`; targeting is the
- *           tenant and the user, by id only. Kill switches are evaluated server-side and cannot be
- *           overridden here.
+ *           declared by services (`@Flag`) and read through `#stackra/flags`. The generated entry
+ *           mounts the flags context from this class, targeted by the signed-in user and the active
+ *           tenant, by id only; the app writes no flags provider. Kill switches are evaluated
+ *           server-side and cannot be overridden here.
  * Runtime: react-native
  * Governing contract: ADR 0081, ADR 0213
  */

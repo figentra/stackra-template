@@ -1,9 +1,11 @@
 {
   // Stackra file contract:
-  // Purpose: TypeScript settings of the mobile app; the Expo preset (react-native condition, JSX, legacy decorators, no emit), nothing local.
-  // Boundary: `#src/*` and `#stackra/*` resolve through package.json imports; `.stackra/` is included so generated code is checked.
+  // Purpose: TypeScript settings of the mobile app: exactly one role preset, nothing local.
+  // Boundary: the mobile preset owns the compiler options (react-native condition, JSX, legacy
+  //           decorators, no emit) and the include list through `${configDir}` (`src`,
+  //           `stackra.config.ts` and the generated `.stackra/`); `#src/*` and `#stackra/*` resolve
+  //           through package.json imports.
   // Runtime: node
-  // Governing contract: ADR 0061
-  "extends": "@stackra/typescript-config/expo.json",
-  "include": ["src", "stackra.config.ts", ".stackra"]
+  // Governing contract: ADR 0003 (one preset per member), ADR 0005 (legacy decorators), ADR 0061
+  "extends": "@stackra/typescript-config/mobile"
 }

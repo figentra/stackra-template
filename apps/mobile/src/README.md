@@ -16,7 +16,7 @@
 | `providers/`          | one folder per provider: `<name>.provider.ts` (only when it runs code before mount), `<name>.context.tsx`, at most one hook                |
 | `stores/`             | `@Store` classes on `@stackra/state`, persisted through `@stackra/storage`                                                                 |
 | `schemas/`            | `Schema(z)` classes: route params, the form, the block props                                                                               |
-| `overrides/<module>/` | `@Override` classes and lang files that change another module's things                                                                     |
+| `overrides/<module>/` | `@Override` classes that change another module's components (its strings: `assets/overrides/<namespace>/`)                                                                     |
 | `assets/`             | `lang/<locale>/mobile.json`, `public/logo.svg`                                                                                             |
 | `styles/global.css`   | the one stylesheet entry                                                                                                                   |
 | `__tests__/`          | the app root boot test                                                                                                                     |

@@ -2,8 +2,8 @@
  * Stackra file contract:
  * Purpose: what the mobile app IS: its key, its `@App` root, its build targets, the API area, the
  *          env contract and the e2e tier. `stackra gen`, `stackra dev`, `stackra build` and
- *          `stackra test` read it to emit the runtime (Expo config, EAS profiles, Metro and Babel,
- *          the entry, the navigation tree, linking, Maestro) into `.stackra/`.
+ *          `stackra test` read it to emit the runtime (Expo config, EAS profiles, Metro, the entry,
+ *          the navigation tree, linking, Maestro) into `.stackra/`.
  * Boundary: identity and build shape only; `defineApp` is the build-config carve-out beside ADR
  *           0145. HOW the packages behave is `src/config/<fact>.config.ts`; HOW and WHERE the app
  *           runs per environment (Metro port, public var values, EAS profiles and channels) is
@@ -22,9 +22,9 @@ import { MobileEnv } from "./src/config/env.config";
 /**
  * The mobile app. `env` is the config class whose `@Env` fields are the only values inlined into
  * the bundle: gen refuses any name without the `EXPO_PUBLIC_` prefix, so a secret can never reach
- * the binary. `e2e.flows` names the Maestro flows gen collects into `.stackra/maestro/config.yaml`,
- * run once per platform and once per locale of `i18n.config.ts`, against the `e2e` EAS profile of
- * `runway.yaml`. The Expo escape hatch is not a key here: it is the function file `expo.extend.ts`
+ * the binary. `e2e.flows` names the Maestro flows: their folder is the Maestro workspace and the
+ * glob is written into `.stackra/maestro/config.yaml`; they run once per platform and once per
+ * locale of `i18n.config.ts`, against the `e2e` EAS profile of `runway.yaml`. The Expo escape hatch is not a key here: it is the function file `expo.extend.ts`
  * at the member root, merged last over the generated Expo config, and it exists only when an ADR
  * names the exception.
  */

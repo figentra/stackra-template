@@ -53,7 +53,7 @@ describe("PushContextProvider", () => {
   it("sends nothing after a denial and opens a tapped notification's url", async () => {
     const devices = fakeClient(Devices);
     const platform = fakePlatform({ push: { permission: "denied" } });
-    const url = "stackra://orders/ord_01H2J3K4L5M6N7P8Q9R0ABCDEF";
+    const url = "acme://orders/ord_01H2J3K4L5M6N7P8Q9R0ABCDEF";
     const { linking } = render(<PushContextProvider>{null}</PushContextProvider>, {
       session,
       tenant,
