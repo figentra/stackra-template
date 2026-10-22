@@ -30,6 +30,7 @@ const YAML = "2.9.1";
  */
 const NPM_ENV = {
   npm_config_fetch_timeout: process.env.npm_config_fetch_timeout || "30000",
+  npm_config_fetch_retries: process.env.npm_config_fetch_retries || "3",
   npm_config_update_notifier: "false",
 };
 
@@ -52,6 +53,8 @@ function run(cmd, args, input) {
     input,
     stdio: piped ? "pipe" : "inherit",
     encoding: "utf8",
+    // Every npx call gets the fast-fail fetch settings; git and other tools ignore them.
+    env: { ...process.env, ...NPM_ENV },
   });
   if (result.error) console.error(`${cmd}: ${result.error.message}`);
   if (piped && result.status !== 0) process.stderr.write(result.stderr || result.stdout || "");
