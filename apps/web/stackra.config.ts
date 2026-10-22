@@ -1,6 +1,6 @@
 /**
  * Stackra file contract:
- * Purpose: what the public site is: key, root class, its targets (`web-ssr` and `pwa`), the public
+ * Purpose: what the public site is: key, root class, its targets (`web` and `pwa`) and how routes render, the public
  *          API area, the env contract, e2e projects and seeds, health. Read by `stackra gen`, `dev`,
  *          `build`, `test` and `validate`.
  * Boundary: identity and build shape only. Where it runs (port, domains, vars, Worker knobs) is
@@ -13,13 +13,17 @@
  */
 import { defineApp } from "@stackra/app";
 import { ApiArea, Target } from "@stackra/contracts";
+import { RenderMode } from "@stackra/navigation";
 import { WebEnv } from "./src/config/env.config";
 
 export default defineApp({
   key: "web",
   module: "./src/web.app.ts",
-  // The web target here is server-rendered; `Pwa` adds the manifest and worker (ADR 0281 d7).
-  targets: [Target.WebSsr, Target.Pwa],
+  // Targets are where the app ships (ADR 0281); `Pwa` adds the manifest and the worker.
+  targets: [Target.Web, Target.Pwa],
+  // Rendering is how a target serves pages: server-rendered on Workers by default (ADR 0176);
+  // a route may still choose `RenderMode.Client` (see page.route.ts).
+  render: RenderMode.Server,
   area: ApiArea.Public,
   env: WebEnv,
   e2e: {

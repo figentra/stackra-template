@@ -9,7 +9,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "entry": ["commitlint.config.mjs"],
+      "entry": [],
       "project": ["*.mjs"],
       // Run by lefthook's pre-commit hook and by the CLI, which knip does not read.
       "ignoreDependencies": ["oxfmt", "@stackra/cli"],

@@ -21,7 +21,7 @@ through `@stackra/ui`, like the console.
 
 ```
 apps/web
-├── stackra.config.ts        defineApp: key, root class, Target.WebSsr + Target.Pwa, ApiArea.Public, env class, e2e seeds, health
+├── stackra.config.ts        defineApp: key, root class, Target.Web + Target.Pwa, render: RenderMode.Server, ApiArea.Public, env class, e2e seeds, health
 ├── vite.extend.ts           the one build hatch: extra Vite plugin instances, merged after the stackra plugin
 ├── runway.yaml              dev port/host, domains and aliases, public + server vars, secret names, Worker knobs
 ├── package.json             three aliases: #src/*, #assets/* and #stackra/*

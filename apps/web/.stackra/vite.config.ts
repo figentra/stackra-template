@@ -21,7 +21,7 @@ export default defineConfig((env) =>
   mergeConfig(
     stackra.viteConfig(app, {
       mode: env.mode,
-      // Target.WebSsr: cloudflare, tailwindcss, reactRouter, stackra
+      // Target.Web with RenderMode.Server: cloudflare, tailwindcss, reactRouter, stackra
       target: app.targets[0],
       server: devServer("web"), // runway.yaml environments.dev via ports.json
       define: definesFor("web", process.env.STACKRA_ENVIRONMENT ?? "dev"), // public fields only

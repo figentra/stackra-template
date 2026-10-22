@@ -174,7 +174,7 @@ window.
 ├── .gitignore                    `.stackra/*` except the committed app-manifest.json, openapi.json
 ├── .github/                      Quality Gate (`pnpm verify`) and release workflows, issue and PR templates
 ├── .changeset/                   pending release notes for packages (apps and services deploy by SHA)
-├── lefthook.yml · commitlint.config.mjs · knip.jsonc · .gitleaks.toml · .editorconfig · .gitattributes
+├── lefthook.yml · .commitlintrc.yaml · knip.jsonc · .gitleaks.toml · .editorconfig · .gitattributes
 ├── mise.toml · .node-version     toolchain pins
 ├── .mcp.yaml                     the Stackra MCP (local `stackra mcp` + hosted); rendered to .mcp.json
 ├── .claude/launch.json           dev-server launch configuration for the assistant's preview
@@ -420,7 +420,7 @@ Replace `acme` with your own names, and the placeholders below, before the first
 | `dev.acme.console`, `dev.acme.mobile`, `acme-console` | `desktop.config.ts`, `release.config.ts`, Maestro flows            | your bundle ids and URL scheme                         |
 | `@your-org/your-team`                                 | `.github/CODEOWNERS`                                               | your GitHub team or user                               |
 | `security@your-domain.example`, `your-repo`           | `SECURITY.md`, `.github/ISSUE_TEMPLATE/config.yml`                 | your security contact and repository                   |
-| `ISSUE_KEY = null`                                    | `commitlint.config.mjs`                                            | your tracker's footer pattern, to require an issue key |
+| `refs-issue-key` (commented out)                      | `.commitlintrc.yaml`                                               | your tracker's prefix, to require an issue-key footer  |
 | `GITHUB_TOKEN` in the release job                     | `.github/workflows/release.yml`                                    | a GitHub App token if the version PR must run the gate |
 | `<stackra-mcp-host>`                                  | `.mcp.yaml`                                                        | the hosted Stackra MCP URL of your plan                |
 | copyright holder, brand assets                        | `LICENSE`, `packages/cross-cutting/brand/assets`                   | yours                                                  |

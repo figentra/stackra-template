@@ -1,0 +1,13 @@
+# Stackra file contract:
+# Purpose: commitlint config for the lefthook commit-msg hook and the Quality Gate. The rules live in
+#          the @stackra/commitlint-config preset (conventional commits, types, subject case, lengths).
+# Boundary: project choices only. The issue-key rule is off; to require a footer such as
+#           `Refs: PROJ-12` on feat/fix/refactor/perf commits, uncomment the rule with your prefix.
+# Secrets: forbidden
+extends:
+  - "@stackra/commitlint-config"
+# rules:
+#   refs-issue-key:
+#     - 2
+#     - always
+#     - PROJ
