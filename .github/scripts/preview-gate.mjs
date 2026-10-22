@@ -46,6 +46,8 @@ const JSONC = [
   /(^|\/)tsconfig[^/]*\.json$/,
   /^\.vscode\//,
   /^packages\/tooling\/typescript\/src\/[^/]+\.json$/,
+  // eas-cli refuses a root `$comment` key but reads a non-strict file as JSON5, so the contract is `//` lines
+  /(^|\/)eas\.json$/,
 ];
 
 /**

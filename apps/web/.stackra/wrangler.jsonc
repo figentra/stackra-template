@@ -6,6 +6,7 @@
 // Boundary: secret values are never here: runway syncs them from Infisical on deploy (ADR 0173)
 //           and the Worker reads them from `env`. Secret names are listed for the reviewer only.
 // Runtime: node
+// Governing contract: ADR 0175 (domains and aliases), ADR 0173 (secrets synced by runway)
 {
   "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
   "name": "acme-web",

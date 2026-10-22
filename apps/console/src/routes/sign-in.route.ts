@@ -6,9 +6,9 @@
  *          blocked.
  * Boundary: the console never renders a credential field and never sees a token. `returnTo` is an
  *           in-app path only: it is resolved against the console's own origin and anything that
- *           lands elsewhere (`//host`, `/\host`, an absolute URL) becomes `/`; the BFF re-validates
- *           it. Outside the shell: `PublicLayout`, and `auth: false` because the route calls
- *           nothing a permission could be derived from.
+ *           lands elsewhere or normalises to `//host` (`//host`, `/\host`, `/.//host`, an absolute
+ *           URL) becomes `/`; the BFF re-validates it. Outside the shell: `PublicLayout`, and
+ *           `auth: false` because the route calls nothing a permission could be derived from.
  * Runtime: browser
  * Governing contract: ADR 0241 (central login app, BFF), ADR 0206 d8
  */
@@ -29,7 +29,8 @@ function inAppReturnTo(raw: string | undefined): string {
     // protocol + host, not `origin`: the desktop's `app:` scheme has an opaque origin, and its
     // parser keeps a backslash in the path, which a later hop could still read as `//host`
     const leaves = target.protocol !== here.protocol || target.host !== here.host;
-    if (leaves || target.pathname.includes("\\")) return "/";
+    // dot segments normalise to a path that can still read as `//host`: `/.//host`, `/a/..//host`
+    if (leaves || target.pathname.startsWith("//") || target.pathname.includes("\\")) return "/";
     return `${target.pathname}${target.search}${target.hash}`;
   } catch {
     return "/"; // an unparsable host such as `//[`

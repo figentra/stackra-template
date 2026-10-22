@@ -58,6 +58,8 @@
   "files.associations": {
     // The tsconfig presets carry a contract comment but no tsconfig*.json name.
     "**/packages/tooling/typescript/src/*.json": "jsonc",
+    // eas.json carries its contract as `//` lines (eas-cli reads it as JSON5 and refuses `$comment`).
+    "**/eas.json": "jsonc",
     // CODEOWNERS is `path owner` lines with `#` comments, not Markdown.
     "CODEOWNERS": "ignore"
   },

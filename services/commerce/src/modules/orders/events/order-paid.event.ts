@@ -4,9 +4,10 @@
  *          as `orders.order.paid.v1`; other services consume it from the committed manifest, and
  *          tenants may subscribe an outbound webhook to it.
  * Boundary: one event per class. Version 1 until `@Version` says otherwise. Recorded by the
- *           MarkPaid transition, never emitted from two places. Broadcast for live tiles only to
- *           the tenant's console sessions that hold `orders.order.read`, because the payload
- *           carries the paid total and the customer id. The paid total rides along so loyalty
+ *           MarkPaid transition, never emitted from two places. Its live-tile broadcast declares
+ *           `orders.order.read` as the permission a tenant console session needs to receive it,
+ *           because the payload carries the paid total and the customer id; enforcing it at
+ *           delivery is @stackra/realtime's job. The paid total rides along so loyalty
  *           earns without a second read; `webhook: true` lets @stackra/webhooks deliver it,
  *           signed, to the endpoints a tenant registers (outbound delivery, retries and the log
  *           are the package's).

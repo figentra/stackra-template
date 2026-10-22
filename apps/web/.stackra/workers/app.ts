@@ -53,12 +53,13 @@ async function handle(request: Request, rawEnv: Env, ctx: ExecutionContext): Pro
   const env = serverEnv(rawEnv); // a missing var fails here with a typed error naming it
   const url = new URL(request.url);
   const canonical = new URL(env.siteUrl);
-  if (url.host !== canonical.host && !url.host.startsWith("localhost")) {
-    return Response.redirect(new URL(url.pathname + url.search, canonical).toString(), 301);
-  }
-  if (url.pathname.includes("//")) {
-    const single = url.pathname.replace(/\/{2,}/g, "/");
-    return Response.redirect(new URL(single + url.search, url.origin).toString(), 301);
+  // collapsed before any redirect is built: resolved as a URL, `//evil.example/x` names a host
+  const path = url.pathname.replace(/\/{2,}/g, "/");
+  const onCanonical = url.host === canonical.host || url.hostname === "localhost";
+  if (!onCanonical || path !== url.pathname) {
+    // concatenated, never resolved, so the target's origin is always the one chosen here
+    const origin = onCanonical ? url.origin : canonical.origin;
+    return Response.redirect(`${origin}${path}${url.search}`, 301);
   }
 
   const nonce = createNonce(); // 128 bits from crypto.getRandomValues, base64

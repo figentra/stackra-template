@@ -12,7 +12,7 @@ carry intent docblocks (ADR 0007) and read the ids factories return instead of t
 | schema         | `schemas/*.schema.ts`                                                             | one schema per file (ADR 0006): `CreateOrderInput`, `CreateOrderOutput`, `OrderView` |
 | error          | `errors/*.error.ts`                                                               | `AppError` subclasses with an `ErrorCategory`; codes are snake_case                  |
 | permission     | `permissions/order.permission.ts`                                                 | `@Permissions({ resource })`; risk lives here only (ADR 0132)                        |
-| event          | `events/*.event.ts`                                                               | one `@Event` per file; `OrderPaid` broadcasts to `read` holders, outbound webhook    |
+| event          | `events/*.event.ts`                                                               | one `@Event` per file; `OrderPaid`'s broadcast declares `read`, outbound webhook     |
 | hook point     | `hooks/order.hook-point.ts`                                                       | a `@HookPoint` class: `adjustTotals` (transform), `verifyPlacement` (verify)         |
 | repository     | `repositories/order.repository.ts`                                                | `@RepositoryOf(Order)`: named reads, no behaviour                                    |
 | service        | `./services/order.service.ts`, `./services/order-pricing.service.ts`              | `@Crud`, transitions, `@AccessLogged`, `Money` arithmetic, the `Logger` port         |

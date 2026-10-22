@@ -7,8 +7,8 @@
  *           lives here only: an action's risk is its permission's (ADR 0132). Gen derives "not
  *           grantable to a role" when every action using a permission has only non-human actors
  *           (ADR 0098). The resource is named (`{ resource: "order" }`), not passed as the model:
- *           OrderPaid gates its broadcast on `read`, and the model reaches OrderPaid through its
- *           state, so importing the model here would close a module cycle.
+ *           OrderPaid declares `read` as its broadcast permission, and the model reaches OrderPaid
+ *           through its state, so importing the model here would close a module cycle.
  * Runtime: isomorphic
  * Governing contract: ADR 0132 (permissions), ADR 0208 (names), ADR 0231,
  *                     guides/programming-model.mdx#permissions, ADR 0098

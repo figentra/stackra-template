@@ -8,6 +8,7 @@
 #           `src/routes/__tests__` (the folder of `e2e.flows`) as the workspace, so the flow glob
 #           below resolves inside that folder.
 # Runtime: node
+# Governing contract: ADR 0182 (test tiers), ADR 0022 (tests beside their subject)
 flows:
   - "*.flow.yaml"
 includeTags:

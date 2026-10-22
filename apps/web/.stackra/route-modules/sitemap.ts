@@ -22,7 +22,9 @@ const FILE = /^(?<source>[a-z_]+)-(?<page>[1-9]\d{0,5})\.xml$/;
 export async function loader(args: Route.LoaderArgs) {
   const ctx = routeContext(args);
   const match = FILE.exec(args.params.file);
-  const source = match?.groups && sitemapSources[match.groups.source];
+  // own properties only: an inherited name such as `constructor` or `__proto__` is not a source
+  const name = match?.groups?.source;
+  const source = name && Object.hasOwn(sitemapSources, name) ? sitemapSources[name] : undefined;
   const site = await resolveSite(ctx);
   if (!match?.groups || !source || !site.indexable) return new Response(null, { status: 404 });
   const page = Number(match.groups.page);
