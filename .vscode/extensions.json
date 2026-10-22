@@ -9,7 +9,8 @@
     // Tests: vitest (unit, int, contract) and Playwright (e2e)
     "vitest.explorer",
     "ms-playwright.playwright",
-    // Config files: YAML (runway, workflows, lefthook), TOML (mise), MDX (docs)
+    // Config files: YAML (runway, workflows, lefthook), TOML (mise; validation and schemas only,
+    // oxfmt formats it), MDX (docs)
     "redhat.vscode-yaml",
     "tamasfe.even-better-toml",
     "unifiedjs.vscode-mdx",
