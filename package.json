@@ -14,7 +14,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "format": "oxfmt --write .",
-    "format:check": "turbo run format:check",
+    "format:check": "oxfmt --check .",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "verify": "stackra verify",
