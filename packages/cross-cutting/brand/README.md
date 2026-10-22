@@ -1,4 +1,4 @@
-# @stackra/brand
+# @acme/brand
 
 Design tokens and the brand mark, at `packages/cross-cutting/brand` (`tier:lib`, category
 `cross-cutting`). It is here, not under `experience`, because brand is read by web, native, mail
@@ -16,22 +16,22 @@ package does not generate.
 
 | Kind              | Folder                | Suffix         | Example                                          | Test |
 | ----------------- | --------------------- | -------------- | ------------------------------------------------ | ---- |
-| tokens (constant) | `src/core/tokens/`    | `.token.ts`    | `core/tokens/color.token.ts`                     | none |
+| design tokens (constant) | `src/core/design-tokens/` | `.design-token.ts` | `core/design-tokens/color.design-token.ts` | none |
 | type              | `src/core/types/`     | `.type.ts`     | `core/types/brand-tokens.type.ts`                | none |
-| function          | `src/core/functions/` | `.function.ts` | `core/functions/brand-css-variables.function.ts` | none |
+| function          | `src/core/functions/` | `.function.ts` | `core/functions/brand-css-variables.function.ts` | `functions/__tests__/brand-css-variables.function.test.ts` |
 | public asset      | `assets/public/`      | any            | `assets/public/images/mark.svg`                  | none |
 | barrel            | `src/`                | `index.ts`     | `src/index.ts`                                   | none |
 
 | Path                                                 | Holds                                                                                                                                            |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/core/tokens/color.token.ts`                     | `COLOR_TOKENS`: dotted key to a light and a dark `oklch()` value                                                                                 |
-| `src/core/tokens/radius.token.ts`                    | `RADIUS_TOKENS`                                                                                                                                  |
-| `src/core/tokens/font.token.ts`                      | `FONT_TOKENS`: the `font-family` stacks, family names only; no font file ships with the package                                                  |
+| `src/core/design-tokens/color.design-token.ts`       | `COLOR_TOKENS`: dotted key to a light and a dark `oklch()` value                                                                                 |
+| `src/core/design-tokens/radius.design-token.ts`      | `RADIUS_TOKENS`                                                                                                                                  |
+| `src/core/design-tokens/font.design-token.ts`        | `FONT_TOKENS`: the `font-family` stacks, family names only; no font file ships with the package                                                  |
 | `src/core/types/brand-tokens.type.ts`                | `BrandToken` and `BrandTokens`; a tenant's brand is `Partial<BrandTokens>`                                                                       |
-| `src/core/functions/brand-css-variables.function.ts` | `brandCssVariables(tokens: Partial<BrandTokens>): string`, a pure string function a server inlines as `<style>`                                  |
+| `src/core/functions/brand-css-variables.function.ts` | `brandCssVariables(tokens: Partial<BrandTokens>): string`, a pure string function a server inlines as `<style>`; it throws on a key it does not declare or a value outside the token grammar |
 | `assets/public/images/mark.svg`                      | the mark, published to the CDN as `Assets.brand.public.mark_svg` (`brand::public/images/mark.svg`, ADR 0234)                                     |
-| `css/tokens.css`                                     | generated: the tokens as CSS custom properties for the web and the console (`@import "@stackra/brand/css/tokens.css"`), light and dark           |
-| `css/native.css`                                     | generated: the same tokens for the mobile app, plus HeroUI Native's theme variables mapped onto them (`@import "@stackra/brand/css/native.css"`) |
+| `css/tokens.css`                                     | generated: the tokens as CSS custom properties for the web and the console (`@import "@acme/brand/css/tokens.css"`), light and dark           |
+| `css/native.css`                                     | generated: the same tokens for the mobile app, plus HeroUI Native's theme variables mapped onto them (`@import "@acme/brand/css/native.css"`) |
 
 Exports are explicit: `.`, `./css/tokens.css`, `./css/native.css`, `./assets/*`.
 

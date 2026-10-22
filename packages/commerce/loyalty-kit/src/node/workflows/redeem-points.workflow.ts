@@ -2,11 +2,14 @@
  * Stackra file contract:
  * Purpose: the steps behind `loyalty_kit.points.redeem`: quote (verify included), debit, confirm.
  *          The debit is compensated (credited back) when confirmation never comes.
- * Boundary: a declarative graph (ADR 0094): steps run in declaration order; each step is its own
- *           transaction and is idempotent on the run id; `compensate` is typed `keyof` this class.
- *           Never exposed directly (ADR 0101).
+ * Boundary: steps run in declaration order; each step is its own transaction and is idempotent on
+ *           the run id; `compensate` is typed `keyof` this class. The run parks before `confirm`
+ *           until ConfirmRedemptionAction sends RedemptionConfirmed for the same member and
+ *           reference; no step body waits. The run timeout covers that wait. Never exposed
+ *           directly (ADR 0101).
  * Runtime: node
- * Governing contract: ADR 0094, 0101, 0151, 0265 (the owner runs its verify point)
+ * Governing contract: ADR 0101, 0151, 0152 decision 1 (`waitFor`), 0265 (the owner runs its verify
+ *                     point)
  */
 import { Step, Workflow, WorkflowBase, type StepContext } from "@stackra/workflow";
 import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
@@ -19,10 +22,11 @@ import type { MemberId } from "#core/types/member-id.type";
 import type { RedemptionQuote } from "#core/interfaces/redemption-quote.interface";
 import { PointsRedeemed } from "#node/events/points-redeemed.event";
 import { LoyaltyHooks } from "#node/hooks/loyalty.hook-point";
+import { RedemptionConfirmed } from "#node/workflows/redemption-confirmed.signal";
 
 /** Output of `quote`; later steps read it as `s.quote`. */
 interface Quoted {
-  /** The branded member taken from the actor, never from input. */
+  /** The branded member taken from the actor (or the customer a service acts for), never input. */
   readonly member: MemberId;
   /** The capped offer. */
   readonly quote: RedemptionQuote;
@@ -32,9 +36,9 @@ interface Quoted {
 
 /**
  * `output` maps step results to the action's declared output, so the workflow stays private to the
- * kit.
+ * kit. The run timeout is the confirmation wait plus room for the quote and the debit.
  */
-@Workflow({ timeout: "30s" })
+@Workflow({ timeout: "20m" })
 export class RedeemPointsWorkflow extends WorkflowBase<RedeemPointsInput, RedeemPointsOutput> {
   constructor(
     private readonly loyalty: LoyaltyService,
@@ -51,7 +55,7 @@ export class RedeemPointsWorkflow extends WorkflowBase<RedeemPointsInput, Redeem
    */
   @Step()
   async quote(input: RedeemPointsInput, ctx: StepContext): Promise<Quoted> {
-    const member = memberId(ctx.actor.id);
+    const member = memberId((ctx.actor.onBehalfOf ?? ctx.actor).id);
     await this.loyalty.assertCanRedeem(member, input.points);
     await this.hooks.redeemVerify(input, ctx);
     return {
@@ -90,13 +94,18 @@ export class RedeemPointsWorkflow extends WorkflowBase<RedeemPointsInput, Redeem
   }
 
   /**
-   * Confirms with the host through a signal: the host's own step (an order placement) resolves it,
-   * or the engine times out and compensates. This is the step that makes the whole thing a workflow
-   * instead of an action.
+   * Runs once the host confirms: the run parks before this step until ConfirmRedemptionAction
+   * sends RedemptionConfirmed for this member and reference, or the 15 minutes pass and the engine
+   * compensates `debit`. This wait is what makes the redemption a workflow instead of an action.
+   * @returns the confirmation as received, kept in the run record for support.
    */
-  @Step({ wait: { signal: "confirmed", timeout: "15m" } })
-  async confirm(_input: void, ctx: StepContext): Promise<void> {
-    await ctx.waitForSignal("confirmed");
+  @Step<RedeemPointsWorkflow>({
+    waitFor: RedemptionConfirmed,
+    correlate: (s) => ({ memberId: s.quote.member, reference: s.quote.reference }),
+    timeout: "15m",
+  })
+  async confirm(confirmed: RedemptionConfirmed): Promise<RedemptionConfirmed> {
+    return confirmed;
   }
 
   /** The action's output, typed against RedeemPointsOutput. */

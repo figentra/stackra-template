@@ -11,7 +11,7 @@ import { describe, expect, it } from "@stackra/testing";
 import { Decision } from "@stackra/iam";
 import { actors } from "@stackra/iam/testing";
 import { fakeEntityManager } from "@stackra/database/testing";
-import { LoyaltyAccountFactory } from "@stackra/loyalty-kit/testing";
+import { LoyaltyAccountFactory } from "@acme/loyalty-kit/testing";
 import { LoyaltyAccountPolicy } from "#node/policies/loyalty-account.policy";
 
 const policy = new LoyaltyAccountPolicy(); // no dependencies: no container needed

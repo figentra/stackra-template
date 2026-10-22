@@ -1,10 +1,10 @@
 /**
  * Stackra file contract:
  * Purpose: why a ledger entry exists; stored on every row and shown as a badge in the console.
- * Boundary: a class enum (ADR 0128 d1 as amended). `Expire` and `Adjust` are written only by the
+ * Boundary: a class enum. `Expire` and `Adjust` are written only by the
  *           kit's own job and workflow; a host never appends them directly.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended: class enums), ADR 0231 (snake_case codes)
+ * Governing contract: ADR 0231 (snake_case codes), guides/programming-model.mdx#enums
  */
 import { Tone } from "@stackra/contracts";
 import { Enum } from "@stackra/schema";

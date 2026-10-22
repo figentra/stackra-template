@@ -1,4 +1,4 @@
-# @stackra/loyalty-kit
+# @acme/loyalty-kit
 
 A generic capability kit (ADR 0259 home A) at `packages/commerce/loyalty-kit` (`tier:lib`, category
 `commerce`): points accounts, tiers, earning and redemption maths, no product business rule. It is
@@ -15,9 +15,9 @@ without relearning placement. `core/` holds the isomorphic kinds, `react/` the c
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.`           | `LoyaltyKitConfig`, `LoyaltyService`, `MemoryLoyaltyLedger`, `memberId`, the override points, the schema classes, the errors, the constant (isomorphic) |
 | `./contracts` | the ports `LoyaltyLedger` (the kit drives it) and `LoyaltyMembers` (the host implements it), the types, the enums                                       |
-| `./node`      | `LoyaltyKitModule`, `AccountService`, models, the postgres driver, actions, queries, events, hooks, permissions, settings, migrations                   |
+| `./node`      | `LoyaltyKitModule`, `AccountService`, `LedgerReconcilerService`, models, the postgres driver, actions, queries, events, the redemption signal, hooks, permissions, settings, migrations |
 | `./react`     | the `PointsBalance` and `PointsIssued` components, the hook, and the `@Override` classes that register them; never imports `#node/*`                    |
-| `./testing`   | `FakeLoyaltyMembers.with()`, `LoyaltyAccountFactory`, `LedgerEntryFactory`, `pointsEntry`, `toHaveBalance`; needs the optional peer `@stackra/testing`  |
+| `./testing`   | `FakeLoyaltyMembers.with()`, `LoyaltyAccountFactory`, `LedgerEntryFactory`, `pointsEntry`, `toHaveBalance`, `DemoSeeder` and its `ids`; needs the optional peer `@stackra/testing`, and no runtime entry imports it, so Faker never reaches a server |
 | `./assets/*`  | `loyalty_kit::` translations (`assets/lang/<locale>/loyalty_kit.json`)                                                                                  |
 
 No symbol is exported from two entries: contracts is ports, types and enums only (no functions);
@@ -31,7 +31,8 @@ template only so it can be read, and is imported as `#stackra/<name>`.
 
 Kind → folder → file suffix → example → the test that proves it (`pnpm new <kind> <name>` in a
 package takes `--entry core|node|react|testing`). A kind folder appears with its first file;
-`enums/ errors/ interfaces/ types/ constants/ functions/` with their second (ADR 0130 d2); the
+`enums/ errors/ interfaces/ types/ constants/ functions/` with their second (ADR 0130 d2 names
+`interfaces/ types/ constants/ errors/`; the kit applies the same rule to the other two); the
 catalogue shows every folder regardless. The last column says what a real kit usually holds: **yes**
 for the kinds almost every kit has, **sometimes** for the kinds a kit adds when it owns that
 concern, **catalogue** for the kinds shown here only so the shape exists once.
@@ -53,7 +54,7 @@ concern, **catalogue** for the kinds shown here only so the shape exists once.
 | module (`@Module({ key, exports })`)             | `src/node/`                        | `.module.ts`                 | `node/loyalty-kit.module.ts`                              | yes             | `node/__tests__/loyalty-kit.module.test.ts`                    |
 | model (`@Model`, `Model.with(traits)`, `@Index`) | `src/node/models/`                 | `.model.ts`                  | `node/models/loyalty-account.model.ts`                    | yes             | none; a factory in `./testing` is written instead              |
 | migration (blueprint class, diff output)         | `src/node/migrations/`             | `.migration.ts`              | `node/migrations/0001-create-loyalty-tables.migration.ts` | yes             | none; the `.int` tier applies the compiled SQL                 |
-| seeder (`Seeder` subclass)                       | `src/node/seeds/`                  | `.seed.ts`                   | `node/seeds/demo.seed.ts`                                 | sometimes       | none; used by `.seed(DemoSeeder)`                              |
+| seeder (`Seeder` subclass, `static ids`)         | `src/testing/seeds/`               | `.seed.ts`                   | `testing/seeds/demo.seed.ts`                              | sometimes       | none; used by `.seed(DemoSeeder)`                              |
 | factory (`Factory<Model>`)                       | `src/testing/factories/`           | `.factory.ts`                | `testing/factories/loyalty-account.factory.ts`            | yes             | none                                                           |
 | factory (value, `factory<DTO>()`)                | `src/testing/factories/`           | `.factory.ts`                | `testing/factories/points-entry.factory.ts`               | sometimes       | none                                                           |
 | fake (`Fake.of(Port)`)                           | `src/testing/fakes/`               | `.fake.ts`                   | `testing/fakes/fake-loyalty-members.fake.ts`              | yes             | none                                                           |
@@ -66,6 +67,7 @@ concern, **catalogue** for the kinds shown here only so the shape exists once.
 | hook implementer (`@Hook`)                       | `src/node/hooks/`                  | `.hook.ts`                   | `node/hooks/tier-multiplier.hook.ts`                      | sometimes       | `hooks/__tests__/tier-multiplier.hook.test.ts`                 |
 | action (call)                                    | `src/node/actions/`                | `.action.ts`                 | `node/actions/enroll-member.action.ts`                    | yes             | `actions/__tests__/enroll-member.action.test.ts`               |
 | action + `runs:` workflow                        | `src/node/actions/` + `workflows/` | `.action.ts`, `.workflow.ts` | `redeem-points.action.ts`, `redeem-points.workflow.ts`    | sometimes       | `workflows/__tests__/redeem-points.workflow.int.test.ts`       |
+| workflow signal (`@Signal`, `waitFor`)           | `src/node/workflows/`              | `.signal.ts`                 | `redemption-confirmed.signal.ts`, sent by `confirm-redemption.action.ts` | sometimes | `workflows/__tests__/redeem-points.workflow.int.test.ts` |
 | job (`@AsJob` + `@Cron`)                         | `src/node/actions/`                | `.action.ts`                 | `node/actions/expire-points.action.ts`                    | sometimes       | an action test                                                 |
 | query (+ `cache:`)                               | `src/node/queries/`                | `.query.ts`                  | `node/queries/get-balance.query.ts`                       | yes             | `queries/__tests__/get-balance.query.test.ts`                  |
 | listener (`@OnEvent(Class)`)                     | `src/node/listeners/`              | `.listener.ts`               | `node/listeners/recalculate-tier.listener.ts`             | sometimes       | `listeners/__tests__/recalculate-tier.listener.test.ts`        |
@@ -118,7 +120,7 @@ Not shown here (a service shows them): `states/`, `links/`, `guards/`, `reposito
   `@Permissions(LoyaltyAccount)` class (`loyalty_kit.loyalty_account.redeem`). An action key
   carries no version field until `@Version` says otherwise.
 - **Migrations by entry and class**: the manifest lists
-  `{ "from": "@stackra/loyalty-kit/node", "class": "CreateLoyaltyTables" }`, never a `src/` path,
+  `{ "from": "@acme/loyalty-kit/node", "class": "CreateLoyaltyTables" }`, never a `src/` path,
   so a host merges what the published package exports.
 - **Named instances**: `@DriverOf(LoyaltyLedger, { named: { primary, archive } }) ledgers` in config
   and `@Named("primary")` on the constructor parameter (LedgerReconcilerService); `@Named` is the
@@ -127,8 +129,13 @@ Not shown here (a service shows them): `states/`, `links/`, `guards/`, `reposito
   `ctx.record(...)` in a step; no injectable event bus.
 - **The model is the one source of the schema**: columns and every index are on the models;
   `stackra db diff` writes the migrations, which are immutable once committed.
-- **Memory first** (ADR 0266): the memory driver and the fake ship in `./testing`; the `.int` test
-  proves the postgres driver, built on `@stackra/ledger`'s journal, keeps the same contract.
+- **Memory first** (ADR 0266): the memory driver ships in `.` and the fake in `./testing`; the
+  `.int` test proves the postgres driver, built on `@stackra/ledger`'s journal, keeps the same
+  contract.
+- **Redemption waits, it never sleeps**: the redeem run parks before its `confirm` step
+  (`waitFor: RedemptionConfirmed`, correlated on member and reference, 15 minutes) until the host
+  calls `loyalty_kit.points.confirm_redemption`; without it, the engine credits the debit back. No
+  step body waits, so the same graph runs on any workflow engine (ADR 0152 decision 1).
 - **Hooks** (ADR 0265): `hooks/` holds extension hooks only; the React hook `usePointsBalance` sits
   beside its component.
 - **Tests** (ADR 0007 amended): every test file carries the contract header; `describe` takes the

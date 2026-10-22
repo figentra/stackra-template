@@ -5,9 +5,9 @@
  * Runtime: node
  * Governing contract: ADR 0025, 0126 decision 2
  */
-import { library } from "@stackra/tsdown-config";
+import { libraryPreset } from "@stackra/tsdown-config";
 
-export default library({
+export default libraryPreset({
   index: "src/index.ts",
   contracts: "src/contracts/index.ts",
   node: "src/node/index.ts",

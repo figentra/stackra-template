@@ -1,6 +1,7 @@
 {
-  "name": "@stackra/access-log",
+  "name": "@acme/access-log",
   "version": "0.1.0",
+  "private": true,
   "description": "@AccessLogged: every call of a marked method is written to an access-log sink; self-registering postgres and memory drivers.",
   "license": "MIT",
   "repository": {

@@ -8,7 +8,7 @@
  *           file is `override-points/points-issued-tile.point.ts`; its binding is an `@Override` in
  *           react/overrides.
  * Runtime: isomorphic
- * Governing contract: ADR 0234 d9 (amended: `overrides/`), ADR 0164
+ * Governing contract: ADR 0164, guides/programming-model.mdx#override-points
  */
 import { OverridePoint } from "@stackra/panel";
 import type { PointsIssuedView } from "#core/schemas/points-issued-view.schema";

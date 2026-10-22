@@ -19,6 +19,8 @@ export { AccountFrozenError } from "#core/errors/account-frozen.error";
 export { MAX_POINTS_PER_ENTRY } from "#core/constants/max-points-per-entry.constant";
 export { RedeemPointsInput } from "#core/schemas/redeem-points-input.schema";
 export { RedeemPointsOutput } from "#core/schemas/redeem-points-output.schema";
+export { ConfirmRedemptionInput } from "#core/schemas/confirm-redemption-input.schema";
+export { ConfirmRedemptionOutput } from "#core/schemas/confirm-redemption-output.schema";
 export { EnrollMemberInput } from "#core/schemas/enroll-member-input.schema";
 export { EnrollMemberOutput } from "#core/schemas/enroll-member-output.schema";
 export { FreezeAccountInput } from "#core/schemas/freeze-account-input.schema";

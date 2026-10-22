@@ -2,12 +2,12 @@
  * Stackra file contract:
  * Purpose: the member tiers, lowest first, each with the earn multiplier the tier-multiplier hook
  *          applies.
- * Boundary: a house enum (class, ADR 0128 d1 as amended): one case per static member; `value` is
+ * Boundary: a house enum (a class): one case per static member; `value` is
  *           the wire and column string, `label` a typed i18n key, `meta.multiplier` what the hook
  *           needs. The `enum` keyword stays banned. Code compares against `LoyaltyTier.Gold`, never
  *           a bare string.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended: class enums), ADR 0231 (snake_case codes)
+ * Governing contract: ADR 0231 (snake_case codes), guides/programming-model.mdx#enums
  */
 import { Tone } from "@stackra/contracts";
 import { Enum } from "@stackra/schema";

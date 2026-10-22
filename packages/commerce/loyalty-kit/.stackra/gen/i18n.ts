@@ -17,7 +17,7 @@ export const I18n = keys({
     nav: ["loyalty"],
     tiers: ["bronze", "silver", "gold"],
     kinds: ["earn", "redeem", "expire", "adjust"],
-    widgets: ["points_issued"],
+    widgets: ["points_issued", "points_balance"],
     documents: ["overview", "redeem_title", "expiry_note"],
     settings: ["title", "expiry_months", "silver_from", "gold_from"],
     permissions: { loyalty_account: ["read", "enroll", "freeze", "redeem", "expire"] },

@@ -12,10 +12,10 @@ import { createTestingModule } from "@stackra/container/testing";
 import { drainEvents } from "@stackra/events/testing";
 import { SettingsReader } from "@stackra/settings";
 import { fakeSettings } from "@stackra/settings/testing";
-import { LoyaltyMembers, LoyaltyTier } from "@stackra/loyalty-kit/contracts";
-import { memberId } from "@stackra/loyalty-kit";
-import { DemoSeeder, LoyaltyKitModule } from "@stackra/loyalty-kit/node";
-import { FakeLoyaltyMembers } from "@stackra/loyalty-kit/testing";
+import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
+import { memberId } from "@acme/loyalty-kit";
+import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
+import { DemoSeeder, FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
 import { AccountService } from "#node/services/account.service";
 import { RecalculateTierListener } from "#node/listeners/recalculate-tier.listener";
 import { LoyaltySettings } from "#node/settings/loyalty.setting";
@@ -29,8 +29,8 @@ describe(RecalculateTierListener, () => {
   it("promotes to gold when balanceAfter reaches goldFrom", async () => {
     const app = await createTestingModule(LoyaltyKitModule)
       .useDrivers("memory")
-      .seed(DemoSeeder) // DemoSeeder.members.bronze: 1 000 points
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([DemoSeeder.members.bronze]))
+      .seed(DemoSeeder) // DemoSeeder.ids.bronze: 1 000 points
+      .override(LoyaltyMembers, FakeLoyaltyMembers.with([DemoSeeder.ids.bronze]))
       .override(
         SettingsReader,
         fakeSettings([[LoyaltySettings, { expiryMonths: 12, silverFrom: 500, goldFrom: 1_500 }]]),
@@ -39,7 +39,7 @@ describe(RecalculateTierListener, () => {
     const accounts = app.get(AccountService);
 
     await app.transaction(async () => {
-      await accounts.earn(memberId(DemoSeeder.members.bronze), {
+      await accounts.earn(memberId(DemoSeeder.ids.bronze), {
         amountMinor: 60_000,
         currency: "SAR",
         reference: "ord_big",
@@ -47,7 +47,7 @@ describe(RecalculateTierListener, () => {
     });
     await drainEvents();
 
-    expect((await accounts.findOneOrFail({ memberId: DemoSeeder.members.bronze })).tier).toBe(
+    expect((await accounts.findOneOrFail({ memberId: DemoSeeder.ids.bronze })).tier).toBe(
       LoyaltyTier.Gold,
     );
   });

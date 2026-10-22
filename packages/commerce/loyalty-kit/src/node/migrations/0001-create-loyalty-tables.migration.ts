@@ -58,10 +58,4 @@ export class CreateLoyaltyTables extends Migration {
       ]);
     });
   }
-
-  /** Drops the entries first, because they reference the accounts. */
-  down(schema: Blueprint): void {
-    schema.drop(LoyaltyLedgerEntries);
-    schema.drop(LoyaltyAccounts);
-  }
 }

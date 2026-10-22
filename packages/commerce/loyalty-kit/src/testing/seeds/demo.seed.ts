@@ -1,12 +1,14 @@
 /**
  * Stackra file contract:
  * Purpose: the kit's `demo` profile: three accounts, one per tier, with one earn entry each.
- * Boundary: synthetic rows from the factory in ./testing, deterministic ADR 0231 ids
- *           (`DemoSeeder.members`, the same principals as commerce's `orders.demo` customers) so
- *           docs, e2e flows and tests can name them. The seeder key is `loyalty_kit.demo`; the file
- *           is `demo.seed.ts`.
+ * Boundary: synthetic rows from the factories beside it in ./testing, so the seeder is exported
+ *           from ./testing only and Faker never reaches the runtime entries. The deterministic
+ *           ADR 0231 ids are declared once, in `DemoSeeder.ids`: they are the same principals as
+ *           commerce's `orders.demo` customers, and every member that names them imports them
+ *           from here. The seeder key is `loyalty_kit.demo`; the file is `demo.seed.ts`.
  * Runtime: node
- * Governing contract: ADR 0190 (profiles minimal, demo, test), ADR 0269 (factories in ./testing)
+ * Governing contract: ADR 0190 (profiles minimal, demo, test), ADR 0269 (domain helpers in the
+ *                     owner's ./testing)
  */
 import { Seeder, type SeedContext } from "@stackra/database";
 import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
@@ -19,10 +21,10 @@ export class DemoSeeder extends Seeder {
   static readonly profiles = ["demo"] as const;
 
   /**
-   * The seeded member per tier; bronze is commerce's first demo customer, the principal the e2e
-   * identity stub signs in.
+   * The only place these principal ids are typed, one member per tier. Bronze is commerce's first
+   * demo customer, the principal the e2e identity stub signs in; silver is the second customer.
    */
-  static readonly members = {
+  static readonly ids = {
     bronze: "usr_01JA0000000000000000000001",
     silver: "usr_01JA0000000000000000000002",
     gold: "usr_01JA0000000000000000000003",
@@ -40,7 +42,7 @@ export class DemoSeeder extends Seeder {
           reference: `seed_${tier.value}`,
           at: ctx.now(),
         })
-        .createOne({ memberId: DemoSeeder.members[tier.value], tier });
+        .createOne({ memberId: DemoSeeder.ids[tier.value], tier });
     }
   }
 }

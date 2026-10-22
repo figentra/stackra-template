@@ -3,13 +3,13 @@
  * Purpose: the colour design tokens, the one source of every colour: each has a light and a dark
  *          value, and its CSS custom property is `--brand-color-<name>` in the generated
  *          `css/tokens.css` and `css/native.css`.
- * Boundary: values only, no React; `@stackra/brand` is cross-cutting (web, native and mail
+ * Boundary: values only, no React; `@acme/brand` is cross-cutting (web, native and mail
  *           templates alike). Values are `oklch()` strings, the form the CSS uses, so nothing is
  *           converted between TypeScript and CSS. Hand-edit the CSS files never: gen rewrites them
  *           from this file.
  * Runtime: isomorphic
- * Governing contract: ADR 0127 (categories), ADR 0231 (design tokens: dotted form and CSS custom
- *                     property form)
+ * Governing contract: ADR 0127 (categories), ADR 0231 (design tokens: dotted and custom-property
+ *                     forms); the `--brand-` prefix is this package's own namespace
  */
 
 /**

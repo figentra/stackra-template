@@ -8,8 +8,8 @@
  */
 import { describe, expect, it } from "@stackra/testing";
 import { fakeHookContext } from "@stackra/actions/testing";
-import { LoyaltyTier } from "@stackra/loyalty-kit/contracts";
-import { memberId } from "@stackra/loyalty-kit";
+import { LoyaltyTier } from "@acme/loyalty-kit/contracts";
+import { memberId } from "@acme/loyalty-kit";
 import { TierMultiplierHook } from "#node/hooks/tier-multiplier.hook";
 
 const draft = { memberId: memberId("usr_1"), amountMinor: 10_000, currency: "SAR" };

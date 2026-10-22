@@ -10,9 +10,9 @@ import { describe, expect, it, freezeClock } from "@stackra/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { run } from "@stackra/actions/testing";
 import { actors } from "@stackra/iam/testing";
-import { AccessLogConfig } from "@stackra/access-log";
-import { AccessLogModule } from "@stackra/access-log/node";
-import { AccessLogEntryFactory } from "@stackra/access-log/testing";
+import { AccessLogConfig } from "@acme/access-log";
+import { AccessLogModule } from "@acme/access-log/node";
+import { AccessLogEntryFactory } from "@acme/access-log/testing";
 import { PurgeAccessLogAction } from "#node/actions/purge-access-log.action";
 
 /**

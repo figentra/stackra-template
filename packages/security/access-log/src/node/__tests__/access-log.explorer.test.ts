@@ -12,9 +12,9 @@ import { createTestingModule } from "@stackra/container/testing";
 import { actors } from "@stackra/iam/testing";
 import { discoverWithGen } from "@stackra/gen/testing";
 import { Module } from "@stackra/container";
-import { AccessLogSink, DataClassification } from "@stackra/access-log/contracts";
-import { AccessLogConfig, AccessLogged } from "@stackra/access-log";
-import { AccessLogExplorer, AccessLogModule } from "@stackra/access-log/node";
+import { AccessLogSink, DataClassification } from "@acme/access-log/contracts";
+import { AccessLogConfig, AccessLogged } from "@acme/access-log";
+import { AccessLogExplorer, AccessLogModule } from "@acme/access-log/node";
 
 /** The smallest host: one provider with one logged read. */
 class CustomerReads {

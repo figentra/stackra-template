@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: converts a `loyalty_kit.points.earned.v1` payload (no tier, no balance) into the v2
- *          shape on read, so stored v1 rows and consumers pinned before the bump keep working.
- *          Publishing v1 during the sunset window is the event's own `alsoPublish`, not this class.
+ *          shape on read, so code written against v2 can read v1 rows still stored in the outbox
+ *          and the event log. It converts in that one direction only: consumers still on v1 keep
+ *          receiving v1 through the event's own `alsoPublish` during the sunset window.
  * Boundary: one pure transformer per adjacent version pair, composed into a path by
  *           @stackra/versioning. The event class carries no version in its key; `@Version(2)` on it
  *           and this upcast are the whole bump.

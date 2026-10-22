@@ -19,11 +19,4 @@ export class LedgerEntriesAccountIdIndex extends Migration {
       t.index([LoyaltyLedgerEntries.columns.accountId]).concurrently(),
     );
   }
-
-  /** Drops the index; reversible because it holds no data of its own. */
-  down(schema: Blueprint): void {
-    schema.table(LoyaltyLedgerEntries, (t) =>
-      t.dropIndex([LoyaltyLedgerEntries.columns.accountId]),
-    );
-  }
 }

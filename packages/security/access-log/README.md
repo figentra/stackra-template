@@ -1,4 +1,4 @@
-# @stackra/access-log
+# @acme/access-log
 
 A decorator package (ADR 0117 C2, ADR 0144) at `packages/security/access-log` (`tier:lib`, category
 `security`): `@AccessLogged({ classification, subjects })` on a method writes one record per call to
@@ -8,10 +8,10 @@ that keeps the decorator and gen honest.
 
 | Entry         | Holds                                                                                                                      |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `.`           | `AccessLogged`, `DataClassification`, `AccessLogService`, `AccessLogConfig`, `MemoryAccessLogSink`                         |
-| `./contracts` | the `AccessLogSink` port, `AccessRecord`, `AccessLoggedOptions` and `AccessLoggedDecorator` (gen reads them), the enum     |
+| `.`           | `AccessLogged`, `AccessLogService`, `AccessLogConfig`, `MemoryAccessLogSink`                                               |
+| `./contracts` | the `AccessLogSink` port, `AccessRecord`, `AccessLoggedOptions` and `AccessLoggedDecorator` (gen reads them), `DataClassification` |
 | `./node`      | `AccessLogModule`, `AccessLogExplorer`, `PostgresAccessLogSink`, `AccessLogEntry`, the permissions, `PurgeAccessLogAction` |
-| `./testing`   | `MemoryAccessLogSink`, `FakeAccessLogSink.with({ failing })`, `AccessLogEntryFactory`, `toHaveLoggedAccess`                |
+| `./testing`   | `FakeAccessLogSink.with({ failing })`, `AccessLogEntryFactory`, `toHaveLoggedAccess`                                       |
 
 `.stackra/app-manifest.json` is the committed contract; `.stackra/gen/*` is committed in the template
 only so it can be read, and is imported as `#stackra/<name>`.
@@ -19,8 +19,9 @@ only so it can be read, and is imported as `#stackra/<name>`.
 ## Shapes index
 
 Kind → folder → file suffix → example → the test that proves it. A kind folder appears with its
-second file for `enums/ decorators/ migrations/ constants/` (ADR 0130 d2); the catalogue shows the
-folder with one. Drivers always sit in `drivers/`, even when an entry has only one.
+second file for `enums/ decorators/ migrations/ constants/` (ADR 0130 d2 names `decorators/` and
+`constants/`; the package applies the same rule to the other two); the catalogue shows the folder
+with one. Drivers always sit in `drivers/`, even when an entry has only one.
 
 | Kind                                 | Folder                                   | Suffix           | Example                                                       | Test                                                             |
 | ------------------------------------ | ---------------------------------------- | ---------------- | ------------------------------------------------------------- | ---------------------------------------------------------------- |

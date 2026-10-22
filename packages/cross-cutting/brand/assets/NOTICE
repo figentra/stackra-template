@@ -1,4 +1,6 @@
-Placeholder artwork for your product brand (the Acme mark).
+The Acme mark in this folder (public/images/mark.svg) is the example product's own artwork, drawn
+for this template. A project made from the template replaces it with its own product mark, whose
+rights are its owner's.
 
-Replace it with your own; your brand's rights then apply. The Stackra brand assets are only in
-.github/assets/ (see TRADEMARKS.md).
+The Stackra brand images are not in this package; they ship only in .github/assets/ under the terms
+in .github/assets/NOTICE.

@@ -11,10 +11,10 @@
 import { describe, expect, it } from "@stackra/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { usePostgres } from "@stackra/database/testing";
-import { LoyaltyLedger, LoyaltyMembers } from "@stackra/loyalty-kit/contracts";
-import { LoyaltyKitConfig, memberId } from "@stackra/loyalty-kit";
-import { LoyaltyKitModule, PostgresLoyaltyLedger } from "@stackra/loyalty-kit/node";
-import { FakeLoyaltyMembers, pointsEntry } from "@stackra/loyalty-kit/testing";
+import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
+import { LoyaltyKitConfig, memberId } from "@acme/loyalty-kit";
+import { LoyaltyKitModule, PostgresLoyaltyLedger } from "@acme/loyalty-kit/node";
+import { FakeLoyaltyMembers, pointsEntry } from "@acme/loyalty-kit/testing";
 
 usePostgres();
 

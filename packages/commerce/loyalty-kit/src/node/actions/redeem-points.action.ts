@@ -2,7 +2,8 @@
  * Stackra file contract:
  * Purpose: `loyalty_kit.points.redeem`: spend points against an amount. The work runs in
  *          RedeemPointsWorkflow because the debit must be undone if the host's later step fails
- *          (compensation, ADR 0101).
+ *          (compensation, ADR 0101): the host confirms with `loyalty_kit.points.confirm_redemption`
+ *          within 15 minutes, or the points are credited back.
  * Boundary: no handle(): `runs:` is the only line that changed when the body moved into steps.
  * Runtime: node
  * Governing contract: ADR 0098, 0101

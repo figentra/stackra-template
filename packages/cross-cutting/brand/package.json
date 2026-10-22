@@ -1,6 +1,7 @@
 {
-  "name": "@stackra/brand",
+  "name": "@acme/brand",
   "version": "0.1.0",
+  "private": true,
   "description": "Design tokens and brand assets shared by every app, service template and mail; one TypeScript token source, CSS generated from it.",
   "license": "MIT",
   "repository": {
@@ -17,7 +18,9 @@
     "LICENSE"
   ],
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./css/*.css"
+  ],
   "imports": {
     "#src/*": [
       "./src/*",
@@ -63,15 +66,21 @@
     "typecheck": "tsc --noEmit",
     "lint": "oxlint .",
     "format:check": "oxfmt --check .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "build": "tsdown"
   },
   "devDependencies": {
     "@stackra/gen": "catalog:stackra",
+    "@stackra/testing": "catalog:stackra",
     "@stackra/tsdown-config": "workspace:*",
     "@stackra/typescript-config": "workspace:*",
+    "@stackra/vitest-config": "workspace:*",
+    "@vitest/coverage-v8": "catalog:quality",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
     "tsdown": "catalog:build",
-    "typescript": "catalog:build"
+    "typescript": "catalog:build",
+    "vitest": "catalog:quality"
   }
 }

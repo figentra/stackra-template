@@ -7,7 +7,7 @@
  * Boundary: no markup, no expressions, no logic. The kind is `documents/`, so that "page" means a
  *           page-level component in an app. A declaration only: nothing runs here.
  * Runtime: node
- * Governing contract: ADR 0110, 0154, 0164, ADR 0264 d7 (amended: `documents/`)
+ * Governing contract: ADR 0110, 0154, 0164, guides/programming-model.mdx#documents
  */
 import { Bind, Blocks, Document, DocumentLayout } from "@stackra/panel";
 import { Icons } from "@stackra/ui/icons";

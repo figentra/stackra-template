@@ -5,7 +5,8 @@
  *           `brandCssVariables`, so a consumer that references only `--brand-<group>-<name>` always
  *           finds the name.
  * Runtime: isomorphic
- * Governing contract: ADR 0231 (design tokens: dotted form and CSS custom property form)
+ * Governing contract: ADR 0231 (design tokens: dotted and custom-property forms); the `--brand-`
+ *                     prefix is this package's own namespace, not an ADR rule
  */
 import type { BrandToken } from "#core/types/brand-tokens.type";
 
