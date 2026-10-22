@@ -15,7 +15,7 @@ built from the producer's committed `.stackra/app-manifest.json`, and gen copies
 
 Layout per app (not docs):
 
-```
+```text
 apps/<name>/
 ├── package.json · stackra.config.ts (what it IS) · runway.yaml (how and where it RUNS) · turbo.jsonc · tsconfig.json · README.md
 ├── assets/{lang/<locale>/<name>.json, public/}          the app's own namespace and files

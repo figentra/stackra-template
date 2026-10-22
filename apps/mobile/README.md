@@ -16,7 +16,7 @@ Babel, the entry, the navigation tree, linking, Maestro) is generated into `.sta
 | `pnpm gen`                             | `stackra gen`: rewrites `.stackra/` from the four source files, the decorated classes and the manifests |
 | `pnpm dev` / `dev:ios` / `dev:android` | Metro on the runway port with gen on save; the platform variants build a dev client and run it          |
 | `pnpm build`                           | `stackra build` (EAS, profile from `--profile`, fingerprint-gated)                                      |
-| `pnpm test` / `test:e2e`               | vitest (jsdom + react-native-web) / Maestro flows against the `e2e` profile, every locale               |
+| `pnpm test` / `test:e2e`               | vitest (jsdom) / Maestro flows against the `e2e` profile, every locale                                  |
 | `pnpm typecheck`                       | gen, then tsc over `src`, `stackra.config.ts`, `.stackra`                                               |
 | `pnpm doctor`                          | `expo install --check` through the toolkit: native versions match the SDK                               |
 
@@ -36,7 +36,7 @@ Babel, the entry, the navigation tree, linking, Maestro) is generated into `.sta
 
 ## Tree
 
-```
+```text
 apps/mobile
 ├── stackra.config.ts          defineApp: key, @App root, targets, area, env class, e2e flows
 ├── expo.extend.ts             (absent) the Expo hatch: a function file merged last over the generated Expo config; only when an ADR names the exception
@@ -82,7 +82,7 @@ apps/mobile
 | User settings pages                       | `#stackra/settings` (`SettingsPages.messages`, `Settings.messages.*`)     | the notification preferences page                         |
 | Strings                                   | `#stackra/i18n` (`I18n.mobile.*`, `I18n.orders.*`, typed)                 | every `t(I18n.…)`                                         |
 | Offline policy per action                 | `#stackra/offline`                                                        | the query provider, the offline banner                    |
-| Device capabilities                       | `#stackra/capabilities` (the `expo` driver's map)                         | `useCapability("scanner"                                  | "push" | "network")` |
+| Device capabilities                       | `#stackra/capabilities` (the `expo` driver's map)                         | `useCapability("scanner" \| "push" \| "network")`         |
 | Validated env                             | `useConfig(MobileEnv)`; `#stackra/env` for generated code                 | the session and realtime providers, linking               |
 | Tenant-editable documents                 | `@Route({ document })` → `Experience.queries.GetDocument`, else the class | `AnnouncementsRoute`; blocks registered in `blocks/`      |
 

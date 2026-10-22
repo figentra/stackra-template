@@ -25,7 +25,7 @@ schemas, the config class, `memberId` and the isomorphic override points come fr
 
 `.stackra/app-manifest.json` is the committed contract; `.stackra/gen/*` (`i18n`, `tables`,
 `wiring`, `permissions`, `queues`, `slots`, `crud`, `manifest`) is committed in the
-preview only so it can be read, and is imported as `#stackra/<name>`.
+template only so it can be read, and is imported as `#stackra/<name>`.
 
 ## Shapes index
 

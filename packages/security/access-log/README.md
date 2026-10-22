@@ -13,7 +13,7 @@ that keeps the decorator and gen honest.
 | `./node`      | `AccessLogModule`, `AccessLogExplorer`, `PostgresAccessLogSink`, `AccessLogEntry`, the permissions, `PurgeAccessLogAction` |
 | `./testing`   | `MemoryAccessLogSink`, `FakeAccessLogSink.with({ failing })`, `AccessLogEntryFactory`, `toHaveLoggedAccess`                |
 
-`.stackra/app-manifest.json` is the committed contract; `.stackra/gen/*` is committed in the preview
+`.stackra/app-manifest.json` is the committed contract; `.stackra/gen/*` is committed in the template
 only so it can be read, and is imported as `#stackra/<name>`.
 
 ## Shapes index

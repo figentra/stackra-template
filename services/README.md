@@ -18,7 +18,7 @@ themselves (`@Driver`) and one config field picks them (`@DriverOf`), and each m
 
 Member layout (both services):
 
-```
+```text
 services/<name>/
 ├── package.json · stackra.config.ts · runway.yaml · turbo.jsonc · tsconfig.json · vitest.config.ts · README.md · .gitignore
 ├── .stackra/{app-manifest.json, openapi.json}   # committed; gen/ and migrations/ and encore/ are generated

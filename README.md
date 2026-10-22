@@ -161,7 +161,7 @@ window.
 
 ## Tree
 
-```
+```text
 .
 ├── AGENTS.md                     agent entry: glossary ("not to be confused with") and rules
 ├── README.md                     this file
@@ -169,19 +169,30 @@ window.
 ├── pnpm-workspace.yaml           members + the only source of versions (catalogs, `workspace:*`)
 ├── turbo.jsonc                   task graph (`gen` before typecheck/test/build) and tier boundaries
 ├── .oxlintrc.jsonc               lint entry: extends `@stackra/oxlint-config`, no rules of its own
-├── .oxfmtrc.jsonc                formatting at 100 columns
+├── .oxfmtrc.jsonc                formatting: code at 100 columns, every type oxfmt supports
 ├── stackra.lock.yaml             pinned revision of every external producer manifest, once
 ├── runway.yaml                   ROOT runway: infrastructure only (providers, four environments,
 │                                 shared resources, member defaults, targets, edge, secrets and
 │                                 release policy)
 ├── .gitignore                    `.stackra/*` except the committed app-manifest.json, openapi.json
-├── .github/                      Quality Gate (`pnpm verify`) and release workflows, issue and PR templates
+├── .github/                      Quality Gate (pre-release: `scripts/preview-gate.mjs`; then `pnpm verify`),
+│                                 release (skips until pnpm-lock.yaml is committed), issue and PR
+│                                 templates, CODEOWNERS, branch protection, Stackra brand assets
+│                                 (`assets/`, trademarked)
 ├── .changeset/                   pending release notes for packages (apps and services deploy by SHA)
 ├── lefthook.yml · .commitlintrc.yaml · knip.jsonc · .gitleaks.toml · .editorconfig · .gitattributes
+├── .vscode/                      editor: oxfmt and oxlint through Oxc, TypeScript 7 extension
+│                                 (useTsgo), schema mappings, debug configurations, tasks
+├── .markdownlint.yaml · cspell.config.yaml   Markdown structure checks; editor spelling words
+├── schemas/                      JSON Schemas for runway.yaml, stackra.lock.yaml, .mcp.yaml and
+│                                 branch-protection.json; temporary copies until
+│                                 static.stackra.figentra.com/schemas/ is live
 ├── mise.toml · .node-version     toolchain pins
-├── .mcp.yaml                     the Stackra MCP (local `stackra mcp` + hosted); rendered to .mcp.json
+├── .mcp.yaml                     every MCP server the project uses (Stackra local + hosted, docs and
+│                                 tool servers); rendered to .mcp.json
 ├── .claude/launch.json           dev-server launch configuration for the assistant's preview
 ├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE · TRADEMARKS.md
+├── REVIEW.md                     pre-release review notes; removed before the template is final
 ├── apps/                         tier:app (apps/README.md)
 │   ├── console/                  @acme/console: tenant console, targets web + pwa + desktop
 │   │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
@@ -217,7 +228,8 @@ window.
 │   │                             Explorer + @Driver sinks, a retention job, the audit resource)
 │   ├── cross-cutting/brand/      @stackra/brand: one TypeScript token source, css/tokens.css and
 │   │                             css/native.css generated from it, the mark
-│   └── tooling/                  tier:config presets: typescript, oxlint (boundaries), vitest, tsdown
+│   └── tooling/                  tier:config presets: typescript, oxlint (boundaries), vitest,
+│                                 tsdown, commitlint
 └── services/                     tier:service (services/README.md)
     ├── commerce/                 @acme/service-commerce: the reference service
     │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
@@ -415,18 +427,25 @@ same generator: many `services/<name>`, private `@acme/*` packages for logic two
 The template uses a neutral example organisation, `acme`, wherever a project-specific value belongs.
 Replace `acme` with your own names, and the placeholders below, before the first push:
 
-| Placeholder                                           | Where                                                              | Put                                                    |
-| ----------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
-| `@acme/*` member names                                | every app and service `package.json`, filters                      | your npm scope                                         |
-| `acme-platform`, `acme`                               | `runway.yaml` (project, GitHub, Sentry, Expo), `stackra.lock.yaml` | your project and organisation names                    |
-| `acme.dev`, `*.acme.dev`                              | `runway.yaml`, app `runway.yaml`, config defaults                  | your domains                                           |
-| `dev.acme.console`, `dev.acme.mobile`, `acme-console` | `desktop.config.ts`, `release.config.ts`, Maestro flows            | your bundle ids and URL scheme                         |
-| `@your-org/your-team`                                 | `.github/CODEOWNERS`                                               | your GitHub team or user                               |
-| `security@your-domain.example`, `your-repo`           | `SECURITY.md`, `.github/ISSUE_TEMPLATE/config.yml`                 | your security contact and repository                   |
-| `refs-issue-key` (commented out)                      | `.commitlintrc.yaml`                                               | your tracker's prefix, to require an issue-key footer  |
-| `GITHUB_TOKEN` in the release job                     | `.github/workflows/release.yml`                                    | a GitHub App token if the version PR must run the gate |
-| `<stackra-mcp-host>`                                  | `.mcp.yaml`                                                        | the hosted Stackra MCP URL of your plan                |
-| copyright holder, brand assets                        | `LICENSE`, `packages/cross-cutting/brand/assets`                   | yours                                                  |
+| Placeholder                                           | Where                                                                                        | Put                                                                                             |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `@acme/*` member names                                | every app and service `package.json`, filters                                                | your npm scope                                                                                  |
+| `acme-platform`, `acme`                               | root `package.json` name, `runway.yaml` (project, GitHub, Sentry, Expo), `stackra.lock.yaml` | your project and organisation names                                                             |
+| `acme.dev`, `*.acme.dev`                              | `runway.yaml`, app `runway.yaml`, config defaults                                            | your domains                                                                                    |
+| `dev.acme.console`, `dev.acme.mobile`, `acme-console` | `desktop.config.ts`, `release.config.ts`, Maestro flows                                      | your bundle ids and URL scheme                                                                  |
+| `@your-org/your-team`                                 | `.github/CODEOWNERS`                                                                         | your GitHub team or user                                                                        |
+| `security@your-domain.example`, `your-repo`           | `SECURITY.md`, `.github/ISSUE_TEMPLATE/config.yml`                                           | your security contact and repository                                                            |
+| `refs-issue-key` (commented out)                      | `.commitlintrc.yaml`                                                                         | your tracker's prefix, to require an issue-key footer                                           |
+| `GITHUB_TOKEN` in the release job                     | `.github/workflows/release.yml`                                                              | a GitHub App token if the version PR must run the gate                                          |
+| `figentra/stackra-template` repository URL            | `repository` in each `packages/*/*/package.json` (not tooling)                               | your repository (npm provenance checks it)                                                      |
+| copyright holder                                      | `LICENSE` and the copies in each package                                                     | yours                                                                                           |
+| product brand (Acme mark, blue accent)                | `packages/cross-cutting/brand`, `apps/*/assets/public/logo.svg`, `apps/docs/src/docs.json`   | your brand                                                                                      |
+| Stackra brand assets (trademarked)                    | `.github/assets/`, `TRADEMARKS.md`, the README logo block, the trademark line in `NOTICE`    | remove, or keep under `TRADEMARKS.md`; set your own social preview in Settings > Social preview |
+
+Template-only lines, removed in a real project once `@stackra/*` is published: the `pnpm-lock.yaml` line in
+`.gitignore` (Release skips until a lockfile is committed), `!.stackra/**` in the root and member `.gitignore` files
+with the committed `.stackra/gen` samples, the pre-release step in `.github/workflows/ci.yml` with
+`.github/scripts/preview-gate.mjs`, and `REVIEW.md`.
 
 Secret values never go in a file: a config field is `@Secret`/`@Env`, `runway.yaml` names the secret, and the value
 lives in your secret store (Infisical by default, ADR 0173).
@@ -456,5 +475,6 @@ lives in your secret store (Infisical by default, ADR 0173).
 
 ## Licence
 
-MIT, see [`LICENSE`](LICENSE). Brand assets, fonts and paid-licence code are excluded, see [`NOTICE`](NOTICE).
+MIT, see [`LICENSE`](LICENSE). The bundled Stackra brand images, fonts and paid-licence code are excluded, see
+[`NOTICE`](NOTICE).
 The Stackra and Figentra names and logos are trademarks, see [`TRADEMARKS.md`](TRADEMARKS.md).
