@@ -6,8 +6,8 @@
  *           never talks to the analytics driver itself. Equal-weight buttons on purpose: declining
  *           is as easy as accepting.
  * Runtime: browser
- * Governing contract: ADR 0071 (consent before analytics; decline is the privacy-preserving
- *                     default), ADR 0128
+ * Governing contract: the `@stackra/consent` package contract (decline is the privacy-preserving
+ *                     default)
  */
 import { useTranslation } from "@stackra/i18n/react";
 import { Button, Surface } from "@stackra/ui";

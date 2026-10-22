@@ -11,7 +11,7 @@
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, HttpMethod, Realm } from "@stackra/contracts";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { OrderListFilter } from "#modules/orders/schemas/order-list-filter.schema";
 import { OrderPage } from "#modules/orders/schemas/order-page.schema";

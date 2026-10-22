@@ -1,12 +1,15 @@
 <!--
 Stackra file contract:
-Purpose: the one logo source of the console (`console::public/logo.svg`); gen rasterises every icon size, the maskable
-         PWA icon, `.icns`, `.ico` and the tray template from it (theming.config.ts `logo`).
-Boundary: artwork only; brand colours come from the tokens, so the mark uses `currentColor` and one brand fill.
+Purpose: the one logo source of the console (`console::public/logo.svg`): the Acme mark, a white
+         "A" on the brand accent. Gen rasterises every icon size, the maskable and monochrome PWA
+         icons, `.icns`, `.ico` and the tray template from it (theming.config.ts `logo`).
+Boundary: artwork only, with literal hex colours, because a rasteriser and an `<img>` never see the
+          page's CSS variables; the accent matches the brand's light accent token.
 Runtime: browser
-Governing contract: ADR 0234 (public assets), owner decision T4 (brand over @stackra/brand)
+Governing contract: ADR 0234 (public assets)
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Acme">
-  <rect width="64" height="64" rx="14" fill="var(--brand-color-accent, oklch(55% 0.17 262))" />
-  <path d="M18 44V20h26v6H25v5h15v6H25v7z" fill="currentColor" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Acme</title>
+  <rect width="64" height="64" rx="14" fill="#2f6df6" />
+  <path d="M18 46 32 16l14 30h-7.5l-2.6-6h-7.8l-2.6 6zM28.6 34h6.8L32 26.2z" fill="#ffffff" />
 </svg>

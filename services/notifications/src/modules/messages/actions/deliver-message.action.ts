@@ -14,7 +14,7 @@ import { Action, type ActionContext, AsJob } from "@stackra/actions";
 import { ActorKind } from "@stackra/contracts";
 import { Backoff } from "@stackra/queue";
 import { Queues } from "#stackra/queues";
-import { MessageService } from "#modules/messages/services/message.service";
+import type { MessageService } from "#modules/messages/services/message.service";
 import { MessagePermissions } from "#modules/messages/permissions/message.permission";
 import { DeliverMessageInput } from "#modules/messages/schemas/deliver-message-input.schema";
 import { DeliverMessageOutput } from "#modules/messages/schemas/deliver-message-output.schema";

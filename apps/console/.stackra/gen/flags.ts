@@ -18,7 +18,6 @@ export const Flags = flagRefs({
       key: "orders.quick_order",
       default: true,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      owner: "orders",
       expires: "2027-06-30",
       label: I18n.orders.flags.quick_order,
     },

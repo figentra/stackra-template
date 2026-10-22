@@ -7,6 +7,7 @@
  * Runtime: node
  * Governing contract: ADR 0260 d3, ADR 0078 d4, ADR 0022
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { deliverRemoteEvent, drainOutbox } from "@stackra/events/testing";
@@ -23,7 +24,8 @@ describe(MarkOrderPaidListener, () => {
   it("marks the referenced order paid and ignores other references", async () => {
     const app = await createTestingModule(CommerceModule).useDrivers("memory").compile();
     const order = await new OrderFactory(app.em).state("authorized").createOne();
-    const capture = { paymentId: order.paymentId!, amountMinor: order.totalMinor, currency: "USD" };
+    assert(order.paymentId, "an authorized order carries its payment id");
+    const capture = { paymentId: order.paymentId, amountMinor: order.totalMinor, currency: "USD" };
 
     await deliverRemoteEvent(Payments.events.PaymentCaptured, { ...capture, reference: order.id });
     await deliverRemoteEvent(Payments.events.PaymentCaptured, { ...capture, reference: "gft_1" });

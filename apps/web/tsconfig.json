@@ -1,10 +1,12 @@
 {
   // Stackra file contract:
-  // Purpose: TypeScript settings of the public site; the app preset (DOM lib, JSX, legacy decorators, no emit), nothing local.
-  // Boundary: `#src/*` and `#stackra/*` resolve through package.json imports; `.stackra/` is included so generated code
-  //           is checked. `src/server/**` is Worker code: the preset adds the workers types for that folder.
+  // Purpose: TypeScript settings of the public site: the app preset (DOM lib, JSX, legacy
+  //          decorators, no emit) and nothing local, so every app member type-checks alike.
+  // Boundary: `#src/*`, `#assets/*` and `#stackra/*` resolve through package.json imports. The
+  //           preset's include covers `src`, `stackra.config.ts`, `vite.extend.ts` and the generated
+  //           `.stackra/`, the Worker entry included: gen's `env.d.ts` declares its bindings and
+  //           the Workers runtime types (`ExecutionContext`, `caches`) that `wrangler types` emits.
   // Runtime: node
   // Governing contract: ADR 0003 (one preset per member), ADR 0165, ADR 0005 (legacy decorators)
-  "extends": "@stackra/typescript-config/app.json",
-  "include": ["src", "stackra.config.ts", "vite.extend.ts", ".stackra"]
+  "extends": "@stackra/typescript-config/app"
 }

@@ -1,12 +1,13 @@
 /**
  * Stackra file contract:
  * Purpose: proves the product loader turns the service's `product_not_found` refusal into a 404,
- *          and `meta` carries canonical, hreflang, the tenant's SEO override and Product JSON-LD
- *          with decimal prices in the market currency.
+ *          and the head carries canonical, hreflang, the tenant's SEO override, Product JSON-LD
+ *          with decimal prices in the market currency, and breadcrumbs that land on real pages (the
+ *          store, the store filtered by collection, the product) in the visitor's locale.
  * Boundary: unit tier; `runRouteLoader` and `routeMeta` call the class's methods with the adapter's
- *           arguments; the commerce client is faked.
+ *           arguments and its SEO default chain; the commerce client is faked.
  * Runtime: node
- * Governing contract: ADR 0022, ADR 0176, ADR 0220, ADR 0007
+ * Governing contract: ADR 0022, ADR 0220, ADR 0007
  */
 import { fakeClient } from "@stackra/clients/testing";
 import { refusal } from "@stackra/errors/testing";
@@ -24,8 +25,8 @@ const SITE = {
   dir: "rtl",
   market: { key: "sa", currency: "SAR" },
   indexable: true,
-  origin: "https://www.example.com",
-  signupUrl: "https://www.example.com/signup",
+  origin: "https://www.acme.example",
+  signupUrl: "https://www.acme.example/signup",
   brand: {},
 } as const;
 /** The seeded demo product as the storefront projection returns it. */
@@ -78,13 +79,13 @@ describe(ProductRoute, () => {
     expect(descriptors).toContainEqual({
       tagName: "link",
       rel: "canonical",
-      href: "https://www.example.com/ar/store/demo-tee",
+      href: "https://www.acme.example/ar/store/demo-tee",
     });
     expect(descriptors).toContainEqual({
       tagName: "link",
       rel: "alternate",
       hrefLang: "en",
-      href: "https://www.example.com/store/demo-tee",
+      href: "https://www.acme.example/store/demo-tee",
     });
     const ld = descriptors.find(
       (d) => "script:ld+json" in d && d["script:ld+json"]["@type"] === "Product",
@@ -92,5 +93,22 @@ describe(ProductRoute, () => {
       "script:ld+json": { offers: { priceCurrency: string; lowPrice: string } };
     };
     expect(ld["script:ld+json"].offers).toMatchObject({ priceCurrency: "SAR", lowPrice: "120.00" });
+  });
+
+  /** A crumb that 404s teaches crawlers a broken trail; each must open a page that exists. */
+  it("links the breadcrumbs to the store, the filtered store and the product", async () => {
+    const commerce = fakeClient(Commerce, (fake) => fake.queries.GetProductBySlug.returns(PRODUCT));
+    const params = { slug: "demo-tee" };
+    const data = await runRouteLoader(ProductRoute, { site: SITE, clients: [commerce], params });
+    const descriptors = routeMeta(ProductRoute, { data, site: SITE, path: "/ar/store/demo-tee" });
+    const trail = descriptors.find(
+      (d) => "script:ld+json" in d && d["script:ld+json"]["@type"] === "BreadcrumbList",
+    ) as { "script:ld+json": { itemListElement: { item: string }[] } };
+
+    expect(trail["script:ld+json"].itemListElement.map((crumb) => crumb.item)).toEqual([
+      "https://www.acme.example/ar/store",
+      "https://www.acme.example/ar/store?collection=shirts",
+      "https://www.acme.example/ar/store/demo-tee",
+    ]);
   });
 });

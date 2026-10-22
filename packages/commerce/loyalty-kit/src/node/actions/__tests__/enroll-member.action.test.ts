@@ -13,9 +13,9 @@ import { Refusals } from "#stackra/manifest";
 import { createTestingModule } from "@stackra/container/testing";
 import { run } from "@stackra/actions/testing";
 import { actors } from "@stackra/iam/testing";
-import { LoyaltyMembers, LoyaltyTier } from "@stackra/loyalty-kit/contracts";
-import { LoyaltyKitModule } from "@stackra/loyalty-kit/node";
-import { FakeLoyaltyMembers } from "@stackra/loyalty-kit/testing";
+import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
+import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
+import { FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
 import { AccountEnrolled } from "#node/events/account-enrolled.event";
 import { EnrollMemberAction } from "#node/actions/enroll-member.action";
 

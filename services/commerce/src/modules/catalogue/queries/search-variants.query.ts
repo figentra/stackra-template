@@ -11,8 +11,8 @@
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { Search } from "@stackra/search";
-import { Product } from "#modules/catalogue/models/product.model";
+import type { Search } from "@stackra/search";
+import type { Product } from "#modules/catalogue/models/product.model";
 import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 import { ProductSearch } from "#modules/catalogue/search/product.search";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";

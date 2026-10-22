@@ -5,8 +5,8 @@
  * Boundary: a class enum so a call site writes `DataClassification.Personal`, never a bare string.
  *           `enums/` would appear with its second file; the catalogue shows the folder.
  * Runtime: isomorphic
- * Governing contract: ADR 0134 (classification), ADR 0128 (amended: class enums), ADR 0231
- *                     (snake_case codes)
+ * Governing contract: ADR 0134 (classification), ADR 0231 (snake_case codes),
+ *                     guides/programming-model.mdx#enums
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

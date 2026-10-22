@@ -1,18 +1,25 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 # Stackra file contract:
-# Purpose: pins the toolchain every contributor and CI job runs; `pnpm` here matches `packageManager` in
-#          package.json (corepack reads that one).
-# Boundary: tool versions and one non-secret environment default only; no secret.
+# Purpose: pins the toolchain every contributor and CI job runs, at exact versions. `pnpm` here matches
+#          `packageManager` in package.json (corepack reads that one) and `node` matches .node-version.
+# Boundary: tool versions only; no environment variable and no secret. NODE_ENV is never set here:
+#           mise-action exports [env] into every CI step, and a build that sees
+#           NODE_ENV=development ships development bundles.
 # Runtime: node
-# Governing contract: ADR 0027 (CLI tools pinned in mise.toml)
+# Governing contract: Stackra ADR 0027 (CLI tools pinned in mise.toml)
 [tools]
+# The JavaScript runtime for every member, script and hook.
 node = "24.22.0"
+# The package manager; the same version as `packageManager` in package.json.
 pnpm = "12.6.0"
+# Secret scanner for the pre-commit hook and the CI gate (.gitleaks.toml).
 gitleaks = "8.30.1"
-# Developer-machine CLIs no mise backend carries: encore, and the assistant you use (claude, opencode).
-# Infisical is the default secret store (ADR 0173); maestro also needs a JDK on PATH.
+# Infisical CLI, the default secret store (Stackra ADR 0173); it injects values, never prints them.
 "github:Infisical/cli" = "0.44.2"
+# Maestro, the mobile end-to-end runner; it also needs a JDK on PATH.
 "github:mobile-dev-inc/maestro" = "cli-2.10.0"
-
-[env]
-NODE_ENV = "development"
+# Encore CLI behind `stackra dev` and the Encore MCP server. Its GitHub releases carry no binaries,
+# so the aqua backend (which downloads from Encore's own release host) installs it.
+"aqua:encoredev/encore" = "1.58.8"
+# EAS CLI for mobile builds, submissions and over-the-air updates.
+"npm:eas-cli" = "25.3.0"

@@ -11,9 +11,9 @@
  *                     guides/programming-model.mdx#services
  */
 import type { Locale } from "@stackra/i18n";
-import { PricingClient } from "#stackra/clients";
-import { StockService } from "#modules/inventory/services/stock.service";
-import { Product } from "#modules/catalogue/models/product.model";
+import type { PricingClient } from "#stackra/clients";
+import type { StockService } from "#modules/inventory/services/stock.service";
+import type { Product } from "#modules/catalogue/models/product.model";
 import type { StorefrontProductCard } from "#modules/catalogue/schemas/storefront-product-card.schema";
 import type { StorefrontProductView } from "#modules/catalogue/schemas/storefront-product-view.schema";
 

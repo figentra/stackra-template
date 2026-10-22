@@ -12,7 +12,7 @@
  */
 import { Provider, type AppContext } from "@stackra/navigation";
 import type { RealtimeConnection } from "@stackra/realtime";
-import { RealtimeTransport } from "@stackra/realtime/contracts";
+import type { RealtimeTransport } from "@stackra/realtime/contracts";
 import { RealtimeContextProvider } from "#src/providers/realtime/realtime.context";
 
 /** Mounts the realtime context at order 30, after the session and the tenant it needs. */

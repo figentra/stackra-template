@@ -26,4 +26,30 @@ describe(WelcomeRoute, () => {
     expect(await screen.findByRole("heading", { name: "Welcome to your console" })).toBeTruthy();
     expect(experience.called(Experience.queries.GetDocument)).toEqual([{ key: "console.welcome" }]);
   });
+
+  /** A tenant's published version replaces the coded default, block for block. */
+  it("renders the tenant's published document instead of the default", async () => {
+    const published = {
+      key: "console.welcome",
+      layout: "stack",
+      blocks: [
+        {
+          type: "console.welcome_hero",
+          props: {
+            titleKey: "console::welcome.title",
+            bodyKey: "console::welcome.body",
+            action: { labelKey: "console::welcome.cta", route: "settings" },
+          },
+        },
+      ],
+    };
+    const experience = fakeClient(Experience, (fake) =>
+      fake.queries.GetDocument.returns(published),
+    );
+    renderRoute(Routes.welcome, { locale: "en", clients: [experience], session: STAFF });
+    expect(await screen.findByRole("heading", { name: "Welcome to your console" })).toBeTruthy();
+    const cta = screen.getByRole("link", { name: "Place your first order" });
+    expect(cta.getAttribute("href")).toBe("/settings");
+    expect(screen.queryByRole("region", { name: "Revenue today" })).toBeNull();
+  });
 });

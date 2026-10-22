@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
  * Purpose: a permission envelope renders without retry; an unknown error renders generically and is
- *          reported.
+ *          reported exactly once, however often the state re-renders.
  * Boundary: unit tier, jsdom; the error reporter is the testing fake.
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0140
@@ -33,5 +33,15 @@ describe(ErrorState, () => {
     expect(screen.getByRole("alert")).not.toHaveTextContent("x is undefined");
     expect(reporter.reported()).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
+  });
+
+  /** A report per render would flood the reporter with duplicates of one failure. */
+  it("reports the same error once across re-renders", () => {
+    const error = new TypeError("x is undefined");
+    const { reporter, rerender } = render(<ErrorState error={error} onRetry={vi.fn()} />, {
+      locale: "en",
+    });
+    rerender(<ErrorState error={error} onRetry={vi.fn()} />);
+    expect(reporter.reported()).toEqual([error]);
   });
 });

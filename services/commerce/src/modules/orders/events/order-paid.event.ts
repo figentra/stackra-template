@@ -4,28 +4,37 @@
  *          as `orders.order.paid.v1`; other services consume it from the committed manifest, and
  *          tenants may subscribe an outbound webhook to it.
  * Boundary: one event per class. Version 1 until `@Version` says otherwise. Recorded by the
- *           MarkPaid transition, never emitted from two places. Broadcast to the tenant's console
- *           sessions for live tiles. The paid total rides along so loyalty earns without a second
- *           read; `webhook: true` lets @stackra/webhooks deliver it, signed, to the endpoints a
- *           tenant registers (outbound delivery, retries and the log are the package's).
+ *           MarkPaid transition, never emitted from two places. Its live-tile broadcast declares
+ *           `orders.order.read` as the permission a tenant console session needs to receive it,
+ *           because the payload carries the paid total and the customer id; enforcing it at
+ *           delivery is @stackra/realtime's job. The paid total rides along so loyalty
+ *           earns without a second read; `webhook: true` lets @stackra/webhooks deliver it,
+ *           signed, to the endpoints a tenant registers (outbound delivery, retries and the log
+ *           are the package's).
  * Runtime: isomorphic
  * Governing contract: ADR 0141, ADR 0078, ADR 0225 (broadcast),
  *                     guides/programming-model.mdx#events; ADR 0127
  */
 import { Event, IntegrationEvent, z } from "@stackra/events";
+import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 
 /**
  * Recorded once per order when its payment is captured; carries the paid total.
  *
  * @example
+ * ```ts
  * order.record(new OrderPaid({ orderId, customerId, paymentId, totalMinor, currency }));
  * @OnEvent(OrderPaid) async handle(event: OrderPaid) { event.data.paymentId }
+ * ```
  */
 @Event({
   name: "order.paid",
   public: true,
   webhook: true,
-  broadcast: { channel: (e) => `tenant.${e.meta.tenantId}.orders` },
+  broadcast: {
+    channel: (e) => `tenant.${e.meta.tenantId}.orders`,
+    permission: OrderPermissions.read,
+  },
 })
 export class OrderPaid extends IntegrationEvent(
   z.object({

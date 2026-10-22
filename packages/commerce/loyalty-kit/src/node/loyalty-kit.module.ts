@@ -14,14 +14,20 @@
 import { Module } from "@stackra/container";
 import { LoyaltyService } from "#core/services/loyalty.service";
 import { AccountService } from "#node/services/account.service";
+import { LedgerReconcilerService } from "#node/services/ledger-reconciler.service";
 
 /**
  * Import once in a host's root module; values come from the host's
  * `src/config/loyalty-kit.config.ts` override.
  *
  * @example
+ * ```ts
  * @Module({ imports: [LoyaltyKitModule] })
  * export class CommerceModule {}
+ * ```
  */
-@Module({ key: "loyalty_kit", exports: [LoyaltyService, AccountService] })
+@Module({
+  key: "loyalty_kit",
+  exports: [LoyaltyService, AccountService, LedgerReconcilerService],
+})
 export class LoyaltyKitModule {}

@@ -28,10 +28,12 @@
   "settings": {
     "title": "Orders",
     "auto_cancel_after_minutes": "Cancel unpaid orders after (minutes)",
-    "customers_may_cancel": "Customers may cancel unpaid orders"
+    "customers_may_cancel": "Customers may cancel unpaid orders",
+    "accepting_orders": "Accept new orders"
   },
   "order": {
     "placed": "Order placed",
+    "queued": "Order saved offline; it is sent when you are back online",
     "cancel_confirm": "Cancel this order? Reserved stock is released.",
     "cancelled": "Order cancelled",
     "lines_count": "{count, plural, one {# item} other {# items}}"
@@ -61,7 +63,7 @@
   },
   "refusals": {
     "order_not_payable": "This order can no longer take a payment.",
-    "tenant_suspended": "This store is suspended; orders cannot be changed right now."
+    "orders_paused": "This store is not taking orders right now. Please try again later."
   },
   "flags": {
     "quick_order": "Quick order screen"

@@ -9,8 +9,7 @@
  *           The device and privacy tabs never reach the server. The user's notification preferences
  *           are the generated `/settings/messages` page.
  * Runtime: browser
- * Governing contract: ADR 0213 (cascade, locks, revisions), ADR 0250, ADR 0256 (prefs), ADR 0071
- *                     (consent)
+ * Governing contract: ADR 0213 (cascade, locks, revisions), ADR 0250, ADR 0256 (prefs)
  */
 import { Route, type RouteContext } from "@stackra/navigation";
 import { Icons } from "@stackra/ui/icons";
@@ -28,7 +27,7 @@ import { TenantSettings } from "#src/schemas/tenant-settings.schema";
   layout: ShellLayout,
   tab: { order: 3, icon: Icons.Gear, label: I18n.console.pages.settings },
   component: SettingsPage,
-  meta: { title: I18n.console.pages.settings },
+  title: I18n.console.pages.settings,
 })
 export class SettingsRoute {
   /**

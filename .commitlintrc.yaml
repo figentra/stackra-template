@@ -1,13 +1,12 @@
+# yaml-language-server: $schema=https://json.schemastore.org/commitlintrc.json
 # Stackra file contract:
-# Purpose: commitlint config for the lefthook commit-msg hook and the Quality Gate. The rules live in
-#          the @stackra/commitlint-config preset (conventional commits, types, subject case, lengths).
-# Boundary: project choices only. The issue-key rule is off; to require a footer such as
-#           `Refs: PROJ-12` on feat/fix/refactor/perf commits, uncomment the rule with your prefix.
-# Secrets: forbidden
+# Purpose: commitlint config for the lefthook commit-msg hook and the CI gate. The rules live in the
+#          @stackra/commitlint-config preset: conventional commits, the house type list, subject case
+#          and lengths.
+# Boundary: project choices only; rules are changed in the preset. The preset's `refs-issue-key`
+#           rule (a `Refs: <PREFIX>-n` footer on feat, fix, refactor and perf commits) stays off
+#           until the project names its issue tracker's prefix under `rules`.
+# Runtime: node
+# Governing contract: Stackra ADR 0013 (conventional commits drive versioning and release)
 extends:
   - "@stackra/commitlint-config"
-# rules:
-#   refs-issue-key:
-#     - 2
-#     - always
-#     - PROJ

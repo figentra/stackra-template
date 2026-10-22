@@ -2,7 +2,7 @@
   "nav": { "loyalty": "الولاء" },
   "tiers": { "bronze": "برونزي", "silver": "فضي", "gold": "ذهبي" },
   "kinds": { "earn": "مكتسبة", "redeem": "مستخدمة", "expire": "منتهية", "adjust": "معدّلة" },
-  "widgets": { "points_issued": "نقاط اليوم" },
+  "widgets": { "points_issued": "نقاط اليوم", "points_balance": "رصيد النقاط" },
   "documents": {
     "overview": "نقاطي",
     "redeem_title": "استخدام النقاط",

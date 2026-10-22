@@ -1,12 +1,18 @@
 # Stackra file contract:
-# Purpose: the committed-manifest exception of this member: everything under .stackra/ is generated except the
-#          contract artefacts other members build their clients from (app-manifest.json) and the OpenAPI projection.
-#          Same rule set as the root .gitignore, repeated so the member folder keeps it when copied elsewhere.
+# Purpose: the ignore rules of this service member: generated output stays out of git except the
+#          contract artefacts other members build their clients from (app-manifest.json) and the
+#          OpenAPI projection. Same rule set as the root .gitignore, repeated so the member folder
+#          keeps it when copied elsewhere.
 # Boundary: ignore rules only.
 # Runtime: node
-# Governing contract: ADR 0158 d1, ADR 0268 R7 (amended)
+# Governing contract: ADR 0158 decision 1 (the manifest and its OpenAPI projection are committed)
+
+# everything `stackra gen` writes under .stackra/ (the Encore app included) is rebuilt from source
 .stackra/*
+# the committed contract other members build their clients from
 !.stackra/app-manifest.json
+# its OpenAPI projection, committed beside it
 !.stackra/openapi.json
-# template only: the generated samples are committed so they can be read; a real project drops the next line
+# template only: the generated samples are committed so they can be read; a real project drops
+# this line once `stackra gen` runs in it
 !.stackra/**

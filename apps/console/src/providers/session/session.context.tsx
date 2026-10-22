@@ -24,8 +24,7 @@ export interface SessionContextProviderProps {
 
 /**
  * On a 401 from any generated client the state flips to signed out; the layout guard then sends the
- * browser to the
- * sign-in route. The flow per target is config, never a branch here.
+ * browser to the sign-in route. The flow per target is config, never a branch here.
  */
 export function SessionContextProvider({ value, children }: SessionContextProviderProps) {
   const identity = useConfig(IdentityConfig);

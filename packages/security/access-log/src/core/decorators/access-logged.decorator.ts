@@ -22,8 +22,10 @@ import type { AccessLoggedOptions } from "#core/interfaces/access-logged-options
  * type, not at run time.
  *
  * @example
+ * ```ts
  * @AccessLogged({ classification: DataClassification.Personal, subjects: (id: string) => [id] })
  * async view(id: string): Promise<CustomerView> { … }
+ * ```
  */
 export const AccessLogged = createDecorator<AccessLoggedOptions<never[]>>({
   kind: "access_logged",

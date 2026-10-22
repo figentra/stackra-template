@@ -12,13 +12,12 @@
  */
 import { ContentEntryType } from "@stackra/content";
 import { Route, type MetaContext, type RouteContext } from "@stackra/navigation";
-import { jsonLd, OgKind, seoMeta } from "@stackra/seo";
+import { OgKind, type Seo } from "@stackra/seo";
 import { Billing, Content } from "#stackra/clients";
 import { I18n } from "#stackra/i18n";
 import { LandingPage } from "#src/components/pages/landing";
 import { SiteConfig } from "#src/config/site.config";
 import { CacheProfile } from "#src/enums/cache-profile.enum";
-import { alternates } from "#src/server/alternates.server";
 import { SiteLayout } from "#src/routes/site.layout";
 
 /** Testimonials shown on the landing page. */
@@ -27,8 +26,8 @@ const TESTIMONIALS_SHOWN = 3;
 /** Route `/`: the home page of hero, features, plans, testimonials, FAQ and call to action. */
 @Route({
   path: "/",
-  index: true,
   layout: SiteLayout,
+  title: I18n.web.hero.title,
   prerender: true,
   cache: CacheProfile.Marketing,
   component: LandingPage,
@@ -53,31 +52,23 @@ export class LandingRoute {
   }
 
   /**
-   * Title, description, canonical, hreflang and OG from the site; Organization and FAQPage
-   * structured data.
+   * Description and the site's OG image; Organization and FAQPage structured data. The title is
+   * the static option; canonical, hreflang and the site name are derived by the adapter.
    */
-  meta(ctx: MetaContext<LandingRoute>) {
-    const { data, site, t, path } = ctx;
-    const url = alternates(ctx, path);
+  meta({ data, site, t }: MetaContext<LandingRoute>): Seo {
     const image = `${site.origin}/og/${OgKind.Site.value}/${site.siteId}`;
     const answers = data.faq.map((entry) => ({
       "@type": "Question",
       name: entry.fields.question,
       acceptedAnswer: { "@type": "Answer", text: entry.fields.answer },
     }));
-    return [
-      ...seoMeta({
-        title: t(I18n.web.hero.title),
-        description: t(I18n.web.hero.subtitle),
-        siteName: site.name,
-        locale: site.locale,
-        canonical: url[site.locale.value]!,
-        alternates: url,
-        noindex: !site.indexable,
-        image,
-      }),
-      jsonLd({ "@type": "Organization", name: site.name, url: site.origin, logo: image }),
-      jsonLd({ "@type": "FAQPage", mainEntity: answers }),
-    ];
+    return {
+      description: t(I18n.web.hero.subtitle),
+      image,
+      jsonLd: [
+        { "@type": "Organization", name: site.name, url: site.origin, logo: image },
+        { "@type": "FAQPage", mainEntity: answers },
+      ],
+    };
   }
 }

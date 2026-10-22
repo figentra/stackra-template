@@ -9,10 +9,10 @@
  *                     ADR 0223
  */
 import { OnEvent, type ListenerContext } from "@stackra/events";
-import { Mailer } from "@stackra/mail";
+import type { Mailer } from "@stackra/mail";
 import { Queues } from "#stackra/queues";
 import { OrderPaid } from "#modules/orders/events/order-paid.event";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderReceiptMail } from "#modules/orders/mails/order-receipt.mail";
 
 /** One receipt per paid order; the Mailer derives the command key from the mail and recipient. */

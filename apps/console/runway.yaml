@@ -7,26 +7,31 @@
 # Boundary: identity is stackra.config.ts; behaviour is src/config/*; accounts, zones, the feed
 #           bucket and signing tooling are the root runway. A value here may override a root
 #           default, never the reverse. Validated by `@stackra/runway/schema/app.json`. The update
-#           feed URL is derived by gen, never a var here.
+#           feed URL is derived by gen, never a var here. No secret: the console is a browser and
+#           desktop client, so every value it holds is public; the Web Push private key belongs to
+#           the notifications service, which signs the pushes.
 # Runtime: node
 # Governing contract: ADR 0249, ADR 0254, ADR 0255, ADR 0175, ADR 0173, ADR 0231 d4
 $schema: "@stackra/runway/schema/app.json"
 version: 2
-member: console # = stackra.config.ts `key`
+# = stackra.config.ts `key`
+member: console
 
-# Every @Secret of the env and config classes, by name; values live in Infisical and runway syncs
-# them on deploy.
-secrets:
-  WEB_PUSH_VAPID_PRIVATE_KEY: {} # path `runtime`, per environment; the public half is a var below
+# Every @Secret of the env and config classes, by name. None: a client bundle can hold no secret.
+secrets: {}
 
+# The deploy gate's check, web and pwa targets only (desktop has no endpoint); the path is the
+# runway's alone, stackra.config.ts does not repeat it.
 health:
   path: /healthz
+  # the Worker answers with the release SHA (ADR 0170 DP24)
   expects: sha
-  # the web and pwa targets; not applicable to desktop
 
 release:
   pwa:
-    updates: from-config # the strategy is pwa.config.ts `updates`; staging only adds the beta badge
+    # the strategy is pwa.config.ts `updates.strategy`; this block only adds the beta badge
+    updates: from-config
+    # the installed app shows a beta badge in every environment but production
     betaBadgeOutsideProduction: true
   desktop:
     # subset of the root target's channels; `latest` is electron-updater's stable (ADR 0254)
@@ -36,7 +41,8 @@ release:
     signing:
       mac: false
       windows: false
-    feedPath: console # feed = <root feed.publicOrigin>/console/<channel>/
+    # feed = <root feed.publicOrigin>/console/<channel>/
+    feedPath: console
     # narrows desktop.config.ts packaging, never widens
     platforms:
       mac: [dmg, zip]
@@ -49,9 +55,13 @@ telemetry:
 
 environments:
   dev:
-    port: 5173 # Vite dev server (web, pwa, the desktop renderer); hmr defaults to port+1
-    host: localhost # `console.localhost` once root `dev.proxy` is on
+    # Vite dev server (web, pwa, the desktop renderer); HMR defaults to port + 1
+    port: 5173
+    # `console.localhost` once root `dev.proxy` is on
+    host: localhost
+    # plain http on localhost; the browser treats localhost as a secure context
     https: false
+    # `stackra dev` prints the URL instead of opening a browser
     open: false
     # Electron dev; the loopback takes the PKCE redirect
     desktop:
@@ -62,11 +72,12 @@ environments:
     vars:
       # VITE_API_ORIGIN and VITE_REALTIME_ORIGIN are omitted: gen fills them from the root gateway
       # (lane offsets applied)
+      # empty disables the reporter, push and analytics in dev
       VITE_SENTRY_DSN: ""
       VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ""
       VITE_POSTHOG_KEY: ""
+    # the last config layer (ADR 0146): every trace in dev, no install prompt, no analytics
     config:
-      # last config layer (ADR 0146)
       console.telemetry:
         traces:
           sampleRate: 1
@@ -80,23 +91,24 @@ environments:
       baseUrl: from-port
       seeds: from-stackra-config
 
+  # one deployment per pull request; push and analytics stay off (their public keys are unset)
   preview:
-    domain: "console-pr-${pr}.preview.acme.dev"
+    domain: "console-pr-${pr}.preview.acme.example"
     vars:
-      VITE_API_ORIGIN: "https://api-pr-${pr}.preview.acme.dev"
-      VITE_REALTIME_ORIGIN: "https://api-pr-${pr}.preview.acme.dev"
+      VITE_API_ORIGIN: "https://api-pr-${pr}.preview.acme.example"
+      VITE_REALTIME_ORIGIN: "https://api-pr-${pr}.preview.acme.example"
       VITE_SENTRY_DSN: ref:sentry.dsn.console
-    secrets: [] # push is off in previews
 
   staging:
-    domain: console.staging.acme.dev
+    domain: console.staging.acme.example
+    # `ref:` values resolve from the root runway's provider outputs at deploy time
     vars:
-      VITE_API_ORIGIN: https://api.staging.acme.dev
-      VITE_REALTIME_ORIGIN: https://api.staging.acme.dev
+      VITE_API_ORIGIN: https://api.staging.acme.example
+      VITE_REALTIME_ORIGIN: https://api.staging.acme.example
       VITE_SENTRY_DSN: ref:sentry.dsn.console
+      # the public half; the notifications service holds the private key that signs pushes
       VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ref:push.vapidPublic.staging
       VITE_POSTHOG_KEY: ref:posthog.key.console
-    secrets: [WEB_PUSH_VAPID_PRIVATE_KEY]
     config:
       console.telemetry:
         traces:
@@ -109,23 +121,25 @@ environments:
       channel: beta
       rollout:
         startPercent: 100
+    # staging testers reload at once instead of waiting for the prompt
     pwa:
       updates: immediate
-      # staging testers reload at once
 
   production:
-    domain: console.acme.dev
-    aliases: [app.acme.dev] # redirect to `domain`
+    domain: console.acme.example
+    # hosts that redirect to `domain`
+    aliases: [app.acme.example]
     vars:
-      VITE_API_ORIGIN: https://api.acme.dev
-      VITE_REALTIME_ORIGIN: https://api.acme.dev
+      VITE_API_ORIGIN: https://api.acme.example
+      VITE_REALTIME_ORIGIN: https://api.acme.example
       VITE_SENTRY_DSN: ref:sentry.dsn.console
       VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ref:push.vapidPublic.production
       VITE_POSTHOG_KEY: ref:posthog.key.console
-    secrets: [WEB_PUSH_VAPID_PRIVATE_KEY]
+    # one request in ten is traced
     workers:
       observability:
         headSamplingRate: 0.1
+    # electron-updater's stable channel, with the root target's staged rollout (20 → 100,
+    # ADR 0181 d3)
     desktop:
       channel: latest
-      # staged rollout from the root target (20 → 100, ADR 0181 d3)

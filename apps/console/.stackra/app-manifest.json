@@ -21,21 +21,38 @@
       "manifest": "services/commerce/.stackra/app-manifest.json",
       "uses": [
         "orders.order.create",
+        "orders.order.cancel",
+        "orders.order.get",
+        "orders.order.list",
         "orders.order.stats_today",
+        "catalogue.product.create",
+        "catalogue.product.update",
+        "catalogue.product.archive",
+        "catalogue.product.attach_image",
+        "catalogue.product.get",
+        "catalogue.product.list",
         "catalogue.variant.search",
         "catalogue.variant.get_by_barcode",
-        "catalogue.product.attach_image",
         "inventory.stock.list_low"
-      ]
+      ],
+      "events": ["orders.order.paid.v1", "inventory.stock.low"]
     },
     {
       "service": "notifications",
       "manifest": "services/notifications/.stackra/app-manifest.json",
       "uses": ["messages.notification.list", "messages.notification.mark_read"]
     },
-    { "service": "experience", "revision": "b82d913", "uses": ["experience.document.get"] },
-    { "service": "platform", "revision": "a77e9b0", "uses": ["settings.value.set"] },
-    { "service": "identity", "revision": "2d4f6c8", "uses": ["identity.session.current"] }
+    {
+      "service": "experience",
+      "pin": "stackra.lock.yaml#experience",
+      "uses": ["experience.document.get"]
+    },
+    { "service": "platform", "pin": "stackra.lock.yaml#platform", "uses": ["settings.value.set"] },
+    {
+      "service": "identity",
+      "pin": "stackra.lock.yaml#identity",
+      "uses": ["identity.session.current"]
+    }
   ],
   "providers": [
     {
@@ -79,12 +96,11 @@
       "class": "DashboardRoute",
       "key": "dashboard",
       "path": "/",
-      "index": true,
       "layout": "ShellLayout",
       "prefetch": ["orders.order.stats_today"],
       "permission": "orders.order.read",
       "derived": ["permission"],
-      "cache": { "ttl": "30s" },
+      "staleTime": "30s",
       "component": "DashboardPage",
       "title": "console::pages.dashboard",
       "shadows": "panel.tenant_admin.index"
@@ -125,6 +141,14 @@
       "title": "console::pages.welcome"
     },
     {
+      "class": "OpenRoute",
+      "key": "open",
+      "path": "/open",
+      "layout": "ShellLayout",
+      "loader": true,
+      "search": ["url"]
+    },
+    {
       "class": "SignInRoute",
       "key": "sign_in",
       "path": "/login",
@@ -132,8 +156,7 @@
       "auth": false,
       "loader": true,
       "component": "SignInPage",
-      "title": "console::login.title",
-      "noindex": true
+      "title": "console::login.title"
     },
     {
       "class": "NotFoundRoute",
@@ -259,6 +282,34 @@
       "group": "orders::nav.sales"
     },
     {
+      "key": "navigate.settings.orders",
+      "from": "commerce orders (settings page navigation)",
+      "permission": "settings.value.manage",
+      "group": "console::pages.settings"
+    },
+    {
+      "key": "navigate.settings.inventory",
+      "from": "commerce inventory (settings page navigation)",
+      "permission": "settings.value.manage",
+      "group": "console::pages.settings"
+    },
+    {
+      "key": "navigate.settings.messages",
+      "from": "notifications messages (settings page navigation, user scope)",
+      "group": "console::pages.settings"
+    },
+    {
+      "key": "navigate.queue.failed_jobs",
+      "from": "@stackra/queue queue.failed_job (resource navigation)",
+      "group": "console::pages.settings"
+    },
+    {
+      "key": "navigate.access_log.entries",
+      "from": "commerce access_log.access_log_entry (resource navigation)",
+      "permission": "access_log.access_log_entry.read",
+      "group": "access_log::nav.audit"
+    },
+    {
       "key": "navigate.console.quick_order",
       "from": "QuickOrderRoute (AppMenu m.route)",
       "shortcut": "mod+shift+o",
@@ -269,7 +320,6 @@
     {
       "key": "action.orders.order.create",
       "from": "commerce orders.order.create (AppMenu m.action)",
-      "shortcut": "mod+n",
       "permission": "orders.order.create",
       "flag": "orders.quick_order",
       "group": "orders::nav.sales"
@@ -283,7 +333,7 @@
     "catalogue.variant.search"
   ],
   "menus": [
-    { "class": "AppMenu", "kind": "application", "targets": ["desktop", "pwa"] },
+    { "class": "AppMenu", "kind": "application", "targets": ["desktop"] },
     { "class": "TrayMenu", "kind": "tray", "targets": ["desktop"] },
     { "class": "ContextMenu", "kind": "context", "targets": ["desktop"] }
   ],
@@ -337,6 +387,6 @@
     "console.consent",
     "console.peripherals"
   ],
-  "secrets": ["WEB_PUSH_VAPID_PRIVATE_KEY"],
+  "secrets": [],
   "assets": { "lang": { "console": ["en", "ar"] }, "public": ["console::public/logo.svg"] }
 }

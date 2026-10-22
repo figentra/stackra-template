@@ -6,7 +6,7 @@
  *           has run; it may add plugin instances but never re-sets what the plugin owns (targets,
  *           budgets, the dev server). No new dependency: the plugin is an inline object.
  * Runtime: node
- * Governing contract: ADR 0165 (Vite with React Router 7), ADR 0145 (build-config carve-out)
+ * Governing contract: ADR 0165 (Vite with React Router 7)
  */
 import type { ViteExtend } from "@stackra/vite-plugin";
 

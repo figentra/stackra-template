@@ -1,5 +1,15 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-issue-config.json
+# Stackra file contract:
+# Purpose: the "New issue" chooser: only the two forms in this folder, plus a link that sends
+#          vulnerability reports to GitHub's private reporting instead of a public issue.
+# Boundary: chooser settings only; the forms are bug_report.yml and feature_request.yml.
+# Runtime: node
+# Governing contract: SECURITY.md (private vulnerability reporting only)
+
+# Every issue goes through a form, so it arrives with the fields triage needs.
 blank_issues_enabled: false
 contact_links:
+  # Opens the private advisory form; a report there is visible to maintainers only.
   - name: Security report
-    url: https://github.com/your-org/your-repo/security/advisories/new
+    url: https://github.com/acme/acme-platform/security/advisories/new
     about: Report a vulnerability privately (SECURITY.md); never in a public issue.

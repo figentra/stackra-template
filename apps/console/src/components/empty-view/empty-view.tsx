@@ -28,7 +28,7 @@ export interface EmptyViewProps {
 }
 
 /**
- * Centered block; `role="status"` is not used because an empty list is not a change to announce.
+ * Centred block; `role="status"` is not used because an empty list is not a change to announce.
  */
 export function EmptyView({
   title,

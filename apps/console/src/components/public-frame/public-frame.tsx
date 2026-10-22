@@ -17,7 +17,7 @@ export function PublicFrame() {
   const { t } = useTranslation();
   const logo = useAsset(Assets.console.public.logo_svg);
   return (
-    <main id="main" className="grid min-block-size-dvh place-items-center gap-6 p-4">
+    <main id="main" className="grid min-h-dvh place-items-center gap-6 p-4">
       <img src={logo.url} alt={t(I18n.console.shell.brand)} className="h-8" />
       <Outlet />
     </main>

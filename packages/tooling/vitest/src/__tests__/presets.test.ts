@@ -4,7 +4,7 @@
  * member factory lays out the projects its docblock promises.
  */
 import { describe, expect, it } from "vitest";
-import { libraryPreset, nativePreset, nodePreset, reactPreset } from "../factories.ts";
+import { appPreset, libraryPreset, mobilePreset, servicePreset, tooling } from "../factories.ts";
 import { stackraVitest } from "../preset.ts";
 import { stackraVitestDecorators } from "../preset-decorators.ts";
 import { stackraVitestReact } from "../preset-react.ts";
@@ -35,8 +35,8 @@ describe("@stackra/vitest-config", () => {
     expect(stackraVitestReact.test?.environment).toBe("jsdom");
   });
 
-  it("nodePreset splits unit and int tests and keeps decorators on", () => {
-    const config = nodePreset({ root: "/member" });
+  it("servicePreset splits unit and int tests and keeps decorators on", () => {
+    const config = servicePreset({ root: "/member" });
     expect(config.root).toBe("/member");
     expect(decorator(config)?.legacy).toBe(true);
     const [unit, int] = projects(config);
@@ -54,8 +54,8 @@ describe("@stackra/vitest-config", () => {
     expect(react?.test.include).toEqual(["src/react/**/__tests__/**/*.test.tsx"]);
   });
 
-  it("reactPreset runs jsdom except in the node folders, and honours exclude", () => {
-    const config = reactPreset({
+  it("appPreset runs jsdom except in the node folders, and honours exclude", () => {
+    const config = appPreset({
       root: "/app",
       nodeFolders: ["src/bridges"],
       exclude: ["**/*.e2e.test.ts"],
@@ -69,10 +69,20 @@ describe("@stackra/vitest-config", () => {
     expect(node?.test).toMatchObject({ name: "src/bridges", environment: "node" });
   });
 
-  it("nativePreset runs every test file in jsdom with decorators", () => {
-    const config = nativePreset({ root: "/mobile" });
+  it("mobilePreset runs every test file in jsdom with decorators", () => {
+    const config = mobilePreset({ root: "/mobile" });
     expect(config.test?.environment).toBe("jsdom");
     expect(config.test?.include).toEqual(["src/**/__tests__/**/*.test.{ts,tsx}"]);
     expect(decorator(config)?.legacy).toBe(true);
+  });
+
+  it("tooling runs the preset packages' own tests in plain Node and refuses an empty suite", () => {
+    expect(tooling.test).toMatchObject({
+      environment: "node",
+      include: ["src/**/__tests__/**/*.test.ts"],
+      passWithNoTests: false,
+    });
+    expect(decorator(tooling)).toBeUndefined();
+    expect(tooling.test?.coverage).toBeUndefined();
   });
 });

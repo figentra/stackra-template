@@ -7,13 +7,12 @@
  *           runs before any child loader; its value reaches loaders as `ctx.site` and components
  *           through `useSite`. No guard: the public site has no session. Pages own their meta.
  * Runtime: isomorphic
- * Governing contract: ADR 0175 (sites by host), ADR 0080 (lang/dir), ADR 0071 (consent before
- *                     analytics)
+ * Governing contract: ADR 0175 (sites by host), ADR 0080 (lang/dir)
  */
 import { Layout, LayoutKind, type RouteContext } from "@stackra/navigation";
 import { RouteError } from "#src/components/route-error";
 import { SiteFrame } from "#src/components/site-frame";
-import { resolveSite } from "#src/server/resolve-site.server";
+import { resolveSite } from "#src/providers/site/resolve-site";
 
 /** Frame of every public page: resolves the tenant site and locale once per request. */
 @Layout({ kind: LayoutKind.Site, component: SiteFrame, errorBoundary: RouteError })

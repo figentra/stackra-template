@@ -1,4 +1,7 @@
-// TypeScript project for this member: extends exactly one @stackra/typescript-config preset and sets nothing else
-// (pnpm validate checks the preset). tsc reads tsconfig.json as JSONC, so the name stays .json.
-// Owner: release-operations · Secrets: forbidden
-{ "extends": "@stackra/typescript-config/vite-node.json" }
+// Stackra file contract:
+// Purpose: this package's own TypeScript project: its presets, its tests and its root config files.
+// Boundary: exactly one role preset and nothing else (`stackra validate` checks it); tsc reads
+//           tsconfig.json as JSONC, so the name stays .json.
+// Runtime: node
+// Governing contract: Stackra ADR 0027 (one toolchain)
+{ "extends": "@stackra/typescript-config/tooling" }

@@ -1,9 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: the component folder's barrel: the shell and its connection indicator.
- * Boundary: explicit exports only.
+ * Purpose: the component folder's barrel.
+ * Boundary: the component only.
  * Runtime: browser
- * Governing contract: ADR 0128
+ * Governing contract: ADR 0128 (component folders)
  */
-export { ConnectionIndicator } from "./connection-indicator";
 export { Shell } from "./shell";

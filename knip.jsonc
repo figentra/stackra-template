@@ -1,31 +1,33 @@
 // Stackra file contract:
 // Purpose: unused files, exports and dependencies detection. Runs in `pnpm verify`.
-// Boundary: knip settings only. In v2 gen discovers every declaration by its kind folder (ADR 0264) and
-//           imports it from the generated `.stackra/` entries and `#stackra/wiring`, so the generated files
-//           are the entries: a kind file nothing generated reaches is the unused file knip reports.
+// Boundary: knip settings only. Gen discovers every declaration by its kind folder (Stackra ADR 0264)
+//           and imports it from the generated `.stackra/` entries and `#stackra/wiring`, so the
+//           generated files are the entries: a kind file nothing generated reaches is the unused file
+//           knip reports.
 // Runtime: node
-// Governing contract: ADR 0264 (kind folders), ADR 0261 (generated imports), ADR 0003 (members)
+// Governing contract: Stackra ADR 0264 (kind folders), Stackra ADR 0261 (generated imports), Stackra
+//                     ADR 0003 (members)
 {
   "$schema": "https://unpkg.com/knip@6.41.0/schema-jsonc.json",
   "workspaces": {
     ".": {
-      "project": ["*.mjs"],
-      // Run by lefthook's pre-commit hook and by the CLI, which knip does not read.
+      // Run by lefthook's pre-commit hook and by the stackra CLI, neither of which knip reads.
       "ignoreDependencies": ["oxfmt", "@stackra/cli"],
-      "ignoreBinaries": ["stackra"],
+      "ignoreBinaries": ["stackra"]
     },
     "packages/tooling/*": {
       // Config packages export presets by subpath (package.json exports); the only TS besides them is their test.
       "entry": ["src/*.ts", "src/**/__tests__/**/*.test.ts"],
       "project": ["*.ts", "src/**/*.ts"],
       // Extended by each preset package's tsconfig.json, which knip doesn't trace where no typecheck script runs.
-      // jsdom: vitest loads it by name for the factories' `environment: "jsdom"`; nothing imports it.
-      "ignoreDependencies": ["@stackra/typescript-config", "jsdom"],
+      // jsdom: vitest loads it by name for the presets' `environment: "jsdom"`; nothing imports it.
+      // @vitest/coverage-v8: vitest loads the provider by name for `coverage.provider: "v8"`.
+      "ignoreDependencies": ["@stackra/typescript-config", "jsdom", "@vitest/coverage-v8"]
     },
     "packages/*/*": {
       // package.json `exports` are entries already; gen reaches the node module through `stackra.module`.
       "entry": [".stackra/gen/*.ts", "src/node/*.module.ts"],
-      "project": ["src/**/*.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}"]
     },
     "apps/*": {
       // App entries are generated (.stackra/main.tsx, entry.client.tsx, main.ts); authored code starts at the app root.
@@ -33,26 +35,27 @@
         ".stackra/*.{ts,tsx}",
         ".stackra/gen/*.{ts,tsx}",
         "stackra.config.ts",
-        "src/*.app.ts",
+        "src/*.app.ts"
       ],
-      "project": ["src/**/*.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}"]
     },
     "services/*": {
       // src/main.ts is the only authored entry; gen reaches every module through #stackra/wiring.
       "entry": ["src/main.ts", ".stackra/gen/*.ts", "stackra.config.ts"],
-      "project": ["src/**/*.ts"],
+      "project": ["src/**/*.ts"]
     },
     "apps/docs": {
       // Mintlify content is MDX rendered by the `mint` CLI; there is no JS entry.
-      "project": [],
-    },
+      "project": []
+    }
   },
-  // `mint`: Swift's Mint runner, a fallback in lefthook's generated hooks.
   "ignore": ["**/__tests__/fixtures/**"],
+  // gitleaks comes from mise.toml, not npm. `mint`: Swift's Mint runner, a fallback in lefthook's
+  // generated hooks.
   "ignoreBinaries": ["gitleaks", "mint"],
   "rules": {
     // Catalog entries are declared ahead of the members that consume them; `warn` keeps a dead one visible.
-    "catalog": "warn",
+    "catalog": "warn"
   },
-  "includeEntryExports": false,
+  "includeEntryExports": false
 }

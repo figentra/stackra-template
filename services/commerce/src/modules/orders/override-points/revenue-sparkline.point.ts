@@ -6,7 +6,7 @@
  *           component (gen fails on a consuming app that does not); props are the widget query's
  *           output.
  * Runtime: isomorphic
- * Governing contract: ADR 0164, ADR 0234 d9 (amended), guides/programming-model.mdx#widgets,
+ * Governing contract: ADR 0164, guides/programming-model.mdx#widgets,
  *                     guides/programming-model.mdx#override-points, ADR 0231
  */
 import { OverridePoint } from "@stackra/panel";

@@ -29,12 +29,4 @@ export class CreateAccessLogEntries extends Migration {
       t.unique([AccessLogEntries.columns.tenantId, AccessLogEntries.columns.callId]);
     });
   }
-
-  /**
-   * Drops the table; the records go with it, which is why a purge job, not a rollback, removes
-   * data.
-   */
-  down(schema: Blueprint): void {
-    schema.drop(AccessLogEntries);
-  }
 }

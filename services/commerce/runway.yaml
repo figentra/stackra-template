@@ -1,27 +1,31 @@
 # yaml-language-server: $schema=../../schemas/runway-service.schema.json
 # Stackra file contract:
-# Purpose: how and where THIS service runs, per environment: dev port and host, the deployable it joins, resources and
-#          scaling, the sizes of what it needs (its logical database, cache keyspace, queues, crons), drivers per
-#          environment, secret NAMES, health checks, per-environment config values. The root runway holds the
-#          destinations (accounts, zones, the shared server) and the defaults this file may override.
-# Boundary: what the service IS is stackra.config.ts; what it NEEDS is derived by gen from the module declarations into
-#           .stackra/app-manifest.json `infra` (database, queues from @AsJob/@OnEvent, crons from @Cron, secrets from
-#           @Secret) and this file only sizes those. No secret value, no business value (src/config/*, settings).
-#           Health checks are declared in stackra.config.ts; this file tunes only their thresholds
-#           (ADR 0190). The mail driver is chosen here per environment (`drivers.mail`), the one home
-#           of that choice (ADR 0266). Validated by `@stackra/runway/schema/service.json`.
+# Purpose: how and where THIS service runs, per environment: dev port and host, the deployable it
+#          joins, resources and scaling, the sizes of what it needs (its logical database, cache
+#          keyspace, queues, crons), drivers per environment, secret NAMES, health thresholds and
+#          per-environment config values. The root runway holds the destinations (accounts, zones,
+#          the shared server) and the defaults this file may override.
+# Boundary: what the service IS is stackra.config.ts; what it NEEDS is derived by gen from the
+#           module declarations into .stackra/app-manifest.json `infra` (database, queues from
+#           @AsJob/@OnEvent, crons from @Cron, secrets from @Secret) and this file only sizes those.
+#           No secret value, no business value (src/config/*, settings). Health checks are declared
+#           in stackra.config.ts; this file tunes only their thresholds (ADR 0190). The mail driver
+#           is chosen here per environment (`drivers.mail`), the one home of that choice (ADR 0266).
+#           Validated by `@stackra/runway/schema/service.json`.
 # Runtime: node
 # Governing contract: ADR 0168; ADR 0169, 0238, 0266, 0148, 0173, 0147 d2
 $schema: "@stackra/runway/schema/service.json"
 version: 2
-member: commerce # must equal stackra.config.ts `key`
+# must equal stackra.config.ts `key`
+member: commerce
 
-# Every @Secret of src/config/*; gen fails on a missing one. Path `runtime` (root default), per environment.
+# Every @Secret of src/config/*; gen fails on a missing one. Path `runtime` (root default), per
+# environment.
 secrets:
   PRICING_API_KEY: {}
 
+# thresholds only; the path and checks are stackra.config.ts `health`
 health:
-  # thresholds only; the path and checks are stackra.config.ts `health`
   readiness:
     requireMigrations: true
     timeoutSeconds: 2
@@ -30,10 +34,12 @@ health:
 
 environments:
   dev:
-    port: 4001 # the service's own listener when run standalone; under `encore run` the root gateway fronts it
+    # the service's own listener when run standalone; under `encore run` the root gateway fronts it
+    port: 4001
     host: localhost
     devConsolePort: 4901
-    deployable: core # dev is a monolith (ADR 0169 d2)
+    # dev is a monolith (ADR 0169 d2)
+    deployable: core
     drivers:
       queue: memory
       cache: memory
@@ -43,37 +49,38 @@ environments:
       mail: memory
       search: memory
       media: memory
+    # one logical db `commerce` per lane (ADR 0238 d2)
     database:
       extensions: [ltree, pg_trgm]
-      # one logical db `commerce` per lane (ADR 0238 d2)
+    # the last config layer (ADR 0146): per-environment @Env values and driver names
     config:
-      # the last config layer (ADR 0146 CF3): per-environment @Env values and driver names
       commerce.service:
+        # the web member's dev origin, resolved by gen; no literal port (ADR 0170)
         storefrontBaseUrl:
           from-member: web
-        # ADR 0170: no literal ports
       loyalty_kit:
         ledger: memory
       access_log:
         sink: memory
+    # `encore run` does not run crons (ADR 0091); the dev console triggers them
     crons:
       enabled: false
-      # `encore run` does not run crons (ADR 0091); the dev console triggers them
 
   preview:
     deployable: core
     database:
       plan: shared
+    # previews never mail a real address
     drivers:
       mail: memory
-      # previews never mail a real address
     secrets: [PRICING_API_KEY]
     config:
       commerce.service:
-        storefrontBaseUrl: "https://web-pr-${pr}.preview.acme.dev"
+        storefrontBaseUrl: "https://web-pr-${pr}.preview.acme.example"
 
   staging:
-    deployable: core # grouped with notifications: the NotificationsClient calls in-process (ADR 0260 d4)
+    # grouped with notifications: the NotificationsClient calls in-process (ADR 0260 d4)
+    deployable: core
     isolate: false
     resources:
       cpu: 0.5
@@ -90,12 +97,12 @@ environments:
       extensions: [ltree, pg_trgm]
     cache:
       keyspaceMb: 256
+    # sizes of the `@Bucket` declarations the manifest lists
     buckets:
       product_images:
         storageGb: 5
-      # `@Bucket` declarations from the manifest
+    # names come from the manifest (`@AsJob` / `@OnEvent` queues); sizes here
     queues:
-      # names come from the manifest (`@AsJob` / `@OnEvent` queues); sizes here
       default:
         visibilityTimeoutSeconds: 300
         dlq: true
@@ -119,12 +126,13 @@ environments:
     secrets: [PRICING_API_KEY]
     config:
       commerce.service:
-        storefrontBaseUrl: https://staging.acme.dev
+        storefrontBaseUrl: https://staging.acme.example
     workers:
       split: false
 
   production:
-    deployable: commerce # split: its own process; the same code reaches notifications over RPC
+    # split: its own process; the same code reaches notifications over RPC
+    deployable: commerce
     isolate: false
     resources:
       cpu: 1
@@ -169,7 +177,8 @@ environments:
     secrets: [PRICING_API_KEY]
     config:
       commerce.service:
-        storefrontBaseUrl: https://www.acme.dev
+        storefrontBaseUrl: https://www.acme.example
+    # queue, cron and outbox work runs in `commerce-worker`
     workers:
       split: true
       resources:
@@ -178,4 +187,3 @@ environments:
         instances:
           min: 1
           max: 4
-      # queue, cron and outbox in `commerce-worker`

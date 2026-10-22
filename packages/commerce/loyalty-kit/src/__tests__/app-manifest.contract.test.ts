@@ -11,7 +11,7 @@
  */
 import { describe, it } from "@stackra/testing";
 import { expectBackwardCompatible, loadManifest, previousRelease } from "@stackra/gen/testing";
-import { LoyaltyKitModule } from "@stackra/loyalty-kit/node";
+import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 
 /**
  * Guards the module's published manifest contract so a release cannot silently break hosts built on
@@ -21,7 +21,7 @@ describe(LoyaltyKitModule, () => {
   /** The diff against the last published manifest is the whole test; any removal fails it. */
   it("only adds to the last release", async () => {
     expectBackwardCompatible(
-      await previousRelease("@stackra/loyalty-kit"),
+      await previousRelease("@acme/loyalty-kit"),
       await loadManifest("./.stackra/app-manifest.json"),
     );
   });

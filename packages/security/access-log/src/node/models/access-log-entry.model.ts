@@ -24,7 +24,7 @@ export class AccessLogEntry extends Model.with(HasPublicId("acl"), BelongsToTena
   @Enumerated(DataClassification) classification!: DataClassification;
   /**
    * The actor with its `onBehalfOf` chain; validated loosely because the Actor shape is owned by
-   * @stackra/contracts.
+   * `@stackra/contracts`.
    */
   @Json(z.object({ type: z.string(), id: z.string() }).passthrough()) actor!: Record<
     string,

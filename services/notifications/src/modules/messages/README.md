@@ -1,8 +1,9 @@
 # messages
 
-One outbound message per command, delivered by a retried job; the in-app inbox; notification preferences; the
-inbound-mail receiver. Producers render their own mail (React Email) and queue `message.send` with subject, html and
-text; this module keeps the dedup row, resolves the recipient and sends through the `MailTransport` port.
+One outbound message per command, delivered by a retried job; the in-app inbox; notification
+preferences; the inbound-mail receiver. Producers render their own mail (React Email) and queue
+`message.send` with subject, html and text; this module keeps the dedup row, resolves the recipient
+and sends through the `MailTransport` port.
 
 | Kind        | File                                                      | Shows                                                                          |
 | ----------- | --------------------------------------------------------- | ------------------------------------------------------------------------------ |

@@ -30,7 +30,7 @@ export const PointsBalance: OverrideComponent<typeof PointsBalanceTile> = ({
   return (
     <Card aria-busy={isRefreshing}>
       <Stat
-        label={t(I18n.loyalty_kit.widgets.points_issued)}
+        label={t(I18n.loyalty_kit.widgets.points_balance)}
         value={data?.balance ?? 0}
         badge={data && t(data.tier.label)}
       />

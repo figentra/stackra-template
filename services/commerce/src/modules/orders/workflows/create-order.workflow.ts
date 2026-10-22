@@ -11,10 +11,10 @@
  */
 import { Backoff } from "@stackra/queue";
 import { Step, Workflow, WorkflowBase, type StepContext } from "@stackra/workflow";
-import { PaymentsClient } from "#stackra/clients";
-import { StockService } from "#modules/inventory/services/stock.service";
-import { OrderService } from "#modules/orders/services/order.service";
-import { OrderPricingService } from "#modules/orders/services/order-pricing.service";
+import type { PaymentsClient } from "#stackra/clients";
+import type { StockService } from "#modules/inventory/services/stock.service";
+import type { OrderService } from "#modules/orders/services/order.service";
+import type { OrderPricingService } from "#modules/orders/services/order-pricing.service";
 import type { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
 import type { CreateOrderOutput } from "#modules/orders/schemas/create-order-output.schema";
 import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";

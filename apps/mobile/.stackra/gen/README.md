@@ -3,7 +3,7 @@
 Built from the committed manifests of the services this app consumes (inferred from
 `#stackra/clients` imports), filtered to `stackra.config.ts` `modules` (the compile-time module
 list, ordered topologically from the manifests' dependency graph), the decorated classes under
-`src/`, the app's own `assets/lang`, `src/overrides/` and the capability map of the `expo` target
+`src/`, the app's own `assets/lang`, `src/overrides/`, `assets/overrides/` and the capability map of the `expo` target
 (ADR 0250). Metro serves these files from disk; `stackra dev` rewrites them on save. Code imports
 them only as `#stackra/<name>`.
 

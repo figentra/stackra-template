@@ -1,13 +1,13 @@
 /**
  * Stackra file contract:
- * Purpose: proves each ADR 0207 safeguard of the inbound-cancel receiver: a bad signature is
+ * Purpose: proves each safeguard of the inbound-cancel receiver: a bad signature is
  *          refused before parsing; a DKIM or SPF failure, or a sender that is not exactly a
  *          verified customer address, queues nothing; a proven sender queues the cancel on behalf
  *          of that customer.
  * Boundary: unit tier; the receiver is invoked with `deliverWebhook` (signed or not); the commerce
  *           client is faked by class; identity is faked with one verified address.
  * Runtime: node
- * Governing contract: ADR 0082, ADR 0260 d4, ADR 0022, ADR 0207
+ * Governing contract: ADR 0082, ADR 0260 d4, ADR 0022
  */
 import { describe, expect, it } from "@stackra/testing";
 import { actors } from "@stackra/iam/testing";
@@ -27,7 +27,7 @@ import { MailAuthResult } from "#modules/messages/enums/mail-auth-result.enum";
 /** Test signing secret; set through config like the real one, never a production value. */
 const SECRET = "test-signing-secret";
 /** The customer's verified address; the only sender allowed to act for them. */
-const ADDRESS = "customer@example.test";
+const ADDRESS = "customer@acme.example";
 /** A commerce order id: this service has no factory for another service's records. */
 const ORDER_ID = "ord_00000000000000000000000001";
 
@@ -71,7 +71,7 @@ describe(InboundMailWebhook, () => {
     await deliverWebhook(InboundMailWebhook, mail(ADDRESS, MailAuthResult.Fail), {
       secret: SECRET,
     });
-    await deliverWebhook(InboundMailWebhook, mail("other@example.test"), { secret: SECRET });
+    await deliverWebhook(InboundMailWebhook, mail("other@acme.example"), { secret: SECRET });
 
     expect(commerce.queued(commerce.order.cancel)).toEqual([]);
   });

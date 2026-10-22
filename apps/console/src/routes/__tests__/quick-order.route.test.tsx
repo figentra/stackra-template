@@ -88,7 +88,7 @@ describe(QuickOrderRoute, () => {
     renderRoute(Routes.quick_order, { locale: "en", clients: [commerce], session: STAFF });
     await pickVariant();
     await userEvent.click(screen.getByRole("button", { name: "Place order" }));
-    expect(await screen.findByText(/insufficient stock/i)).toBeTruthy();
+    expect(await screen.findByText("Not enough stock.")).toBeTruthy();
   });
 
   /** With the flag off for the tenant the route is not there at all. */

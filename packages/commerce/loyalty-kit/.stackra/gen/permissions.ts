@@ -36,7 +36,7 @@ export const permissions = {
   "loyalty_kit.loyalty_account.redeem": {
     class: "LoyaltyAccountPermissions.redeem",
     risk: "L1",
-    usedBy: ["loyalty_kit.points.redeem"],
+    usedBy: ["loyalty_kit.points.redeem", "loyalty_kit.points.confirm_redemption"],
     policy: "LoyaltyAccountPolicy.redeem",
   },
   "loyalty_kit.loyalty_account.expire": {

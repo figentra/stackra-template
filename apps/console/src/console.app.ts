@@ -23,10 +23,9 @@ import { TenantProvider } from "#src/providers/tenant/tenant.provider";
 
 /**
  * Session → tenant → query (scoped by tenant) → realtime (joins the tenant's channel) → flags
- * (targeted by tenant)
- * → platform → toasts (innermost, so every provider above can raise one). Container, i18n, theming,
- * consent,
- * analytics and telemetry are mounted by `createApp` from their config classes and are not listed.
+ * (targeted by tenant) → platform → toasts (innermost, so every provider above can raise one).
+ * Container, i18n, theming, consent, analytics and telemetry are mounted by `createApp` from their
+ * config classes and are not listed.
  */
 @App({
   panels: [TenantAdminPanel, CustomerPortalPanel],

@@ -1,9 +1,10 @@
 // Stackra file contract:
-// Purpose: shared oxlint base — correctness is an error, suspicious a warning, `any` and unused code are errors.
-//          Do NOT extend directly from a workspace; extend a role preset (node/react/decorators).
-// Scope: every TypeScript/JavaScript file in the repo
-// Owner: release-operations
-// Secrets: forbidden
+// Purpose: shared oxlint base: correctness is an error, suspicious a warning, `any`, unused code and
+//          value imports used only as types are errors.
+// Boundary: never extended directly by a member; a member extends a role preset (node, react,
+//           decorators) or, at the repository root, boundaries.
+// Runtime: node
+// Governing contract: Stackra ADR 0129 (house lint rules), Stackra ADR 0007 (TSDoc tags)
 {
   "$schema": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc", "import", "jsdoc"],
@@ -11,18 +12,21 @@
   "env": { "es2024": true },
   "rules": {
     "no-console": "off",
+    // `self.__WB_MANIFEST` is the name Workbox injects the precache list into; nothing else may
+    // start or end with an underscore
+    "no-underscore-dangle": ["warn", { "allow": ["__WB_MANIFEST"] }],
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "typescript/no-explicit-any": "error",
     "typescript/consistent-type-imports": "error",
     "typescript/no-non-null-assertion": "error",
     // Mutating sort on a freshly-built local array is fine; toSorted() is noise here.
     "unicorn/no-array-sort": "off",
-    // Empty files are allowed for placeholders and test setup.
+    // Empty files are allowed for side-effect-only test setup modules.
     "unicorn/no-empty-file": "off",
     // Side-effect imports for CSS and polyfills.
     "import/no-unassigned-import": "off",
     "import/no-cycle": "error",
-    // TSDoc tags (ADR 0007, amended 2026-10-21). oxlint 1.86 has no jsdoc/no-types, so the `{type}`
+    // TSDoc tags (Stackra ADR 0007, amended 2026-10-21). oxlint 1.86 has no jsdoc/no-types, so the `{type}`
     // ban lives in `stackra validate` (the doc-standard check).
     "jsdoc/check-tag-names": [
       "error",
@@ -43,10 +47,10 @@
           "remarks",
           "sealed",
           "typeParam",
-          "virtual",
-        ],
-      },
-    ],
+          "virtual"
+        ]
+      }
+    ]
   },
   "ignorePatterns": [
     "**/dist/**",
@@ -55,6 +59,6 @@
     "**/node_modules/**",
     "**/.turbo/**",
     "**/*.d.ts",
-    "**/encore.gen/**",
-  ],
+    "**/encore.gen/**"
+  ]
 }

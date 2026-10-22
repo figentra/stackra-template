@@ -1,37 +1,49 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/v2.2.2/schema.json
 # Stackra file contract:
-# Purpose: git hooks: pre-commit format and lint on staged files plus a secret scan, commit-msg conventional
-#          commits, pre-push the committed contracts check and the affected gate. Installed by `pnpm install`
-#          (prepare runs `lefthook install`).
-# Boundary: advisory only; the CI Quality Gate (.github/workflows/ci.yml, `pnpm verify`) is the gate.
+# Purpose: git hooks. pre-commit: format, lint and spelling on staged files plus a secret scan;
+#          commit-msg: conventional commits; pre-push: the committed contracts check and the affected
+#          gate. The lefthook package installs the hooks itself on `pnpm install` (its install script
+#          is allowed in pnpm-workspace.yaml `allowBuilds`; it skips when CI is set).
+# Boundary: advisory only; the CI Quality Gate (.github/workflows/ci.yml) is the gate, so a commit
+#           made with `--no-verify` still meets every check before it reaches main.
 # Runtime: node
-# Governing contract: ADR 0158 (committed manifests), ADR 0173 (secrets never in git)
+# Governing contract: Stackra ADR 0158 (committed manifests), Stackra ADR 0173 (secrets never in git)
 
 pre-commit:
+  # The jobs read staged files only and never write, so they run side by side.
   parallel: true
   jobs:
+    # Formatting: every type oxfmt formats (CONTRIBUTING.md, "Formatting"); .oxfmtrc.jsonc ignores
+    # generated and vendored paths.
     - name: oxfmt
-      # every type oxfmt formats (CONTRIBUTING.md, "Formatting"); .oxfmtrc.jsonc ignores the rest
       glob:
         - "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"
         - "*.{json,jsonc,json5,yaml,yml,toml,md,mdx}"
-        - "*.{css,scss,less,html,graphql,vue}"
-      # --check, not --write: stage_fixed would stash unstaged work. oxfmt exits 2 when every staged file is on
-      # its ignore list (pnpm-lock.yaml alone): that is not a finding.
+        - "*.{css,html}"
+      # --check, not --write: stage_fixed would stash unstaged work. oxfmt exits 2 when every staged file
+      # is on its ignore list (pnpm-lock.yaml alone): that is not a finding.
       run: sh -c 'pnpm exec oxfmt --check "$@"; s=$?; [ $s -eq 2 ] && exit 0; exit $s' -- {staged_files}
+    # Lint: every JavaScript and TypeScript extension oxlint reads, against .oxlintrc.jsonc.
     - name: oxlint
-      glob: "*.{ts,tsx,js,mjs,cjs}"
+      glob: "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"
       run: pnpm exec oxlint {staged_files}
+    # Spelling: British English plus the project words in cspell.config.yaml; the files it ignores
+    # (translations outside English, generated output) are listed there.
+    - name: cspell
+      glob: "*.{md,mdx,ts,tsx,css,yaml,yml}"
+      run: pnpm exec cspell lint --no-progress --no-must-find-files --dot {staged_files}
+    # Secrets: the staged diff only, with the repository policy; findings are redacted.
     - name: gitleaks
       run: |
         if command -v gitleaks >/dev/null 2>&1; then
-          gitleaks git --pre-commit --staged --config .gitleaks.toml --no-banner --redact
+          gitleaks git --pre-commit --staged --redact --no-banner --config .gitleaks.toml
         else
-          echo "gitleaks not installed (mise install) — CI still scans"
+          echo "gitleaks not installed (mise install): CI still scans"
         fi
 
 commit-msg:
   jobs:
+    # Conventional commits with the house rules of @stackra/commitlint-config (.commitlintrc.yaml).
     - name: commitlint
       run: pnpm exec commitlint --edit {1}
 
@@ -40,5 +52,6 @@ pre-push:
     # Committed .stackra/app-manifest.json and openapi.json equal what gen derives now.
     - name: gen-check
       run: pnpm exec stackra gen --check
+    # The full gate over the members the pushed commits touch.
     - name: verify-affected
       run: pnpm exec stackra verify --affected

@@ -1,6 +1,20 @@
 {
+  "$schema": "https://www.schemastore.org/claude-code-launch.json",
+  "$comment": "Purpose: the dev servers Claude Code's preview starts, one per web-facing app member. Boundary: each entry runs the member's own `dev` script; the ports repeat each member runway.yaml `environments.dev.port` because this format cannot read it, so change both together. Runtime: node. Governing contract: Stackra ADR 0282 (agent setup).",
   "version": "0.0.1",
   "configurations": [
+    {
+      "name": "console",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@acme/console", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@acme/web", "dev"],
+      "port": 5175
+    },
     {
       "name": "docs",
       "runtimeExecutable": "pnpm",

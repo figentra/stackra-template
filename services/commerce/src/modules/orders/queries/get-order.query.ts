@@ -6,7 +6,7 @@
  * Governing contract: ADR 0098, 0155, guides/programming-model.mdx#queries
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { OrderView } from "#modules/orders/schemas/order-view.schema";
 import { GetOrderInput } from "#modules/orders/schemas/get-order-input.schema";

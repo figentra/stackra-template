@@ -3,8 +3,8 @@
  * Purpose: one fact: what a "site" is for this app. Which hosts are previews (never indexed), an
  *          optional fixed site for a single-tenant deployment, the product whose plan ladder the
  *          pricing pages sell, and where "start trial" goes.
- * Boundary: values only. The resolution itself is `server/resolve-site.server.ts`, which reads this
- *           through the route context. Preview prefixes per environment come through runway
+ * Boundary: values only. The resolution itself is `providers/site/resolve-site.ts`, which reads
+ *           this through the route context. Preview prefixes per environment come through runway
  *           `config.web.site`.
  * Runtime: isomorphic
  * Governing contract: ADR 0175 (tenant domains through the edge), ADR 0242 (plan ladders per

@@ -5,7 +5,6 @@
  * Boundary: adds the jsdom environment to the base preset; the consumer owns its setup file.
  * Runtime: node
  * Governing contract: ADR 0007 (documentation).
- * Owner: release-operations · Secrets: forbidden
  */
 import { defineConfig, mergeConfig } from "vitest/config";
 import { stackraVitest } from "./preset.ts";

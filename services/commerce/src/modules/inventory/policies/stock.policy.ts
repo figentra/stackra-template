@@ -8,7 +8,7 @@
 import { Decision, Policy, type PolicyFor } from "@stackra/iam";
 import { Realm, type Actor } from "@stackra/contracts";
 import { StockLevel } from "#modules/inventory/models/stock-level.model";
-import { StockPermissions } from "#modules/inventory/permissions/stock.permission";
+import type { StockPermissions } from "#modules/inventory/permissions/stock.permission";
 
 /** Record-level rules for stock: only the tenant's own staff and its services adjust. */
 @Policy(StockLevel)

@@ -8,7 +8,7 @@
  */
 import { Facts, type ContextFacts, type ContextRequest } from "@stackra/ai";
 import { Order } from "#modules/orders/models/order.model";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 
 /**

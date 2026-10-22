@@ -8,7 +8,8 @@ Governing contract: root AGENTS.md
 
 # AGENTS — @acme/service-notifications
 
-- Owner: your team (`.github/CODEOWNERS`). This member is delivery, preferences, the message log and the in-app inbox.
+- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is delivery, preferences, the
+  message log and the in-app inbox.
 - Behaviour is decorated actions and queries; never hand-write Encore (`stackra gen` emits it).
 - Commerce is reached through events and generated clients only, never its source.
 - Secrets: forbidden; secret values come from the project's secret store at run time.

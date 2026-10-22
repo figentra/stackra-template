@@ -10,7 +10,8 @@
  * Governing contract: ADR 0164 (panels are resources), ADR 0139,
  *                     guides/programming-model.mdx#resources
  */
-import { Infolist, Resource, Table } from "@stackra/panel";
+import type { Infolist, Table } from "@stackra/panel";
+import { Resource } from "@stackra/panel";
 import { Icons } from "@stackra/ui/icons";
 import { Realm } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";

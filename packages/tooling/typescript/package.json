@@ -2,7 +2,7 @@
   "name": "@stackra/typescript-config",
   "version": "0.1.0",
   "private": true,
-  "description": "Shared tsconfig presets, imported with their file name (`@stackra/typescript-config/service.json`). A member extends exactly one role preset and adds no compiler options of its own.",
+  "description": "Shared tsconfig presets by role: a member's tsconfig.json is exactly { \"extends\": \"@stackra/typescript-config/<role>\" } with app, mobile, library, service or tooling, and adds no compiler options of its own.",
   "license": "MIT",
   "files": [
     "src/*.json",
@@ -12,20 +12,15 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./src/base.json",
-    "./base.json": "./src/base.json",
-    "./node.json": "./src/node.json",
-    "./library.json": "./src/library.json",
-    "./decorators.json": "./src/decorators.json",
-    "./decorators-react.json": "./src/decorators-react.json",
-    "./service.json": "./src/service.json",
-    "./encore.json": "./src/encore.json",
-    "./react.json": "./src/react.json",
-    "./vite.json": "./src/vite.json",
-    "./vite-node.json": "./src/vite-node.json",
-    "./runtime.json": "./src/runtime.json",
-    "./app.json": "./src/app.json",
-    "./expo.json": "./src/expo.json"
+    "./app": "./src/app.json",
+    "./mobile": "./src/mobile.json",
+    "./library": "./src/library.json",
+    "./service": "./src/service.json",
+    "./tooling": "./src/tooling.json",
+    "./desktop": "./src/desktop.json",
+    "./service-worker": "./src/service-worker.json",
+    "./encore": "./src/encore.json",
+    "./runtime": "./src/runtime.json"
   },
   "scripts": {
     "format": "oxfmt --write .",

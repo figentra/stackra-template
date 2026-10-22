@@ -9,7 +9,7 @@
  *                     guides/programming-model.mdx#widgets
  */
 import { SystemRole } from "@stackra/iam";
-import { Widget } from "@stackra/panel";
+import { Widget, WidgetSize } from "@stackra/panel";
 import { Slots } from "#stackra/slots";
 import { Realm } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";
@@ -26,7 +26,7 @@ import { RevenueSparkline } from "#modules/orders/override-points/revenue-sparkl
   title: I18n.orders.widgets.revenue_today,
   realms: [Realm.TenantAdmin],
   slot: Slots.Dashboard.Header,
-  size: "sm",
+  size: WidgetSize.Small,
   query: OrdersTodayQuery,
   component: RevenueSparkline,
   permission: OrderPermissions.read,

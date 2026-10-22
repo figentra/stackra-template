@@ -89,8 +89,8 @@ class MenusConfig {
   @Bool() contextMenu = true;
   /** Electron menu roles kept besides the contributed items. */
   @List(Str) standardRoles: string[] = ["undo", "redo", "cut", "copy", "paste", "selectAll"];
-  /** The Help menu's documentation link. @defaultValue "https://docs.acme.dev/console" */
-  @Url() docsUrl = "https://docs.acme.dev/console";
+  /** The Help menu's documentation link. @defaultValue "https://docs.acme.example/console" */
+  @Url() docsUrl = "https://docs.acme.example/console";
 }
 
 /** The tray icon. */
@@ -117,8 +117,11 @@ class DeepLinksConfig {
   @Str({ pattern: /^[a-z][a-z0-9-]+$/ }) scheme = "acme-console";
   /** Also claim the app's https origin as universal links. @defaultValue false */
   @Bool() claimHttpsOrigin = false;
-  /** Route a deep link opens; `%s` is the path after the scheme. @defaultValue "/open?url=%s" */
-  @Str() route = "/open?url=%s";
+  /**
+   * Route a deep link opens; `%s` is the link after the scheme, which the `/open` route
+   * (`OpenRoute`) resolves to an in-app path or refuses. @defaultValue "/open?url=%s"
+   */
+  @Str({ pattern: /^\/open\?url=%s$/ }) route = "/open?url=%s";
 }
 
 /** Auto-update behaviour; the active channel per environment is runway's. */
@@ -145,7 +148,8 @@ class UpdatesConfig {
 /** Renderer permission requests main grants; everything else is denied by the baseline. */
 class PermissionsConfig {
   /**
-   * Electron permission names granted.
+   * Electron permission names granted; `usb` and `hid` serve the POS peripherals and match the
+   * `com.apple.security.device.usb` entitlement in `packaging.macEntitlements`.
    * @defaultValue ["notifications", "clipboard-read", "fullscreen", "usb", "hid"]
    */
   @List(
@@ -162,10 +166,11 @@ class PermissionsConfig {
   )
   allow = ["notifications", "clipboard-read", "fullscreen", "usb", "hid"];
   /**
-   * Origins the renderer may navigate to; everything else opens in the system browser.
-   * @defaultValue ["app://"]
+   * Origins the renderer may navigate to; everything else opens in the system browser. The
+   * packaged renderer is served from `app://bundle`, so no other `app:` host is reachable.
+   * @defaultValue ["app://bundle"]
    */
-  @List(Str) allowedNavigationOrigins: string[] = ["app://"];
+  @List(Str) allowedNavigationOrigins: string[] = ["app://bundle"];
 }
 
 /** Tighten-only knobs; the baseline cannot be loosened from config (ADR 0251 d3). */
@@ -178,12 +183,12 @@ class HardeningConfig {
 
 /** electron-builder packaging; runway's `release.desktop.platforms` may only narrow it. */
 class PackagingConfig {
-  /** Bundle identifier. @defaultValue "dev.acme.console" */
-  @Str() appId = "dev.acme.console";
-  /** Name in the dock and the start menu. @defaultValue "Console" */
-  @Str() productName = "Console";
-  /** Copyright line of the installers. @defaultValue "© Acme" */
-  @Str() copyright = "© Acme";
+  /** Bundle identifier, the reverse of the product domain. @defaultValue "example.acme.console" */
+  @Str() appId = "example.acme.console";
+  /** Name in the dock and the start menu. @defaultValue "Acme Console" */
+  @Str() productName = "Acme Console";
+  /** Copyright line of the installers. @defaultValue "Copyright © 2026 Acme" */
+  @Str() copyright = "Copyright © 2026 Acme";
   /** macOS targets; `zip` is required by electron-updater. @defaultValue ["dmg", "zip"] */
   @List(OneOf(["dmg", "zip", "pkg", "mas"])) mac = ["dmg", "zip"];
   /** Windows targets. @defaultValue ["nsis"] */
@@ -220,22 +225,12 @@ export class DesktopConfig {
   };
   /** Named overlays, each opened by its shortcut, the tray menu or an in-app button. */
   @Map(Nested(OverlayConfig)) overlays: Record<string, OverlayConfig> = {
-    // Claude-style prompt bar centred on the active display; Esc or blur closes it.
+    // A launcher bar centred on the active display that takes a quick order; Esc or blur closes it.
     quick: Object.assign(new OverlayConfig(), {
       style: OverlayStyle.Launcher,
       route: "/quick-order",
       shortcut: "CommandOrControl+Shift+Space",
       anchor: OverlayAnchor.ScreenCenter,
-    }),
-    // Gemini-style card docked to the right edge. The dashboard stands in until an assistant
-    // route exists.
-    assistant: Object.assign(new OverlayConfig(), {
-      style: OverlayStyle.Panel,
-      route: "/",
-      anchor: OverlayAnchor.EdgeRight,
-      hideOnBlur: false,
-      pinnable: true,
-      resizable: true,
     }),
   };
   /** Which shell menus are shown and where Help points. */
@@ -256,6 +251,10 @@ export class DesktopConfig {
   @Bool() launchAtLoginDefault = false;
   /** Minidumps through the reporter port with the DSN from env. @defaultValue true */
   @Bool() crashReporter = true;
-  /** Where the offline queue lives on desktop. @defaultValue OfflineStore.NodeSqlite */
-  @OneOf(OfflineStore) offlineStore = OfflineStore.NodeSqlite;
+  /**
+   * Where the persisted query cache and the offline queue live on desktop: the same encrypted
+   * IndexedDB persister as web and PWA, with its key held by Electron `safeStorage`.
+   * @defaultValue OfflineStore.EncryptedIndexedDb
+   */
+  @OneOf(OfflineStore) offlineStore = OfflineStore.EncryptedIndexedDb;
 }

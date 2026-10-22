@@ -1,8 +1,8 @@
 // Stackra file contract:
-// Purpose: the repo-wide entry carrying the tier dependency rule (ADR 0003): a package
+// Purpose: the repo-wide entry carrying the tier dependency rule (Stackra ADR 0003): a package
 //          (packages/<category>/<name>) never imports an app, a service or encore.dev; a service never
 //          imports another service or hand-written Encore; an app never imports a service; nothing imports
-//          a package's src/ deep path. Package runtime splits (ADR 0004, v2 layout): core/ and contracts/
+//          a package's src/ deep path. Package runtime splits (Stackra ADR 0004): core/ and contracts/
 //          are isomorphic, react/ never reaches node/, native/ never reaches node/ or react-dom.
 //          oxlint does not merge one rule across overrides: the LAST matching override's options replace
 //          the earlier ones. So the no-restricted-imports overrides run general → specific and each one
@@ -10,7 +10,15 @@
 //          Not here, because they need the module graph: cross-module internals inside one member (gen
 //          fails on the import) and links point down (planned rule `no-upward-route-import`: only a route
 //          imports its layout and page class; everything else uses `Routes.x` from #stackra/routes).
-// Owner: the owner · Secrets: forbidden
+//          Service packages are matched by name in any npm scope (`@<scope>/service-<name>`), so the
+//          preset names no project's scope; service paths are matched as `services/<name>/src` or
+//          `services/<name>/.stackra`, so a member's own `services/` kind folder
+//          (`#node/services/x.service`) is not mistaken for a service member.
+// Boundary: import bans only; every other rule comes from node.jsonc, and the decorator rules from the
+//           last override below.
+// Runtime: node
+// Governing contract: Stackra ADR 0003 (tier direction), Stackra ADR 0004 (package entries), Stackra
+//                     ADR 0260 (cross-service calls through clients and events)
 {
   "extends": ["./node.jsonc"],
   "overrides": [
@@ -22,13 +30,13 @@
           {
             "patterns": [
               {
-                "group": ["@stackra/*/src/*"],
-                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths.",
-              },
-            ],
-          },
-        ],
-      },
+                "group": ["@*/*/src/*"],
+                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "files": ["**/services/**/*.ts", "**/services/**/*.tsx"],
@@ -38,17 +46,17 @@
           {
             "patterns": [
               {
-                "group": ["@stackra/*/src/*"],
-                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths.",
+                "group": ["@*/*/src/*"],
+                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths."
               },
               {
-                "group": ["encore.dev", "encore.dev/*", "~encore/*", "@acme/service-*"],
-                "message": "A service is plain TypeScript: no hand-written Encore (gen emits it into .stackra/encore/, ADR 0091, 0124) and no other service's package. Reach another service through its generated client from #stackra/clients or listen to its events (ADR 0260).",
-              },
-            ],
-          },
-        ],
-      },
+                "group": ["encore.dev", "encore.dev/*", "~encore/*", "@*/service-*"],
+                "message": "A service is plain TypeScript: no hand-written Encore (gen emits it into .stackra/encore/, Stackra ADR 0091, 0124) and no other service's package. Reach another service through its generated client from #stackra/clients or listen to its events (Stackra ADR 0260)."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "files": ["**/apps/**/*.ts", "**/apps/**/*.tsx"],
@@ -58,23 +66,24 @@
           {
             "patterns": [
               {
-                "group": ["@stackra/*/src/*"],
-                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths.",
+                "group": ["@*/*/src/*"],
+                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths."
               },
               {
                 "group": [
                   "encore.dev",
                   "encore.dev/*",
                   "~encore/*",
-                  "@acme/service-*",
-                  "**/services/**",
+                  "@*/service-*",
+                  "**/services/*/src/**",
+                  "**/services/*/.stackra/**"
                 ],
-                "message": "An app never imports a service or encore.dev. Call it through the generated client from #stackra/clients (ADR 0003, 0260).",
-              },
-            ],
-          },
-        ],
-      },
+                "message": "An app never imports a service or encore.dev. Call it through the generated client from #stackra/clients (Stackra ADR 0003, 0260)."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "files": ["**/packages/**/*.ts", "**/packages/**/*.tsx"],
@@ -84,31 +93,32 @@
           {
             "patterns": [
               {
-                "group": ["@stackra/*/src/*"],
-                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths.",
+                "group": ["@*/*/src/*"],
+                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths."
               },
               {
                 "group": [
                   "**/apps/**",
-                  "**/services/**",
-                  "@acme/*",
+                  "**/services/*/src/**",
+                  "**/services/*/.stackra/**",
+                  "@*/service-*",
                   "encore.dev",
                   "encore.dev/*",
-                  "~encore/*",
+                  "~encore/*"
                 ],
-                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (ADR 0260).",
-              },
-            ],
-          },
-        ],
-      },
+                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (Stackra ADR 0260)."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "files": [
         "**/packages/*/*/src/core/**/*.ts",
         "**/packages/*/*/src/contracts/**/*.ts",
         "**/packages/*/*/src/core/**/*.tsx",
-        "**/packages/*/*/src/contracts/**/*.tsx",
+        "**/packages/*/*/src/contracts/**/*.tsx"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -116,19 +126,20 @@
           {
             "patterns": [
               {
-                "group": ["@stackra/*/src/*"],
-                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths.",
+                "group": ["@*/*/src/*"],
+                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths."
               },
               {
                 "group": [
                   "**/apps/**",
-                  "**/services/**",
-                  "@acme/*",
+                  "**/services/*/src/**",
+                  "**/services/*/.stackra/**",
+                  "@*/service-*",
                   "encore.dev",
                   "encore.dev/*",
-                  "~encore/*",
+                  "~encore/*"
                 ],
-                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (ADR 0260).",
+                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (Stackra ADR 0260)."
               },
               {
                 "group": [
@@ -140,14 +151,14 @@
                   "#native/*",
                   "react",
                   "react-dom",
-                  "react-native",
+                  "react-native"
                 ],
-                "message": "core/ and contracts/ are isomorphic: no runtime split (node/, react/, native/) and no host library (ADR 0004).",
-              },
-            ],
-          },
-        ],
-      },
+                "message": "core/ and contracts/ are isomorphic: no runtime split (node/, react/, native/) and no host library (Stackra ADR 0004)."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "files": ["**/packages/*/*/src/react/**/*.ts", "**/packages/*/*/src/react/**/*.tsx"],
@@ -157,28 +168,29 @@
           {
             "patterns": [
               {
-                "group": ["@stackra/*/src/*"],
-                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths.",
+                "group": ["@*/*/src/*"],
+                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths."
               },
               {
                 "group": [
                   "**/apps/**",
-                  "**/services/**",
-                  "@acme/*",
+                  "**/services/*/src/**",
+                  "**/services/*/.stackra/**",
+                  "@*/service-*",
                   "encore.dev",
                   "encore.dev/*",
-                  "~encore/*",
+                  "~encore/*"
                 ],
-                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (ADR 0260).",
+                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (Stackra ADR 0260)."
               },
               {
                 "group": ["#node", "#node/*"],
-                "message": "react/ runs in the browser and React Native: it never imports the node/ runtime split (ADR 0004).",
-              },
-            ],
-          },
-        ],
-      },
+                "message": "react/ runs in the browser and React Native: it never imports the node/ runtime split (Stackra ADR 0004)."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "files": ["**/packages/*/*/src/native/**/*.ts", "**/packages/*/*/src/native/**/*.tsx"],
@@ -188,28 +200,29 @@
           {
             "patterns": [
               {
-                "group": ["@stackra/*/src/*"],
-                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths.",
+                "group": ["@*/*/src/*"],
+                "message": "Deep imports into a package's src/ bypass its public exports. Import the package or one of its declared subpaths."
               },
               {
                 "group": [
                   "**/apps/**",
-                  "**/services/**",
-                  "@acme/*",
+                  "**/services/*/src/**",
+                  "**/services/*/.stackra/**",
+                  "@*/service-*",
                   "encore.dev",
                   "encore.dev/*",
-                  "~encore/*",
+                  "~encore/*"
                 ],
-                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (ADR 0260).",
+                "message": "A package never imports an app, a service or encore.dev. Move the dependency the other way, or define a port in the package's ./contracts that the service implements (Stackra ADR 0260)."
               },
               {
                 "group": ["#node", "#node/*", "react-dom", "react-dom/*"],
-                "message": "native/ composes react, never node/ or react-dom (ADR 0004).",
-              },
-            ],
-          },
-        ],
-      },
+                "message": "native/ composes react, never node/ or react-dom (Stackra ADR 0004)."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "files": [
@@ -218,42 +231,43 @@
         "**/services/**/*.ts",
         "**/packages/**/*.tsx",
         "**/apps/**/*.tsx",
-        "**/services/**/*.tsx",
+        "**/services/**/*.tsx"
       ],
+      // Decorator factories are PascalCase, so `new-cap` must not treat them as constructors; an empty
+      // decorated class (`@Module({...}) class X {}`) is the normal spelling of a kind.
       "rules": {
-        "typescript/consistent-type-imports": "off",
         "eslint/new-cap": [
           "warn",
           {
-            "capIsNew": false,
-          },
+            "capIsNew": false
+          }
         ],
         "typescript/no-extraneous-class": [
           "error",
           {
-            "allowWithDecorator": true,
-          },
-        ],
-      },
+            "allowWithDecorator": true
+          }
+        ]
+      }
     },
     {
       "files": [
         "**/packages/**/src/react/**/*.{ts,tsx}",
         "**/packages/**/src/native/**/*.{ts,tsx}",
-        "**/apps/**/*.tsx",
+        "**/apps/**/*.tsx"
       ],
       "plugins": ["react"],
       "rules": {
         "react/react-in-jsx-scope": "off",
         "react/rules-of-hooks": "error",
-        "react/exhaustive-deps": "warn",
-      },
+        "react/exhaustive-deps": "warn"
+      }
     },
     {
       "files": ["**/__tests__/**/*.ts", "**/__tests__/**/*.tsx", "**/__fixtures__/**/*.ts"],
       "rules": {
-        "typescript/no-extraneous-class": "off",
-      },
-    },
-  ],
+        "typescript/no-extraneous-class": "off"
+      }
+    }
+  ]
 }

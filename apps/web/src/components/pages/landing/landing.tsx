@@ -13,6 +13,7 @@ import { useTranslation } from "@stackra/i18n/react";
 import type { RouteComponent } from "@stackra/navigation";
 import { Icons } from "@stackra/ui/icons";
 import { I18n } from "#stackra/i18n";
+import { Routes } from "#stackra/routes";
 import { CtaBanner } from "#src/blocks/cta-banner";
 import { FaqSection } from "#src/blocks/faq-section";
 import { FeatureGrid } from "#src/blocks/feature-grid";
@@ -39,8 +40,8 @@ export const LandingPage: RouteComponent<typeof LandingRoute> = ({ data }) => {
       <HeroSection
         title={t(I18n.web.hero.title)}
         subtitle={t(I18n.web.hero.subtitle)}
-        cta={{ label: t(I18n.web.hero.cta), route: "pricing" }}
-        secondary={{ label: t(I18n.web.hero.secondary), route: "store" }}
+        cta={{ label: t(I18n.web.hero.cta), route: Routes.pricing.name }}
+        secondary={{ label: t(I18n.web.hero.secondary), route: Routes.store.name }}
       />
       <FeatureGrid title={t(I18n.web.features.title)} features={features} />
       <PricingTable data={data.ladder} product={site.product} />
@@ -53,7 +54,7 @@ export const LandingPage: RouteComponent<typeof LandingRoute> = ({ data }) => {
       <CtaBanner
         title={t(I18n.web.cta.title)}
         body={t(I18n.web.cta.body)}
-        button={{ label: t(I18n.web.cta.button), route: "pricing" }}
+        button={{ label: t(I18n.web.cta.button), route: Routes.pricing.name }}
       />
     </>
   );

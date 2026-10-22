@@ -22,7 +22,7 @@ import {
 } from "@stackra/actions";
 import { CacheEvict } from "@stackra/cache";
 import { I18n } from "#stackra/i18n";
-import { ProductService } from "#modules/catalogue/services/product.service";
+import type { ProductService } from "#modules/catalogue/services/product.service";
 import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 import { ArchiveProductInput } from "#modules/catalogue/schemas/archive-product-input.schema";
 import { ProductView } from "#modules/catalogue/schemas/product-view.schema";

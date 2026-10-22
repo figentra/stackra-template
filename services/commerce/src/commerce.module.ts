@@ -9,8 +9,8 @@
  * Governing contract: ADR 0090, 0263, guides/programming-model.mdx#modules and ADR 0266
  */
 import { Module } from "@stackra/container";
-import { AccessLogModule } from "@stackra/access-log/node";
-import { LoyaltyKitModule } from "@stackra/loyalty-kit/node";
+import { AccessLogModule } from "@acme/access-log/node";
+import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 
 /** Values for both packages live in src/config/*.config.ts; a custom driver is `@Replaces`. */
 @Module({ key: "commerce", imports: [LoyaltyKitModule, AccessLogModule] })

@@ -6,7 +6,7 @@
  *           (`overrides/<module>/`) is omitted because the point is this package's own; an app
  *           overriding it writes `overrides/loyalty_kit/components/points-balance.override.tsx`.
  * Runtime: browser
- * Governing contract: ADR 0234 d9 (amended: `overrides/`)
+ * Governing contract: ADR 0164, guides/programming-model.mdx#overrides
  */
 import { Override } from "@stackra/panel";
 import { PointsBalanceTile } from "#core/override-points/points-balance.point";

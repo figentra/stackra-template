@@ -5,8 +5,7 @@
  * Boundary: an app-local class enum (only the public site shows the toggle); `months` is what turns
  *           a yearly price into its per-month display.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (enums are classes), ADR 0231 (snake_case codes), ADR 0242 (plan
- *                     ladders)
+ * Governing contract: ADR 0231 (snake_case codes), ADR 0242 (plan ladders)
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

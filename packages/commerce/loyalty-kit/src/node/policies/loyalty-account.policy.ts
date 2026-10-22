@@ -12,7 +12,7 @@
 import { Decision, Policy, type PolicyFor } from "@stackra/iam";
 import { Realm, type Actor } from "@stackra/contracts";
 import { LoyaltyAccount } from "#node/models/loyalty-account.model";
-import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
+import type { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
 
 /**
  * Decides per account after the permission check passed. `Deny` overrides a granted permission;

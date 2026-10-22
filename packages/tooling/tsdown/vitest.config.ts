@@ -1,13 +1,11 @@
 /**
  * Stackra file contract:
- * Purpose: test config of @stackra/tsdown-config — plain vitest for the preset's own tests; `passWithNoTests` off so an
- *          empty suite fails (AGENTS.md). A tooling preset does not consume the framework vitest preset it ships.
- * Scope: @stackra/tsdown-config (tests).
- * Owner: release-operations
- * Secrets: forbidden
+ * Purpose: test config of @stackra/tsdown-config: the `tooling` role of the vitest presets (plain Node,
+ *          explicit vitest imports, an empty suite fails).
+ * Boundary: the preset's own tests only; it adds nothing to the role.
+ * Runtime: node
+ * Governing contract: Stackra ADR 0022 (test placement)
  */
-import { defineConfig } from "vitest/config";
+import { tooling } from "@stackra/vitest-config";
 
-export default defineConfig({
-  test: { include: ["src/**/__tests__/**/*.test.ts"], passWithNoTests: false },
-});
+export default tooling;

@@ -8,9 +8,16 @@ Governing contract: root AGENTS.md
 
 # AGENTS — @acme/web
 
-- Owner: your team (`.github/CODEOWNERS`). This member is the public site (React Router 7 on a Worker).
-- UI, routes and server loaders only; data comes from the services through the generated clients (`#stackra/clients`).
-- `.stackra/` holds generated samples; change `stackra.config.ts` and rerun `stackra gen`, never edit them.
+- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is the public site (React Router
+  7 on a Worker).
+- UI, routes and server loaders only; data comes from the services through the generated clients
+  (`#stackra/clients`).
+- `.stackra/` holds generated samples; change `stackra.config.ts` and rerun `stackra gen`, never
+  edit them.
+- A GET for HTML never sets a cookie (consent and the locale choice are written in the browser after
+  the visitor acts); `landing.e2e.test.ts` asserts it on every page.
+- No route module imports server-only code: clients and the server env reach loaders through the
+  Worker's load context.
 - Secrets: forbidden; secret values come from the project's secret store at run time.
 
 ## PII

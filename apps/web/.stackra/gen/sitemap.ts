@@ -3,7 +3,9 @@
  * `prerender: true` and the sitemap sources of the consumed manifests (experience
  * pages.sitemap.get, commerce catalogue.product.list_storefront) — do not edit
  * Purpose: the sitemap sources: the prerendered marketing routes, the tenant's builder pages and
- *          the storefront products. `routes/sitemap.route.ts` writes the XML.
+ *          the storefront products. Each `list` answers one cursor page (or everything, when the
+ *          query has no cursor); `@stackra/seo/sitemap` walks the cursors into numbered files and
+ *          `route-modules/sitemap.ts` writes the XML.
  * Boundary: data plus the listers bound to the consumed queries; links are built from
  *           `#stackra/routes` keys, so no route module is imported.
  * Runtime: worker
@@ -17,37 +19,37 @@ import { Routes } from "#stackra/routes";
 /** Build timestamp the generated Vite config defines; `lastmod` of prerendered pages. */
 declare const __BUILD_TIME__: string;
 
-/** One file per source under `/sitemaps/<name>.xml`; the index at `/sitemap.xml` lists them. */
+/** One source per name; the index lists `/sitemaps/<name>-<page>.xml` for each. */
 export const sitemapSources: Record<string, SitemapSource<PublicClients>> = {
   marketing: {
     changefreq: Changefreq.Weekly,
-    list: async (_clients, _site, href) =>
-      [Routes.landing, Routes.pricing, Routes.contact].map((route) => ({
+    list: async (_clients, _site, href) => ({
+      items: [Routes.landing, Routes.pricing, Routes.contact].map((route) => ({
         path: href(route),
         updatedAt: __BUILD_TIME__,
       })),
+    }),
   },
   pages: {
     changefreq: Changefreq.Weekly,
-    list: async (clients, site) =>
-      (await clients.query(Experience.queries.GetPagesSitemap, { siteId: site.siteId })).entries,
+    // one answer with every published path; the helper splits it into files of `pageSize`
+    list: async (clients, site) => ({
+      items: (await clients.query(Experience.queries.GetPagesSitemap, { siteId: site.siteId }))
+        .entries,
+    }),
   },
   products: {
     changefreq: Changefreq.Daily,
-    list: async (clients, _site, href) => {
-      const entries: { path: string; updatedAt?: string; image?: string }[] = [];
-      let cursor: string | undefined;
-      do {
-        const page = await clients.query(Commerce.queries.ListStorefrontProducts, {
-          cursor,
-          limit: 48,
-        });
-        for (const p of page.items) {
-          entries.push({ path: href(Routes.product, { slug: p.slug }), image: p.image?.url });
-        }
-        cursor = page.nextCursor;
-      } while (cursor);
-      return entries;
+    maxLimit: 100, // catalogue.product.list_storefront's own `limit` ceiling
+    list: async (clients, _site, href, { cursor, limit }) => {
+      const page = await clients.query(Commerce.queries.ListStorefrontProducts, { cursor, limit });
+      return {
+        items: page.items.map((product) => ({
+          path: href(Routes.product, { slug: product.slug }),
+          image: product.image?.url,
+        })),
+        nextCursor: page.nextCursor,
+      };
     },
   },
 };

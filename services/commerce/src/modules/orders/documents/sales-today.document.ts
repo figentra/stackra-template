@@ -7,10 +7,9 @@
  * Boundary: a declaration only: no markup, no expressions, no logic, nothing runs at request time.
  *           The kind is `documents/` (`@Document`) so that "page" means a page component in an app.
  * Runtime: node
- * Governing contract: ADR 0110, 0154, 0164, ADR 0264 d7 (amended: `documents/`),
- *                     guides/programming-model.mdx#documents
+ * Governing contract: ADR 0110, 0154, 0164, guides/programming-model.mdx#documents
  */
-import { Blocks, Document } from "@stackra/panel";
+import { Blocks, Document, DocumentLayout } from "@stackra/panel";
 import { Icons } from "@stackra/ui/icons";
 import { Realm } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";
@@ -31,7 +30,7 @@ import { OrderPermissions } from "#modules/orders/permissions/order.permission";
   realms: [Realm.TenantAdmin],
   permission: OrderPermissions.read,
   navigation: { group: I18n.orders.nav.sales, icon: Icons.Chart, order: 10 },
-  layout: "two-column",
+  layout: DocumentLayout.TwoColumn,
   blocks: [
     Blocks.widget(RevenueTodayWidget, { column: 1 }),
     Blocks.table(ListOrdersQuery, {

@@ -38,7 +38,7 @@ export function SessionContextProvider({ children }: SessionContextProviderProps
       oidc={{
         issuer: env.zitadelIssuer,
         clientId: env.zitadelClientId,
-        // stackra://auth/callback, registered on the ZITADEL native app
+        // acme://auth/callback, registered on the ZITADEL native app
         redirectUri: Linking.createURL(identity.nativeRedirectPath, { scheme: release.scheme }),
         postLogoutRedirectUri: Linking.createURL("/", { scheme: release.scheme }),
         scopes: identity.scopes,

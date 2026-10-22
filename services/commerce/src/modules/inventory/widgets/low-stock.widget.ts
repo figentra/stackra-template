@@ -8,7 +8,7 @@
  * Runtime: node
  * Governing contract: ADR 0164, guides/programming-model.mdx#widgets
  */
-import { Widget } from "@stackra/panel";
+import { Widget, WidgetSize } from "@stackra/panel";
 import { Slots } from "#stackra/slots";
 import { Realm } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";
@@ -24,7 +24,7 @@ import { StockPermissions } from "#modules/inventory/permissions/stock.permissio
   title: I18n.inventory.widgets.low_stock,
   realms: [Realm.TenantAdmin],
   slot: Slots.Dashboard.Main,
-  size: "md",
+  size: WidgetSize.Medium,
   query: ListLowStockQuery,
   params: { limit: 5 },
   display: { kind: "list", primary: "variantId", secondary: "available" },

@@ -30,7 +30,7 @@ export function LoadingState({ label, fullScreen = false, rows = 3 }: LoadingSta
   const { t } = useTranslation();
   if (fullScreen) {
     return (
-      <div role="status" aria-busy="true" className="grid min-block-size-dvh place-items-center">
+      <div role="status" aria-busy="true" className="grid min-h-dvh place-items-center">
         <Spinner size="lg" aria-label={t(label)} />
       </div>
     );

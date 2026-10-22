@@ -16,11 +16,15 @@
         "catalogue.product.get_by_slug"
       ]
     },
-    { "service": "billing", "revision": "8e1b3d2", "uses": ["billing.catalog.plan.list"] },
-    { "service": "content", "revision": "4a9c7f1", "uses": ["content.entry.list"] },
+    {
+      "service": "billing",
+      "pin": "stackra.lock.yaml#billing",
+      "uses": ["billing.catalog.plan.list"]
+    },
+    { "service": "content", "pin": "stackra.lock.yaml#content", "uses": ["content.entry.list"] },
     {
       "service": "experience",
-      "revision": "b82d913",
+      "pin": "stackra.lock.yaml#experience",
       "uses": [
         "sites.site.resolve",
         "sites.site.get",
@@ -30,7 +34,7 @@
         "seo.not_found.record"
       ]
     },
-    { "service": "marketing", "revision": "c3d8e07", "uses": ["leads.lead.create"] }
+    { "service": "marketing", "pin": "stackra.lock.yaml#marketing", "uses": ["leads.lead.create"] }
   ],
   "providers": [
     {
@@ -54,8 +58,8 @@
       "class": "LandingRoute",
       "key": "landing",
       "path": "/",
-      "index": true,
       "layout": "SiteLayout",
+      "title": "web::hero.title",
       "prerender": true,
       "cache": "marketing",
       "loader": true,
@@ -67,11 +71,13 @@
       "key": "pricing",
       "path": "/pricing",
       "layout": "SiteLayout",
+      "title": "web::pricing.title",
       "prerender": true,
       "cache": "marketing",
       "loader": true,
       "meta": true,
       "flags": ["web.pricing_yearly_first"],
+      "derived": ["flags"],
       "component": "PricingPage"
     },
     {
@@ -79,6 +85,8 @@
       "key": "contact",
       "path": "/contact",
       "layout": "SiteLayout",
+      "title": "web::contact.title",
+      "search": "ContactSearch",
       "prerender": true,
       "cache": "marketing",
       "submit": true,
@@ -90,6 +98,8 @@
       "key": "store",
       "path": "/store",
       "layout": "SiteLayout",
+      "title": "web::store.title",
+      "search": "StoreSearch",
       "cache": "catalogue",
       "loader": true,
       "meta": true,
@@ -111,7 +121,7 @@
       "path": "*",
       "layout": "SiteLayout",
       "render": "client",
-      "fallback": "TenantPageFallback",
+      "hydrateFallback": "TenantPageFallback",
       "cache": "page",
       "loader": true,
       "meta": true,
@@ -121,20 +131,22 @@
   "generatedRoutes": [
     {
       "from": "seo.config.ts",
-      "paths": ["/robots.txt", "/sitemap.xml", "/sitemaps/:source", "/og/:kind/:id"]
+      "paths": ["/robots.txt", "/sitemap.xml", "/sitemaps/:file", "/og/:kind/:id"]
     },
     {
       "from": "i18n.config.ts urlStrategy prefix_except_default",
       "locales": { "en": "/", "ar": "/ar" }
     }
   ],
-  "menus": [{ "class": "SiteMenu", "kind": "navigation" }],
+  "menus": [
+    { "class": "SiteMenu", "kind": "navigation" },
+    { "class": "FooterMenu", "kind": "navigation" }
+  ],
   "flags": [
     {
       "class": "PricingYearlyFirstFlag",
       "key": "web.pricing_yearly_first",
       "default": false,
-      "owner": "web",
       "expires": "2027-03-31"
     }
   ],
@@ -173,7 +185,12 @@
       "props": "FaqProps",
       "accepts": "content.entry.list"
     },
-    { "class": "CtaBannerBlock", "key": "web.cta", "component": "CtaBanner", "props": "CtaProps" },
+    {
+      "class": "CtaBannerBlock",
+      "key": "web.cta_banner",
+      "component": "CtaBanner",
+      "props": "CtaProps"
+    },
     {
       "class": "ProductGridBlock",
       "key": "web.product_grid",
@@ -187,13 +204,13 @@
       "lang": "leads",
       "locale": "en",
       "keys": ["refusals.rate_limited", "refusals.captcha_failed"],
-      "file": "src/overrides/leads/lang/en.json"
+      "file": "assets/overrides/leads/en.json"
     },
     {
       "lang": "leads",
       "locale": "ar",
       "keys": ["refusals.rate_limited", "refusals.captcha_failed"],
-      "file": "src/overrides/leads/lang/ar.json"
+      "file": "assets/overrides/leads/ar.json"
     }
   ],
   "config": [

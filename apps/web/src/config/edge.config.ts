@@ -7,7 +7,7 @@
  *           from it. TLS, WAF and rate limits are the root runway's `edge` (ADR 0237 layer 1),
  *           never here.
  * Runtime: isomorphic
- * Governing contract: ADR 0237, ADR 0176
+ * Governing contract: ADR 0237
  */
 import { Config } from "@stackra/config";
 import { Bool, Int, Map, Nested } from "@stackra/validation";
@@ -35,7 +35,8 @@ export class EdgeConfig {
     [CacheProfile.None.value]: { sMaxAge: 0, staleWhileRevalidate: 0 },
   };
   /**
-   * Ask the experience `seo` module for a redirect before routing an uncached path.
+   * Ask the experience `seo` module for a redirect when the router answers an HTML 404; a failed
+   * lookup keeps the 404, and a target on another site is refused.
    * @defaultValue true
    */
   @Bool() lookupRedirects = true;
@@ -43,7 +44,10 @@ export class EdgeConfig {
   @Int({ min: 0 }) redirectCacheSeconds = 300;
   /** Record HTML 404s for the experience `seo` module after responding. @defaultValue true */
   @Bool() notFoundLog = true;
-  /** Abort a stream whose upstream is slower than this. @defaultValue 5000 */
+  /**
+   * React Router's `streamTimeout`: pending loader data is rejected after this, and the stream is
+   * cut a second later. @defaultValue 5000
+   */
   @Int({ min: 500 }) streamTimeoutMs = 5_000;
   /** Bots get fully rendered HTML: the stream waits for every loader. @defaultValue true */
   @Bool() botsWaitForAll = true;

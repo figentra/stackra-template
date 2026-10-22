@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: proves the print bridge reaches the printer port with the lines and the drawer kick, and
- *          the generated handler table refuses an undeclared key, an invalid input and a foreign
- *          sender before any main code runs.
+ *          the generated handler table of a packaged build refuses an undeclared key, an invalid
+ *          input, a foreign sender and the dev server's origin before any main code runs; the
+ *          result matches on the printer while the envelope's correlation id stays free.
  * Boundary: unit tier, node; the printer is `@stackra/peripherals/testing`'s fake; the handler
  *           table is the committed gen sample, imported through the package's subpath.
  * Runtime: node
@@ -13,11 +14,13 @@ import { CoreRefusals } from "@stackra/errors";
 import { refusal } from "@stackra/errors/testing";
 import { fakeReceiptPrinter } from "@stackra/peripherals/testing";
 import { runBridge } from "@stackra/platform/testing";
-import { handlers } from "#stackra-desktop/handlers";
+import { handlerTable } from "#stackra-desktop/handlers";
 import { PrintReceiptBridge } from "#src/bridges/print-receipt.bridge";
 
 /** A sender the generated handler accepts: the bundled renderer's main frame. */
 const SENDER = { senderUrl: "app://bundle/index.html", isMainFrame: true };
+/** The table of a packaged build: main passes no dev origin. */
+const handlers = handlerTable(null);
 
 /** Guards the desktop receipt bridge that reaches hardware. */
 describe(PrintReceiptBridge, () => {
@@ -30,12 +33,12 @@ describe(PrintReceiptBridge, () => {
       openDrawer: true,
     };
     const result = await runBridge(PrintReceiptBridge, input, { replace: [printer] });
-    expect(result.printer).toBe(printer.deviceName);
+    expect(result).toMatchObject({ printer: printer.deviceName });
     expect(printer.jobs()).toEqual([{ lines: ["Total 12.00"], cut: true, drawer: true }]);
   });
 
   /** The allow-list, the schema and the sender check all run before any main code (ADR 0251). */
-  it("refuses an undeclared key, an invalid input and a foreign sender", async () => {
+  it("refuses an undeclared key, a bad input, a foreign sender and the dev origin", async () => {
     const bridged = refusal(CoreRefusals.bridge_rejected);
     await expect(
       handlers.invoke({ key: "console.receipt.nope", input: {} }, SENDER),
@@ -47,6 +50,10 @@ describe(PrintReceiptBridge, () => {
     const valid = { orderId: "ord_01J9Z3K4M5N6P7Q8R9S0T1V2W3", lines: ["a"] };
     await expect(
       handlers.invoke({ key: "console.receipt.print", input: valid }, foreign),
+    ).rejects.toRefuseWith(bridged);
+    const devServer = { ...SENDER, senderUrl: "http://localhost:5173/" };
+    await expect(
+      handlers.invoke({ key: "console.receipt.print", input: valid }, devServer),
     ).rejects.toRefuseWith(bridged);
   });
 });

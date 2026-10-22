@@ -6,7 +6,7 @@
  *           granted and never asked. A cookie, not localStorage, so the server can render the
  *           banner state and the Worker can vary on it.
  * Runtime: isomorphic
- * Governing contract: ADR 0071 (consent before analytics; decline is the default)
+ * Governing contract: the `@stackra/consent` package contract (decline is the default)
  */
 import { Config } from "@stackra/config";
 import { ConsentCategory, ConsentRegime } from "@stackra/consent";

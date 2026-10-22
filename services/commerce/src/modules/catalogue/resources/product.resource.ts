@@ -10,7 +10,8 @@
  * Governing contract: ADR 0164, 0139, ADR 0105 (where `@Crud` output lives),
  *                     guides/programming-model.mdx#resources
  */
-import { FormBuilder, Infolist, Resource, Table } from "@stackra/panel";
+import type { FormBuilder, Infolist, Table } from "@stackra/panel";
+import { Resource } from "@stackra/panel";
 import { Icons } from "@stackra/ui/icons";
 import { Realm } from "@stackra/contracts";
 import { ProductCrud } from "#stackra/crud";

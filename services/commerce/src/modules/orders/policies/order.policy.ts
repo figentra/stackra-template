@@ -8,13 +8,13 @@
  *           nobody.
  * Runtime: node
  * Governing contract: ADR 0132 d4, ADR 0263 d10 (binding by verb),
- *                     guides/programming-model.mdx#policies-and-guards, ADR 0098, ADR 0207
+ *                     guides/programming-model.mdx#policies-and-guards, ADR 0098
  */
 import { Decision, Policy, type PolicyFor } from "@stackra/iam";
 import { ActorKind, Realm, type Actor } from "@stackra/contracts";
-import { SettingsReader } from "@stackra/settings";
+import type { SettingsReader } from "@stackra/settings";
 import { Order } from "#modules/orders/models/order.model";
-import { OrderPermissions } from "#modules/orders/permissions/order.permission";
+import type { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { OrderSettings } from "#modules/orders/settings/order.setting";
 
 /** Decides per order after the permission check passed. `deny` beats a granted permission. */
@@ -28,7 +28,7 @@ export class OrderPolicy implements PolicyFor<typeof OrderPermissions, Order> {
   /**
    * Staff may cancel any unpaid order; a customer only their own, and only if the tenant allows it.
    * A service (the inbound-mail relay) cancels only as the customer it acts for, under the same
-   * customer rules: own orders, unpaid only (ADR 0207 safeguard c).
+   * customer rules: own orders, unpaid only (the inbound-mail receiver's safeguard c).
    */
   async cancel(actor: Actor, order: Order): Promise<Decision> {
     if (!order.status.canCancel()) return Decision.Deny;

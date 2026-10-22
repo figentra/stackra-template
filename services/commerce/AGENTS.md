@@ -8,7 +8,8 @@ Governing contract: root AGENTS.md
 
 # AGENTS — @acme/service-commerce
 
-- Owner: your team (`.github/CODEOWNERS`). This member is the reference service (catalogue, inventory, orders, loyalty).
+- Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is the reference service
+  (catalogue, inventory, orders, loyalty).
 - Behaviour is decorated actions and queries; never hand-write Encore (`stackra gen` emits it).
 - Other services reach this one through events and generated clients only.
 - Secrets: forbidden; secret values come from the project's secret store at run time.

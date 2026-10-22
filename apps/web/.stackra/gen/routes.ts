@@ -6,8 +6,9 @@
  *          `m.route(Routes.store)`), never with the route class.
  * Boundary: data plus types. The route classes are imported as types only, so importing this file
  *           never loads a route module and no layout, menu or page can close an import cycle
- *           through it (links point down: app shell ← layout ← route → page). The key → class
- *           table the router mounts is `route-table.ts`, imported only by gen's entry and tree.
+ *           through it (links point down: app shell ← layout ← route → page). The router mounts
+ *           the classes themselves from gen's route tree, which is the only importer of a route
+ *           module.
  * Runtime: isomorphic
  */
 import { routeRef } from "@stackra/navigation";

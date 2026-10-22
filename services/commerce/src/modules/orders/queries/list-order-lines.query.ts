@@ -10,8 +10,8 @@
  *                     guides/programming-model.mdx#links
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
-import { GraphQuery } from "@stackra/database";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { GraphQuery } from "@stackra/database";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderLineVariantLink } from "#modules/orders/links/order-line-variant.link";
 import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { OrderLinesInput } from "#modules/orders/schemas/order-lines-input.schema";

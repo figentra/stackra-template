@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
- * Purpose: `console.sidebar.toggle`: collapses or expands the sidebar; mirrors HeroUI's `mod+b` so
- *          the layout and the desktop menu agree.
- * Boundary: a `@Command` class; the state is the UI store's.
+ * Purpose: `console.sidebar.toggle`: collapses or expands the sidebar from the keyboard, the
+ *          desktop menu and the palette.
+ * Boundary: a `@Command` class and the only owner of `mod+b` (the shell turns HeroUI's own binding
+ *           off, so one key press flips the sidebar once); the state is the UI store's.
  * Runtime: browser
  * Governing contract: ADR 0245, ADR 0079
  */

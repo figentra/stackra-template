@@ -12,9 +12,9 @@ import { createTestingModule } from "@stackra/container/testing";
 import { run } from "@stackra/actions/testing";
 import { actors } from "@stackra/iam/testing";
 import { dispatch, drainEvents } from "@stackra/events/testing";
-import { LoyaltyMembers, LoyaltyTier } from "@stackra/loyalty-kit/contracts";
-import { DemoSeeder, LoyaltyKitModule, PointsEarned } from "@stackra/loyalty-kit/node";
-import { FakeLoyaltyMembers } from "@stackra/loyalty-kit/testing";
+import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
+import { LoyaltyKitModule, PointsEarned } from "@acme/loyalty-kit/node";
+import { DemoSeeder, FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
 import { AccountService } from "#node/services/account.service";
 import { GetBalanceQuery } from "#node/queries/get-balance.query";
 
@@ -29,12 +29,12 @@ describe(GetBalanceQuery, () => {
     const app = await createTestingModule(LoyaltyKitModule)
       .useDrivers("memory")
       .seed(DemoSeeder)
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([DemoSeeder.members.gold]))
+      .override(LoyaltyMembers, FakeLoyaltyMembers.with([DemoSeeder.ids.gold]))
       .compile();
-    const as = actors.customer(DemoSeeder.members.gold);
+    const as = actors.customer(DemoSeeder.ids.gold);
     const { id: accountId } = await app
       .get(AccountService)
-      .findOneOrFail({ memberId: DemoSeeder.members.gold });
+      .findOneOrFail({ memberId: DemoSeeder.ids.gold });
 
     const first = await run(GetBalanceQuery, { accountId }, { as });
     expect(first.output).toMatchObject({
@@ -46,7 +46,7 @@ describe(GetBalanceQuery, () => {
 
     await dispatch(
       new PointsEarned({
-        memberId: DemoSeeder.members.gold,
+        memberId: DemoSeeder.ids.gold,
         points: 10,
         reference: "x",
         tier: LoyaltyTier.Gold,

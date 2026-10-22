@@ -1,6 +1,14 @@
 // Stackra file contract:
-// Purpose: extends the root turbo.jsonc and declares this member's one tier tag.
-// Boundary: tier tag only.
+// Purpose: extends the root turbo.jsonc and declares this member's one tier tag (the validator
+//          checks it matches the path).
+// Boundary: tier tag only; this member's tasks are the root ones, so nothing else is declared here.
 // Runtime: node
-// Governing contract: ADR 0003, workspace-layout rule
-{ "$schema": "https://turborepo.dev/schema.json", "extends": ["//"], "tags": ["tier:service"] }
+// Governing contract: ADR 0003 (tier direction)
+{
+  // the Turborepo schema, so editors complete and check the keys
+  "$schema": "https://turborepo.dev/schema.json",
+  // inherit every task from the root turbo.jsonc
+  "extends": ["//"],
+  // a service: depends on packages, never on an app or another service
+  "tags": ["tier:service"]
+}

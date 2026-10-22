@@ -1,9 +1,13 @@
 This project is MIT-licensed (LICENSE), with these exclusions:
 
-- The bundled Stackra brand images in .github/assets/ (logos and the social image) are all rights
-  reserved, see .github/assets/NOTICE. packages/cross-cutting/brand/assets/ holds placeholder artwork
-  for your own product brand.
-- Fonts keep their own licence: the licence text sits beside each font file.
-- Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed. It is consumed as a dependency
-  (here through @stackra-pro/ui) under its vendor's terms and is not covered by the MIT licence.
-- The Stackra and Figentra names and logos are trademarks of Figentra Technologies L.L.C., see TRADEMARKS.md.
+- The Stackra brand images in .github/assets/ (the logos in brand/ and the social preview image) are
+  Copyright (c) 2026 Figentra Technologies L.L.C, all rights reserved, and are not covered by the MIT
+  licence; see .github/assets/NOTICE. The Stackra and Figentra names and logos are trademarks of
+  Figentra Technologies L.L.C.
+- The Acme brand artwork in packages/cross-cutting/brand/assets/ is the example product's own; see
+  packages/cross-cutting/brand/assets/NOTICE.
+- A font committed to this repository keeps its own licence, and that licence text sits beside the
+  font file.
+- Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed. It is consumed as
+  a dependency (here through @stackra-pro/ui) under its vendor's terms and is not covered by the MIT
+  licence.

@@ -44,8 +44,11 @@ describe(SettingsRoute, () => {
       settings: { values: { [KEY]: true }, provenance: { [KEY]: "locked" } },
     });
     await userEvent.click(await screen.findByRole("tab", { name: "Tenant" }));
-    expect(screen.getByLabelText("Customers may cancel")).toHaveAttribute("aria-readonly", "true");
+    expect(screen.getByLabelText("Customers may cancel unpaid orders")).toHaveAttribute(
+      "aria-readonly",
+      "true",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(await screen.findByText("This value is locked by the platform")).toBeTruthy();
+    expect(await screen.findByText("This setting is locked by the platform.")).toBeTruthy();
   });
 });

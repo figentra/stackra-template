@@ -9,10 +9,10 @@
  * Runtime: node
  * Governing contract: ADR 0142, 0140, 0173 (secrets by reference), ADR 0266; ADR 0127
  */
-import { ConnectionStore } from "@stackra/connections";
+import type { ConnectionStore } from "@stackra/connections";
 import { Driver } from "@stackra/container";
 import { Resend } from "resend";
-import { NotificationsConfig } from "#config/notifications.config";
+import type { NotificationsConfig } from "#config/notifications.config";
 import { MailTransport, type OutboundMail } from "#modules/messages/contracts/mail-transport.port";
 import { ResendConnection } from "#modules/messages/connections/resend.connection";
 import { MailProviderUnavailableError } from "#modules/messages/errors/mail-provider-unavailable.error";

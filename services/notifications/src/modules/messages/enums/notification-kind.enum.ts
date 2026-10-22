@@ -4,7 +4,7 @@
  *          mobile inbox render.
  * Boundary: a house enum (class); the `value` is stored on the Notification row.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended), ADR 0231; ADR 0127
+ * Governing contract: ADR 0231, guides/programming-model.mdx#enums
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

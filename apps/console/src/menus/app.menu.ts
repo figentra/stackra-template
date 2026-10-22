@@ -1,14 +1,15 @@
 /**
  * Stackra file contract:
- * Purpose: the application menu (desktop menu bar, PWA app menu): sections of standard roles,
- *          commands, actions and routes; labels are i18n keys translated in main with the locale
- *          the renderer reports.
+ * Purpose: the desktop menu bar: sections of standard roles, commands, actions and routes; labels
+ *          are i18n keys translated in main with the locale the renderer reports.
  * Boundary: a builder, because menus are deep and repeated. Items reference command classes,
- *           generated action descriptors and route classes; a removed one is a type error.
- *           `targets` prunes the menu per build; an item runs through the kbd module, never a
- *           handler here. Role names are Electron's own values.
- * Runtime: isomorphic
- * Governing contract: ADR 0058 (Electron), ADR 0245
+ *           generated action descriptors and route keys; a removed one is a type error. Desktop
+ *           only: a PWA has no OS menu bar (ADR 0281 d2), and the web and PWA reach the same items
+ *           through the command palette. No accelerator is one a browser reserves (`mod+n`,
+ *           `mod+t`, `mod+w`), because the palette shows the same shortcuts in a tab. An item runs
+ *           through the kbd module, never a handler here. Role names are Electron's own values.
+ * Runtime: node
+ * Governing contract: ADR 0058 (Electron), ADR 0245, ADR 0281 d2 (no OS menu bar in a PWA)
  */
 import { Target } from "@stackra/contracts";
 import { Menu, type MenuBuilder, type MenuContext } from "@stackra/navigation";
@@ -22,8 +23,8 @@ import { ToggleSidebarCommand } from "#src/commands/toggle-sidebar.command";
 import { DesktopConfig } from "#src/config/desktop.config";
 import { Routes } from "#stackra/routes";
 
-/** Application menu for the desktop menu bar and PWA: standard roles, commands and actions. */
-@Menu({ targets: [Target.Desktop, Target.Pwa] })
+/** Application menu of the desktop menu bar: standard roles, commands and actions. */
+@Menu({ targets: [Target.Desktop] })
 export class AppMenu {
   /**
    * macOS gets the app menu first; Windows and Linux get File. The navigation section is generated.
@@ -32,10 +33,7 @@ export class AppMenu {
     return [
       m.role("appMenu"),
       m.section(I18n.console.menu.file, [
-        m.action(Commerce.actions.CreateOrder, {
-          shortcut: "mod+n",
-          flag: Flags.orders.quick_order,
-        }),
+        m.action(Commerce.actions.CreateOrder, { flag: Flags.orders.quick_order }),
         m.route(Routes.quick_order, { shortcut: "mod+shift+o" }),
         m.separator(),
         m.role("close"),

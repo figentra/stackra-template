@@ -2,8 +2,8 @@
  * Stackra file contract:
  * Purpose: this service's host layer over @stackra/realtime's defaults: who may subscribe to the
  *          channels its events broadcast on (`tenant.{tenantId}.orders`, `.inventory`).
- * Boundary: only what differs from the package. Each event's `broadcast.permission` still gates its
- *           own channel; this layer narrows subscription to staff sessions and shortens the
+ * Boundary: only what differs from the package. Each event still declares the `broadcast.permission`
+ *           its own channel needs; this layer narrows subscription to staff sessions and shortens the
  *           subscribe token, because commerce's channels carry revenue and stock levels.
  * Runtime: node
  * Governing contract: ADR 0146, ADR 0225 (broadcast); ADR 0127 (realtime chain)

@@ -11,7 +11,7 @@
  */
 import { Provider, type AppContext } from "@stackra/navigation";
 import type { RealtimeConnection } from "@stackra/realtime";
-import { RealtimeTransport } from "@stackra/realtime/contracts";
+import type { RealtimeTransport } from "@stackra/realtime/contracts";
 import { RealtimeConfig } from "#src/config/realtime.config";
 import { RealtimeContextProvider } from "#src/providers/realtime/realtime.context";
 

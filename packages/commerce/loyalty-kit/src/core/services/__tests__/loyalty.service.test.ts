@@ -14,10 +14,10 @@ import { beforeEach, describe, expect, it, freezeClock } from "@stackra/testing"
 import { refusal } from "@stackra/errors/testing";
 import { Refusals } from "#stackra/manifest";
 import { createTestingModule } from "@stackra/container/testing";
-import { LoyaltyLedger, LoyaltyMembers } from "@stackra/loyalty-kit/contracts";
-import { LoyaltyKitConfig, LoyaltyService, memberId } from "@stackra/loyalty-kit";
-import { LoyaltyKitModule } from "@stackra/loyalty-kit/node";
-import { FakeLoyaltyMembers, pointsEntry } from "@stackra/loyalty-kit/testing";
+import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
+import { LoyaltyKitConfig, LoyaltyService, memberId } from "@acme/loyalty-kit";
+import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
+import { FakeLoyaltyMembers, pointsEntry } from "@acme/loyalty-kit/testing";
 
 const usr1 = memberId("usr_1");
 const at = new Date("2026-10-21T00:00:00Z");

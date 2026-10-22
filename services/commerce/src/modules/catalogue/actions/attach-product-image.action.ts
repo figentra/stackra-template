@@ -12,9 +12,9 @@
  */
 import { Action, type ActionContext, AsEndpoint, UxAfter } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { MediaLibrary } from "@stackra/media";
+import type { MediaLibrary } from "@stackra/media";
 import { I18n } from "#stackra/i18n";
-import { ProductService } from "#modules/catalogue/services/product.service";
+import type { ProductService } from "#modules/catalogue/services/product.service";
 import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 import { ProductImagesBucket } from "#modules/catalogue/buckets/product-images.bucket";
 import { AttachProductImageInput } from "#modules/catalogue/schemas/attach-product-image-input.schema";

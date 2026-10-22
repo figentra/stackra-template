@@ -7,11 +7,11 @@
  *           by class. Every id comes from a factory, never a literal.
  * Runtime: node
  * Governing contract: ADR 0098 (one pipeline), 0132 (policy), 0022, ADR 0007 (test docblocks),
- *                     guides/programming-model.mdx#tests, ADR 0207
+ *                     guides/programming-model.mdx#tests
  */
 import { describe, expect, it } from "@stackra/testing";
-import { AccessLogSink } from "@stackra/access-log/contracts";
-import "@stackra/access-log/testing"; // registers toHaveLoggedAccess
+import { AccessLogSink } from "@acme/access-log/contracts";
+import "@acme/access-log/testing"; // registers toHaveLoggedAccess
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { createTestingModule } from "@stackra/container/testing";
@@ -27,6 +27,14 @@ import { OrderFactory } from "#modules/orders/factories/order.factory";
 import { OrderLineFactory } from "#modules/orders/factories/order-line.factory";
 import { StockLevel } from "#modules/inventory/models/stock-level.model";
 import { StockLevelFactory } from "#modules/inventory/factories/stock-level.factory";
+
+/** The notifications service as the actor, optionally for a customer (the inbound-mail relay). */
+function relay(onBehalfOf?: string) {
+  return actors.service(
+    "notifications",
+    onBehalfOf ? { onBehalfOf: actors.customer(onBehalfOf) } : {},
+  );
+}
 
 /**
  * The policy and the side effects of a cancel; the workflow path is covered in workflows/__tests__.
@@ -81,18 +89,13 @@ describe(CancelOrderAction, () => {
   });
 
   /**
-   * The inbound-mail path (ADR 0207): a service may cancel only as the customer it acts for.
+   * The inbound-mail path: a service may cancel only as the customer it acts for.
    * Without `onBehalfOf`, or on behalf of someone else, the policy denies; on behalf of the owner
    * it succeeds and the access record names the owner, so the relay is auditable.
    */
   it("lets a service cancel only for the owning customer, and logs the access", async () => {
     const app = await createTestingModule(CommerceModule).useDrivers("memory").compile();
     const [order, other] = await new OrderFactory(app.em).createMany(2);
-    const relay = (onBehalfOf?: string) =>
-      actors.service(
-        "notifications",
-        onBehalfOf ? { onBehalfOf: actors.customer(onBehalfOf) } : {},
-      );
 
     const bare = await run(CancelOrderAction, { orderId: order.id }, { as: relay() });
     const wrong = await run(

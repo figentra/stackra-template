@@ -1,13 +1,12 @@
 /**
  * Stackra file contract:
- * Purpose: the loyalty module: commerce's use of @stackra/loyalty-kit. It extends orders without
+ * Purpose: the loyalty module: commerce's use of @acme/loyalty-kit. It extends orders without
  *          editing orders.
  * Boundary: exports nothing. Its contributions are hooks (into orders), listeners (on orders
  *           events) and the LoyaltyMembers driver the kit needs. Gen infers loyalty → orders from
  *           the hook point it implements.
  * Runtime: node
- * Governing contract: ADR 0263, ADR 0265 (extension), guides/programming-model.mdx#modules;
- *                     acme-platform docs/catalogue/commerce.yaml#loyalty
+ * Governing contract: ADR 0263, ADR 0265 (extension), guides/programming-model.mdx#modules
  */
 import { Module } from "@stackra/container";
 

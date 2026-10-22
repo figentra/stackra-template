@@ -9,7 +9,7 @@
 import { Decision, Policy, type PolicyFor } from "@stackra/iam";
 import { Realm, type Actor } from "@stackra/contracts";
 import { Product } from "#modules/catalogue/models/product.model";
-import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
+import type { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 
 /** Record-level rules for products: only the tenant's own staff archive. */
 @Policy(Product)

@@ -17,7 +17,7 @@ import { memberId } from "#core/functions/member-id.function";
 import { NotOwnPrincipalError } from "#core/errors/not-own-principal.error";
 import { EnrollMemberInput } from "#core/schemas/enroll-member-input.schema";
 import { EnrollMemberOutput } from "#core/schemas/enroll-member-output.schema";
-import { AccountService } from "#node/services/account.service";
+import type { AccountService } from "#node/services/account.service";
 import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
 
 /**

@@ -4,18 +4,21 @@
  *          and bulk actions. Declared here, rendered by @stackra/panel; a package module
  *          contributes UI exactly like a service module.
  * Boundary: data only. Builder methods are used because table, form and infolist are deep, repeated
- *           structures; everything else is a decorator option. Column keys are `keyof
- *           LoyaltyAccount`, actions are referenced by class, so a renamed field or action is a
- *           type error. Declared on the node side, rendered by @stackra/panel in the browser and in
- *           react-native.
+ *           structures; everything else is a decorator option. Table and infolist keys are `keyof
+ *           LoyaltyAccount`; the form's keys are `keyof EnrollMemberInput`, because the form
+ *           submits that action and nothing else (there is no update operation). Actions are
+ *           referenced by class, so a renamed field or action is a type error. Declared on the
+ *           node side, rendered by @stackra/panel in the browser and in react-native.
  * Runtime: node
  * Governing contract: ADR 0164 (panels are resources), 0139
  */
-import { FormBuilder, Infolist, Resource, Table } from "@stackra/panel";
+import type { FormBuilder, Infolist, Table } from "@stackra/panel";
+import { Resource } from "@stackra/panel";
 import { Icons } from "@stackra/ui/icons";
 import { Realm } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";
 import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
+import type { EnrollMemberInput } from "#core/schemas/enroll-member-input.schema";
 import { LoyaltyAccount } from "#node/models/loyalty-account.model";
 import { EnrollMemberAction } from "#node/actions/enroll-member.action";
 import { FreezeAccountAction } from "#node/actions/freeze-account.action";
@@ -58,25 +61,13 @@ export class LoyaltyAccountResource extends Resource<LoyaltyAccount> {
   }
 
   /**
-   * Create and edit. Field types, validation and labels come from the model decorators (ADR 0095);
-   * every field shape once.
+   * Enroll only: exactly the fields of EnrollMemberInput a person fills in, validated by its
+   * schema. `accountId` is the PUT address the panel mints when the form opens, so it is never a
+   * field; freezing is the FreezeAccountAction row action, and ledger entries are read-only
+   * (infolist).
    */
-  form(f: FormBuilder<LoyaltyAccount>) {
-    return f.fields((x) => [
-      x.text("memberId").required().disabledOnEdit(),
-      x.enum("tier", LoyaltyTier),
-      x.toggle("isFrozen"),
-      x.dateTime("frozenAt").visibleWhen("isFrozen"),
-      x.keyValue("notes", { keys: ["flaggedBy", "reason"] }),
-      x
-        .repeater("entries", (r) => [
-          r.number("points"),
-          r.enum("kind"),
-          r.text("reference"),
-          r.dateTime("at"),
-        ])
-        .readOnly(),
-    ]);
+  form(f: FormBuilder<EnrollMemberInput>) {
+    return f.fields((x) => [x.text("principalId").required(), x.enum("tier", LoyaltyTier)]);
   }
 
   /** The detail view: every entry shape once, with the ledger as a relation panel. */

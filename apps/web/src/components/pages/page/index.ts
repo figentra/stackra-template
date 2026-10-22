@@ -1,9 +1,8 @@
 /**
  * Stackra file contract:
  * Purpose: the page folder's barrel.
- * Boundary: explicit exports only.
+ * Boundary: the component and its Props only; a hook stays private to its folder.
  * Runtime: isomorphic
- * Governing contract: ADR 0128 d2
+ * Governing contract: ADR 0128 (component folders)
  */
 export { TenantPage } from "./page";
-export { TenantPageFallback } from "./tenant-page-fallback";

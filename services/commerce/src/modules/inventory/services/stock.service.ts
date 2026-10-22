@@ -9,9 +9,9 @@
  * Governing contract: ADR 0149 (locking), 0101 (workflow steps call module services), 0141,
  *                     guides/programming-model.mdx#services
  */
-import { Repository } from "@stackra/database";
+import type { Repository } from "@stackra/database";
 import { WithLock } from "@stackra/locking";
-import { SettingsReader } from "@stackra/settings";
+import type { SettingsReader } from "@stackra/settings";
 import { StockLevel } from "#modules/inventory/models/stock-level.model";
 import { StockLow } from "#modules/inventory/events/stock-low.event";
 import { InventorySettings } from "#modules/inventory/settings/inventory.setting";

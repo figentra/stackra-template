@@ -6,8 +6,7 @@
  *           `telemetry.sentryProject`. No personal data: user ids only. A replay records only after
  *           the user granted the analytics consent category.
  * Runtime: isomorphic
- * Governing contract: ADR 0232 (reporter port), ADR 0184 (telemetry), ADR 0183 (budgets), ADR 0071
- *                     (consent)
+ * Governing contract: ADR 0232 (reporter port), ADR 0184 (telemetry), ADR 0183 (budgets)
  */
 import { Config } from "@stackra/config";
 import { ConsentCategory } from "@stackra/consent";

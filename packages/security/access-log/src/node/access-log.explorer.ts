@@ -9,10 +9,11 @@
  * Runtime: node
  * Governing contract: ADR 0144 (Explorers), ADR 0005 (no reflect-metadata)
  */
-import { DiscoveryService, type OnApplicationBootstrap } from "@stackra/container";
-import { RequestContext } from "@stackra/actions";
+import type { DiscoveryService } from "@stackra/container";
+import { type OnApplicationBootstrap } from "@stackra/container";
+import type { RequestContext } from "@stackra/actions";
 import { AccessLogged } from "#core/decorators/access-logged.decorator";
-import { AccessLogService } from "#core/services/access-log.service";
+import type { AccessLogService } from "#core/services/access-log.service";
 
 /** One instance per container; runs once after every provider is constructed. */
 export class AccessLogExplorer implements OnApplicationBootstrap {

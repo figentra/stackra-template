@@ -7,7 +7,7 @@
  *           consent through `@stackra/consent` (which starts or stops the analytics driver),
  *           density through the UI store.
  * Runtime: browser
- * Governing contract: ADR 0250 (capability refusal), ADR 0256 (prefs), ADR 0079, ADR 0071 (consent)
+ * Governing contract: ADR 0250 (capability refusal), ADR 0256 (prefs), ADR 0079
  */
 import { ConsentCategory } from "@stackra/consent";
 import { useConsent } from "@stackra/consent/react";

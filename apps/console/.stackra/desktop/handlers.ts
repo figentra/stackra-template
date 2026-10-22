@@ -5,16 +5,23 @@
  *          checks the sender (app://bundle, main frame), the key against the allow-list, the input
  *          against the bridge's schema, the caller against its `actors` and permission, then runs
  *          the bridge and wraps the result in the envelope.
- * Boundary: the table is data built from the declarations; no handler logic is written here.
+ * Boundary: the table is data built from the declarations; no handler logic is written here. The
+ *           Vite dev origin is an allowed sender only when main passes it, which it does in an
+ *           unpackaged build alone; a packaged app accepts `app://bundle/` and nothing else.
  * Runtime: node
  */
 import { desktopHandlers } from "@stackra/platform/electron";
 import { PickExportFolderBridge } from "#src/bridges/pick-export-folder.bridge";
 import { PrintReceiptBridge } from "#src/bridges/print-receipt.bridge";
 
-/** The table `createDesktopApp` installs; `invoke` is also what the unit tests call directly. */
-export const handlers = desktopHandlers({
-  allowedSenders: ["app://bundle/"],
-  bridges: [PrintReceiptBridge, PickExportFolderBridge],
-  events: ["deeplink", "command", "update-state", "context-menu-chosen", "locale-request"],
-});
+/**
+ * The table `createDesktopApp` installs; `invoke` is also what the unit tests call directly.
+ * `devOrigin` is the Vite dev server's origin, or `null` for a packaged build.
+ */
+export function handlerTable(devOrigin: string | null) {
+  return desktopHandlers({
+    allowedSenders: devOrigin === null ? ["app://bundle/"] : ["app://bundle/", `${devOrigin}/`],
+    bridges: [PrintReceiptBridge, PickExportFolderBridge],
+    events: ["deeplink", "command", "update-state", "context-menu-chosen", "locale-request"],
+  });
+}

@@ -1,14 +1,20 @@
-// Tasks for the command palette (Tasks: Run Task) and the default build/test shortcuts.
+// Stackra file contract:
+// Purpose: the tasks in the command palette (Tasks: Run Task) and the default build and test
+//          shortcuts, each a root `pnpm` script.
+// Boundary: task wiring only; the commands themselves are package.json scripts. Problem matchers are
+//           empty because each tool prints its own file:line findings.
+// Runtime: node
+// Governing contract: Stackra ADR 0027 (one toolchain for editor, hooks and CI)
 {
   "version": "2.0.0",
   "tasks": [
     {
       "label": "verify",
-      "detail": "Full gate: format, lint, typecheck, test, build, validate, boundaries, knip",
+      "detail": "Full gate: format, lint, typecheck, test, build, gen check, validate, boundaries, knip",
       "type": "shell",
       "command": "pnpm verify",
       "group": { "kind": "build", "isDefault": true },
-      "problemMatcher": ["$tsc"]
+      "problemMatcher": []
     },
     {
       "label": "gen",
@@ -38,6 +44,13 @@
       "detail": "oxfmt the whole repo",
       "type": "shell",
       "command": "pnpm format",
+      "problemMatcher": []
+    },
+    {
+      "label": "spell",
+      "detail": "cspell over Markdown, TypeScript, CSS and YAML (cspell.config.yaml)",
+      "type": "shell",
+      "command": "pnpm spell",
       "problemMatcher": []
     }
   ]

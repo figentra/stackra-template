@@ -6,7 +6,7 @@
 //           the preset. A preset's ignorePatterns resolve relative to the preset file, so the repo-level
 //           ones live here. The path is relative because oxlint resolves `extends` as a file path.
 // Runtime: node
-// Governing contract: ADR 0003 (tier direction), ADR 0129 (house lint rules)
+// Governing contract: Stackra ADR 0003 (tier direction), Stackra ADR 0129 (house lint rules)
 {
   "$schema": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json",
   "extends": ["./packages/tooling/oxlint/src/boundaries.jsonc"],
@@ -24,5 +24,8 @@
     "**/.expo/**",
     // lint fixtures are banned imports on purpose; their test lints them with the preset directly
     "**/__tests__/fixtures/**",
-  ],
+    // declaration files, as in the base preset: an `export {}` there turns `declare module` into an
+    // augmentation, which a source-file rule would remove
+    "**/*.d.ts"
+  ]
 }

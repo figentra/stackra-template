@@ -10,8 +10,8 @@
  * Governing contract: ADR 0260 d7 (package port, service driver), ADR 0263
  */
 import { Driver } from "@stackra/container";
-import { LoyaltyMembers, type MemberId } from "@stackra/loyalty-kit/contracts";
-import { OrderService } from "#modules/orders/services/order.service";
+import { LoyaltyMembers, type MemberId } from "@acme/loyalty-kit/contracts";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
 
 /**

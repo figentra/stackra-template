@@ -2,7 +2,7 @@
   "nav": { "loyalty": "Loyalty" },
   "tiers": { "bronze": "Bronze", "silver": "Silver", "gold": "Gold" },
   "kinds": { "earn": "Earned", "redeem": "Redeemed", "expire": "Expired", "adjust": "Adjusted" },
-  "widgets": { "points_issued": "Points today" },
+  "widgets": { "points_issued": "Points today", "points_balance": "Points balance" },
   "documents": {
     "overview": "My points",
     "redeem_title": "Spend points",

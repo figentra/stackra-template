@@ -2,30 +2,47 @@
 # src/config/theming.config.ts (logo), runway.yaml (release.desktop: feedPath, platforms, signing
 # switches; environments.production.desktop.channel) and root runway.yaml
 # (targets.electron-release: feed origin) — do not edit
-# Purpose: electron-builder settings of the desktop target.
+# Purpose: electron-builder settings of the desktop target: identity, the files packed, the
+#          entry main runs, installers per platform, the macOS entitlements and the update feed.
 # Boundary: no signing identity, password or APPLE_* value: `signing` is off in the member runway
 #           (ADR 0254 d1); when on, gen emits the key names and the release workflow supplies values
 #           from Infisical /ci. Fuses are `fuses.json`, set by the afterPack hook @stackra/platform
 #           ships (ADR 0251).
 # Runtime: node
-appId: dev.acme.console
-productName: Console
-copyright: © Acme
+# Governing contract: ADR 0249, ADR 0251, ADR 0254
+
+# desktop.config.ts packaging.appId: the bundle identifier, stable across releases
+appId: example.acme.console
+# desktop.config.ts packaging.productName: the dock, start-menu and installer name
+productName: Acme Console
+# desktop.config.ts packaging.copyright
+copyright: Copyright © 2026 Acme
+# the package.json fields the packed app sees; `main` points Electron at the built main entry,
+# not at the member's source package.json
+extraMetadata:
+  main: dist/desktop/main.js
 directories:
+  # installers and blockmaps land here; the release workflow uploads this folder
   output: dist/desktop-release
+# the renderer bundle (app://bundle/) and the main and preload bundles; nothing else is packed
 files:
   - dist/renderer/**
   - dist/desktop/**
+# desktop.config.ts deepLinks.scheme, registered as the default handler at install
 protocols:
   - name: Acme Console
     schemes: [acme-console]
-afterPack: "@stackra/platform/electron/after-pack" # applies fuses.json
+# applies fuses.json to the packed binary before signing
+afterPack: "@stackra/platform/electron/after-pack"
 mac:
   icon: dist/icons/icon.icns
+  # required for notarisation; the entitlements below are what the hardened runtime allows
   hardenedRuntime: true
-  # baseline + com.apple.security.device.usb (desktop.config.ts)
-  entitlementsInherit: "@stackra/platform/electron/entitlements.plist"
-  # runway release.desktop.platforms.mac ∩ desktop.config.ts packaging.mac; `arch` belongs to a target
+  # generated from the baseline (JIT for V8) plus desktop.config.ts packaging.macEntitlements (USB
+  # for the receipt printer and scanner, ADR 0253); helpers inherit the same set
+  entitlements: .stackra/desktop/entitlements.mac.plist
+  entitlementsInherit: .stackra/desktop/entitlements.mac.plist
+  # runway release.desktop.platforms.mac ∩ desktop.config.ts packaging.mac; `zip` feeds the updater
   target:
     - target: dmg
       arch: [universal]
@@ -33,16 +50,21 @@ mac:
       arch: [universal]
 win:
   icon: dist/icons/icon.ico
+  # runway release.desktop.platforms.windows ∩ desktop.config.ts packaging.windows and windowsArch
   target:
     - target: nsis
       arch: [x64, arm64]
 nsis:
+  # desktop.config.ts packaging.perMachine: a per-user install that needs no administrator
   perMachine: false
 linux:
   icon: dist/icons/icon-512.png
+  # AppImage only on day one (ADR 0254 d2)
   target: [AppImage]
 publish:
+  # a static feed electron-updater reads; no provider account is involved
   provider: generic
   # root targets.electron-release.feed.publicOrigin + runway release.desktop.feedPath
-  url: https://downloads.acme.dev/console/${channel}/
-  channel: latest # runway environments.production.desktop.channel; staging builds carry `beta`
+  url: https://downloads.acme.example/console/${channel}/
+  # runway environments.production.desktop.channel; staging builds carry `beta`
+  channel: latest

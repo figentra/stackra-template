@@ -3,8 +3,8 @@
 `@Block` classes and their components (every app that contributes page-builder blocks has a
 `blocks/`). A block is data-addressable code: tenants place it in L2 documents by key, the
 experience service validates its props on publish, the renderer re-validates on render and refuses a
-key nobody registers (ADR 0110 d6). Folder shape: `<name>/{<name>.block.ts, <name>.tsx, index.ts,
-__tests__/}`.
+key nobody registers (ADR 0110 d6). Folder shape:
+`<name>/{<name>.block.ts, <name>.tsx, index.ts, __tests__/}`.
 
 | Folder          | Key                   | Props schema                     | Renders                                             |
 | --------------- | --------------------- | -------------------------------- | --------------------------------------------------- |

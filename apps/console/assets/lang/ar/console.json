@@ -1,7 +1,8 @@
 {
   "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
   "shell": {
-    "brand": "وحدة تحكم فيجنترا",
+    "brand": "وحدة تحكم Acme",
+    "short_name": "وحدة التحكم",
     "top_bar": "الشريط العلوي",
     "menu": "القائمة",
     "sidebar": "تبديل الشريط الجانبي",
@@ -10,7 +11,12 @@
     "loading_session": "جارٍ تحميل الجلسة"
   },
   "shortcuts": {
-    "quick_order": "طلب سريع"
+    "quick_order": "طلب سريع",
+    "quick_order_short": "طلب",
+    "quick_order_description": "أنشئ طلبًا لعميل ببضع نقرات."
+  },
+  "manifest": {
+    "description": "الطلبات والكتالوج والمخزون لمتجرك، متصلًا أو دون اتصال."
   },
   "pages": {
     "dashboard": "لوحة التحكم",
@@ -44,10 +50,12 @@
   "roles": {
     "admin": "مسؤول",
     "staff": "موظف",
-    "viewer": "مشاهد"
+    "viewer": "مشاهد",
+    "member": "عضو"
   },
   "locale": {
-    "switch": "تبديل اللغة"
+    "switch": "تبديل اللغة",
+    "current": "اللغة: {name}"
   },
   "theme": {
     "light": "فاتح",
@@ -59,7 +67,8 @@
     "title": "أنت غير متصل",
     "body": "{count, plural, zero {ستتم مزامنة تغييراتك عند عودة الاتصال.} one {تغيير واحد بانتظار المزامنة.} two {تغييران بانتظار المزامنة.} few {# تغييرات بانتظار المزامنة.} many {# تغييرًا بانتظار المزامنة.} other {# تغيير بانتظار المزامنة.}}",
     "page_title": "أنت غير متصل",
-    "page_body": "لم تُحفظ هذه الصفحة للاستخدام دون اتصال. أعد الاتصال وحاول مجددًا."
+    "page_body": "لم تُحفظ هذه الصفحة للاستخدام دون اتصال. أعد الاتصال وحاول مجددًا.",
+    "retry": "حاول مجددًا"
   },
   "queue": {
     "title": "التغييرات المعلّقة",
@@ -79,7 +88,10 @@
       "client_retry": "إعادة المحاولة على الأحدث",
       "manual": "مراجعة",
       "discard": "تجاهل تغييري"
-    }
+    },
+    "discard_confirm_title": "هل تريد تجاهل هذا التغيير؟",
+    "discard_confirm_body": "يُحذف التغيير الذي أجريته دون اتصال ولن يصل إلى الخادم أبدًا.",
+    "discard_keep": "الإبقاء عليه"
   },
   "dashboard": {
     "today": "اليوم",
@@ -184,6 +196,8 @@
     "empty_title": "لا إشعارات بعد",
     "empty_body": "تظهر هنا تحديثات الطلبات والرسائل الموجهة إليك.",
     "mark_read": "تحديد كمقروء",
-    "loading": "جارٍ تحميل الإشعارات"
+    "loading": "جارٍ تحميل الإشعارات",
+    "load_more": "عرض المزيد",
+    "mark_read_failed": "تعذّر تحديد الإشعار كمقروء. حاول مجددًا."
   }
 }

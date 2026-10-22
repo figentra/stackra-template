@@ -17,7 +17,8 @@ describe(RevenueSparklineOverride, () => {
   it("formats the revenue for the locale and hides the chart from assistive tech", () => {
     const today = { count: 3, revenueMinor: 50_000, currency: "SAR", hourly: Array(24).fill(1) };
     renderOverride(RevenueSparklineOverride, today, { locale: "ar" });
-    expect(screen.getByText("٥٠٠٫٠٠ ر.س.")).toBeTruthy(); // 50 000 halalas are 500.00 riyals
+    // 50 000 halalas are 500.00 riyals; Latin digits by default (i18n.config.ts `numerals`)
+    expect(screen.getByText(/500\.00\sر\.س\./)).toBeTruthy();
     expect(screen.queryByRole("img")).toBeNull();
   });
 });

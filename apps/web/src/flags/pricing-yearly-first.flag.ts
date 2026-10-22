@@ -4,12 +4,12 @@
  *          visitors, and compare trial starts against the monthly-first control.
  * Boundary: a release switch evaluated per visitor after consent; it never changes a price, only
  *           which interval the toggle opens on. It expires with the experiment and gen warns after
- *           that date.
+ *           that date. Its owner is the member's CODEOWNERS entry, never a field here.
  * Runtime: isomorphic
  * Governing contract: ADR 0213 d3 (flags are a settings kind)
  */
 import { Flag } from "@stackra/feature-flags";
 
 /** Off by default, so a visitor without consent always sees the monthly-first control. */
-@Flag({ key: "pricing_yearly_first", default: false, owner: "web", expires: "2027-03-31" })
+@Flag({ key: "pricing_yearly_first", default: false, expires: "2027-03-31" })
 export class PricingYearlyFirstFlag {}

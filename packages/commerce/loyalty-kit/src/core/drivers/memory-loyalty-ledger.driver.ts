@@ -45,7 +45,8 @@ export class MemoryLoyaltyLedger extends LoyaltyLedger {
    */
   async expire(memberId: MemberId, before: Date): Promise<number> {
     let removed = 0;
-    for (const e of [...this.entries.values()]) {
+    // a snapshot: `append` adds entries to the map while this loop runs
+    for (const e of Array.from(this.entries.values())) {
       if (e.memberId !== memberId || !e.kind.is(EntryKind.Earn) || e.at >= before) continue;
       const written = await this.append({
         memberId,

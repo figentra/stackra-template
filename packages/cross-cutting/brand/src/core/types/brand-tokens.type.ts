@@ -7,9 +7,9 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0127 (categories), ADR 0231 (design tokens)
  */
-import type { ColorToken } from "#core/tokens/color.token";
-import type { FontToken } from "#core/tokens/font.token";
-import type { RadiusToken } from "#core/tokens/radius.token";
+import type { ColorToken } from "#core/design-tokens/color.design-token";
+import type { FontToken } from "#core/design-tokens/font.design-token";
+import type { RadiusToken } from "#core/design-tokens/radius.design-token";
 
 /** Any token key. */
 export type BrandToken = ColorToken | RadiusToken | FontToken;

@@ -6,6 +6,7 @@
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0080, ADR 0222
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
 import { Locale } from "@stackra/i18n";
@@ -43,7 +44,8 @@ describe(ProductCard, () => {
       locale: "en",
       site: { locale: Locale.En },
     });
-    const img = container.querySelector("img")!;
+    const img = container.querySelector("img");
+    assert(img, "the card renders its image");
     // the media fake's form
     expect(img.getAttribute("src")).toBe("https://cdn.test/tee.jpg?w=480&format=webp");
     expect(img.getAttribute("loading")).toBe("lazy");

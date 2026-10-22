@@ -1,162 +1,162 @@
 # yaml-language-server: $schema=./schemas/runway-root.schema.json
 # Stackra file contract:
-# Purpose: the ROOT runway: the infrastructure itself. Destinations per environment (AWS account and
-#          region, Encore Cloud app, Docker host, Cloudflare zone, EAS project), shared resources
-#          (the Postgres server, the cache cluster, the queue provider, networking), the edge, the
-#          release policy, and DEFAULTS members inherit. It never lists deployables: gen collects
-#          them from every member's runway.yaml.
-# Boundary: no member fact (ports, domains of one app, one service's database size: those are member
-#           runways), no package behaviour (src/config), no secret value (ADR 0173). `ref:<path>`
-#           resolves from the private stacks repo's Pulumi stack config at infra/deploy time (ADR
-#           0171 d4); a private product repo may inline the id. Read by `stackra infra`, `stackra
-#           gen` (infra.config.json, compose, wrangler, eas.json), `stackra dev` and the runway
-#           workflows; validated by `@stackra/runway/schema/root.json` in `stackra validate`.
-#           `drivers.mail` is the per-environment layer of `MailConfig.driver`: `memory` in dev and
-#           preview, `notifications` in staging and production, so a service never declares the
-#           choice a second time. `drivers.search`, `drivers.media` and `drivers.webhooks` are the
-#           defaults of the `@stackra/search`, `@stackra/media` and `@stackra/webhooks` ports; a
-#           member runway overrides one per environment.
+# Purpose: the ROOT runway: WHERE things run. Providers and accounts, destinations per environment
+#          (AWS account and region, Encore Cloud app, Docker host, Cloudflare zone, EAS project), the
+#          pools many members share (the one Postgres server per environment, the cache cluster, the
+#          queue provider, networking), domains, the edge, the release policy, and the DEFAULTS
+#          members inherit. It never lists deployables: gen collects them from every member's
+#          runway.yaml.
+# Boundary: no member fact (ports, domains of one app, one service's database size: member runways),
+#           no single-owner dependency (the identity provider belongs to the identity member; Valkey,
+#           object storage, mail capture and antivirus containers are declared by the driver packages
+#           that need them and start only when a member selects that driver), no package behaviour
+#           (src/config) and no secret value (Stackra ADR 0173). `ref:<path>` resolves from the
+#           private stacks repository's Pulumi stack config at infra and deploy time (Stackra ADR
+#           0171); a private product repository may inline the id. Read by `stackra infra`, `stackra
+#           gen` (infra config, compose, wrangler, eas.json), `stackra dev` and the runway workflows;
+#           validated by `@stackra/runway/schema/root.json` in `stackra validate`. `drivers.mail` is
+#           the per-environment layer of `MailConfig.driver`: `memory` in dev and preview,
+#           `notifications` in staging and production, so a service never declares the choice a
+#           second time. `drivers.search`, `drivers.media` and `drivers.webhooks` are the defaults of
+#           the `@stackra/search`, `@stackra/media` and `@stackra/webhooks` ports; a member runway
+#           overrides one per environment.
 # Runtime: node
-# Governing contract: ADR 0168, 0169, 0170, 0171, 0173, 0175, 0179, 0180, 0184, 0238, 0254
+# Governing contract: Stackra ADR 0168, 0169, 0170, 0171, 0173, 0175, 0179, 0180, 0184, 0238, 0254
 $schema: "@stackra/runway/schema/root.json"
 version: 2
-# prefix for stacks (`acme-platform/staging`), images (`acme-platform-core`), Workers, tags
+# Prefix for stacks (`acme-platform/staging`), images (`acme-platform-core`), Workers and tags.
 project: acme-platform
 
 # ── Providers: every account and vendor, named once ───────────────────────────────────────────────
 providers:
   aws:
-    region: me-central-1 # one region (ADR 0186); a tenant's region is immutable (0210 d4)
+    # One region (Stackra ADR 0186); a tenant's region is immutable (Stackra ADR 0210).
+    region: me-central-1
+    # Three accounts: `shared` holds the state bucket and the image registry, `nonprod` runs preview
+    # and staging, `prod` runs production (Stackra ADR 0171).
     accounts:
       shared: ref:aws.accounts.shared
       nonprod: ref:aws.accounts.nonprod
       prod: ref:aws.accounts.prod
-      # DP11
-    # Pulumi state, S3 + KMS (0171 d4)
+    # Pulumi state: an S3 bucket encrypted with a KMS key (Stackra ADR 0171).
     state:
       bucket: ref:aws.state.bucket
       kmsKey: ref:aws.state.kmsKey
+    # The image registry: every image is scanned, gets an SBOM and is signed before a deploy reads it
+    # (Stackra ADR 0019).
     ecr:
       account: shared
       scan: trivy
       sbom: syft
       sign: cosign
-      # DP17/DP18
+    # Cost alerts at these percentages of the monthly budget; non-production stops at 100%.
     budgets:
       thresholds: [50, 80, 100]
       stopNonProdAt: 100
-      # DP20
+    # Tags every resource carries, for cost allocation and access policies.
     requiredTags: [env, service, tenant]
   encore:
+    # Encore Cloud app id (public, not a secret).
     app: acme-platform
-    # Encore Cloud app id (public)
   cloudflare:
     accountId: ref:cloudflare.accountId
-    # zone → id; member runways name hosts under these zones
+    # Zone → zone id; member runways name hosts under these zones. `acme.example` is a reserved
+    # example domain: put your own zone here.
     zones:
-      acme.dev: ref:cloudflare.zones.acme
-  # ADR 0170 d6
+      acme.example: ref:cloudflare.zones.acme
+  # The repository and its deployment environments (Stackra ADR 0170).
   github:
     org: acme
     repo: acme-platform
     environments:
       production:
-        reviewers: [owner]
+        # A production promotion waits for one of these reviewers (a team or a user).
+        reviewers: [acme/platform-team]
   infisical:
-    domain: https://eu.infisical.com # Infisical Cloud EU (0171 d6)
+    # Infisical Cloud, EU region (Stackra ADR 0171).
+    domain: https://eu.infisical.com
     workspace: ref:infisical.workspace
-    # runway env → Infisical env
+    # Runway environment → Infisical environment.
     environments:
       dev: dev
       preview: preview
       staging: staging
       production: prod
-    # default secret paths; a member may name `path: ci`
+    # Default secret paths; a member may name `path: ci`.
     paths:
       runtime: /runtime
       ci: /ci
       agents: /agents
   sentry:
+    # Projects are named per member (app runway `telemetry.sentryProject`).
     org: acme
-    # projects are named per member (app runway `telemetry.sentryProject`)
   betterstack:
     source: ref:betterstack.source
-  # the collector every service exports to (0184 d1); on-prem: bundled LGTM
+  # The collector every service exports to (Stackra ADR 0184); on-premises it is the bundled
+  # otel-lgtm container.
   otlp:
     endpoint: ref:otlp.endpoint
+  # The EAS project the mobile app builds and updates under (Stackra ADR 0180).
   expo:
     account: acme
     projectId: ref:expo.projectId
-    # EAS project (ADR 0180)
+  # The Apple developer team that signs the iOS app, and the App Store Connect app record the
+  # submit profiles in the mobile member's eas.json upload to (Stackra ADR 0180).
   apple:
     teamId: ref:apple.teamId
+    ascAppId: ref:apple.ascAppId
   google:
     playDeveloperId: ref:google.playDeveloperId
+  # Licence keys and distribution of paid packages (Stackra ADR 0177).
   keygen:
     account: ref:keygen.account
-    # Pro distribution and licences (0177/0178)
-  # SaaS identity (0206 d4); dev and on-prem run the container
-  zitadel:
-    cloud: ref:zitadel.instance
 
-# ── Environments: exactly these four names in every tool (ADR 0170 DP5; `local` is `dev`) ───
+# ── Environments: exactly these four names in every tool (Stackra ADR 0170; `local` is `dev`) ─────
 environments:
   dev:
+    # Where each kind of member runs; a member runway may override its own.
     destinations:
-      # where each kind of member runs; a member runway may override its own
-      # `stackra dev` = gen --watch + `encore run` + the compose infra below (ADR 0199 d3)
+      # `stackra dev` = gen --watch + `encore run` + the compose infra below.
       services: compose
-      # apps with web/pwa/desktop targets run their own dev server on the member's port
+      # Apps with web, PWA or desktop targets run their own dev server on the member's port.
       web: vite-dev
-      mobile: expo-dev # Metro on the member's port
-    # the containers `stackra dev` brings; a driver set to `memory` in every service removes its
-    # container
+      # Metro on the member's port.
+      mobile: expo-dev
+    # The shared containers `stackra dev` brings. A driver's own container (Valkey, object storage,
+    # mail capture, antivirus) comes from the package that ships the driver and starts only when a
+    # member selects it; the identity provider comes with the identity member.
     infra:
-      # `encore run`: every service behind one port; the Encore dev dashboard
+      # `encore run`: every service behind one port, and the Encore dev dashboard.
       gateway:
         port: 4000
         dashboard: 9400
+      # The one Postgres server; each service gets its own logical database (Stackra ADR 0238).
+      # The pgvector image is Postgres 17 with pgvector built in; ltree and pg_trgm ship with
+      # Postgres.
       postgres:
-        image: postgres:17
+        image: pgvector/pgvector:0.8.7-pg17-trixie@sha256:7a7e9f22015b67edb4bef5c59daeebcd7e74bfa570df6ce60ae01237c8648a84
         port: 5432
         extensions: [pgvector, ltree, pg_trgm]
         perLane: true
-      # only when a service picks the valkey driver
-      valkey:
-        image: valkey/valkey:8
-        port: 6379
-        when: driver
-      minio:
-        image: minio/minio
-        port: 9000
-        consolePort: 9001
-        when: driver
-      # seeded from the apps' identity configs
-      zitadel:
-        image: ghcr.io/zitadel/zitadel:v3
-        port: 8080
-        seed: .stackra/zitadel/seed.yaml
-      mailpit:
-        image: axllent/mailpit
-        smtpPort: 1025
-        uiPort: 8025
+      # Traces, metrics and logs in one local container (Grafana, Tempo, Loki, Prometheus), started
+      # on request.
       otel-lgtm:
-        image: grafana/otel-lgtm
+        image: grafana/otel-lgtm:0.37.0@sha256:57b5ab1ca6619beb180174e2fccce04762470750669d043f544b4726d0582d07
         grpcPort: 4317
         httpPort: 4318
         uiPort: 3000
         when: opt-in
-    # worktree N adds N*100 to every dev port (member and infra)
+    # Worktree N adds N*100 to every dev port (member and infra), so worktrees run side by side.
     lanes:
       enabled: true
       portStep: 100
       from: STACKRA_LANE
-    # on → a local CA, `<key>.localhost` names, one proxy
+    # On: a local certificate authority, `<key>.localhost` names and one proxy.
     https:
       enabled: false
       tool: mkcert
       hosts: "*.localhost"
-    # routes by Host to member dev ports; needed only for *.localhost or https
+    # Routes by Host to member dev ports; needed only for *.localhost or https.
     proxy:
       enabled: false
       port: 4443
@@ -178,19 +178,20 @@ environments:
         https: false
         open: false
 
+  # Optional per-pull-request environments; delete the block if you do not use them.
   preview:
-    # optional per-pull-request environments; delete the block if you do not use them
     destinations:
       services: encore-cloud
       web: cloudflare-workers
       mobile: eas
+    # One Encore environment per pull request.
     encore:
       env: "preview-${pr}"
-      # one Encore environment per pull request
     ttl: 7d
-    data: synthetic # golden tenant only
+    # Synthetic data only: the golden tenant the seeders publish.
+    data: synthetic
     shared:
-      # one small server for every preview; one logical db per service (0238)
+      # One small server for every preview; one logical database per service (Stackra ADR 0238).
       database:
         plan: shared
         class: db.t4g.small
@@ -218,14 +219,14 @@ environments:
           search: postgres
           media: s3
           webhooks: native
-    # members get `<key>-pr-N.preview.acme.dev` unless they say otherwise
+    # Members get `<key>-pr-N.preview.acme.example` unless they say otherwise.
     domains:
-      zone: acme.dev
+      zone: acme.example
       pattern: "${member}-pr-${pr}.preview"
+    # A preview deploys on every pull request and gates on the health endpoint only.
     deploy:
       on: pull-request
       gate: health
-      # DP24: previews gate on the health endpoint only
 
   staging:
     destinations:
@@ -233,12 +234,13 @@ environments:
       web: cloudflare-workers
       mobile: eas
       desktop: electron-release
-    # Encore Cloud process allocation = the deployables gen collected
+    # Encore Cloud process allocation = the deployables gen collected.
     encore:
       env: staging
       account: nonprod
       processAllocation: from-deployables
     shared:
+      # Used by aws-ecs, and by Encore Cloud's own VPC settings where it accepts them.
       network:
         vpc:
           cidr: 10.40.0.0/16
@@ -247,7 +249,7 @@ environments:
         loadBalancer:
           type: alb
           idleTimeoutSeconds: 60
-        # used by aws-ecs and by Encore Cloud's own VPC settings where it accepts them
+      # ONE server per environment (Stackra ADR 0238).
       database:
         engine: rds-postgres
         class: db.t4g.medium
@@ -256,7 +258,6 @@ environments:
         extensions: [pgvector, ltree, pg_trgm]
         pool:
           proxy: rds-proxy
-        # ONE server per environment (0238 d1)
       cache:
         engine: valkey
         node: cache.t4g.small
@@ -264,7 +265,7 @@ environments:
       queues:
         provider: sns-sqs
         dlq: true
-      # defaults for every member bucket
+      # Defaults for every member bucket.
       buckets:
         versioning: true
         lifecycle:
@@ -298,20 +299,20 @@ environments:
           observability:
             headSamplingRate: 0.1
     domains:
-      zone: acme.dev
+      zone: acme.example
       pattern: "${member}.staging"
+    # Staging deploys on every merge to main.
     deploy:
       on: merge-to-main
-      # DP6
+    # The EAS update channel members inherit.
     mobile:
       channel: staging
-      # EAS update channel members inherit
     desktop:
       channel: beta
 
   production:
     destinations:
-      # switch `services` to aws-ecs | helm | compose and the matching `targets.*` block applies
+      # Switch `services` to aws-ecs, helm or compose and the matching `targets.*` block applies.
       services: encore-cloud
       web: cloudflare-workers
       mobile: eas
@@ -373,14 +374,16 @@ environments:
           search: postgres
           media: s3
           webhooks: native
-    # ADR 0169 d1: these services are never packed with another; a member runway cannot undo it
+    # These services are never packed with another, and a member runway cannot undo it (Stackra ADR
+    # 0169).
     isolate: [identity, payments]
-    # DP26; on-prem: customer certificates
+    # Tenant custom domains go through Cloudflare for SaaS; on-premises installs use the customer's
+    # certificates instead.
     domains:
-      zone: acme.dev
+      zone: acme.example
       pattern: "${member}"
       tenantDomains: cloudflare-for-saas
-    # DP6: `runway promote <sha>` behind the owner's approval
+    # `runway promote <sha>` behind the production environment's reviewers (providers.github).
     deploy:
       on: promote
       approval: github-environment
@@ -391,23 +394,26 @@ environments:
 
 # ── Target blocks: provider shape, selected by `environments.<env>.destinations.*` ────────────────
 targets:
+  # Managed hosting; sizes come from `shared` and member `resources`.
   encore-cloud:
     cloud: aws
-    # managed (DP3); sizes come from `shared` and member `resources`
+  # Self-hosting on AWS (the @stackra-pro runtime stack, Stackra ADR 0171).
   aws-ecs:
-    # self-host on AWS (DP2 fallback; the @stackra-pro runtime stack, 0171 d5)
-    compute: fargate # fargate | ec2
+    # fargate | ec2
+    compute: fargate
+    # In front of static apps that do not run on Workers.
     cloudfront:
       enabled: true
-      # in front of static apps that do not run on Workers
     images:
       arch: [amd64, arm64]
+  # Single-host on-premises (Stackra ADR 0179) and dev.
   compose:
-    # single-host on-prem (0179 PK9) and dev
-    # on-prem footprint (D-14 open: which are required)
-    bundled: [postgres, valkey, minio, zitadel, mailpit, otel-lgtm, clamav]
-    registry: ghcr.io/acme # or the customer's registry / `docker load` (PK11)
-  # Kubernetes on-prem; Zarf for air-gap (PK10/PK12)
+    # The shared containers every install runs; driver containers and the identity provider join
+    # when a member selects that driver or the identity member is installed.
+    bundled: [postgres, otel-lgtm]
+    # Or the customer's registry, or `docker load` for an air-gapped install (Stackra ADR 0179).
+    registry: ghcr.io/acme
+  # Kubernetes on-premises; Zarf packages the air-gapped install (Stackra ADR 0179).
   helm:
     namespace: acme-platform
     ingressClass: nginx
@@ -418,17 +424,20 @@ targets:
     observability:
       headSamplingRate: 0.1
   eas:
-    # MR2: native fingerprint change, the `build:mobile` label, or a release
+    # A native build runs on a native fingerprint change, the `build:mobile` label or a release
+    # (Stackra ADR 0180).
     buildTrigger: fingerprint
-    monthlyBuildCap: 60 # MR3
-    credentials: eas-managed # signing certificates live in EAS, never in the repo
-    # which CI secrets the submit step reads
+    # The monthly EAS build budget (Stackra ADR 0180).
+    monthlyBuildCap: 60
+    # Signing certificates live in EAS, never in the repository.
+    credentials: eas-managed
+    # Which CI secrets the submit step reads.
     submit:
       ios: app-store-connect-api-key
       android: service-account
     # OTA (expo-updates): the channel is `environments.<env>.mobile.channel`; the runtime version is
     # the member's `release.runtimePolicy` (fingerprint), so an update never reaches a binary whose
-    # native layer differs. A staged rollout widens by `stepHours` unless the crash rate gate trips.
+    # native layer differs. A staged rollout widens by `stepHours` unless the crash-rate gate trips.
     ota:
       rollout:
         startPercent: 10
@@ -437,34 +446,39 @@ targets:
       gate:
         crashFreeSessions: 99.5
       rollback: republish-previous
+    # A production store release (Play) opens at this percentage of users; the crash-rate gate
+    # above widens it, as for OTA updates (Stackra ADR 0180).
+    storeRollout:
+      startPercent: 10
   electron-release:
-    # members append `/<key>/<channel>/`
+    # Members append `/<key>/<channel>/`.
     feed:
       bucket: r2:acme-downloads
-      publicOrigin: https://downloads.acme.dev
+      publicOrigin: https://downloads.acme.example
+    # A staged rollout widens by `stepHours` (Stackra ADR 0254).
     rollout:
       startPercent: 20
       endPercent: 100
       stepHours: 24
-      # ADR 0181 d3
-    # tooling; ON/OFF is the member's `release.desktop.signing`
+    # Tooling only; ON or OFF is the member's `release.desktop.signing`.
     signing:
       mac: notarize
       windows: azure-trusted-signing
       linux: none
-    # release jobs only (CI6)
+    # Runner images of the desktop release jobs, pinned so a runner upgrade is a reviewed change.
     runners:
-      mac: macos-latest
-      windows: windows-latest
-      linux: ubuntu-latest
+      mac: macos-15
+      windows: windows-2025
+      linux: ubuntu-24.04
 
-# ── Edge (ADR 0175, 0237 layer 1) ─────────────────────────────────────────────────────────────────
+# ── Edge (Stackra ADR 0175, 0237 layer 1) ─────────────────────────────────────────────────────────
 edge:
-  proxy: all # Cloudflare proxies every public hostname (DP27)
+  # Cloudflare proxies every public hostname.
+  proxy: all
   waf: managed
   bots:
     mode: likely-automated-challenge
-  # coarse per-IP; per-area limits are rate-limit.config.ts
+  # Coarse per-IP limit; per-area limits are rate-limit.config.ts.
   rateLimit:
     perIp:
       requests: 600
@@ -472,22 +486,26 @@ edge:
   tls:
     minVersion: "1.2"
     hsts: true
-  apiHost: api # `api.<zone>/{public,app,admin,platform}` routes to the Encore gateway (0237 d1)
-  analyticsProxy: /ingest # reverse proxy path for PostHog on app origins
+  # `api.<zone>/{public,app,admin,platform}` routes to the Encore gateway (Stackra ADR 0237).
+  apiHost: api
+  # Reverse-proxy path for PostHog on app origins.
+  analyticsProxy: /ingest
 
-# ── Secrets: vault defaults; NAMES are declared by members (ADR 0168 d5, 0173, 0257) ──────────────
+# ── Secrets: vault defaults; NAMES are declared by members (Stackra ADR 0168, 0173, 0257) ──────────
 secrets:
-  # runway syncs Infisical → Encore secrets / Worker secrets / EAS environments / compose env
-  # (outside git) / k8s Secret
+  # Runway syncs Infisical → Encore secrets, Worker secrets, EAS environments, compose env (outside
+  # git) and Kubernetes Secrets.
   sync: on-deploy
   defaultPath: runtime
+  # CI-only names the release workflows read over OIDC; never given to a runtime.
   ci:
-    # CI-only names the release workflows read over OIDC; never a runtime
     - EXPO_TOKEN
     - APPLE_ASC_KEY_ID
     - APPLE_ASC_ISSUER_ID
     - APPLE_ASC_KEY_P8
     - GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+    # The Firebase client config of the Android app (FCM push), synced to EAS as a file variable.
+    - GOOGLE_SERVICES_JSON
     - APPLE_NOTARY_KEY_P8
     - APPLE_SIGNING_CERT_P12
     - APPLE_SIGNING_CERT_PASSWORD
@@ -496,48 +514,52 @@ secrets:
     - CLOUDFLARE_API_TOKEN
     - SENTRY_AUTH_TOKEN
     - TURBO_TOKEN
+    # Signs and verifies every remote-cache artefact (turbo.jsonc `remoteCache.signature`).
+    - TURBO_REMOTE_CACHE_SIGNATURE_KEY
     - ENCORE_AUTH_KEY
 
-# ── Release policy (ADR 0170) ─────────────────────────────────────────────────────────────────────
+# ── Release policy (Stackra ADR 0170) ─────────────────────────────────────────────────────────────
 release:
+  # SaaS promotes the commit SHA; on-premises bundles promote the image digest.
   promote:
     unit: sha
-    # SaaS promotes the SHA (DP4); on-prem bundles promote the image digest
+  # Post-deploy gates: the health endpoint reports the deployed SHA, the Playwright smoke suite
+  # passes, and errors are watched for 15 minutes.
   gate:
     health: sha
     smoke: playwright
     errorWatchMinutes: 15
-    # DP24
   strategy:
     kind: all-at-once
     healthGate: true
     autoRollback: true
-    # DP16
+  # The rollback window after a promotion, and who triggers a rollback.
   rollback:
     withinMinutes: 15
     by: owner
-    # DP14
-  records: [github-deployments, linear-release, "slack:#deploys"] # DP23
-  buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm] # DP21
-  # PK14
+  # Where every release is recorded.
+  records: [github-deployments, linear-release, "slack:#deploys"]
+  # Build and publish order across destinations.
+  buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm]
+  # On-premises upgrades (Stackra ADR 0179).
   onPrem:
     upgrades: sequential-minor
     preflight: true
     backup: mandatory
     migrationsAsJob: true
 
-# ── Observability defaults (ADR 0184) ─────────────────────────────────────────────────────────────
+# ── Observability defaults (Stackra ADR 0184) ─────────────────────────────────────────────────────
 observability:
+  # Hot logs are searchable for 30 days, then archived to object storage for 13 months.
   logs:
     hotDays: 30
     coldMonths: 13
     coldStore: s3
-    # OB11
+  # Every cron, outbox relay and worker reports a heartbeat; a missed one alerts.
   heartbeats:
     crons: true
     relays: true
     workers: true
-    # OB10
+  # Service-level objectives start with the first paying tenant.
   slos:
     startAt: first-paying-tenant
-    # OB3

@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: proves the inbox badges the service's inbox-wide unread count (not the page's), renders
- *          an entry from its kind's label, marks one read through the generated action, and shows
- *          the empty state for a user with none.
+ *          an entry from its kind's label, marks one read through the generated action, loads the
+ *          next page by cursor, says so when marking read fails, and shows the empty state for a
+ *          user with none.
  * Boundary: unit tier, jsdom; the notifications client is faked at the HTTP boundary.
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0007
@@ -38,6 +39,37 @@ describe(NotificationInbox, () => {
     expect(notifications.called(Notifications.actions.MarkNotificationRead)).toEqual([
       { notificationId: UNREAD.id },
     ]);
+  });
+
+  /** Older notifications are one press away: the next page is asked for with the last cursor. */
+  it("loads the next page with the cursor", async () => {
+    const older = { ...UNREAD, id: "ntf_01J9Z3K4M5N6P7Q8R9S0T1V2W4" };
+    const notifications = fakeClient(Notifications, (fake) =>
+      fake.queries.ListNotifications.when({ cursor: UNREAD.id })
+        .returns({ items: [older], hasMore: false, unread: 3 })
+        .otherwise({ items: [UNREAD], hasMore: true, nextCursor: UNREAD.id, unread: 3 }),
+    );
+    render(<NotificationInbox />, { locale: "en", clients: [notifications] });
+    await userEvent.click(await screen.findByRole("button", { name: "Notifications: 3 unread" }));
+    await userEvent.click(screen.getByRole("button", { name: "Load more" }));
+    expect(await screen.findAllByRole("button", { name: "Mark read" })).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: "Load more" })).toBeNull();
+  });
+
+  /** A refused mark-read must be said, not swallowed, and the entry stays unread. */
+  it("shows a toast when marking read fails", async () => {
+    const page = { items: [UNREAD], hasMore: false, unread: 1 };
+    const notifications = fakeClient(Notifications, (fake) => {
+      fake.queries.ListNotifications.returns(page);
+      fake.actions.MarkNotificationRead.throws(new Error("network"));
+    });
+    render(<NotificationInbox />, { locale: "en", clients: [notifications] });
+    await userEvent.click(await screen.findByRole("button", { name: "Notifications: 1 unread" }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark read" }));
+    expect(
+      await screen.findByText("Could not mark the notification read. Try again."),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Mark read" })).toBeTruthy();
   });
 
   /** A user with no notifications sees the translated empty state, not a blank sheet. */

@@ -2,21 +2,25 @@
 # Purpose: the committed-manifest exception of this member: everything under .stackra/ is generated except the
 #          contract artefacts other members build their clients from (app-manifest.json) and the OpenAPI projection.
 #          Same rule set as the root .gitignore, repeated so the member folder keeps it when copied elsewhere.
-# Boundary: ignore rules only.
+# Boundary: ignore rules only. EAS does not read this file: the generated repo-root .easignore decides
+#           what an upload carries, and it keeps the shims and `.stackra/` below.
 # Runtime: node
 # Governing contract: ADR 0158, ADR 0268
+# gen output, except the committed contract artefacts
 .stackra/*
 !.stackra/app-manifest.json
 !.stackra/openapi.json
 # template only: the generated samples are committed so they can be read; a real project drops the next line
 !.stackra/**
-# generated root shims (Expo CLI and EAS read the member root; each re-exports its .stackra/ file)
+# generated root shims (Expo CLI and EAS read the member root; each re-exports or copies its .stackra/ file)
 /app.config.ts
-/babel.config.js
 /metro.config.js
 /eas.json
+# build output
 dist/
+# Expo CLI cache and the native projects `expo prebuild` writes
 .expo/
 ios/
 android/
+# Maestro screenshots, logs and reports (`testOutputDir`)
 maestro-report/

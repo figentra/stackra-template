@@ -1,34 +1,24 @@
 /*
 Stackra file contract:
-Purpose: the one stylesheet: Tailwind v4, the HeroUI theme, and the generated @stackra/brand tokens
-         mapped onto HeroUI's semantic variables, so every component follows the brand (and a
-         tenant's override) in light and dark.
+Purpose: the one stylesheet: Tailwind v4, the HeroUI theme, and the generated @acme/brand tokens
+         mapped onto HeroUI's own variables, so every component follows the brand (and a tenant's
+         override) in light and dark; the brand-only utilities; the Arabic font; a few page-level
+         rules.
 Boundary: token mapping and a few page-level rules only; logical properties only. Only the
-          `--brand-<group>-<name>` names `@stackra/brand` generates from its token source are
-          referenced; a tenant override sets the same names on `<html>` through the site frame.
+          `--brand-<group>-<name>` names `@acme/brand` generates from its token source are
+          referenced; a tenant override sets the same names through the site frame's nonce-bearing
+          `<Style>`.
 Runtime: browser
-Governing contract: ADR 0080 (logical CSS, light and dark), ADR 0165 (HeroUI v3 on Tailwind v4),
-                    ADR 0231 (token names)
+Governing contract: ADR 0080 (logical CSS, light and dark), ADR 0165 (HeroUI v3 on Tailwind v4)
 */
 @import "tailwindcss";
 @import "@heroui/styles";
-@import "@stackra/brand/css/tokens.css";
+@import "@acme/brand/css/tokens.css";
 
-/* Brand → theme: components use `text-ink`, `text-ink-muted`, `bg-surface`; HeroUI's own semantic
-   variables (`foreground`, `muted`) point at the same tokens. */
-@theme inline {
-  --color-ink: var(--brand-color-ink);
-  --color-ink-muted: var(--brand-color-ink-muted);
-  --color-surface: var(--brand-color-surface);
-  --color-accent: var(--brand-color-accent);
-  --color-accent-foreground: var(--brand-color-accent-foreground);
-  --color-warning: var(--brand-color-warning);
-  --color-foreground: var(--brand-color-ink);
-  --color-muted: var(--brand-color-ink-muted);
-  --radius-field: var(--brand-radius-md);
-  --radius-panel: var(--brand-radius-lg);
-  --font-sans: var(--brand-font-sans), var(--brand-font-arabic), system-ui, sans-serif;
-}
+/* Tailwind skips gitignored and installed files by default: scan the generated sources and the
+   Stackra UI packages, whose components carry utility classes too. */
+@source "../../.stackra";
+@source "../../node_modules/@stackra";
 
 /* Dark follows the system unless the visitor chose; `data-theme` is written by @stackra/theming. */
 @custom-variant dark (&:where(
@@ -36,6 +26,7 @@ Governing contract: ADR 0080 (logical CSS, light and dark), ADR 0165 (HeroUI v3 
   [data-theme="dark"] *,
   :not([data-theme="light"]):where(.dark, .dark *)
 ));
+/* Native controls and scrollbars follow the same choice. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
@@ -45,8 +36,35 @@ Governing contract: ADR 0080 (logical CSS, light and dark), ADR 0165 (HeroUI v3 
   color-scheme: dark;
 }
 
-/* Arabic reads better slightly larger at the same line height. */
-:root[dir="rtl"] {
+/* HeroUI's semantic variables point at the brand; the brand file switches its values for dark, so
+   one mapping serves both schemes and a tenant's override reaches every component. */
+:root,
+.light,
+.dark,
+[data-theme] {
+  --accent: var(--brand-color-accent);
+  --accent-foreground: var(--brand-color-accent-foreground);
+  --foreground: var(--brand-color-ink);
+  --muted: var(--brand-color-ink-muted);
+  --surface: var(--brand-color-surface);
+  --warning: var(--brand-color-warning);
+  --radius: var(--brand-radius-md);
+}
+
+/* The brand-only names HeroUI has no variable for: `text-ink`, `text-ink-muted`, the two radii
+   (`rounded-field`, `rounded-panel`) and the font stack. */
+@theme inline {
+  --color-ink: var(--brand-color-ink);
+  --color-ink-muted: var(--brand-color-ink-muted);
+  --radius-field: var(--brand-radius-md);
+  --radius-panel: var(--brand-radius-lg);
+  --font-sans: var(--brand-font-sans);
+}
+
+/* Arabic switches the brand's sans stack to its Arabic face and reads better slightly larger at
+   the same line height. */
+:root[lang="ar"] {
+  --brand-font-sans: var(--brand-font-arabic);
   font-size: 106.25%;
 }
 

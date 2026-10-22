@@ -1,15 +1,18 @@
 # Stackra file contract:
-# Purpose: release. With pending changesets it opens or updates the "version packages" PR; on that
-#          PR's merge it publishes every package with "private": false to npm with provenance, then
-#          uploads a CycloneDX SBOM. Apps and services deploy by commit SHA, not from here.
-# Triggers: every push to main; workflow_dispatch with `dry_run` for a publish dry run.
-# Needs: the `release` environment (protected, main only), contents and pull-requests write, and
-#        id-token write for npm trusted publishing. No npm token and no repository secret.
-# Skips: until the repository commits pnpm-lock.yaml (`preflight` below), every job is skipped and
-#        the run is green: `pnpm install --frozen-lockfile` cannot run without a lockfile, which is
-#        the case in the template while `@stackra/*` is unpublished (pre-release).
-# Owner: the repository maintainers (CODEOWNERS). Runbook:
-#        https://docs.stackra.figentra.com/runbooks/release
+# Purpose: release. With pending changesets it opens or updates the "version packages" pull request;
+#          when that pull request merges it publishes every package that is not marked
+#          `"private": true` to npm with provenance, then builds a CycloneDX SBOM of the released
+#          tree. Apps and services deploy by commit SHA, not from here.
+# Boundary: triggers are every push to main and workflow_dispatch with `dry_run` for a publish dry
+#           run. Needs the `release` environment (protected, main only), contents and pull-requests
+#           write, and id-token write for npm trusted publishing; no npm token and no repository
+#           secret. Until the repository commits pnpm-lock.yaml (`preflight` below) every job is
+#           skipped and the run is green: `pnpm install --frozen-lockfile` cannot run without a
+#           lockfile, which is the case while `@stackra/*` is unpublished.
+# Runtime: node
+# Governing contract: Stackra ADR 0013 (versioning and release), Stackra ADR 0019 (supply-chain
+#                     hardening), Stackra ADR 0177 (npm distribution). Runbook:
+#                     https://docs.stackra.figentra.com/runbooks/release
 name: Release
 
 on:
@@ -22,11 +25,11 @@ on:
         type: boolean
         default: false
 
-# One release run per ref at a time: a second run starting before this one finishes
-# would version the same changesets twice.
+# One release run per ref at a time: a second run starting before this one finishes would version the
+# same changesets twice.
 concurrency: release-${{ github.ref }}
 
-# ADR 0019 D2: nothing by default; the job below asks for what it needs.
+# Stackra ADR 0019: nothing by default; each job asks for what it needs.
 permissions: {}
 
 jobs:
@@ -34,15 +37,16 @@ jobs:
   # this job checks out the lockfile alone and exposes the answer as an output the jobs below read.
   preflight:
     name: Preflight
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     outputs:
       has-lockfile: ${{ steps.lockfile.outputs.present }}
     steps:
-      # ADR 0019 D1: every action is pinned to a full commit SHA, the version in the trailing comment.
+      # Stackra ADR 0019: every action is pinned to a full commit SHA, the version in the trailing
+      # comment.
       - name: Checkout (lockfile only)
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
           sparse-checkout: pnpm-lock.yaml
@@ -60,27 +64,29 @@ jobs:
 
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: preflight
     # No lockfile, no install: skip instead of failing (see the header).
     if: needs.preflight.outputs.has-lockfile == 'true'
     # https://docs.stackra.figentra.com/runbooks/release ("Before the first release"): a human
-    # configures this environment as protected and restricted to main, so a branch that
-    # edits the workflow cannot obtain a credential.
+    # configures this environment as protected and restricted to main, so a branch that edits the
+    # workflow cannot obtain a credential.
     environment: release
     permissions:
       contents: write # push the version-PR branch and the version tags
       pull-requests: write # open and update the version PR
-      id-token: write # ADR 0177 amendment: pnpm trusted publishing (GitHub OIDC) and the provenance statement; no npm token
+      id-token: write # pnpm trusted publishing (GitHub OIDC) and the provenance statement; no npm token
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0 # changesets diffs against history and reads existing tags
           submodules: false
 
-      # ADR 0027 D2: node and pnpm come from mise.toml.
+      # Stackra ADR 0027: node and pnpm come from mise.toml.
       - name: Toolchain (mise)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
@@ -89,8 +95,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # With pending changesets this opens or updates the "version packages" PR; on its merge `changeset publish`
-      # publishes every package with "private": false to npm with provenance. Apps and services deploy by commit SHA.
       - name: Build
         run: pnpm build
 
@@ -98,7 +102,11 @@ jobs:
         if: inputs.dry_run == true
         run: pnpm -r publish --dry-run --no-git-checks
 
+      # With pending changesets this opens or updates the "version packages" PR; when that PR merges,
+      # `changeset publish` publishes every package not marked `"private": true` to npm with
+      # provenance. The inputs are changesets/action's own names at this SHA.
       - name: Version PR / publish
+        id: changesets
         if: inputs.dry_run != true
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
@@ -106,27 +114,28 @@ jobs:
           publish-script: pnpm changeset publish
           pr-title: "chore(release): version packages"
           commit-message: "chore(release): version packages"
-          # GITHUB_TOKEN works, but a PR it opens does not trigger the Quality Gate. Swap in a GitHub App token
-          # (actions/create-github-app-token) when you want the version PR checked (README, "Make it yours").
+          # GITHUB_TOKEN works, but a PR it opens does not trigger the Quality Gate. Swap in a GitHub App
+          # token (actions/create-github-app-token) when the version PR must run the gate.
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          # changesets runs pnpm 12's native publish (`pnpm changeset publish` -> `pnpm publish`): it resolves
-          # workspace:/catalog: versions and does the OIDC exchange and provenance itself, not the npm CLI.
-          # No NPM_TOKEN exists anywhere (ADR 0177 amendment).
+          # changesets runs pnpm 12's native publish (`pnpm changeset publish` -> `pnpm publish`): it
+          # resolves workspace:/catalog: versions and does the OIDC exchange and provenance itself, not
+          # the npm CLI. No NPM_TOKEN exists anywhere (Stackra ADR 0177).
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
           NPM_CONFIG_PROVENANCE: "true"
 
-  # The SBOM job holds no id-token and no write permission: it only reads the repository.
+  # The SBOM of what was just released. It runs only when the release job published something, and
+  # holds no id-token and no write permission: it only reads the repository.
   sbom:
     name: SBOM
-    runs-on: ubuntu-latest
-    # Runs only after a release job that ran; a skipped release skips this job too.
+    runs-on: ubuntu-24.04
     needs: release
+    if: needs.release.outputs.published == 'true'
     permissions:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
           submodules: false
@@ -139,16 +148,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # SBOM covers what actually got installed (node_modules), independent of whether this
-      # run released. `--ignore-npm-errors` is required because cyclonedx-npm shells out to
-      # `npm ls` internally, which reports the devDependency-only peer graphs of transitive
-      # tools as errors even though pnpm installed fine. The tool is pinned via npx because
-      # it is not a workspace catalog dependency.
+      # `pnpm sbom` runs the CycloneDX CLI at its catalog version (catalog `release`). It reads what
+      # was installed (node_modules); `--ignore-npm-errors` is needed because it shells out to
+      # `npm ls`, which reports the devDependency-only peer graphs of transitive tools as errors even
+      # though pnpm installed fine.
       - name: Generate SBOM (CycloneDX)
-        run: npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --ignore-npm-errors --output-format JSON --output-file sbom.cdx.json
+        run: pnpm sbom
 
       - name: Upload SBOM as release artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sbom
           path: sbom.cdx.json

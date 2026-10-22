@@ -12,8 +12,8 @@
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, ApiArea, HttpMethod } from "@stackra/contracts";
-import { ProductService } from "#modules/catalogue/services/product.service";
-import { StorefrontService } from "#modules/catalogue/services/storefront.service";
+import type { ProductService } from "#modules/catalogue/services/product.service";
+import type { StorefrontService } from "#modules/catalogue/services/storefront.service";
 import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 import { GetProductBySlugInput } from "#modules/catalogue/schemas/get-product-by-slug-input.schema";
 import { StorefrontProductView } from "#modules/catalogue/schemas/storefront-product-view.schema";

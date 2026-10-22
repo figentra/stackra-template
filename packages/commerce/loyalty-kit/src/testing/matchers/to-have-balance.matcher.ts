@@ -3,7 +3,7 @@
  * Purpose: `expect(ledger).toHaveBalance(member, points)`: a domain matcher over the LoyaltyLedger
  *          port.
  * Boundary: a matcher owned by the package whose port it reads (ADR 0269), exported from
- *           `@stackra/loyalty-kit/testing`.
+ *           `@acme/loyalty-kit/testing`.
  * Runtime: isomorphic
  * Governing contract: ADR 0269 (domain matchers live in the owning package's ./testing)
  */

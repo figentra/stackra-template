@@ -15,7 +15,7 @@ import { Action, type ActionContext, AsEndpoint, Idempotency } from "@stackra/ac
 import { ActorKind, HttpMethod } from "@stackra/contracts";
 import { SendMessageInput } from "#modules/messages/schemas/send-message-input.schema";
 import { SendMessageOutput } from "#modules/messages/schemas/send-message-output.schema";
-import { MessageService } from "#modules/messages/services/message.service";
+import type { MessageService } from "#modules/messages/services/message.service";
 import { MessagePermissions } from "#modules/messages/permissions/message.permission";
 import { MessageStatus } from "#modules/messages/enums/message-status.enum";
 import { DeliverMessageAction } from "#modules/messages/actions/deliver-message.action";

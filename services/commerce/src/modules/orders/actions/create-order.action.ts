@@ -26,13 +26,14 @@ import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
 import { CreateOrderOutput } from "#modules/orders/schemas/create-order-output.schema";
 import { CreateOrderWorkflow } from "#modules/orders/workflows/create-order.workflow";
-import { TenantActiveGuard } from "#modules/orders/guards/tenant-active.guard";
+import { AcceptingOrdersGuard } from "#modules/orders/guards/accepting-orders.guard";
 
 /**
  * Places an order for the acting customer. No `handle`: `runs` hands the validated input to the
- * workflow and returns its output through the same pipeline (guards, permission, idempotency, rate
- * limit, audit, UX). Its risk is `OrderPermissions.create`'s (ADR 0132). Offline clients may queue it
- * with a client-minted id for 72 hours; a conflict on replay is shown to the person, never merged.
+ * workflow and returns its output through the same pipeline (guards, permission, idempotency,
+ * rate limit, audit, UX). Its risk is `OrderPermissions.create`'s (ADR 0132). Offline clients may
+ * queue it with a client-minted id for 72 hours; a conflict on replay is shown to the person, never
+ * merged.
  */
 @Action({
   key: "order.create", // gen prefixes the module key: `orders.order.create`
@@ -40,8 +41,9 @@ import { TenantActiveGuard } from "#modules/orders/guards/tenant-active.guard";
   output: CreateOrderOutput,
   permission: OrderPermissions.create,
   actors: [ActorKind.User, ActorKind.Agent],
-  guards: [TenantActiveGuard],
-  idempotency: Idempotency.Required, // clients send Idempotency-Key; the pipeline stores key + hash + result
+  guards: [AcceptingOrdersGuard], // refuses while the tenant has paused ordering
+  // clients send Idempotency-Key; the pipeline stores key + hash + result
+  idempotency: Idempotency.Required,
   rateLimit: { perMinute: 20 },
   runs: CreateOrderWorkflow,
   intents: ["order two of SKU-123", "buy these items"],
@@ -52,7 +54,12 @@ import { TenantActiveGuard } from "#modules/orders/guards/tenant-active.guard";
     retention: "72h",
     onConflict: [ConflictResolution.ServerWins, ConflictResolution.Manual],
   },
-  ux: { success: I18n.orders.order.placed, after: [UxAfter.OpenRecord] },
+  // `queued` is the toast a client shows when it stores the call offline instead of sending it
+  ux: {
+    success: I18n.orders.order.placed,
+    queued: I18n.orders.order.queued,
+    after: [UxAfter.OpenRecord],
+  },
 })
 @AsEndpoint({ method: HttpMethod.Post, path: "/orders" })
 @AsTool() // agents may place orders for their user; L1, so no approval

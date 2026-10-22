@@ -8,11 +8,12 @@
  *           literal URL here.
  * Runtime: node
  */
+import { fileURLToPath } from "node:url";
 import { e2ePreset } from "@stackra/testing/e2e";
 import { baseUrlOf } from "@stackra/runway/ports";
 
 export default e2ePreset({
-  root: new URL("..", import.meta.url).pathname,
+  root: fileURLToPath(new URL("..", import.meta.url)),
   app: "@acme/console",
   baseURL: baseUrlOf("console"),
   services: [

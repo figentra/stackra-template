@@ -4,8 +4,9 @@
  * — do not edit
  * Purpose: the full React Router 7 framework-mode route tree: the SEO resource routes at the root,
  *          then the site layout with every `@Route` class once per locale (`/` unprefixed for `en`,
- *          `/ar` for `ar`), each with its own route id. The splat (`PageRoute`) is last in every
- *          locale. A hand-written route config is banned (ADR 0165).
+ *          `/ar` for `ar`), each with its own route id and one module in `route-modules/` named by
+ *          its key. A route whose path equals its layout's is the index. The splat (`PageRoute`) is
+ *          last in every locale. A hand-written route config is banned (ADR 0165).
  * Boundary: read by the Vite plugin at build and by the router at run time; never edited.
  * Runtime: isomorphic
  */
@@ -14,26 +15,27 @@ import { index, layout, prefix, route, type RouteConfig } from "@react-router/de
 /** The pages of one locale; the adapter reads the locale from the URL. */
 function sitePages(locale: "en" | "ar") {
   const id = (name: string) => `${locale}/${name}`;
-  return layout("./adapters/site.layout.tsx", { id: id("site") }, [
-    index("./adapters/landing.route.tsx", { id: id("landing") }), // prerender, marketing
-    route("pricing", "./adapters/pricing.route.tsx", { id: id("pricing") }), // prerender, marketing
-    route("contact", "./adapters/contact.route.tsx", { id: id("contact") }), // prerender, submit
+  return layout("./route-modules/site.tsx", { id: id("site") }, [
+    index("./route-modules/landing.tsx", { id: id("landing") }), // prerender, marketing
+    route("pricing", "./route-modules/pricing.tsx", { id: id("pricing") }), // prerender, marketing
+    route("contact", "./route-modules/contact.tsx", { id: id("contact") }), // prerender, submit
     ...prefix("store", [
-      index("./adapters/store.route.tsx", { id: id("store") }), // StoreRoute: cache catalogue
+      index("./route-modules/store.tsx", { id: id("store") }), // StoreRoute: cache catalogue
       // ProductRoute: cache catalogue
-      route(":slug", "./adapters/product.route.tsx", { id: id("product") }),
+      route(":slug", "./route-modules/product.tsx", { id: id("product") }),
     ]),
     // PageRoute: render client, cache page
-    route("*", "./adapters/page.route.tsx", { id: id("page") }),
+    route("*", "./route-modules/page.tsx", { id: id("page") }),
   ]);
 }
 
 export default [
   // from seo.config.ts (resource routes; no UI, one Response each)
-  route("robots.txt", "./routes/robots.route.ts"),
-  route("sitemap.xml", "./routes/sitemap-index.route.ts"),
-  route("sitemaps/:source", "./routes/sitemap.route.ts"), // marketing.xml, pages.xml, products.xml
-  route("og/:kind/:id", "./routes/og-image.route.ts"), // kinds: site, page, product
+  route("robots.txt", "./route-modules/robots.ts"),
+  route("sitemap.xml", "./route-modules/sitemap-index.ts"),
+  // marketing-1.xml, pages-1.xml, products-<n>.xml; seo.config.ts sitemapPageSize per file
+  route("sitemaps/:file", "./route-modules/sitemap.ts"),
+  route("og/:kind/:id", "./route-modules/og-image.ts"), // kinds: site, page, product
 
   // from i18n.config.ts: defaultLocale en unprefixed, ar prefixed
   sitePages("en"),

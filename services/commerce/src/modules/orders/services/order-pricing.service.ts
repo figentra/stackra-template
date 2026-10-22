@@ -11,11 +11,11 @@
  *                     (money), guides/programming-model.mdx#hooks; ADR 0127 rows 2 and 29
  */
 import type { ActionContext } from "@stackra/actions";
-import { Logger } from "@stackra/contracts";
+import type { Logger } from "@stackra/contracts";
 import { Money } from "@stackra/money";
-import { PricingClient } from "#stackra/clients";
-import { ProductService } from "#modules/catalogue/services/product.service";
-import { OrderHooks } from "#modules/orders/hooks/order.hook-point";
+import type { PricingClient } from "#stackra/clients";
+import type { ProductService } from "#modules/catalogue/services/product.service";
+import type { OrderHooks } from "#modules/orders/hooks/order.hook-point";
 import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 import type { OrderTotals } from "#modules/orders/schemas/order-totals.schema";
 import type { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";

@@ -5,7 +5,8 @@
 #           advisory on iOS.
 # Runtime: node
 # Governing contract: ADR 0059, ADR 0252, ADR 0022
-appId: dev.acme.mobile
+appId: ${APP_ID}
+name: offline-queue
 tags: [gate, android]
 ---
 - runFlow: sign-in-and-home.flow.yaml

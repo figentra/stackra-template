@@ -1,11 +1,13 @@
 {
   // Stackra file contract:
-  // Purpose: TypeScript settings of the console; the app preset (DOM lib, JSX, legacy decorators, no emit), nothing local.
-  // Boundary: `#src/*`, `#stackra/*` and `#stackra-desktop/*` resolve through package.json imports; `.stackra/` is
-  //           included so generated code is checked. `src/bridges/**` is Electron-main code: the preset adds the node
-  //           lib for that folder.
+  // Purpose: TypeScript settings of the console: the app preset (DOM lib, JSX, legacy decorators,
+  //          no emit) and nothing local, so every app member type-checks alike.
+  // Boundary: `#src/*`, `#stackra/*` and `#stackra-desktop/*` resolve through package.json imports.
+  //           The preset's include covers `src`, `stackra.config.ts` and the generated `.stackra/`.
+  //           The renderer program has the DOM lib only: the service worker (`.stackra/sw.ts`) and
+  //           the Electron main process (`.stackra/desktop/`) are checked by their own presets'
+  //           programs, never by this one.
   // Runtime: node
   // Governing contract: ADR 0003 (one preset per member), ADR 0165, ADR 0005 (legacy decorators)
-  "extends": "@stackra/typescript-config/app.json",
-  "include": ["src", "stackra.config.ts", ".stackra"]
+  "extends": "@stackra/typescript-config/app"
 }

@@ -9,9 +9,9 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0220 (integer minor units), ADR 0263 (typed constructor, no @Inject)
  */
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
-import { LoyaltyMembers } from "#contracts/loyalty-members.port";
-import { LoyaltyKitConfig } from "#config/loyalty-kit.config";
+import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import type { LoyaltyMembers } from "#contracts/loyalty-members.port";
+import type { LoyaltyKitConfig } from "#config/loyalty-kit.config";
 import { EntryKind } from "#core/enums/entry-kind.enum";
 import { InsufficientPointsError } from "#core/errors/insufficient-points.error";
 import { NotAMemberError } from "#core/errors/not-a-member.error";

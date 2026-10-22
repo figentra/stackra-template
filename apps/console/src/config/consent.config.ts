@@ -6,7 +6,7 @@
  *           always granted and never asked. The decision is per user and device, in the prefs
  *           store.
  * Runtime: isomorphic
- * Governing contract: ADR 0071 (consent before analytics; decline is the default)
+ * Governing contract: the `@stackra/consent` package contract (decline is the default)
  */
 import { Config } from "@stackra/config";
 import { ConsentCategory } from "@stackra/consent";

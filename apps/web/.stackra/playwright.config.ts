@@ -8,11 +8,12 @@
  * Boundary: `baseURL` and the Turnstile mode come from the member runway; no literal URL here.
  * Runtime: node
  */
+import { fileURLToPath } from "node:url";
 import { e2ePreset } from "@stackra/testing/e2e";
 import { baseUrlOf } from "@stackra/runway/ports";
 
 export default e2ePreset({
-  root: new URL("..", import.meta.url).pathname,
+  root: fileURLToPath(new URL("..", import.meta.url)),
   app: "@acme/web",
   target: "web-ssr", // builds, then serves `build/` with wrangler dev on the member's dev port
   baseURL: baseUrlOf("web"),

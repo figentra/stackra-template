@@ -19,6 +19,7 @@ import { SettingsPages } from "#stackra/settings";
 import { CustomerPortalPanel } from "#src/panels/customer-portal.panel";
 import { DashboardRoute } from "#src/routes/dashboard.route";
 import { NotFoundRoute } from "#src/routes/not-found.route";
+import { OpenRoute } from "#src/routes/open.route";
 import { PublicLayout } from "#src/routes/public.layout";
 import { QuickOrderRoute } from "#src/routes/quick-order.route";
 import { SettingsRoute } from "#src/routes/settings.route";
@@ -39,6 +40,8 @@ export const routes: RouteObject[] = [
     toRoute(SettingsRoute),
     // document: WelcomeDocument → GetDocument({ key: "console.welcome" }) or the class
     toRoute(WelcomeRoute),
+    // /open?url=: the PWA protocol handler and the desktop deep link land here
+    toRoute(OpenRoute),
     ...toResource(Resources.Product), // /catalogue/products, /:id, /:id/edit, /new
     ...toResource(Resources.Order), // /orders/orders, /:id
     ...toResource(Resources.AccessLogEntry), // /access-log/entries

@@ -5,14 +5,24 @@
  * Boundary: presentation over `useActiveTenant`. A refused switch (queued offline work) is shown as
  *           a toast with the refusal's i18n key; the component never clears the queue itself.
  * Runtime: browser
- * Governing contract: ADR 0208 (memberships), ADR 0139 (feedback as toasts), ADR 0128
+ * Governing contract: ADR 0208 (memberships), ADR 0139 (feedback as toasts)
  */
 import { Avatar, Dropdown, toast } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";
 import { Icon, Icons } from "@stackra/ui/icons";
 import { useActiveTenant } from "#src/providers/tenant/use-active-tenant";
 import { EmptyView } from "#src/components/empty-view";
-import { I18n } from "#stackra/i18n";
+import { I18n, type I18nKey } from "#stackra/i18n";
+
+/**
+ * Membership role code → label. The identity service sends the role as a plain code, so a role the
+ * console does not know yet shows as a member instead of a raw key.
+ */
+const ROLE_LABELS: Readonly<Record<string, I18nKey>> = {
+  admin: I18n.console.roles.admin,
+  staff: I18n.console.roles.staff,
+  viewer: I18n.console.roles.viewer,
+};
 
 /** The switcher: a dropdown of memberships, or the no-tenant empty state for a user with none. */
 export function TenantSwitcher() {
@@ -33,7 +43,7 @@ export function TenantSwitcher() {
     <Dropdown>
       <Dropdown.Trigger
         aria-label={t(I18n.console.tenant.switch)}
-        className="flex items-center gap-2 w-full"
+        className="flex w-full items-center gap-2"
       >
         <Avatar name={current.name} size="sm" />
         <span className="truncate text-start">{current.name}</span>
@@ -52,7 +62,7 @@ export function TenantSwitcher() {
             key={m.tenantId}
             id={m.tenantId}
             textValue={m.name}
-            description={t(I18n.console.roles[m.role])}
+            description={t(ROLE_LABELS[m.role] ?? I18n.console.roles.member)}
           >
             {m.name}
           </Dropdown.Item>

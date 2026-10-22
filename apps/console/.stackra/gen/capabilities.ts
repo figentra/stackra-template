@@ -30,7 +30,11 @@ export const target = {
 
 /** What each file declared; `required` fails gen for a target without it, `optional` degrades. */
 export const requirements = [
-  { file: "hooks/use-online-status.ts", required: [Capability.Network], optional: [] },
+  {
+    file: "components/offline-banner/use-online-status.ts",
+    required: [Capability.Network],
+    optional: [],
+  },
   {
     file: "components/pages/settings/use-device-settings.ts",
     required: [],

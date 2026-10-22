@@ -7,9 +7,9 @@
  * Governing contract: ADR 0022, ADR 0007 (amended: test docblocks)
  */
 import { describe, expect, it } from "@stackra/testing";
-import { memberId } from "@stackra/loyalty-kit";
-import { MemoryLoyaltyLedger } from "@stackra/loyalty-kit";
-import { pointsEntry, toHaveBalance } from "@stackra/loyalty-kit/testing";
+import { memberId } from "@acme/loyalty-kit";
+import { MemoryLoyaltyLedger } from "@acme/loyalty-kit";
+import { pointsEntry, toHaveBalance } from "@acme/loyalty-kit/testing";
 
 /** Guards the ledger matcher the other suites trust, so a wrong balance cannot pass unnoticed. */
 describe(toHaveBalance, () => {

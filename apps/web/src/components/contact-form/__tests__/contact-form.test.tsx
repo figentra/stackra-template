@@ -1,8 +1,8 @@
 /**
  * Stackra file contract:
  * Purpose: the adapter shows the schema's translated message before any request, a server field
- *          error shows at once (in Arabic too), and a valid submission records `LeadSubmitted` with
- *          the plan and nothing personal.
+ *          error shows at once (in Arabic too), and a valid submission posts the plan with the
+ *          form while recording no analytics (the page records the lead once the server accepts).
  * Boundary: unit tier, jsdom; the router stub catches the submit so nothing posts; analytics is the
  *           fake of `@stackra/analytics/testing`.
  * Runtime: browser
@@ -13,7 +13,6 @@ import { describe, expect, it, vi } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
 import { createRoutesStub } from "@stackra/navigation/testing";
 import { I18n } from "#stackra/i18n";
-import { LeadSubmitted } from "#src/analytics/lead-submitted.event";
 import { ContactForm } from "#src/components/contact-form";
 
 /**
@@ -47,17 +46,18 @@ describe(ContactForm, () => {
     expect(screen.getByText("يرجى كتابة جملة واحدة على الأقل.")).toBeTruthy();
   });
 
-  /** The event names the plan the visitor came from and never carries their name or email. */
-  it("records LeadSubmitted with the plan on a valid submission", async () => {
-    const { analytics } = mount("en", { plan: "enterprise" });
+  /** A lead is the server's to accept, so the form posts the plan and tracks nothing itself. */
+  it("posts a valid submission with the plan and records no event", async () => {
+    const { action, analytics } = mount("en", { plan: "enterprise" });
     await userEvent.type(screen.getByLabelText("Your name"), "Lina");
-    await userEvent.type(screen.getByLabelText("Work email"), "lina@example.com");
+    await userEvent.type(screen.getByLabelText("Work email"), "lina@acme.example");
     await userEvent.type(
       screen.getByLabelText("How can we help?"),
       "We need a store for two brands.",
     );
     await userEvent.click(screen.getByLabelText("You may contact me about this request."));
     await userEvent.click(screen.getByRole("button", { name: "Send" }));
-    expect(analytics.events()).toEqual([new LeadSubmitted({ plan: "enterprise" })]);
+    expect(action).toHaveBeenCalledOnce();
+    expect(analytics.events()).toEqual([]);
   });
 });

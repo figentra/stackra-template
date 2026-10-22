@@ -11,8 +11,8 @@
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, ApiArea, HttpMethod } from "@stackra/contracts";
-import { Search } from "@stackra/search";
-import { StorefrontService } from "#modules/catalogue/services/storefront.service";
+import type { Search } from "@stackra/search";
+import type { StorefrontService } from "#modules/catalogue/services/storefront.service";
 import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 import { ProductSearch } from "#modules/catalogue/search/product.search";
 import { SearchProductsInput } from "#modules/catalogue/schemas/search-products-input.schema";

@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: the PWA offline journey: the shell loads from the service worker, a mutation is queued
- *          with the offline toast and replays exactly once back online, and a never-visited page
- *          falls back to `/offline`.
+ *          with the action's declared offline toast and replays exactly once back online, and a
+ *          never-visited page renders inside the cached app shell with the offline banner (the
+ *          `/offline` page is only for a worker with no shell cached).
  * Boundary: the `pwa` Playwright project (service workers allowed). The server mock asserts the
  *           Idempotency-Key, so a double replay fails the test. Runs after `stackra build --target
  *           pwa`.
@@ -44,16 +45,18 @@ test("works offline and replays the queued order once", async ({ page, context }
 });
 
 /**
- * A page never opened online has no cached copy, so the worker must serve the offline fallback, not
- * an error.
+ * A page never opened online has no cached copy, so the worker answers with the app shell: the
+ * navigation stays usable and the banner says the data is not here, instead of a dead end.
  */
-test("serves the offline page for a never-visited route", async ({ page, context }) => {
+test("renders a never-visited route in the cached shell", async ({ page, context }) => {
   await seed("orders.demo");
   await loginAs(page, { role: "staff", tenant: "ten_1" });
   await page.goto("/");
   await page.evaluate(() => navigator.serviceWorker.ready);
   await context.setOffline(true);
   await page.goto("/catalogue/products");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/you are offline|أنت غير متصل/i);
+  const navigation = page.getByRole("navigation", { name: /main navigation|التنقل الرئيسي/i });
+  await expect(navigation).toBeVisible();
+  await expect(page.getByRole("status")).toContainText(/you are offline|أنت غير متصل/i);
   await expect(await axe(page)).toHaveNoViolations();
 });

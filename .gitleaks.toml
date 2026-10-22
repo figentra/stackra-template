@@ -1,20 +1,30 @@
 #:schema https://www.schemastore.org/gitleaks.json
 # Stackra file contract:
-# Purpose: secret scanning policy for pre-commit (lefthook) and CI (secrets:scan)
-# Boundary: scan policy only; allowlisted paths hold deliberately fake keys.
+# Purpose: secret scanning policy for the pre-commit hook (lefthook.yml), the CI gate and
+#          `pnpm secrets:scan`: gitleaks' default rules plus the two narrow allowlists below.
+# Boundary: scan policy only. An allowlist names a path or a value shape that is never a secret; it
+#           never silences a rule for real source files.
 # Runtime: node
-# Governing contract: ADR 0173 (secrets never in git)
+# Governing contract: Stackra ADR 0173 (secrets never in git)
 
-title = "stackra"
+title = "acme-platform"
 
+# The `[[allowlists]]` tables need gitleaks 8.25 or later; mise.toml pins the version every hook and
+# CI job runs.
+minVersion = "8.30.1"
+
+# gitleaks' built-in rule set, kept current with the pinned version.
 [extend]
 useDefault = true
 
-[allowlist]
-description = "Fixtures with deliberately fake keys; generated i18n key references (I18n.<ns>.<path>) are names, not values"
-paths = ['''.*/__fixtures__/.*''']
-regexes = [
-  '''sk_test_[A-Za-z0-9]{8,}''',
-  '''rk_test_[A-Za-z0-9]{8,}''',
-  '''^I18n(\.[a-z][a-z0-9_]*)+$''',
-]
+# Test fixtures hold deliberately fake keys (for example Stripe `sk_test_` values a driver test signs
+# with); they sit only under a `__tests__/fixtures/` folder.
+[[allowlists]]
+description = "Deliberately fake keys in test fixtures"
+paths = ['''(^|/)__tests__/fixtures/''']
+
+# Generated i18n key references (`I18n.<namespace>.<path>`) look like high-entropy strings to the
+# generic rule, but they are names, not values.
+[[allowlists]]
+description = "Generated i18n key references"
+regexes = ['''^I18n(\.[a-z][a-z0-9_]*)+$''']

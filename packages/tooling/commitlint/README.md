@@ -12,8 +12,8 @@ rules:
     - PROJ
 ```
 
-The preset extends `@commitlint/config-conventional` and sets the house type list, subject case, `scope-case` off
-(member short names may carry digits) and the header and body lengths.
+The preset extends `@commitlint/config-conventional` and sets the house type list, subject case,
+`scope-case` off (member short names may carry digits) and the header and body lengths.
 
 | Rule             | Default | Meaning                                                                                                             |
 | ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |

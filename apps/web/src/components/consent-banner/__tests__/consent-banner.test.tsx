@@ -1,11 +1,11 @@
 /**
  * Stackra file contract:
- * Purpose: declining keeps analytics off and hides the banner; allowing opts the driver in; both in
- *          Arabic too.
- * Boundary: unit tier, jsdom; the analytics driver is the fake of @stackra/analytics/testing;
- *           consent is in memory.
+ * Purpose: declining keeps analytics off and hides the banner; allowing lets analytics run; both in
+ *          Arabic too. The banner only records the decision; the analytics package reacts to it.
+ * Boundary: unit tier, jsdom; the analytics driver is the fake of @stackra/analytics/testing,
+ *           wired to the in-memory consent store as the real package is.
  * Runtime: browser
- * Governing contract: ADR 0022, ADR 0071
+ * Governing contract: ADR 0022
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";

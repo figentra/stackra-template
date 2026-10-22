@@ -11,12 +11,12 @@
 import { Action, type ActionContext, AsJob } from "@stackra/actions";
 import { ActorKind } from "@stackra/contracts";
 import { Cron } from "@stackra/scheduler";
-import { SettingsReader } from "@stackra/settings";
+import type { SettingsReader } from "@stackra/settings";
 import { time } from "@stackra/support";
 import { Queues } from "#stackra/queues";
-import { StockService } from "#modules/inventory/services/stock.service";
-import { OrderService } from "#modules/orders/services/order.service";
-import { OrderRepository } from "#modules/orders/repositories/order.repository";
+import type { StockService } from "#modules/inventory/services/stock.service";
+import type { OrderService } from "#modules/orders/services/order.service";
+import type { OrderRepository } from "#modules/orders/repositories/order.repository";
 import { OrderSettings } from "#modules/orders/settings/order.setting";
 import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";

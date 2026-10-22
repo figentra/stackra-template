@@ -6,7 +6,7 @@
  * Boundary: presentation only; props are the widget query's output, typed from the override point.
  *           No fetching.
  * Runtime: browser
- * Governing contract: ADR 0164, ADR 0234 d9 (overrides/)
+ * Governing contract: ADR 0164, ADR 0234 (asset and override keys)
  */
 import { Override, type OverrideComponent } from "@stackra/panel";
 import { Card, Sparkline } from "@stackra/ui";

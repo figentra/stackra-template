@@ -1,8 +1,21 @@
-# markdownlint: structure checks for Markdown and MDX. Formatting (wrapping, spacing, tables) is
-# oxfmt's job, so rules that overlap with the formatter are off.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/DavidAnson/markdownlint/v0.42.0/schema/markdownlint-config-schema.json
+# Stackra file contract:
+# Purpose: markdownlint structure checks for every Markdown and MDX file (headings, lists, links,
+#          fences). Layout (wrapping, spacing, tables) is oxfmt's job, so rules that overlap with the
+#          formatter are off.
+# Boundary: rule switches only; formatting options live in .oxfmtrc.jsonc.
+# Runtime: node
+# Governing contract: Stackra ADR 0007 (documentation standard)
+
+# Every rule on unless switched off below.
 default: true
-MD013: false # line length: oxfmt owns Markdown layout and keeps prose wrapping as written
-MD033: false # inline HTML: Mintlify MDX components and README banners
-MD041: false # first line heading: MDX files start with frontmatter
+# Line length: oxfmt wraps Markdown prose at 100 columns (.oxfmtrc.jsonc, proseWrap "always"); tables,
+# links and code blocks keep their own length.
+MD013: false
+# Inline HTML: Mintlify MDX components and the README banner.
+MD033: false
+# First line a heading: MDX files start with frontmatter.
+MD041: false
+# Repeated headings are fine in different sections (for example "Rules" under two parents).
 MD024:
-  siblings_only: true # repeated headings are fine in different sections
+  siblings_only: true

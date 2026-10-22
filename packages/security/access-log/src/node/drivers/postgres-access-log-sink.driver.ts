@@ -8,10 +8,11 @@
  * Governing contract: ADR 0263 (self-registering drivers)
  */
 import { Driver } from "@stackra/container";
-import { Repository, UniqueViolation } from "@stackra/database";
+import type { Repository } from "@stackra/database";
+import { UniqueViolation } from "@stackra/database";
 import { AccessLogSink } from "#contracts/access-log-sink.port";
 import type { AccessRecord } from "#core/interfaces/access-record.interface";
-import { AccessLogEntry } from "#node/models/access-log-entry.model";
+import type { AccessLogEntry } from "#node/models/access-log-entry.model";
 
 /**
  * Writes outside the caller's transaction (`requiresNew`), so a rolled-back read still leaves its

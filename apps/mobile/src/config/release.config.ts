@@ -18,7 +18,7 @@ import { Bool, Int, Nested, OneOf, Str } from "@stackra/validation";
 /** iOS identity and capabilities gen writes into the Expo config. */
 class IosConfig {
   /** The App Store bundle id; frozen after the first upload. */
-  @Str() bundleIdentifier = "dev.acme.mobile";
+  @Str() bundleIdentifier = "example.acme.mobile";
   /** Ship an iPad layout. @defaultValue true */
   @Bool() supportsTablet = true;
   /** Export compliance: the app uses only exempt encryption. @defaultValue false */
@@ -28,7 +28,7 @@ class IosConfig {
 /** Android identity gen writes into the Expo config. */
 class AndroidConfig {
   /** The Play Store package name; frozen after the first upload. */
-  @Str() package = "dev.acme.mobile";
+  @Str() package = "example.acme.mobile";
   /** Opt in to Android's predictive back gesture. @defaultValue false */
   @Bool() predictiveBackGesture = false;
 }
@@ -37,14 +37,14 @@ class AndroidConfig {
 @Config("mobile.release")
 export class ReleaseConfig {
   /** The display name under the icon. */
-  @Str() name = "Stackra";
-  /** The Expo slug. */
-  @Str() slug = "stackra";
+  @Str() name = "Acme";
+  /** The Expo slug: the EAS project name. */
+  @Str() slug = "acme-mobile";
   /**
-   * Deep-link scheme (`stackra://`); also the PKCE redirect scheme (`identity.config.ts` adds the
+   * Deep-link scheme (`acme://`); also the PKCE redirect scheme (`identity.config.ts` adds the
    * path).
    */
-  @Str({ pattern: /^[a-z][a-z0-9-]+$/ }) scheme = "stackra";
+  @Str({ pattern: /^[a-z][a-z0-9-]+$/ }) scheme = "acme";
   /** The iOS bundle identity and store fields. */
   @Nested(IosConfig) ios = new IosConfig();
   /** The Android package identity and store fields. */

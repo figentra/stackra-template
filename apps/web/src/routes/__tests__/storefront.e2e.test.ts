@@ -9,6 +9,7 @@
  * Runtime: node
  * Governing contract: ADR 0182, ADR 0183
  */
+import assert from "node:assert/strict";
 import { test, expect, axe, seed } from "@stackra/testing/e2e";
 
 /** Each journey starts from freshly seeded catalogue data so runs do not depend on order. */
@@ -28,9 +29,10 @@ test("store: list, search, detail, variant, 404", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/demo tee/i);
   const price = page.getByTestId("price");
   const before = await price.textContent();
+  assert(before, "the product page shows a price");
   await page.getByRole("button", { name: /option: size|الخيار: size/i }).click();
   await page.getByRole("option", { name: "L" }).click();
-  await expect(price).not.toHaveText(before!);
+  await expect(price).not.toHaveText(before);
   await expect(await axe(page)).toHaveNoViolations();
 
   await page.goto("/store/does-not-exist");

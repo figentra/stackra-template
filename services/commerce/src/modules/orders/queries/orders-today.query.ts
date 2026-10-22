@@ -8,15 +8,15 @@
  * Runtime: node
  * Governing contract: ADR 0137 (cache option), 0150, guides/programming-model.mdx#queries
  */
-import { Query, type QueryContext } from "@stackra/actions";
-import { OrderRepository } from "#modules/orders/repositories/order.repository";
+import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
+import type { OrderRepository } from "#modules/orders/repositories/order.repository";
 import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { OrderPaid } from "#modules/orders/events/order-paid.event";
 import { OrdersTodayInput } from "#modules/orders/schemas/orders-today-input.schema";
 import { OrdersTodayOutput } from "#modules/orders/schemas/orders-today-output.schema";
-import { ActorKind } from "@stackra/contracts";
+import { ActorKind, HttpMethod } from "@stackra/contracts";
 
-/** The query behind the revenue-today widget. */
+/** The query behind the revenue-today widget; the console and mobile tiles call it over HTTP. */
 @Query({
   key: "order.stats_today",
   input: OrdersTodayInput,
@@ -25,6 +25,7 @@ import { ActorKind } from "@stackra/contracts";
   actors: [ActorKind.User],
   cache: { ttl: "1m", invalidateOn: [OrderPaid] },
 })
+@AsEndpoint({ method: HttpMethod.Get, path: "/orders/stats/today" })
 export class OrdersTodayQuery {
   constructor(private readonly orders: OrderRepository) {}
 
@@ -35,8 +36,12 @@ export class OrdersTodayQuery {
   async handle(_input: OrdersTodayInput, ctx: QueryContext): Promise<OrdersTodayOutput> {
     const paid = await this.orders.findPaidSince(ctx.startOfDay());
     const hourly = Array.from({ length: 24 }, () => 0);
-    // paidAt is set on every Paid row
-    for (const o of paid) hourly[ctx.hourOf(o.paidAt!)]! += o.totalMinor;
+    for (const o of paid) {
+      // findPaidSince returns Paid rows only, and every Paid row has paidAt
+      if (!o.paidAt) continue;
+      const hour = ctx.hourOf(o.paidAt);
+      hourly[hour] = (hourly[hour] ?? 0) + o.totalMinor;
+    }
     return {
       count: paid.length,
       revenueMinor: paid.reduce((s, o) => s + o.totalMinor, 0),

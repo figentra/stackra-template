@@ -68,7 +68,7 @@ Consumers: search (drop from the index), the storefront cache (purge).
 
 ## loyalty_kit
 
-Merged from `@stackra/loyalty-kit`; ids are the kit's (`memberId` is the commerce customer id).
+Merged from `@acme/loyalty-kit`; ids are the kit's (`memberId` is the commerce customer id).
 
 ### `loyalty_kit.account.enrolled.v1`
 
@@ -103,6 +103,7 @@ Recorded when an account is frozen or unfrozen.
 
 ## Not public
 
-`inventory.stock.low.v1` (`{ variantId, locationId, available }`) is broadcast on the tenant
-realtime channel and is not available to webhooks. `loyalty_kit.points.redeemed.v1`
+Domain events carry no version: they never leave the producing service, so their shape changes with
+its code. `inventory.stock.low` (`{ variantId, locationId, available }`) is broadcast on the tenant
+realtime channel and is not available to webhooks. `loyalty_kit.points.redeemed`
 (`{ memberId, points, reference }`) stays inside the service.

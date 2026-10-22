@@ -8,8 +8,9 @@ class with a kind decorator (`@App`, `@Route`, `@Layout`, `@Provider`, `@Store`,
 referenced from decorator options; nothing is referenced by string (permissions, actions, queries,
 enums, override points, i18n keys and routes are generated constants). A mobile "screen" is a route
 with native presentation options, the same term as web and console. Its module set is fixed when the
-binary is built (`stackra.config.ts` `modules`). The runtime (Expo config, EAS profiles, Metro,
-Babel, the entry, the navigation tree, linking, Maestro) is generated into `.stackra/`.
+binary is built (`stackra.config.ts` `modules`). The runtime (Expo config, EAS profiles, Metro, the
+entry, the navigation tree, linking, Maestro) is generated into `.stackra/`; Expo's own Babel
+default compiles it, so no Babel config exists.
 
 | Command                                | Does                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -18,7 +19,7 @@ Babel, the entry, the navigation tree, linking, Maestro) is generated into `.sta
 | `pnpm build`                           | `stackra build` (EAS, profile from `--profile`, fingerprint-gated)                                      |
 | `pnpm test` / `test:e2e`               | vitest (jsdom) / Maestro flows against the `e2e` profile, every locale                                  |
 | `pnpm typecheck`                       | gen, then tsc over `src`, `stackra.config.ts`, `.stackra`                                               |
-| `pnpm doctor`                          | `expo install --check` through the toolkit: native versions match the SDK                               |
+| `pnpm run doctor`                      | `expo install --check` through the toolkit: native versions match the SDK                               |
 
 ## The four source files (one fact, one file)
 
@@ -44,7 +45,7 @@ apps/mobile
 ├── package.json               #src/*, #assets/* and #stackra/* imports; the Expo native modules
 ├── tsconfig.json              the expo preset, nothing local
 ├── .gitignore                 .stackra/* except app-manifest.json; the generated root shims
-├── app.config.ts · babel.config.js · metro.config.js · eas.json   GENERATED root shims (gitignored): Expo/EAS read the member root
+├── app.config.ts · metro.config.js · eas.json   GENERATED root shims (gitignored): Expo/EAS read the member root
 ├── src/
 │   ├── mobile.app.ts          @App: theme, the provider stack in order, the root layout, the hosted panel
 │   ├── config/                one @Config class per fact (13): env, i18n, theming, identity, query, state, telemetry,
@@ -58,14 +59,14 @@ apps/mobile
 │   ├── components/pages/      one page component per route + its own hook + __tests__
 │   ├── blocks/                @Block classes with their components (promo-banner)
 │   ├── documents/             @Document defaults for L2 documents (announcements)
-│   ├── providers/             session, tenant, query, realtime, flags, push, theme: [.provider.ts] + .context.tsx + [hook]
+│   ├── providers/             session, tenant, query, realtime, push, theme: [.provider.ts] + .context.tsx + [hook]
 │   ├── stores/                @Store classes on @stackra/state (preferences, persisted in prefs)
 │   ├── schemas/               Schema(z) classes: route params, the form, the block props
-│   ├── overrides/orders/      @Override of the RevenueSparkline point; lang overrides
+│   ├── overrides/orders/      @Override of the RevenueSparkline point
 │   ├── assets/                lang/{en,ar}/mobile.json, public/logo.svg
 │   └── styles/global.css      Tailwind v4 + Uniwind + HeroUI Native + brand tokens
-└── .stackra/                  GENERATED: app-manifest.json (committed), app.config.ts, eas.json, .easignore, eas-sync.json,
-                               metro/babel, main.ts, env.d.ts, vitest.config.ts, maestro/, gen/{env,routes,navigation,linking,
+└── .stackra/                  GENERATED: app-manifest.json (committed), app.config.ts, eas.json, eas-sync.json,
+                               metro.config.js, main.ts, env.d.ts, vitest.config.ts, maestro/, gen/{env,routes,navigation,linking,
                                modules,clients,i18n,widgets,offline,capabilities,overrides,wiring,slots,panels,flags,settings}
 ```
 
@@ -99,7 +100,16 @@ apps/mobile
 
 ## Catalog entries this member needs (root `pnpm-workspace.yaml`)
 
-`@stackra/{actions,analytics,app,cli,clients,config,consent,container,contracts,errors,experience,feature-flags,i18n,iam,identity,navigation,panel,platform,query,realtime,schema,settings,state,storage,tenancy,theming,ui,validation,testing,typescript-config}`
-in `catalog:stackra`; the `mobile` catalog of the main repository (expo, react-native,
-heroui-native, uniwind, the Expo modules, react-native-bottom-tabs). Maestro is a mise-pinned CLI,
-not an npm dependency.
+`@stackra/{actions,analytics,app,cli,clients,config,consent,container,contracts,errors,experience,feature-flags,i18n,iam,identity,navigation,panel,platform,query,realtime,runway,schema,settings,state,storage,tenancy,testing,theming,ui,validation}`
+in `catalog:stackra`; the `mobile` catalog (expo, react-native, heroui-native, uniwind, the Expo
+modules, react-native-bottom-tabs, Sentry, `@types/react`); `react` and `@types/node` from the
+default catalog, `tailwindcss` from `frontend` and `typescript` from `build`. `@acme/brand` and the
+`@stackra/{typescript,vitest}-config` presets are `workspace:*`. Maestro and eas-cli are mise-pinned
+CLIs, not npm dependencies.
+
+## The repository-root `.easignore`
+
+EAS uploads from the repository root and reads only the root `.easignore`, which replaces every
+`.gitignore` for the upload. `stackra gen` writes it: the repository ignores, minus the `.stackra/*`
+rules, plus the members a mobile build never compiles, and it re-includes this member's `.stackra/`
+and root shims, which are gitignored but are the build's input.

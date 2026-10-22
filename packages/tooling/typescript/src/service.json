@@ -1,12 +1,16 @@
 // Stackra file contract:
-// Purpose: a service member (services/<name>): plain TypeScript on node with legacy decorators (the decorators
-//          preset), plus the member files gen reads and writes: stackra.config.ts and .stackra/gen (code imports
-//          it as #stackra/*). Hand-written Encore never appears; `stackra gen` emits it into .stackra/encore
-//          with its own tsconfig (ADR 0091, 0124).
-// Owner: release-operations · Secrets: forbidden
+// Purpose: the `service` role: a service member (services/<name>), plain TypeScript on Node with
+//          legacy decorators and React Email templates (`mails/*.mail.tsx`), plus the member files gen
+//          reads and writes: stackra.config.ts and .stackra/gen (code imports it as #stackra/*).
+// Boundary: a member's tsconfig.json is exactly `{ "extends": "@stackra/typescript-config/service" }`.
+//           Hand-written Encore never appears; `stackra gen` emits it into .stackra/encore with its
+//           own tsconfig, which extends `encore`.
+// Runtime: node
+// Governing contract: Stackra ADR 0091, Stackra ADR 0124 (Encore is generated), Stackra ADR 0005
+//                     (legacy decorators, no metadata)
 {
   "display": "@stackra/typescript-config — service",
-  "extends": "./decorators.json",
+  "extends": "./library.json",
   "include": [
     "${configDir}/src",
     "${configDir}/stackra.config.ts",

@@ -1,7 +1,15 @@
-// Recommended extensions for this repo. One formatter (oxfmt) and one linter (oxlint), both through Oxc;
-// Prettier and ESLint are rejected (not-built-yet rule), so they are listed as unwanted.
+// Stackra file contract:
+// Purpose: the extensions VS Code recommends when this repository opens: one formatter (oxfmt) and
+//          one linter (oxlint) through Oxc, the TypeScript 7 language service, the test runners,
+//          config schemas, spelling, i18n and data tools.
+// Boundary: recommendations only; settings live in .vscode/settings.json. Prettier and ESLint are
+//           listed as unwanted.
+// Runtime: node
+// Governing contract: Stackra ADR 0227 (Prettier and ESLint are rejected,
+//                     https://docs.stackra.figentra.com/adr/0227-rejected-and-deferred-technologies-refreshed)
 {
   "recommendations": [
+    // TypeScript 7: the native language service (settings.json `js/ts.experimental.useTsgo`).
     "TypeScriptTeam.native-preview",
     // Format and lint: oxfmt + oxlint
     "oxc.oxc-vscode",
@@ -24,8 +32,10 @@
     // Docs: Markdown rules (oxfmt formats; markdownlint flags structure) and Mermaid in previews
     "davidanson.vscode-markdownlint",
     "bierner.markdown-mermaid",
-    // Spelling: cspell.config.yaml (the editor is the only place it runs)
+    // Spelling: cspell.config.yaml (also enforced by lefthook and CI) with the British English
+    // dictionary it selects (`language: en-GB,en`)
     "streetsidesoftware.code-spell-checker",
+    "streetsidesoftware.code-spell-checker-british-english",
     // i18n keys in assets/lang/<locale>/<namespace>.json, inline and with missing-key reports
     "lokalise.i18n-ally",
     // Data: Postgres through SQLTools, and SQLite files (the desktop offline store)

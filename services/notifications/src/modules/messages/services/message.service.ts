@@ -8,11 +8,12 @@
  * Governing contract: ADR 0136, 0141 (the aggregate records), 0263, ADR 0134,
  *                     guides/programming-model.mdx#services
  */
-import { IdentityResolver } from "@stackra/contracts";
-import { Repository, UniqueViolation } from "@stackra/database";
-import { NotificationsConfig } from "#config/notifications.config";
-import { MailTransport } from "#modules/messages/contracts/mail-transport.port";
-import { Message } from "#modules/messages/models/message.model";
+import type { IdentityResolver } from "@stackra/contracts";
+import type { Repository } from "@stackra/database";
+import { UniqueViolation } from "@stackra/database";
+import type { NotificationsConfig } from "#config/notifications.config";
+import type { MailTransport } from "#modules/messages/contracts/mail-transport.port";
+import type { Message } from "#modules/messages/models/message.model";
 import { MessageSent } from "#modules/messages/events/message-sent.event";
 import { MessageStatus } from "#modules/messages/enums/message-status.enum";
 import type { SendMessageInput } from "#modules/messages/schemas/send-message-input.schema";

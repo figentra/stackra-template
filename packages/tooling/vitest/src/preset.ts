@@ -8,7 +8,6 @@
  * Boundary: the base config only; it declares no test and no setup file.
  * Runtime: node
  * Governing contract: ADR 0007 (documentation); ADR 0022 (test placement).
- * Owner: release-operations · Secrets: forbidden
  */
 import { defineConfig } from "vitest/config";
 

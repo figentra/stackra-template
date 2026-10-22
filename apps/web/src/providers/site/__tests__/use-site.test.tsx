@@ -20,8 +20,8 @@ const SITE = {
   dir: "ltr",
   market: { key: "sa", currency: "SAR" },
   indexable: true,
-  origin: "https://www.example.com",
-  signupUrl: "https://www.example.com/signup",
+  origin: "https://www.acme.example",
+  signupUrl: "https://www.acme.example/signup",
   brand: {},
 } as const;
 

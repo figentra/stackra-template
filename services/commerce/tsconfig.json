@@ -1,9 +1,11 @@
 {
   // Stackra file contract:
-  // Purpose: TypeScript settings of the commerce service; one preset, nothing local.
-  // Boundary: the preset owns strictness, decorators (legacy, no emitDecoratorMetadata) and module resolution.
+  // Purpose: TypeScript settings of the commerce service: the service preset.
+  // Boundary: exactly one preset and nothing local: the preset owns strictness, legacy decorators
+  //           (no emitDecoratorMetadata), module resolution and the member's include (`src` and
+  //           `.stackra/gen`, resolved from this file's folder); `#` subpaths resolve through
+  //           package.json imports.
   // Runtime: node
-  // Governing contract: ADR 0005 (legacy decorators), tier rule (one preset per member)
-  "extends": "@stackra/typescript-config/service.json",
-  "include": ["src", ".stackra/gen"]
+  // Governing contract: ADR 0005 (legacy decorators), ADR 0003 (one preset per member)
+  "extends": "@stackra/typescript-config/service"
 }

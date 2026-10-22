@@ -6,7 +6,7 @@ the same class enums authored code uses.
 
 | File             | Holds                                                                                   | Read it to answer                          |
 | ---------------- | --------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `wiring.ts`      | every binding, its scope and module, the drivers with lazy candidates, the module graph | "what does X get injected with?"           |
+| `wiring.ts`      | every binding, its scope and module, the drivers with lazy candidates, the seeders as lazy imports, the module graph | "what does X get injected with?"           |
 | `hooks.ts`       | every hook point and its ordered implementers, with the files that call them            | "who changes order totals, in what order?" |
 | `clients.ts`     | descriptors and client classes of the services this one consumes, with their transport  | "how do I call pricing?"                   |
 | `crud.ts`        | action and query classes synthesised from `@Crud`                                       | "where is catalogue.product.list?"         |

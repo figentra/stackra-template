@@ -2,12 +2,13 @@
  * Stackra file contract:
  * Purpose: the settings page: a device tab (prefs store, applied by the page's hook), a privacy tab
  *          (analytics consent), a tenant tab (posted to the route's `submit`), a link to the
- *          generated notification preferences page, and the pending-changes anchor.
+ *          generated notification preferences page, and the pending-changes section (the queue
+ *          list itself, the anchor the pending-changes command jumps to).
  * Boundary: labels, bounds and defaults of the tenant fields come from the generated settings
  *           metadata; option lists come from the class enums and `#stackra/i18n` locales, never
  *           hand-typed. Field names are paths of the form's schema, checked by its type.
  * Runtime: browser
- * Governing contract: ADR 0213, ADR 0165 (form adapters), ADR 0071 (consent)
+ * Governing contract: ADR 0213, ADR 0165 (form adapters)
  */
 import { useLocale, useTranslation } from "@stackra/i18n/react";
 import type { RouteComponent } from "@stackra/navigation";
@@ -17,7 +18,7 @@ import { Button, Tabs } from "@stackra/ui";
 import { Field, Form, useSchemaForm } from "@stackra/ui/form";
 import { I18n, locales } from "#stackra/i18n";
 import { Settings, SettingsPages } from "#stackra/settings";
-import { PendingChanges } from "#src/components/pending-changes";
+import { PendingChangesList } from "#src/components/pending-changes-list";
 import { Density } from "#src/enums/density.enum";
 import type { SettingsRoute } from "#src/routes/settings.route";
 import { DevicePrefs } from "#src/schemas/device-prefs.schema";
@@ -116,8 +117,11 @@ export const SettingsPage: RouteComponent<typeof SettingsRoute> = ({ data }) => 
           </Tabs.Panel>
         )}
       </Tabs>
-      <section id="pending-changes" aria-label={t(I18n.console.queue.title)}>
-        <PendingChanges />
+      <section id="pending-changes" aria-labelledby="pending-changes-title">
+        <h2 id="pending-changes-title" className="text-lg font-semibold">
+          {t(I18n.console.queue.title)}
+        </h2>
+        <PendingChangesList />
       </section>
     </div>
   );

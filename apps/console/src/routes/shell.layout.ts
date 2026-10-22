@@ -15,7 +15,7 @@
 import { Target } from "@stackra/contracts";
 import { Layout, LayoutKind, type RouteContext } from "@stackra/navigation";
 import { Shell } from "#src/components/shell";
-import { RouteErrorState } from "#src/components/error-state";
+import { RouteErrorState } from "#src/components/route-error-state";
 import { Routes } from "#stackra/routes";
 
 /** Signed-in frame: generated navigation sidebar, top bar, offline banner and command palette. */

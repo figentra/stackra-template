@@ -4,9 +4,10 @@
  *          is runway.yaml.
  * Boundary: identity only, read by tooling at build time. Consumed services (commerce) are inferred
  *           from imports of `#stackra/clients`. Health checks live here only (ADR 0190).
- *           `defineService` is the build-config carve-out beside ADR 0145 (ADR 0247).
+ *           `defineService` creates the member's build-time value; decorators annotate code
+ *           (ADR 0247).
  * Runtime: node
- * Governing contract: ADR 0249, 0261, 0263, ADR 0145 (carve-out), ADR 0190
+ * Governing contract: ADR 0249, 0261, 0263, ADR 0247 (define creates values), ADR 0190
  */
 import { MigrationMode, MigrationRunner } from "@stackra/config";
 import { defineService } from "@stackra/app";

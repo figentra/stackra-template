@@ -9,13 +9,13 @@
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { SettingsReader } from "@stackra/settings";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import type { SettingsReader } from "@stackra/settings";
+import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
 import { EntryKind } from "#core/enums/entry-kind.enum";
 import { memberId } from "#core/functions/member-id.function";
 import { BalanceView } from "#core/schemas/balance-view.schema";
 import { GetBalanceInput } from "#core/schemas/get-balance-input.schema";
-import { AccountService } from "#node/services/account.service";
+import type { AccountService } from "#node/services/account.service";
 import { PointsEarned } from "#node/events/points-earned.event";
 import { PointsRedeemed } from "#node/events/points-redeemed.event";
 import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";

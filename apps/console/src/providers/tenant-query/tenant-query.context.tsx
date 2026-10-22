@@ -4,8 +4,8 @@
  *          scoped to the active tenant so a tenant switch never shows another tenant's cache.
  * Boundary: a context component without behaviour before mount. It passes the config and nothing
  *           else: scope, persistence and replay come from QueryConfig, which actions may queue from
- *           `#stackra/offline`; drivers (encrypted IndexedDB on web, safeStorage on desktop) are
- *           chosen by gen per target.
+ *           `#stackra/offline`. The persister is the encrypted IndexedDB one on every target; on
+ *           desktop its key is held by Electron `safeStorage` (desktop.config.ts `offlineStore`).
  * Runtime: browser
  * Governing contract: ADR 0079, ADR 0252, ADR 0256
  */

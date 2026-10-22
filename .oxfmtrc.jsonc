@@ -1,13 +1,25 @@
 // Stackra file contract:
-// Purpose: oxfmt settings for the whole workspace: a code width of 100 columns (Markdown prose keeps
-//          its own wrapping, proseWrap preserve), and the generated or upstream files that are never
-//          reformatted.
+// Purpose: oxfmt settings for the whole workspace: code at 100 columns, Markdown prose wrapped at the
+//          same width, JSONC without trailing commas, and the generated or upstream files that are
+//          never reformatted. The editor, the pre-commit hook and CI all read this one file.
 // Boundary: formatter options and ignores only; adding an ignore pattern needs a reason beside it.
 // Runtime: node
-// Governing contract: ADR 0007 (docblocks wrap at the same width)
+// Governing contract: Stackra ADR 0007 (docblocks wrap at the same width)
 {
   "$schema": "https://unpkg.com/oxfmt@0.71.0/configuration_schema.json",
   "printWidth": 100,
+  "overrides": [
+    {
+      // Editors' JSON-with-comments services warn on a trailing comma; JSONC files carry none.
+      "files": ["**/*.jsonc"],
+      "options": { "trailingComma": "none" }
+    },
+    {
+      // Prose wraps at printWidth, so the 100-column rule holds for docs too (.markdownlint.yaml MD013).
+      "files": ["**/*.md", "**/*.mdx"],
+      "options": { "proseWrap": "always" }
+    }
+  ],
   "ignorePatterns": [
     "**/node_modules/**",
     "**/dist/**",
@@ -22,6 +34,6 @@
     "**/CHANGELOG.md",
     "pnpm-lock.yaml",
     // rendered from .mcp.yaml by `stackra mcp sync` (gitignored)
-    ".mcp.json",
-  ],
+    ".mcp.json"
+  ]
 }

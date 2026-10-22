@@ -6,12 +6,13 @@
  * Runtime: node
  * Governing contract: ADR 0022, ADR 0095, ADR 0007
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { ContactInput } from "#src/schemas/contact.schema";
 
 const valid = {
   name: "Lina",
-  email: "lina@example.com",
+  email: "lina@northwind.example",
   message: "We need a store for two brands.",
   consent: true,
   captchaToken: "tok",
@@ -32,8 +33,8 @@ describe(ContactInput, () => {
       message: "short",
       consent: false,
     });
-    expect(result.success).toBe(false);
-    const messages = result.error!.issues.map((issue) => issue.message);
+    assert(!result.success, "the schema refuses the input");
+    const messages = result.error.issues.map((issue) => issue.message);
     expect(messages).toEqual(
       expect.arrayContaining([
         "web::contact.errors.email",

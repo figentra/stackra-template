@@ -3,7 +3,8 @@
  * Purpose: the LoyaltyMembers port: who may redeem. The kit asks; the host answers from its own
  *          customer data.
  * Boundary: an abstract class that is its own token. The kit ships no driver for it: a host
- *           registers one with `@Driver(LoyaltyMembers, "<host>")`, which is the port's only
+ *           registers one under its own name (commerce's is `@Driver(LoyaltyMembers, "commerce")`),
+ *           which is the port's only
  *           candidate (so no config field selects it), and gen fails the build when none does
  *           (unresolved port). Earning does not ask: the first earn enrolls.
  * Runtime: isomorphic

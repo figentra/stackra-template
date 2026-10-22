@@ -2,26 +2,33 @@
 /**
  * Stackra file contract:
  * Purpose: the pre-release Quality Gate, one command for CI and for agents: `node .github/scripts/preview-gate.mjs`.
- *          It runs every check that needs no workspace install (commit messages, format, config files parse,
- *          secrets scan), because the `@stackra/*` packages and the `stackra` CLI are not published yet.
+ *          It runs every check that needs no workspace install (pull request title and commit messages, format,
+ *          spelling, config files parse, secrets scan), because the `@stackra/*` packages and the `stackra` CLI
+ *          are not published yet.
  * Boundary: reads tracked files and git history and reports findings; it never edits a file. Tools are pinned
  *           here (npx with exact versions; gitleaks from mise.toml). Delete this script and its workflow step
  *           once `pnpm install --frozen-lockfile` and `pnpm verify` run in CI.
  * Runtime: node (built-ins only, so it runs before any install)
  * Governing contract: Stackra ADR 0019 (pinned tools), ADR 0027 (toolchain from mise.toml)
  *
- * Usage: `node .github/scripts/preview-gate.mjs [commits|format|config|secrets ...]` (default: all four).
- * `commits` lints BASE_SHA..HEAD_SHA (CI) or origin/main..HEAD (local); it is skipped on push events and on
- * renovate/ and changeset-release/ branches (PR_BRANCH), whose commit messages a bot writes.
+ * Usage: `node .github/scripts/preview-gate.mjs [commits|format|spelling|config|secrets ...]` (default: all five).
+ * `commits` lints the pull request title (PR_TITLE) and BASE_SHA..HEAD_SHA (CI) or origin/main..HEAD (local); it
+ * is skipped outside pull requests (push, merge_group) and on renovate/ and changeset-release/ branches
+ * (PR_BRANCH), whose titles and commit messages a bot writes.
  */
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-/** Exact versions of the tools fetched with npx; bump them together with the workspace catalogs. */
+/**
+ * Exact versions of the tools fetched with npx. COMMITLINT, OXFMT and CSPELL equal their pnpm-workspace.yaml
+ * catalog pins (`release` and `quality`); bump them together. YAML is the `yaml` parser this script alone
+ * uses, so it has no catalog entry.
+ */
 const COMMITLINT = "21.2.3";
 const OXFMT = "0.71.0";
+const CSPELL = "10.4.0";
 const YAML = "2.9.1";
 
 /**
@@ -39,6 +46,8 @@ const JSONC = [
   /(^|\/)tsconfig[^/]*\.json$/,
   /^\.vscode\//,
   /^packages\/tooling\/typescript\/src\/[^/]+\.json$/,
+  // eas-cli refuses a root `$comment` key but reads a non-strict file as JSON5, so the contract is `//` lines
+  /(^|\/)eas\.json$/,
 ];
 
 /**
@@ -46,15 +55,16 @@ const JSONC = [
  * @param cmd - the program to run.
  * @param args - its arguments.
  * @param input - optional text piped to stdin; output is then captured and printed only on failure.
+ * @param env - extra environment variables for this one command.
  */
-function run(cmd, args, input) {
+function run(cmd, args, input, env = {}) {
   const piped = input !== undefined;
   const result = spawnSync(cmd, args, {
     input,
     stdio: piped ? "pipe" : "inherit",
     encoding: "utf8",
     // Every npx call gets the fast-fail fetch settings; git and other tools ignore them.
-    env: { ...process.env, ...NPM_ENV },
+    env: { ...process.env, ...NPM_ENV, ...env },
   });
   if (result.error) console.error(`${cmd}: ${result.error.message}`);
   if (piped && result.status !== 0) process.stderr.write(result.stderr || result.stdout || "");
@@ -72,8 +82,9 @@ function tracked(...patterns) {
 }
 
 /**
- * Lint the commit messages of the pull request range with the conventional preset. The repo's own
- * `.commitlintrc.yaml` extends `@stackra/commitlint-config`, which needs an install, so this gate uses
+ * Lint the pull request title and the commit messages of its range with the conventional preset. The title
+ * becomes the squash-merge commit subject, so it obeys the same rules. The repo's own `.commitlintrc.yaml`
+ * extends `@stackra/commitlint-config`, which needs an install, so this gate uses
  * `@commitlint/config-conventional` directly.
  */
 function commits() {
@@ -82,22 +93,37 @@ function commits() {
   if (/^(renovate|changeset-release)\//.test(process.env.PR_BRANCH ?? "")) {
     return skip("commits", `bot branch ${process.env.PR_BRANCH}`);
   }
-  const config = join(mkdtempSync(join(tmpdir(), "preview-gate-")), "commitlint.yaml");
-  writeFileSync(config, 'extends: ["@commitlint/config-conventional"]\n');
-  return run("npx", [
-    "--yes",
-    "-p",
-    `@commitlint/cli@${COMMITLINT}`,
-    "-p",
-    `@commitlint/config-conventional@${COMMITLINT}`,
-    "commitlint",
-    "--config",
-    config,
-    "--from",
-    process.env.BASE_SHA || "origin/main",
-    "--to",
-    process.env.HEAD_SHA || "HEAD",
-  ]);
+  const dir = mkdtempSync(join(tmpdir(), "preview-gate-"));
+  try {
+    const configFile = join(dir, "commitlint.yaml");
+    writeFileSync(configFile, 'extends: ["@commitlint/config-conventional"]\n');
+    const commitlint = [
+      "--yes",
+      "-p",
+      `@commitlint/cli@${COMMITLINT}`,
+      "-p",
+      `@commitlint/config-conventional@${COMMITLINT}`,
+      "commitlint",
+      "--config",
+      configFile,
+    ];
+    // The title is read from the environment and piped on stdin, so it never reaches a shell.
+    const title = process.env.PR_TITLE;
+    const titleOk = title
+      ? run("npx", commitlint, title)
+      : skip("pull request title", "PR_TITLE unset");
+    if (!titleOk) console.error("the pull request title is not a conventional commit subject");
+    const rangeOk = run("npx", [
+      ...commitlint,
+      "--from",
+      process.env.BASE_SHA || "origin/main",
+      "--to",
+      process.env.HEAD_SHA || "HEAD",
+    ]);
+    return titleOk && rangeOk;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 /** Check formatting with oxfmt, which reads `.oxfmtrc.jsonc` for width and ignores. */
@@ -106,17 +132,59 @@ function format() {
 }
 
 /**
- * Parse every tracked YAML file (with the `yaml` CLI, one file per stdin) and every strict JSON file
- * (with JSON.parse); JSONC files are left to the TypeScript and editor tooling that reads them.
+ * Check spelling with cspell, which reads `cspell.config.yaml` (British English, the project words and the
+ * ignored paths), over the same file types the pre-commit hook checks.
  */
-function config() {
-  let ok = true;
-  for (const file of tracked("*.yaml", "*.yml")) {
-    if (!run("npx", ["--yes", `yaml@${YAML}`, "valid"], readFileSync(file, "utf8"))) {
-      console.error(`invalid YAML: ${file}`);
-      ok = false;
+function spelling() {
+  return run("npx", [
+    "--yes",
+    `cspell@${CSPELL}`,
+    "lint",
+    "--no-progress",
+    "--dot",
+    "--gitignore",
+    "**/*.{md,mdx,ts,tsx,css,yaml,yml}",
+  ]);
+}
+
+/**
+ * Parses every file named in the JSON array on stdin with the `yaml` package and prints each error with its
+ * file. It runs inside the npx environment of `yaml`, whose `node_modules` the shell puts on NODE_PATH.
+ */
+const YAML_CHECK = `
+const { parseAllDocuments } = require("yaml");
+const { readFileSync } = require("node:fs");
+let failed = 0;
+for (const file of JSON.parse(readFileSync(0, "utf8"))) {
+  for (const doc of parseAllDocuments(readFileSync(file, "utf8"))) {
+    for (const error of doc.errors) {
+      console.error(\`invalid YAML: \${file}: \${error.message}\`);
+      failed += 1;
     }
   }
+}
+process.exit(failed > 0 ? 1 : 0);
+`;
+
+/**
+ * Parse every tracked YAML file in one `yaml` process and every strict JSON file with JSON.parse; JSONC
+ * files are left to the TypeScript and editor tooling that reads them.
+ */
+function config() {
+  const yamlFiles = tracked("*.yaml", "*.yml");
+  let ok = run(
+    "npx",
+    [
+      "--yes",
+      "-p",
+      `yaml@${YAML}`,
+      "-c",
+      // npx puts the package's .bin on PATH but not its node_modules on NODE_PATH; derive it from the bin.
+      'NODE_PATH="$(dirname "$(command -v yaml)")/.." node -e "$YAML_CHECK"',
+    ],
+    JSON.stringify(yamlFiles),
+    { YAML_CHECK },
+  );
   for (const file of tracked("*.json").filter((f) => !JSONC.some((re) => re.test(f)))) {
     try {
       JSON.parse(readFileSync(file, "utf8"));
@@ -147,7 +215,7 @@ function skip(name, reason) {
   return true;
 }
 
-const CHECKS = { commits, format, config, secrets };
+const CHECKS = { commits, format, spelling, config, secrets };
 const wanted = process.argv.slice(2);
 const unknown = wanted.filter((name) => !(name in CHECKS));
 if (unknown.length > 0) {

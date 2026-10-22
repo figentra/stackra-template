@@ -1,11 +1,15 @@
 # Stackra file contract:
-# Purpose: the one formatting contract every editor honours before any formatter runs
-# Scope: repository-wide
-# Owner: docs-governance
-# Secrets: forbidden
+# Purpose: the formatting baseline every editor applies while you type, before any formatter runs.
+#          It matches .oxfmtrc.jsonc, so a file saved anywhere already passes `pnpm format:check`.
+# Boundary: whitespace, line endings and width only; the formatter owns everything else.
+# Runtime: node
+# Governing contract: Stackra ADR 0007 (code and docs wrap at the same width)
 
+# This is the top-most .editorconfig; editors stop looking further up the tree.
 root = true
 
+# Every file: UTF-8, LF line endings, a final newline, two-space indentation and the 100-column
+# width oxfmt formats to.
 [*]
 charset = utf-8
 end_of_line = lf
@@ -13,12 +17,8 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
+max_line_length = 100
 
+# Markdown and MDX: two trailing spaces are a hard line break, so they are kept.
 [*.{md,mdx}]
 trim_trailing_whitespace = false
-
-[Makefile]
-indent_style = tab
-
-[*.sql]
-indent_size = 2

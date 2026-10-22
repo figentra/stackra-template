@@ -9,7 +9,7 @@
 import { useContext } from "react";
 import { SiteContextMissingError } from "#src/errors/site-context-missing.error";
 import { SiteContext } from "#src/providers/site/site.context";
-import type { ResolvedSite } from "#src/server/resolve-site.server";
+import type { ResolvedSite } from "#src/providers/site/resolve-site";
 
 /** The site the layout resolved for this request. */
 export function useSite(): ResolvedSite {

@@ -3,15 +3,17 @@
  * Purpose: the Cmd+K palette: every command the actor may run, grouped, plus a free-text intent
  *          that proposes an action.
  * Boundary: presentation over `useCommandPalette`. HeroUI Pro's `Command` owns filtering, keyboard
- *           navigation and focus; this file owns only what each item says and does.
+ *           navigation and focus; this file owns only what each item says and does. A shortcut is
+ *           drawn by the kbd package, which writes the platform's modifier, never the raw string.
  * Runtime: browser
- * Governing contract: ADR 0245, ADR 0197 (HeroUI Pro in our own apps), ADR 0128
+ * Governing contract: ADR 0245, ADR 0197 (HeroUI Pro in our own apps)
  */
 import { Command, EmptyState } from "@stackra-pro/ui";
 import { Tone } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
-import { Chip, Kbd } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";
+import { ShortcutKeys } from "@stackra/kbd/react";
+import { Chip, Kbd } from "@stackra/ui";
 import { Icon, Icons } from "@stackra/ui/icons";
 import { I18n } from "#stackra/i18n";
 import { useCommandPalette } from "./use-command-palette";
@@ -81,9 +83,7 @@ export function CommandPalette() {
                       <Icon name={command.icon ?? Icons.ArrowRight} aria-hidden />
                       <span>{t(command.label)}</span>
                       {command.shortcut && (
-                        <Kbd className="ms-auto">
-                          <Kbd.Content>{command.shortcut}</Kbd.Content>
-                        </Kbd>
+                        <ShortcutKeys shortcut={command.shortcut} className="ms-auto" />
                       )}
                     </Command.Item>
                   ))}

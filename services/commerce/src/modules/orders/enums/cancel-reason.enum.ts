@@ -4,7 +4,7 @@
  *          `cancelled` and `expired`.
  * Boundary: a house enum (class); the `value` is the event reason code (snake_case, ADR 0231).
  * Runtime: isomorphic
- * Governing contract: ADR 0128 (amended), ADR 0231, guides/programming-model.mdx#enums
+ * Governing contract: ADR 0231, guides/programming-model.mdx#enums
  */
 import { Enum } from "@stackra/schema";
 import { I18n } from "#stackra/i18n";

@@ -7,6 +7,7 @@
 #          applied), so no port is typed anywhere but runway.yaml.
 # Boundary: the seeded `demo-tee` product is the measured product page (orders.demo seed).
 # Runtime: node
+# Governing contract: ADR 0183 (quality budgets), ADR 0182 (test tiers)
 ci:
   collect:
     startServerCommand: stackra start

@@ -2,33 +2,34 @@
 // Purpose: task graph. `gen` runs before typecheck, test and build in every member, because code
 //          imports #stackra/*. Every member's turbo.jsonc extends this file with exactly one tier
 //          tag; `boundaries` enforces the tier direction.
-// Boundary: task order and outputs only. A member's own committed manifest and OpenAPI file are
-//           outputs of its `gen`, never its inputs; an app's `gen` reads the services' committed
-//           manifests as inputs, so a service change re-runs the apps' gen. TURBO_TOKEN and
-//           TURBO_TEAM come from the environment (CI: Infisical; local: optional), never this file.
+// Boundary: task order, inputs, outputs and the environment each task may see. A member's own
+//           committed manifest and OpenAPI file are outputs of its `gen`, never its inputs; an
+//           app's `gen` reads the services' committed manifests as inputs, so a service change
+//           re-runs the apps' gen. TURBO_TOKEN, TURBO_TEAM and TURBO_REMOTE_CACHE_SIGNATURE_KEY come
+//           from the environment (CI: Infisical; local: optional), never this file.
 // Runtime: node
-// Governing contract: ADR 0261 (gen before build), ADR 0003 (tier direction), ADR 0158 (committed
-//                     manifest)
+// Governing contract: Stackra ADR 0261 (gen before build), Stackra ADR 0003 (tier direction),
+//                     Stackra ADR 0158 (committed manifest)
 {
   "$schema": "https://turborepo.dev/schema.json",
 
   // Remote cache: active when TURBO_TOKEN/TURBO_TEAM are present; a no-op otherwise. `signature: true`
-  // HMAC-signs every artifact (TURBO_REMOTE_CACHE_SIGNATURE_KEY, from the vault).
+  // HMAC-signs every artefact with TURBO_REMOTE_CACHE_SIGNATURE_KEY (runway.yaml `secrets.ci`).
   "remoteCache": { "enabled": true, "signature": true },
   "ui": "tui",
-  // Strict env mode: a task only sees the env vars it declares.
+  // Strict env mode: a task only sees the environment variables it declares below.
   "envMode": "strict",
   "cacheMaxAge": "7d",
   "cacheMaxSize": "10GB",
 
-  // every member runway is a task input below
+  // Root files every task depends on; each member's runway.yaml is a `gen` input below.
   "globalDependencies": [
     "pnpm-workspace.yaml",
     "runway.yaml",
     "mise.toml",
     "stackra.lock.yaml",
     ".oxlintrc.jsonc",
-    ".oxfmtrc.jsonc",
+    ".oxfmtrc.jsonc"
   ],
   "globalEnv": ["NODE_ENV", "CI"],
   // Read without entering the cache key: they change how a tool runs, never what it produces.
@@ -41,61 +42,97 @@
       "tier:config": { "dependencies": { "deny": ["tier:lib", "tier:app", "tier:service"] } },
       "tier:lib": { "dependencies": { "deny": ["tier:app", "tier:service"] } },
       "tier:app": { "dependencies": { "deny": ["tier:service"] } },
-      "tier:service": { "dependencies": { "deny": ["tier:app", "tier:service"] } },
-    },
+      "tier:service": { "dependencies": { "deny": ["tier:app", "tier:service"] } }
+    }
   },
   "tasks": {
     "gen": {
       "description": "stackra gen: .stackra/gen (#stackra/*), the generated entries, and the committed app-manifest.json and openapi.json.",
       "dependsOn": ["^gen"],
-      // an app's clients come from the in-repo service manifests (committed outputs of their own
-      // `gen`) plus the external manifests pinned in stackra.lock.yaml
+      // An app's clients come from the in-repo service manifests (committed outputs of their own
+      // `gen`) plus the external manifests pinned in stackra.lock.yaml.
       "inputs": [
         "src/**",
         "assets/**",
         "package.json",
         "stackra.config.ts",
         "runway.yaml",
-        "$TURBO_ROOT$/services/*/.stackra/app-manifest.json",
+        "$TURBO_ROOT$/services/*/.stackra/app-manifest.json"
       ],
-      "outputs": [".stackra/**", "css/**"],
+      "outputs": [".stackra/**", "css/**"]
     },
-    "typecheck": { "description": "tsc --noEmit.", "dependsOn": ["gen", "^build"] },
-    "test": { "description": "Each member's vitest suite.", "dependsOn": ["gen"] },
+    "typecheck": {
+      "description": "tsc --noEmit.",
+      "dependsOn": ["gen", "^build"],
+      // A tsconfig preset change re-checks every member that extends it.
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/typescript/src/**"]
+    },
+    "test": {
+      "description": "Each member's vitest suite.",
+      "dependsOn": ["gen"],
+      // The vitest presets shape every member's projects; a preset change re-runs the suites.
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/vitest/src/**"]
+    },
     "test:coverage": {
       "description": "vitest run --coverage against the shared gate; packages only.",
       "dependsOn": ["gen"],
-      "outputs": ["coverage/**"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/vitest/src/**"],
+      "outputs": ["coverage/**"]
     },
     "test:e2e": {
+      "description": "End-to-end tests of an app's built output: Playwright with axe (web, PWA, desktop) and Maestro flows (mobile).",
       "dependsOn": ["build"],
+      // The base URL and the public build values the tests assert against.
+      "env": ["VITE_*", "EXPO_PUBLIC_*", "RENDERER_VITE_*", "STACKRA_*"],
+      "passThroughEnv": ["PLAYWRIGHT_*", "MAESTRO_*"],
       "outputs": [
         "playwright-report/**",
         "test-results/**",
         "maestro-report/**",
-        ".maestro/output/**",
-      ],
+        ".maestro/output/**"
+      ]
     },
-    "build": { "dependsOn": ["gen", "^build"], "outputs": ["dist/**", "build/**"] },
+    "build": {
+      "description": "Build a member's deployable output: tsdown for packages, the generated Vite, Metro, Electron or Wrangler build for apps.",
+      "dependsOn": ["gen", "^build"],
+      // A tsdown preset change rebuilds every package.
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/tsdown/src/**"],
+      // Public values a bundler inlines (Stackra ADR 0231 prefixes) and the server-side build values;
+      // they change the output, so they enter the cache key.
+      "env": ["VITE_*", "EXPO_PUBLIC_*", "RENDERER_VITE_*", "MAIN_VITE_*", "STACKRA_*"],
+      // The Sentry release and source-map upload settings (SENTRY_AUTH_TOKEN, SENTRY_ORG, …) change
+      // where maps go, not what is built, so they stay out of the cache key.
+      "passThroughEnv": ["SENTRY_*"],
+      "outputs": ["dist/**", "build/**"]
+    },
     "lint": {
       "description": "oxlint, no fixes; no ^build: linting a member's own source needs nothing built.",
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxlintrc.jsonc"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/.oxlintrc.jsonc",
+        "$TURBO_ROOT$/packages/tooling/oxlint/src/**"
+      ]
     },
     "format": {
       "description": "Rewrite files with oxfmt. Never cached: its job is to mutate the tree.",
-      "cache": false,
+      "cache": false
     },
     "format:check": {
       "description": "Fail if anything is unformatted, without writing.",
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxfmtrc.jsonc"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxfmtrc.jsonc"]
     },
-    "validate": { "dependsOn": ["gen"] },
+    "validate": {
+      "description": "stackra validate: a member's config files against their schemas and the placement rules (tier tags, catalogs, kind folders).",
+      "dependsOn": ["gen"]
+    },
     "clean": { "description": "Remove a member's build output and local caches.", "cache": false },
     "dev": {
       "description": "Long-running dev/watch process (stackra dev).",
       "cache": false,
       "persistent": true,
       "interruptible": true,
-    },
-  },
+      // Dev servers read the same public and server values a build inlines.
+      "passThroughEnv": ["VITE_*", "EXPO_PUBLIC_*", "RENDERER_VITE_*", "MAIN_VITE_*", "STACKRA_*"]
+    }
+  }
 }

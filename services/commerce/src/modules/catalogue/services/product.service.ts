@@ -9,10 +9,11 @@
  *                     ADR 0127
  */
 import { Cacheable } from "@stackra/cache";
-import { Crud, CrudService, Repository } from "@stackra/database";
+import type { Repository } from "@stackra/database";
+import { Crud, CrudService } from "@stackra/database";
 import type { Locale } from "@stackra/i18n";
 import { Product } from "#modules/catalogue/models/product.model";
-import { Variant } from "#modules/catalogue/models/variant.model";
+import type { Variant } from "#modules/catalogue/models/variant.model";
 import type { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { ProductLimit } from "#modules/catalogue/entitlements/product-limit.entitlement";

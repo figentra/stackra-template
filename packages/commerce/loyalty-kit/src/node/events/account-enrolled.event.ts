@@ -14,8 +14,10 @@ import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
  * The account exists now; consumers react to it without asking the kit.
  *
  * @example
+ * ```ts
  * account.record(new AccountEnrolled({ accountId, memberId, tier }));
  * @OnEvent(AccountEnrolled) async handle(event: AccountEnrolled) { event.data.tier }
+ * ```
  */
 @Event({ name: "account.enrolled", public: true })
 export class AccountEnrolled extends IntegrationEvent(

@@ -13,10 +13,10 @@ import { beforeEach, describe, expect, it, freezeClock } from "@stackra/testing"
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { Refusals } from "#stackra/manifest";
-import { LoyaltyMembers, LoyaltyTier } from "@stackra/loyalty-kit/contracts";
-import { memberId } from "@stackra/loyalty-kit";
-import { DemoSeeder, LoyaltyKitModule, PointsEarned } from "@stackra/loyalty-kit/node";
-import { FakeLoyaltyMembers } from "@stackra/loyalty-kit/testing";
+import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
+import { memberId } from "@acme/loyalty-kit";
+import { LoyaltyKitModule, PointsEarned } from "@acme/loyalty-kit/node";
+import { DemoSeeder, FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
 import { AccountService } from "#node/services/account.service";
 
 const purchase = { amountMinor: 10_000, currency: "SAR", reference: "ord_1" };
@@ -56,7 +56,7 @@ describe(AccountService, () => {
    * The gold member of the demo seed earns double, which proves the hook chain runs on this path.
    */
   it("applies the tier multiplier", async () => {
-    expect(await accounts.earn(memberId(DemoSeeder.members.gold), purchase)).toBe(200);
+    expect(await accounts.earn(memberId(DemoSeeder.ids.gold), purchase)).toBe(200);
   });
 
   /**
@@ -64,10 +64,10 @@ describe(AccountService, () => {
    * purchase.
    */
   it("refuses an earn on a frozen account", async () => {
-    const account = await accounts.findOneOrFail({ memberId: DemoSeeder.members.silver });
+    const account = await accounts.findOneOrFail({ memberId: DemoSeeder.ids.silver });
     await accounts.setFrozen(account, true, new Date());
 
-    await expect(accounts.earn(memberId(DemoSeeder.members.silver), purchase)).rejects.toRefuseWith(
+    await expect(accounts.earn(memberId(DemoSeeder.ids.silver), purchase)).rejects.toRefuseWith(
       refusal(Refusals.loyalty_kit.account_frozen),
     );
   });
