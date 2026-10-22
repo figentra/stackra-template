@@ -1,4 +1,4 @@
-# `.github/`
+# `.github/` overview
 
 GitHub configuration for the repository (Stackra ADR 0012: GitHub is the code host).
 
