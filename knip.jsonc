@@ -6,7 +6,7 @@
 // Runtime: node
 // Governing contract: ADR 0264 (kind folders), ADR 0261 (generated imports), ADR 0003 (members)
 {
-  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "$schema": "https://unpkg.com/knip@6.41.0/schema.json",
   "workspaces": {
     ".": {
       "project": ["*.mjs"],

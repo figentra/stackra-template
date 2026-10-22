@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/runway-app.schema.json
 # Stackra file contract:
 # Purpose: how and where the docs site runs: the one dev port, written only here.
 # Boundary: a minimal app runway; Mintlify hosts the built site (connected to `apps/docs/src`), so

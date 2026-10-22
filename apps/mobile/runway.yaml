@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/runway-app.schema.json
 # Stackra file contract:
 # Purpose: how and where THIS app runs, per environment. The Metro dev port (the
 #          ONLY place it is written; gen writes it into `.stackra/metro.config.js` and
