@@ -7,8 +7,8 @@
  * Governing contract: ADR 0098, 0155, guides/programming-model.mdx#queries
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
-import { SettingsReader } from "@stackra/settings";
-import { StockLevelRepository } from "#modules/inventory/repositories/stock-level.repository";
+import type { SettingsReader } from "@stackra/settings";
+import type { StockLevelRepository } from "#modules/inventory/repositories/stock-level.repository";
 import { StockPermissions } from "#modules/inventory/permissions/stock.permission";
 import { InventorySettings } from "#modules/inventory/settings/inventory.setting";
 import { LowStockInput } from "#modules/inventory/schemas/low-stock-input.schema";

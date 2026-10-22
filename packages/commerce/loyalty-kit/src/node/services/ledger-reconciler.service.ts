@@ -10,7 +10,7 @@
  * Governing contract: ADR 0263 (typed constructors, named instances without forRoot)
  */
 import { Named } from "@stackra/container";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
 import type { MemberId } from "#core/types/member-id.type";
 
 /** Answers "do the old and the new ledger agree for this member?" during a driver migration. */

@@ -11,7 +11,7 @@
  */
 import { Driver } from "@stackra/container";
 import { LoyaltyMembers, type MemberId } from "@acme/loyalty-kit/contracts";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
 
 /**

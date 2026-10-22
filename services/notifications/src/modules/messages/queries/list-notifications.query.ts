@@ -11,8 +11,8 @@
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { Repository } from "@stackra/database";
-import { Notification } from "#modules/messages/models/notification.model";
+import type { Repository } from "@stackra/database";
+import type { Notification } from "#modules/messages/models/notification.model";
 import { NotificationPermissions } from "#modules/messages/permissions/notification.permission";
 import { NotificationListFilter } from "#modules/messages/schemas/notification-list-filter.schema";
 import { NotificationPage } from "#modules/messages/schemas/notification-page.schema";

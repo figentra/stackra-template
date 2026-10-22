@@ -11,11 +11,12 @@
  *                     0127
  */
 import { type EventOf, OnEvent } from "@stackra/events";
-import { Repository } from "@stackra/database";
-import { SettingsReader } from "@stackra/settings";
-import { Commerce, CommerceClient } from "#stackra/clients";
+import type { Repository } from "@stackra/database";
+import type { SettingsReader } from "@stackra/settings";
+import type { CommerceClient } from "#stackra/clients";
+import { Commerce } from "#stackra/clients";
 import { Queues } from "#stackra/queues";
-import { Notification } from "#modules/messages/models/notification.model";
+import type { Notification } from "#modules/messages/models/notification.model";
 import { NotificationKind } from "#modules/messages/enums/notification-kind.enum";
 import { NotificationCreated } from "#modules/messages/events/notification-created.event";
 import { NotificationPreferences } from "#modules/messages/settings/notification-preferences.setting";

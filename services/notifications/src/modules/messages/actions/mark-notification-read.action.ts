@@ -9,8 +9,8 @@
  */
 import { Action, type ActionContext, AsEndpoint } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { Repository } from "@stackra/database";
-import { Notification } from "#modules/messages/models/notification.model";
+import type { Repository } from "@stackra/database";
+import type { Notification } from "#modules/messages/models/notification.model";
 import { NotificationPermissions } from "#modules/messages/permissions/notification.permission";
 import { MarkNotificationReadInput } from "#modules/messages/schemas/mark-notification-read-input.schema";
 import { NotificationView } from "#modules/messages/schemas/notification-view.schema";

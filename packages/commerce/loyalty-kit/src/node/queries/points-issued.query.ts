@@ -9,11 +9,11 @@
  */
 import { Query, type QueryContext } from "@stackra/actions";
 import { ActorKind } from "@stackra/contracts";
-import { Repository } from "@stackra/database";
+import type { Repository } from "@stackra/database";
 import { EntryKind } from "#core/enums/entry-kind.enum";
 import { PointsIssuedInput } from "#core/schemas/points-issued-input.schema";
 import { PointsIssuedView } from "#core/schemas/points-issued-view.schema";
-import { LedgerEntry } from "#node/models/ledger-entry.model";
+import type { LedgerEntry } from "#node/models/ledger-entry.model";
 import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
 
 /** Two sums over today's rows; the widget binds this query by class. */

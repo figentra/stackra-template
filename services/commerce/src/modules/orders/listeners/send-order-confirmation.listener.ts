@@ -11,11 +11,11 @@
  *                     ADR 0266
  */
 import { OnEvent, type ListenerContext } from "@stackra/events";
-import { Mailer } from "@stackra/mail";
+import type { Mailer } from "@stackra/mail";
 import { Queues } from "#stackra/queues";
-import { CommerceConfig } from "#config/commerce.config";
+import type { CommerceConfig } from "#config/commerce.config";
 import { OrderPlaced } from "#modules/orders/events/order-placed.event";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderPlacedMail } from "#modules/orders/mails/order-placed.mail";
 
 /** One confirmation per order; notifications deduplicates by the command key the Mailer derives. */

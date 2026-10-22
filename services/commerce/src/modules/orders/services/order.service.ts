@@ -9,12 +9,13 @@
  * Governing contract: ADR 0105 (@Crud), 0136, 0141 (the aggregate records, the unit of work ships),
  *                     guides/programming-model.mdx#services, ADR 0212
  */
-import { Crud, CrudService, Repository } from "@stackra/database";
+import type { Repository } from "@stackra/database";
+import { Crud, CrudService } from "@stackra/database";
 import { AccessLogged } from "@acme/access-log";
 import { DataClassification } from "@acme/access-log/contracts";
 import { Order } from "#modules/orders/models/order.model";
-import { OrderLine } from "#modules/orders/models/order-line.model";
-import { OrderRepository } from "#modules/orders/repositories/order.repository";
+import type { OrderLine } from "#modules/orders/models/order-line.model";
+import type { OrderRepository } from "#modules/orders/repositories/order.repository";
 import { OrderPlaced } from "#modules/orders/events/order-placed.event";
 import { End, MarkPaid, PendingPayment } from "#modules/orders/states/order.state";
 import type { OrderView } from "#modules/orders/schemas/order-view.schema";

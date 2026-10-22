@@ -8,7 +8,7 @@
  * Governing contract: ADR 0098, 0155, guides/programming-model.mdx#queries
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
-import { ProductService } from "#modules/catalogue/services/product.service";
+import type { ProductService } from "#modules/catalogue/services/product.service";
 import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 import { GetProductInput } from "#modules/catalogue/schemas/get-product-input.schema";
 import { ProductView } from "#modules/catalogue/schemas/product-view.schema";

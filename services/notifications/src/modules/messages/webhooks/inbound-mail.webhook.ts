@@ -14,10 +14,12 @@
  * Runtime: node
  * Governing contract: ADR 0082 (areas), ADR 0260 d4 (command mode)
  */
-import { ApiArea, IdentityResolver } from "@stackra/contracts";
+import type { IdentityResolver } from "@stackra/contracts";
+import { ApiArea } from "@stackra/contracts";
 import { SignatureScheme, Webhook } from "@stackra/webhooks";
-import { Commerce, CommerceClient } from "#stackra/clients";
-import { NotificationsConfig } from "#config/notifications.config";
+import type { CommerceClient } from "#stackra/clients";
+import { Commerce } from "#stackra/clients";
+import type { NotificationsConfig } from "#config/notifications.config";
 import { InboundMailPayload } from "#modules/messages/schemas/inbound-mail-payload.schema";
 import { MailAuthResult } from "#modules/messages/enums/mail-auth-result.enum";
 

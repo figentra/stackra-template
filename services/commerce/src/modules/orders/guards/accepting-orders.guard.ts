@@ -12,7 +12,7 @@
  *                     guides/programming-model.mdx#policies-and-guards
  */
 import { Guard, type GuardContext } from "@stackra/actions";
-import { SettingsReader } from "@stackra/settings";
+import type { SettingsReader } from "@stackra/settings";
 import { OrdersPausedError } from "#modules/orders/errors/orders-paused.error";
 import { OrderSettings } from "#modules/orders/settings/order.setting";
 

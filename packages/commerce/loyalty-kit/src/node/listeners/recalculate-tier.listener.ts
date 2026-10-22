@@ -8,9 +8,9 @@
  * Governing contract: ADR 0264 decision 8 (one listener form), ADR 0078
  */
 import { OnEvent, type ListenerContext } from "@stackra/events";
-import { SettingsReader } from "@stackra/settings";
+import type { SettingsReader } from "@stackra/settings";
 import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
-import { AccountService } from "#node/services/account.service";
+import type { AccountService } from "#node/services/account.service";
 import { PointsEarned } from "#node/events/points-earned.event";
 import { LoyaltySettings } from "#node/settings/loyalty.setting";
 

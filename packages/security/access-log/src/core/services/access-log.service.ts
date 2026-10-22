@@ -8,8 +8,9 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0184 (telemetry), ADR 0263 (ports resolve by type)
  */
-import { Clock, Logger, type Actor } from "@stackra/contracts";
-import { AccessLogSink } from "#contracts/access-log-sink.port";
+import type { Clock, Logger } from "@stackra/contracts";
+import { type Actor } from "@stackra/contracts";
+import type { AccessLogSink } from "#contracts/access-log-sink.port";
 import { ACCESS_LOG_WRITE_FAILED } from "#core/constants/access-log-write-failed.constant";
 import type { AccessLoggedOptions } from "#core/interfaces/access-logged-options.interface";
 

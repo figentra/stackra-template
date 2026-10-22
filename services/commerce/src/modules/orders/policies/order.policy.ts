@@ -12,9 +12,9 @@
  */
 import { Decision, Policy, type PolicyFor } from "@stackra/iam";
 import { ActorKind, Realm, type Actor } from "@stackra/contracts";
-import { SettingsReader } from "@stackra/settings";
+import type { SettingsReader } from "@stackra/settings";
 import { Order } from "#modules/orders/models/order.model";
-import { OrderPermissions } from "#modules/orders/permissions/order.permission";
+import type { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { OrderSettings } from "#modules/orders/settings/order.setting";
 
 /** Decides per order after the permission check passed. `deny` beats a granted permission. */

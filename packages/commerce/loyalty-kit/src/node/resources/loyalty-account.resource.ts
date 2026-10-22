@@ -12,7 +12,8 @@
  * Runtime: node
  * Governing contract: ADR 0164 (panels are resources), 0139
  */
-import { FormBuilder, Infolist, Resource, Table } from "@stackra/panel";
+import type { FormBuilder, Infolist, Table } from "@stackra/panel";
+import { Resource } from "@stackra/panel";
 import { Icons } from "@stackra/ui/icons";
 import { Realm } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";

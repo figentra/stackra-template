@@ -11,8 +11,8 @@
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { Repository } from "@stackra/database";
-import { Variant } from "#modules/catalogue/models/variant.model";
+import type { Repository } from "@stackra/database";
+import type { Variant } from "#modules/catalogue/models/variant.model";
 import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { GetVariantByBarcodeInput } from "#modules/catalogue/schemas/get-variant-by-barcode-input.schema";

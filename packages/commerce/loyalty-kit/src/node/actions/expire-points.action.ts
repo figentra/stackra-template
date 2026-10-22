@@ -12,12 +12,12 @@ import { Action, AsJob, type ActionContext } from "@stackra/actions";
 import { ActorKind } from "@stackra/contracts";
 import { Queues } from "#stackra/queues";
 import { Cron } from "@stackra/scheduler";
-import { SettingsReader } from "@stackra/settings";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import type { SettingsReader } from "@stackra/settings";
+import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
 import { memberId } from "#core/functions/member-id.function";
 import { ExpirePointsInput } from "#core/schemas/expire-points-input.schema";
 import { ExpirePointsOutput } from "#core/schemas/expire-points-output.schema";
-import { AccountService } from "#node/services/account.service";
+import type { AccountService } from "#node/services/account.service";
 import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
 import { LoyaltySettings } from "#node/settings/loyalty.setting";
 

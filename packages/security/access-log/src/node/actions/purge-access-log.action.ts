@@ -9,12 +9,13 @@
  * Governing contract: ADR 0264 decision 9 (jobs are actions), ADR 0148, ADR 0134
  */
 import { Action, AsJob, type ActionContext } from "@stackra/actions";
-import { Clock, ActorKind } from "@stackra/contracts";
-import { Repository } from "@stackra/database";
+import type { Clock } from "@stackra/contracts";
+import { ActorKind } from "@stackra/contracts";
+import type { Repository } from "@stackra/database";
 import { Cron } from "@stackra/scheduler";
 import { Queues } from "#stackra/queues";
-import { AccessLogConfig } from "#config/access-log.config";
-import { AccessLogEntry } from "#node/models/access-log-entry.model";
+import type { AccessLogConfig } from "#config/access-log.config";
+import type { AccessLogEntry } from "#node/models/access-log-entry.model";
 import { AccessLogEntryPermissions } from "#node/permissions/access-log-entry.permission";
 import { PurgeAccessLogInput } from "#node/schemas/purge-access-log-input.schema";
 import { PurgeAccessLogOutput } from "#node/schemas/purge-access-log-output.schema";

@@ -10,7 +10,7 @@
  */
 import { OnEvent } from "@stackra/events";
 import { memberId } from "@acme/loyalty-kit";
-import { AccountService } from "@acme/loyalty-kit/node";
+import type { AccountService } from "@acme/loyalty-kit/node";
 import { Queues } from "#stackra/queues";
 import { OrderPaid } from "#modules/orders/events/order-paid.event";
 

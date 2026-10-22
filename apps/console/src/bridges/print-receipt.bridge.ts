@@ -11,7 +11,7 @@
  *                     0250
  */
 import { ActorKind } from "@stackra/contracts";
-import { ReceiptPrinter } from "@stackra/peripherals/contracts";
+import type { ReceiptPrinter } from "@stackra/peripherals/contracts";
 import { Capability } from "@stackra/platform";
 import { Bridge, type BridgeContext } from "@stackra/platform/electron";
 import { Commerce } from "#stackra/clients";

@@ -11,7 +11,7 @@
 import { type EventOf, OnEvent, type ListenerContext } from "@stackra/events";
 import { Payments } from "#stackra/clients";
 import { Order } from "#modules/orders/models/order.model";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 
 /** Bridges the payments capture fact into the order lifecycle; the only consumer of the capture. */
 export class MarkOrderPaidListener {

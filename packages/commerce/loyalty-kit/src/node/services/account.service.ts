@@ -12,22 +12,23 @@
  * Governing contract: ADR 0105 (@Crud), ADR 0136, ADR 0141, ADR 0265 (the owner calls its hook
  *                     point explicitly)
  */
-import { RequestContext } from "@stackra/actions";
-import { Clock } from "@stackra/contracts";
-import { Crud, CrudService, Repository } from "@stackra/database";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import type { RequestContext } from "@stackra/actions";
+import type { Clock } from "@stackra/contracts";
+import type { Repository } from "@stackra/database";
+import { Crud, CrudService } from "@stackra/database";
+import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
 import { EntryKind } from "#core/enums/entry-kind.enum";
 import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
 import { AccountFrozenError } from "#core/errors/account-frozen.error";
 import type { EarnRequest } from "#core/interfaces/earn-request.interface";
 import { LoyaltyAccountView } from "#core/schemas/loyalty-account-view.schema";
-import { LoyaltyService } from "#core/services/loyalty.service";
+import type { LoyaltyService } from "#core/services/loyalty.service";
 import type { MemberId } from "#core/types/member-id.type";
 import { LoyaltyAccount } from "#node/models/loyalty-account.model";
 import { AccountEnrolled } from "#node/events/account-enrolled.event";
 import { AccountFrozen } from "#node/events/account-frozen.event";
 import { PointsEarned } from "#node/events/points-earned.event";
-import { LoyaltyHooks } from "#node/hooks/loyalty.hook-point";
+import type { LoyaltyHooks } from "#node/hooks/loyalty.hook-point";
 import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
 
 /**

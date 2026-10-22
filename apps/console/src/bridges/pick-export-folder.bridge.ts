@@ -9,7 +9,7 @@
  * Governing contract: ADR 0251, ADR 0250 (web is the baseline, desktop adds), ADR 0256
  */
 import { ActorKind } from "@stackra/contracts";
-import { FileSystem } from "@stackra/filesystem/contracts";
+import type { FileSystem } from "@stackra/filesystem/contracts";
 import { Capability } from "@stackra/platform";
 import { Bridge, type BridgeContext } from "@stackra/platform/electron";
 import { Commerce } from "#stackra/clients";

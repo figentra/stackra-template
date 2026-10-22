@@ -12,8 +12,8 @@
  *                     point)
  */
 import { Step, Workflow, WorkflowBase, type StepContext } from "@stackra/workflow";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
-import { LoyaltyService } from "#core/services/loyalty.service";
+import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import type { LoyaltyService } from "#core/services/loyalty.service";
 import { EntryKind } from "#core/enums/entry-kind.enum";
 import { memberId } from "#core/functions/member-id.function";
 import type { RedeemPointsInput } from "#core/schemas/redeem-points-input.schema";
@@ -21,7 +21,7 @@ import type { RedeemPointsOutput } from "#core/schemas/redeem-points-output.sche
 import type { MemberId } from "#core/types/member-id.type";
 import type { RedemptionQuote } from "#core/interfaces/redemption-quote.interface";
 import { PointsRedeemed } from "#node/events/points-redeemed.event";
-import { LoyaltyHooks } from "#node/hooks/loyalty.hook-point";
+import type { LoyaltyHooks } from "#node/hooks/loyalty.hook-point";
 import { RedemptionConfirmed } from "#node/workflows/redemption-confirmed.signal";
 
 /** Output of `quote`; later steps read it as `s.quote`. */

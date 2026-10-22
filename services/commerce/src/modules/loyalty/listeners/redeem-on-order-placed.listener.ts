@@ -7,8 +7,9 @@
  * Governing contract: ADR 0078, guides/programming-model.mdx#listeners
  */
 import { OnEvent, type ListenerContext } from "@stackra/events";
-import { LoyaltyService, memberId } from "@acme/loyalty-kit";
-import { OrderService } from "#modules/orders/services/order.service";
+import type { LoyaltyService } from "@acme/loyalty-kit";
+import { memberId } from "@acme/loyalty-kit";
+import type { OrderService } from "#modules/orders/services/order.service";
 import { OrderPlaced } from "#modules/orders/events/order-placed.event";
 import { AdjustmentCode } from "#modules/loyalty/enums/adjustment-code.enum";
 

@@ -13,7 +13,7 @@ import { ActorKind, HttpMethod, Tone } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";
 import { FreezeAccountInput } from "#core/schemas/freeze-account-input.schema";
 import { FreezeAccountOutput } from "#core/schemas/freeze-account-output.schema";
-import { AccountService } from "#node/services/account.service";
+import type { AccountService } from "#node/services/account.service";
 import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
 
 /** Idempotent (PUT): freezing a frozen account changes nothing and records nothing. */

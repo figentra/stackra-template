@@ -11,13 +11,13 @@
  * Governing contract: ADR 0263 (self-registering drivers), ADR 0220 (integer minor units), ADR 0266
  */
 import { Driver } from "@stackra/container";
-import { Journal } from "@stackra/ledger";
+import type { Journal } from "@stackra/ledger";
 import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
 import { EXPIRE_REFERENCE_PREFIX } from "#core/constants/expire-reference-prefix.constant";
 import { EntryKind } from "#core/enums/entry-kind.enum";
 import type { PointsEntry } from "#core/interfaces/points-entry.interface";
 import type { MemberId } from "#core/types/member-id.type";
-import { LedgerEntry } from "#node/models/ledger-entry.model";
+import type { LedgerEntry } from "#node/models/ledger-entry.model";
 
 /**
  * The journal's unique (tenant, account, reference) index, not application logic, enforces

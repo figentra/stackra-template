@@ -7,8 +7,8 @@
  * Governing contract: ADR 0098, 0136, guides/programming-model.mdx#actions
  */
 import { Action, AsEndpoint, type ActionContext } from "@stackra/actions";
-import { Repository } from "@stackra/database";
-import { StockLevel } from "#modules/inventory/models/stock-level.model";
+import type { Repository } from "@stackra/database";
+import type { StockLevel } from "#modules/inventory/models/stock-level.model";
 import { StockPermissions } from "#modules/inventory/permissions/stock.permission";
 import { AdjustStockInput } from "#modules/inventory/schemas/adjust-stock-input.schema";
 import { AdjustStockOutput } from "#modules/inventory/schemas/adjust-stock-output.schema";
