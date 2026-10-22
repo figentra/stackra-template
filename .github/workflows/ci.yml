@@ -31,11 +31,12 @@ jobs:
       - name: Toolchain (mise)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
-          install_args: node pnpm gitleaks
+          install_args: node gitleaks
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      # Preview gate: the `@stackra/*` packages and the `stackra` CLI are not published yet, so
+      # `pnpm install` and `pnpm verify` cannot run here. Until they are, the gate runs every check that
+      # needs no workspace install. Replace these steps with `pnpm install --frozen-lockfile`,
+      # `pnpm exec commitlint …`, `pnpm verify` and `pnpm secrets:scan` once @stackra/cli is released.
       - name: Commit messages
         if: github.event_name == 'pull_request'
         env:
@@ -44,15 +45,21 @@ jobs:
           PR_BRANCH: ${{ github.head_ref }}
         run: |
           case "$PR_BRANCH" in renovate/*|changeset-release/*) exit 0 ;; esac
-          pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA"
+          printf 'extends: ["@commitlint/config-conventional"]\n' > "$RUNNER_TEMP/commitlint.yaml"
+          npx --yes -p @commitlint/cli@21.2.3 -p @commitlint/config-conventional@21.2.3 \
+            commitlint --config "$RUNNER_TEMP/commitlint.yaml" --from "$BASE_SHA" --to "$HEAD_SHA"
 
-      # stackra verify: format check, lint, typecheck, test, build, gen check (committed manifests equal what gen
-      # derives), validate (structure, versions, docblocks), boundaries and knip.
-      - name: Verify
-        run: pnpm verify
+      - name: Format
+        run: npx --yes oxfmt@0.71.0 --check
+
+      - name: Config files parse
+        run: |
+          git ls-files -z '*.yaml' '*.yml' | xargs -0 -n1 sh -c 'npx --yes yaml@2.9.1 valid < "$0" || { echo "invalid YAML: $0"; exit 1; }'
+          # tsconfig files and .vscode settings are JSONC (comments allowed); everything else is strict JSON.
+          git ls-files -z '*.json' ':!:**/tsconfig*.json' ':!:tsconfig*.json' ':!:.vscode/**' ':!:packages/tooling/typescript/src/*.json' | xargs -0 node -e 'for (const f of process.argv.slice(1)) { try { JSON.parse(require("fs").readFileSync(f, "utf8")); } catch (e) { console.error("invalid JSON: " + f + ": " + e.message); process.exitCode = 1; } }'
 
       - name: Secrets scan
-        run: pnpm secrets:scan
+        run: gitleaks detect --no-banner --redact --source .
 
   # Deploy reads each member's runway.yaml and the root runway.yaml (`stackra infra preview` shows the plan). Applying
   # stays a human step until the deploy ADR decides the promotion unit; this job marks where the deploy goes.
