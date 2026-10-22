@@ -25,7 +25,7 @@ pre-commit:
     - name: gitleaks
       run: |
         if command -v gitleaks >/dev/null 2>&1; then
-          gitleaks protect --staged --config .gitleaks.toml --no-banner --redact
+          gitleaks git --pre-commit --staged --config .gitleaks.toml --no-banner --redact
         else
           echo "gitleaks not installed (mise install) — CI still scans"
         fi

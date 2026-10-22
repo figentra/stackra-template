@@ -1,6 +1,7 @@
-// Workspace settings: one formatter (oxfmt) and one linter (oxlint) through the Oxc extension, the
-// repo's TypeScript, schemas for every config file, and the .editorconfig rules. Prettier and ESLint
-// are off (rejected). Personal preferences (theme, font, keybindings) belong in user settings.
+// Workspace settings: one formatter (oxfmt) and one linter (oxlint) through the Oxc extension,
+// TypeScript 7 through the TypeScript 7 extension, schemas for every config file, and the
+// .editorconfig rules. Prettier and ESLint are off (rejected). Personal preferences (theme, font,
+// keybindings) belong in user settings.
 //
 // Formatting standard (CONTRIBUTING.md, "Formatting"): oxfmt owns every language it supports and
 // nothing else formats. The editor, lefthook and CI run the same tool with the same config
@@ -39,11 +40,10 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
 
-  // ── TypeScript: the repo's version, project-relative imports, `#` subpath imports ──────────────
+  // ── TypeScript: the TypeScript 7 extension (native), `#` subpath imports ──────────────────────
   // TypeScript 7 ships only the native `tsc` (no tsserver.js), so the editor runs the official
   // "TypeScript 7" extension (TypeScriptTeam.native-preview) with its bundled native build instead of
-  // a `tsdk.path`. Members compile with the catalog's TypeScript 7; the stackra root's TypeScript 6
-  // exists only for doc-standard and must not drive the editor.
+  // a `tsdk.path`. Members compile with the catalog's TypeScript 7.
   "js/ts.experimental.useTsgo": true,
   "js/ts.preferences.importModuleSpecifier": "non-relative",
   "js/ts.preferences.preferTypeOnlyAutoImports": true,
@@ -56,6 +56,8 @@
     ".oxlintrc.jsonc": "jsonc",
     ".oxfmtrc.jsonc": "jsonc",
     "**/tsconfig*.json": "jsonc",
+    // the tsconfig presets carry a contract comment but no tsconfig*.json name
+    "**/packages/tooling/typescript/src/*.json": "jsonc",
     "**/.vscode/*.json": "jsonc",
     "*.mdx": "mdx"
   },
@@ -77,8 +79,8 @@
     "https://static.stackra.figentra.com/schemas/": true
   },
   // A file's own `$schema` wins over these mappings, so they cover only files that carry none. The
-  // preview cannot install packages, so no schema here points into node_modules: tools are pinned
-  // to the catalog version in the URL instead.
+  // @stackra/* packages are unpublished, so no schema here points into node_modules: tools are
+  // pinned to an exact version in the URL instead.
   "json.schemas": [
     // JSONC files: oxfmt writes trailing commas, so the JSON service must accept them.
     {
@@ -103,7 +105,7 @@
     // EAS build profiles, including the generated apps/mobile/.stackra/eas.json.
     {
       "fileMatch": ["**/eas.json"],
-      "url": "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json"
+      "url": "https://raw.githubusercontent.com/expo/eas-cli/v25.3.0/packages/eas-json/schema/eas.schema.json"
     },
     // Generated OpenAPI documents (`openapi: 3.1.0`): the official OAS 3.1 schema.
     {
@@ -124,19 +126,18 @@
   "yaml.validate": true,
   "yaml.schemaStore.enable": true,
   "yaml.schemas": {
-    // Stackra's own schemas, copied from the framework (stackra tools/schemas) into schemas/. They
-    // work offline and keep their static.stackra.figentra.com $id for later hosting.
-    "./schemas/runway-root.schema.json": "/runway.yaml",
-    "./schemas/runway-app.schema.json": "apps/*/runway.yaml",
-    "./schemas/runway-service.schema.json": "services/*/runway.yaml",
+    // Stackra's published schemas (served from static.stackra.figentra.com/schemas/ by the stackra
+    // repo's workers/static); local copies in schemas/ until that host is live. Every runway.yaml
+    // carries its own `$schema` modeline: a pattern here matches by suffix, so "/runway.yaml" would
+    // also hit the app and service files.
     "./schemas/stackra-lock.schema.json": "stackra.lock.yaml",
     "./schemas/mcp.schema.json": ".mcp.yaml",
     // Tools' own published schemas; lefthook pinned to the catalog version (2.2.2).
     "https://raw.githubusercontent.com/evilmartians/lefthook/v2.2.2/schema.json": "lefthook.yml",
-    "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json": ".markdownlint.yaml",
-    "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/packages/cspell-types/cspell.schema.json": "cspell.config.yaml",
+    "https://raw.githubusercontent.com/DavidAnson/markdownlint/v0.42.0/schema/markdownlint-config-schema.json": ".markdownlint.yaml",
+    "https://raw.githubusercontent.com/streetsidesoftware/cspell/v10.4.0/packages/cspell-types/cspell.schema.json": "cspell.config.yaml",
     // electron-builder's own schema (SchemaStore's copy predates the `universal` arch).
-    "https://unpkg.com/app-builder-lib@26/scheme.json": "**/electron-builder.yml",
+    "https://unpkg.com/app-builder-lib@26.15.3/scheme.json": "**/electron-builder.yml",
     // GitHub issue templates and Maestro flows, from SchemaStore.
     "https://www.schemastore.org/github-issue-config.json": ".github/ISSUE_TEMPLATE/config.yml",
     "https://www.schemastore.org/github-issue-forms.json": [
