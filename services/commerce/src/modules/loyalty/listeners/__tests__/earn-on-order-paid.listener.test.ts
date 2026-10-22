@@ -8,6 +8,7 @@
  * Governing contract: ADR 0078 (listeners run once per event id), ADR 0022,
  *                     guides/programming-model.mdx#listeners, ADR 0265
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { drainOutbox } from "@stackra/events/testing";
@@ -30,10 +31,12 @@ describe(EarnOnOrderPaidListener, () => {
       .state("authorized")
       .createOne({ subtotalMinor: 2_000, totalMinor: 2_000 });
     const orders = app.get(OrderService);
+    const { paymentId } = order;
+    assert(paymentId, "an authorized order carries its payment id");
 
-    await orders.markPaid(order.id, order.paymentId!, new Date());
+    await orders.markPaid(order.id, paymentId, new Date());
     await drainOutbox(); // publishes order.paid and runs the queued listener
-    await orders.markPaid(order.id, order.paymentId!, new Date()); // idempotent: records nothing
+    await orders.markPaid(order.id, paymentId, new Date()); // idempotent: records nothing
     await drainOutbox();
 
     expect(app.events.published()).toEmit(PointsEarned, { points: 200, reference: order.id });

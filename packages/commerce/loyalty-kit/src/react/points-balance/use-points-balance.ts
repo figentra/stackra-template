@@ -8,7 +8,7 @@
  * Governing contract: ADR 0231 (hooks start with `use`), ADR 0265 (`hooks/` is extension hooks
  *                     only)
  */
-import { useMemo } from "react";
+import { useState } from "react";
 import type { BalanceView } from "#core/schemas/balance-view.schema";
 
 /** Thirty days in milliseconds; the warning window. */
@@ -25,11 +25,9 @@ export interface PointsBalanceState {
  * @returns `expiresSoon` true when the oldest live points expire within thirty days of now.
  */
 export function usePointsBalance(data?: BalanceView): PointsBalanceState {
-  return useMemo(
-    () => ({
-      expiresSoon:
-        !!data?.nextExpiryAt && new Date(data.nextExpiryAt).getTime() - Date.now() < SOON_MS,
-    }),
-    [data?.nextExpiryAt],
-  );
+  // the clock is read once, when the tile mounts: a thirty-day window needs no ticking time, and
+  // render stays pure
+  const [now] = useState(Date.now);
+  const expiry = data?.nextExpiryAt;
+  return { expiresSoon: !!expiry && Date.parse(expiry) - now < SOON_MS };
 }

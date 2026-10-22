@@ -7,6 +7,7 @@
  * Runtime: node
  * Governing contract: ADR 0098, 0082, ADR 0022, guides/programming-model.mdx#tests, ADR 0269
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { actors } from "@stackra/iam/testing";
 import { createTestingModule } from "@stackra/container/testing";
@@ -43,8 +44,9 @@ describe(GetProductBySlugQuery, () => {
     const app = await boot();
     const product = await new ProductFactory(app.em).has(VariantFactory, 2).createOne();
     const [first, second] = product.variants;
-    await new StockLevelFactory(app.em).createOne({ variantId: first!.id });
-    await new StockLevelFactory(app.em).state("soldOut").createOne({ variantId: second!.id });
+    assert(first && second, "the factory made two variants");
+    await new StockLevelFactory(app.em).createOne({ variantId: first.id });
+    await new StockLevelFactory(app.em).state("soldOut").createOne({ variantId: second.id });
 
     const { output } = await run(
       GetProductBySlugQuery,

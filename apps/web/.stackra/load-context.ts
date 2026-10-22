@@ -25,5 +25,3 @@ declare module "react-router" {
     readonly clients: (options?: PublicClientOptions) => PublicClients;
   }
 }
-
-export {};

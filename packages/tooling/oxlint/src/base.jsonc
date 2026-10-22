@@ -12,6 +12,9 @@
   "env": { "es2024": true },
   "rules": {
     "no-console": "off",
+    // `self.__WB_MANIFEST` is the name Workbox injects the precache list into; nothing else may
+    // start or end with an underscore
+    "no-underscore-dangle": ["warn", { "allow": ["__WB_MANIFEST"] }],
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "typescript/no-explicit-any": "error",
     "typescript/consistent-type-imports": "error",

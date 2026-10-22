@@ -28,6 +28,14 @@ import { OrderLineFactory } from "#modules/orders/factories/order-line.factory";
 import { StockLevel } from "#modules/inventory/models/stock-level.model";
 import { StockLevelFactory } from "#modules/inventory/factories/stock-level.factory";
 
+/** The notifications service as the actor, optionally for a customer (the inbound-mail relay). */
+function relay(onBehalfOf?: string) {
+  return actors.service(
+    "notifications",
+    onBehalfOf ? { onBehalfOf: actors.customer(onBehalfOf) } : {},
+  );
+}
+
 /**
  * The policy and the side effects of a cancel; the workflow path is covered in workflows/__tests__.
  */
@@ -88,11 +96,6 @@ describe(CancelOrderAction, () => {
   it("lets a service cancel only for the owning customer, and logs the access", async () => {
     const app = await createTestingModule(CommerceModule).useDrivers("memory").compile();
     const [order, other] = await new OrderFactory(app.em).createMany(2);
-    const relay = (onBehalfOf?: string) =>
-      actors.service(
-        "notifications",
-        onBehalfOf ? { onBehalfOf: actors.customer(onBehalfOf) } : {},
-      );
 
     const bare = await run(CancelOrderAction, { orderId: order.id }, { as: relay() });
     const wrong = await run(

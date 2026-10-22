@@ -10,6 +10,7 @@
  * Governing contract: ADR 0151 (conformance), 0094, 0182 (integration tier),
  *                     guides/programming-model.mdx#workflows, ADR 0269
  */
+import assert from "node:assert/strict";
 import { beforeAll, describe, expect, freezeClock, freezeIds, it } from "@stackra/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
@@ -60,7 +61,9 @@ describe(CreateOrderWorkflow, () => {
       .override(PaymentsClient, payments)
       .compile();
     const product = await new ProductFactory(app.em).has(VariantFactory, 1).createOne();
-    const variantId = product.variants[0]!.id;
+    const [variant] = product.variants;
+    assert(variant, "the factory made one variant");
+    const variantId = variant.id;
     const level = await new StockLevelFactory(app.em).createOne({ variantId, onHand: 50 });
     const input = { lines: [{ variantId, quantity: 2 }], extensions: {} };
 

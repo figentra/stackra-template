@@ -21,8 +21,10 @@ import { LedgerReconcilerService } from "#node/services/ledger-reconciler.servic
  * `src/config/loyalty-kit.config.ts` override.
  *
  * @example
+ * ```ts
  * @Module({ imports: [LoyaltyKitModule] })
  * export class CommerceModule {}
+ * ```
  */
 @Module({
   key: "loyalty_kit",

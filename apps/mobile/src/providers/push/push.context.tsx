@@ -37,12 +37,12 @@ export function PushContextProvider({ children }: PushContextProviderProps) {
   const config = useConfig(PushConfig);
   const push = useCapability("push", { required: false });
   const session = useSession();
-  const tenant = useTenant({ optional: true });
+  const tenantId = useTenant({ optional: true })?.tenantId;
   const { locale } = useLocale();
   const register = useAction(Devices.actions.RegisterDevice);
 
   useEffect(() => {
-    if (!push || session.status !== SessionStatus.SignedIn || !tenant) return;
+    if (!push || session.status !== SessionStatus.SignedIn || !tenantId) return;
     let isCancelled = false;
     const grant =
       config.askOn === PromptMoment.FirstSession ? push.register() : push.registerIfGranted();
@@ -63,7 +63,7 @@ export function PushContextProvider({ children }: PushContextProviderProps) {
       isCancelled = true;
       off();
     };
-  }, [push, session.status, tenant?.tenantId, locale, register, config.askOn]);
+  }, [push, session.status, tenantId, locale, register, config.askOn]);
 
   return <>{children}</>;
 }

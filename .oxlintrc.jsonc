@@ -23,6 +23,9 @@
     "**/android/**",
     "**/.expo/**",
     // lint fixtures are banned imports on purpose; their test lints them with the preset directly
-    "**/__tests__/fixtures/**"
+    "**/__tests__/fixtures/**",
+    // declaration files, as in the base preset: an `export {}` there turns `declare module` into an
+    // augmentation, which a source-file rule would remove
+    "**/*.d.ts"
   ]
 }

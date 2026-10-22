@@ -7,11 +7,12 @@
  * Runtime: node
  * Governing contract: ADR 0078 (listeners run once per event id), ADR 0022, ADR 0223
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { drainOutbox } from "@stackra/events/testing";
 import { Mailer } from "@stackra/mail";
-import { MemoryMailer } from "@stackra/mail/testing";
+import type { MemoryMailer } from "@stackra/mail/testing";
 import { CommerceModule } from "#src/commerce.module";
 import { SendOrderReceiptListener } from "#modules/orders/listeners/send-order-receipt.listener";
 import { OrderService } from "#modules/orders/services/order.service";
@@ -25,9 +26,11 @@ describe(SendOrderReceiptListener, () => {
     const app = await createTestingModule(CommerceModule).useDrivers("memory").compile();
     const order = await new OrderFactory(app.em).state("authorized").createOne();
     const orders = app.get(OrderService);
+    const { paymentId } = order;
+    assert(paymentId, "an authorized order carries its payment id");
 
-    await orders.markPaid(order.id, order.paymentId!, new Date());
-    await orders.markPaid(order.id, order.paymentId!, new Date()); // a redelivered capture
+    await orders.markPaid(order.id, paymentId, new Date());
+    await orders.markPaid(order.id, paymentId, new Date()); // a redelivered capture
     await drainOutbox();
 
     const sent = (app.get(Mailer) as MemoryMailer).sent(OrderReceiptMail);

@@ -7,6 +7,7 @@
  * Runtime: node
  * Governing contract: ADR 0098, 0136, 0137, ADR 0022, guides/programming-model.mdx#tests
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
@@ -25,7 +26,9 @@ import { VariantFactory } from "#modules/catalogue/factories/variant.factory";
 async function setup() {
   const app = await createTestingModule(CommerceModule).useDrivers("memory").compile();
   const product = await new ProductFactory(app.em).has(VariantFactory, 1).createOne();
-  return { app, productId: product.id, variantId: product.variants[0]!.id, staff: actors.staff() };
+  const [variant] = product.variants;
+  assert(variant, "the factory made one variant");
+  return { app, productId: product.id, variantId: variant.id, staff: actors.staff() };
 }
 
 /** Guards product archiving, which pulls a product off sale and must stay consistent. */

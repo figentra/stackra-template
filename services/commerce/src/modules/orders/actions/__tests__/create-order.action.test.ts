@@ -12,6 +12,7 @@
  * Governing contract: ADR 0098 (one pipeline), ADR 0137 (refusal codes), ADR 0022,
  *                     guides/programming-model.mdx#tests
  */
+import assert from "node:assert/strict";
 import { describe, expect, it } from "@stackra/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
@@ -50,7 +51,9 @@ async function setup({ paused = false } = {}) {
   const pausedSettings = fakeSettings([[OrderSettings, { acceptingOrders: false }]]);
   const app = await (paused ? module.override(SettingsReader, pausedSettings) : module).compile();
   const product = await new ProductFactory(app.em).has(VariantFactory, 1).createOne();
-  const variantId = product.variants[0]!.id;
+  const [variant] = product.variants;
+  assert(variant, "the factory made one variant");
+  const variantId = variant.id;
   await new StockLevelFactory(app.em).createOne({ variantId, onHand: 10 });
   return { app, input: { lines: [{ variantId, quantity: 1 }], extensions: {} } };
 }
@@ -90,7 +93,9 @@ describe(CreateOrderAction, () => {
       .state("draft")
       .has(VariantFactory, 1)
       .createOne();
-    const input = { lines: [{ variantId: draft.variants[0]!.id, quantity: 1 }], extensions: {} };
+    const [variant] = draft.variants;
+    assert(variant, "the factory made one variant");
+    const input = { lines: [{ variantId: variant.id, quantity: 1 }], extensions: {} };
 
     const result = await run(CreateOrderAction, input, {
       as: actors.customer(),

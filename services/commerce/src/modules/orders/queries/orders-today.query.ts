@@ -9,7 +9,7 @@
  * Governing contract: ADR 0137 (cache option), 0150, guides/programming-model.mdx#queries
  */
 import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
-import { OrderRepository } from "#modules/orders/repositories/order.repository";
+import type { OrderRepository } from "#modules/orders/repositories/order.repository";
 import { OrderPermissions } from "#modules/orders/permissions/order.permission";
 import { OrderPaid } from "#modules/orders/events/order-paid.event";
 import { OrdersTodayInput } from "#modules/orders/schemas/orders-today-input.schema";
@@ -36,8 +36,12 @@ export class OrdersTodayQuery {
   async handle(_input: OrdersTodayInput, ctx: QueryContext): Promise<OrdersTodayOutput> {
     const paid = await this.orders.findPaidSince(ctx.startOfDay());
     const hourly = Array.from({ length: 24 }, () => 0);
-    // paidAt is set on every Paid row
-    for (const o of paid) hourly[ctx.hourOf(o.paidAt!)]! += o.totalMinor;
+    for (const o of paid) {
+      // findPaidSince returns Paid rows only, and every Paid row has paidAt
+      if (!o.paidAt) continue;
+      const hour = ctx.hourOf(o.paidAt);
+      hourly[hour] = (hourly[hour] ?? 0) + o.totalMinor;
+    }
     return {
       count: paid.length,
       revenueMinor: paid.reduce((s, o) => s + o.totalMinor, 0),

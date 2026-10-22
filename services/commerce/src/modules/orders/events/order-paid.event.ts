@@ -21,8 +21,10 @@ import { OrderPermissions } from "#modules/orders/permissions/order.permission";
  * Recorded once per order when its payment is captured; carries the paid total.
  *
  * @example
+ * ```ts
  * order.record(new OrderPaid({ orderId, customerId, paymentId, totalMinor, currency }));
  * @OnEvent(OrderPaid) async handle(event: OrderPaid) { event.data.paymentId }
+ * ```
  */
 @Event({
   name: "order.paid",

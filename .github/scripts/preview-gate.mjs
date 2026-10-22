@@ -93,8 +93,8 @@ function commits() {
   }
   const dir = mkdtempSync(join(tmpdir(), "preview-gate-"));
   try {
-    const config = join(dir, "commitlint.yaml");
-    writeFileSync(config, 'extends: ["@commitlint/config-conventional"]\n');
+    const configFile = join(dir, "commitlint.yaml");
+    writeFileSync(configFile, 'extends: ["@commitlint/config-conventional"]\n');
     const commitlint = [
       "--yes",
       "-p",
@@ -103,7 +103,7 @@ function commits() {
       `@commitlint/config-conventional@${COMMITLINT}`,
       "commitlint",
       "--config",
-      config,
+      configFile,
     ];
     // The title is read from the environment and piped on stdin, so it never reaches a shell.
     const title = process.env.PR_TITLE;
