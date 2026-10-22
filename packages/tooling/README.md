@@ -23,4 +23,4 @@ One role vocabulary runs through them: a member is an `app`, `mobile`, `library`
 - Changing a preset changes every member: run `pnpm verify`.
 - Create one with `pnpm new tooling <name>` (`stackra new`).
 
-Guide: https://docs.stackra.figentra.com/guides/tooling
+Guide: [tooling](https://docs.stackra.figentra.com/guides/tooling).
