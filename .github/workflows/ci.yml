@@ -20,6 +20,8 @@ jobs:
   gate:
     name: Quality Gate
     runs-on: ubuntu-latest
+    # The preview gate takes under a minute; a hung npx download should fail the run, not hold it 6 h.
+    timeout-minutes: 15
     permissions:
       contents: read
 

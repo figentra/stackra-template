@@ -24,6 +24,15 @@ const COMMITLINT = "21.2.3";
 const OXFMT = "0.71.0";
 const YAML = "2.9.1";
 
+/**
+ * npm settings for every npx call. A stalled registry request otherwise waits npm's default 5-minute
+ * fetch timeout before its retry (seen on GitHub runners); 30 s fails it fast and npm retries.
+ */
+const NPM_ENV = {
+  npm_config_fetch_timeout: process.env.npm_config_fetch_timeout || "30000",
+  npm_config_update_notifier: "false",
+};
+
 /** JSON files that are JSONC (comments allowed), so a strict JSON.parse would reject them. */
 const JSONC = [
   /(^|\/)tsconfig[^/]*\.json$/,
