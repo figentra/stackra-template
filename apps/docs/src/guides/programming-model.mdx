@@ -96,9 +96,8 @@ Nothing above a route imports it. A layout, menu, frame, header, page or documen
 generated key, `Routes.dashboard` from `#stackra/routes`, which imports route classes as types only:
 `navigate.to(Routes.order_detail, { orderId })`, `ctx.redirect(Routes.sign_in)`, `m.route(Routes.store)`,
 `<Link to={Routes.store} />`. Layouts carry no `tabs:` list; each tab route declares `tab`, and gen builds the tab
-bar and the menus into `#stackra/navigation`. The key → class table the router mounts is gen's own
-`route-table.ts`, imported only by the generated entry and tree, so no import cycle among decorated classes can
-form. A planned lint rule, `no-upward-route-import`, will fail an upward import.
+bar and the menus into `#stackra/navigation`. Only gen's own route tree imports the route classes, so no import
+cycle among decorated classes can form. A planned lint rule, `no-upward-route-import`, will fail an upward import.
 
 ## Reaching a sibling module
 
@@ -145,8 +144,10 @@ imports (there is no `consumes` list anywhere), and emits one family of Zod desc
 (`actionRef`, `queryRef`, `eventRef`, …) in every app. Types come from the descriptor,
 `ActionInput<typeof Commerce.actions.CancelOrder>`, never from a hand-written type. Routes are keyed
 by their snake_case route key in `#stackra/routes`, so data that must name a route holds a
-`RouteKey`. The site is restricted to the `public` API area; a reference to anything else is a gen
-error.
+`RouteKey`, written from the ref (`Routes.pricing.name`) so a renamed route is a type error. The site
+is restricted to the `public` API area; a reference to anything else is a gen error. The site's route
+modules never import server-only code: the public clients and the server env reach every loader
+through the Worker's load context, and a GET for HTML never sets a cookie.
 
 Ready to change something? [Add a field end to end](/guides/add-a-field) walks one change through
 every file.
@@ -190,7 +191,10 @@ Blueprint)` (ADR 0159).
 
 ### Seeds
 
-`seeds/<name>.seed.ts`: a `Seeder` with `static profiles`; the key is `<module>.<name>` (ADR 0190).
+`seeds/<name>.seed.ts`: a `Seeder` with `static profiles`; the key is `<module>.<name>` (ADR 0190). A seeder declares
+the ids other seeders and tests reuse once, in `static readonly ids`. A package keeps its seeders under `src/testing/`
+and exports them from `./testing`, so Faker never reaches a runtime entry; a service's seeders load lazily, never at
+boot.
 
 ### Schemas
 
@@ -205,7 +209,8 @@ risk lives here only (ADR 0132, 0208).
 ### Events
 
 `@Event({ name, public, broadcast? })` on a class extending `IntegrationEvent(schema)`; the wire name is
-`<module>.<aggregate>.<verb>.v<n>` (ADR 0141).
+`<module>.<aggregate>.<verb>.v<n>` (ADR 0141). A `DomainEvent` never leaves its service, so its name carries no version
+(`inventory.stock.low`). A broadcast names the permission a session needs to receive it.
 
 ### Listeners
 
@@ -245,7 +250,11 @@ A `@Policy(Model)` class answers per-record questions; a guard `extends Guard` a
 ### Workflows
 
 A multi-step action runs as a `@Workflow()` class that `extends WorkflowBase<Input, Output>`, with `@Step`
-methods and compensations (ADR 0101, 0151, 0152).
+methods and compensations (ADR 0101, 0151, 0152). A step that waits for something outside the run names it with
+`waitFor` (an event or a `@Signal` class in `workflows/<name>.signal.ts`), `correlate` (the values the signal must
+carry) and `timeout`; the run's own `timeout` is at least as long as its waits. An action sends the signal, so
+permission, tenancy and the audit trail apply to it: the loyalty kit's `RedeemPointsWorkflow` parks its `confirm`
+step on `RedemptionConfirmed`, which `ConfirmRedemptionAction` sends (ADR 0152 decision 1).
 
 ### Resources
 

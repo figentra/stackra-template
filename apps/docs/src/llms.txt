@@ -6,15 +6,15 @@
 
 ## Docs
 
-- [Acme Retail on Stackra](https://docs.example.com/index.md): what the project is and the reading order
-- [Quickstart](https://docs.example.com/quickstart.md): clone to a placed order
-- [The programming model](https://docs.example.com/guides/programming-model.md): classes with kind decorators, folders say the kind
-- [Add a field end to end](https://docs.example.com/guides/add-a-field.md): one change through every file it touches
-- [Testing](https://docs.example.com/guides/testing.md): a test beside every subject, helpers from the owning package
-- [Architecture decisions](https://docs.example.com/adr/index.md): the ADR table
-- [0001 The loyalty ledger is a port](https://docs.example.com/adr/0001-loyalty-ledger-is-a-port.md)
-- [Using the API](https://docs.example.com/api-reference/introduction.md): areas, auth, idempotency, errors, versions
-- [Events](https://docs.example.com/api-reference/events.md): public integration events
+- [Acme Retail on Stackra](https://docs.acme.example/index.md): what the project is and the reading order
+- [Quickstart](https://docs.acme.example/quickstart.md): clone to a placed order
+- [The programming model](https://docs.acme.example/guides/programming-model.md): classes with kind decorators, folders say the kind
+- [Add a field end to end](https://docs.acme.example/guides/add-a-field.md): one change through every file it touches
+- [Testing](https://docs.acme.example/guides/testing.md): a test beside every subject, helpers from the owning package
+- [Architecture decisions](https://docs.acme.example/adr/index.md): the ADR table
+- [0001 The loyalty ledger is a port](https://docs.acme.example/adr/0001-loyalty-ledger-is-a-port.md)
+- [Using the API](https://docs.acme.example/api-reference/introduction.md): areas, auth, idempotency, errors, versions
+- [Events](https://docs.acme.example/api-reference/events.md): public integration events
 
 ## API (from @acme/service-commerce 0.1.0; Stackra-Version 2026-10-01, 2027-03-01)
 
@@ -30,16 +30,17 @@
 - catalogue.product.update (action) — PATCH /products/{productId} — app, catalogue.product.update, L1
 - catalogue.product.list (query) — GET /products — app, catalogue.product.read, L0
 - inventory.stock.adjust (action) — PUT /stock/{variantId}/locations/{locationId} — app, inventory.stock.manage, L2, policy StockPolicy.manage
-- inventory.stock.list_low (query) — MCP tool only — app, inventory.stock.read, L1
-- orders.order.create (action) — POST /orders — app, orders.order.create, L1, Idempotency-Key required, offline queue; refusals: tenant_suspended, variant_unavailable, insufficient_stock, insufficient_points, rate_limited
-- orders.order.cancel (action) — PUT /orders/{orderId}/cancel — app, orders.order.cancel, L2, policy OrderPolicy.cancel; refusals: tenant_suspended, forbidden
+- inventory.stock.list_low (query) — GET /stock/low — app, inventory.stock.read, L1
+- orders.order.create (action) — POST /orders — app, orders.order.create, L1, Idempotency-Key required, offline queue; refusals: orders_paused, variant_unavailable, insufficient_stock, insufficient_points, rate_limited
+- orders.order.cancel (action) — PUT /orders/{orderId}/cancel — app, orders.order.cancel, L2, policy OrderPolicy.cancel; refusals: forbidden
 - orders.order.expire_unpaid (action) — cron */5 * * * * — app, orders.order.expire, L2
 - orders.order.get (query) — GET /orders/{orderId} — app, orders.order.read, L0, policy OrderPolicy.read
 - orders.order.list (query) — GET /orders — app, orders.order.read, L0
 - orders.order.list_lines (query) — GET /orders/{orderId}/lines — app, orders.order.read, L0, policy OrderPolicy.read
-- orders.order.stats_today (query) — MCP tool only — app, orders.order.read, L0
+- orders.order.stats_today (query) — GET /orders/stats/today — app, orders.order.read, L0
 - loyalty_kit.account.enroll (action) — PUT /loyalty/accounts/{accountId} — app, loyalty_kit.loyalty_account.enroll, L1; refusals: not_own_principal
-- loyalty_kit.points.redeem (action) — POST /loyalty/redemptions — app, loyalty_kit.loyalty_account.redeem, L1, Idempotency-Key required; refusals: not_a_member, insufficient_points, workflow_timed_out, rate_limited
+- loyalty_kit.points.redeem (action) — POST /loyalty/redemptions — app, loyalty_kit.loyalty_account.redeem, L1, Idempotency-Key required; waits up to 15m for confirmation, then credits the points back; refusals: not_a_member, insufficient_points, workflow_timed_out, rate_limited
+- loyalty_kit.points.confirm_redemption (action) — PUT /loyalty/redemptions/{reference}/confirm — app, loyalty_kit.loyalty_account.redeem, L1; keeps the debit of a pending redemption
 - loyalty_kit.account.freeze (action) — PUT /loyalty/accounts/{accountId}/freeze — app, loyalty_kit.loyalty_account.freeze, L2
 - loyalty_kit.points.expire (action) — cron 0 3 * * * — app, loyalty_kit.loyalty_account.expire, L2
 - loyalty_kit.points.balance (query) — GET /loyalty/accounts/{accountId}/balance — app, loyalty_kit.loyalty_account.read, L0
@@ -53,13 +54,13 @@
 - orders.order.paid.v1 (webhook): orderId, customerId, paymentId, totalMinor, currency
 - orders.order.cancelled.v1: orderId, customerId, reason
 - catalogue.product.archived.v1: productId, variantIds
-- inventory.stock.low.v1 (not public): variantId, locationId, available
+- inventory.stock.low (domain event, not public): variantId, locationId, available
 - loyalty_kit.account.enrolled.v1: accountId, memberId, tier
 - loyalty_kit.points.earned.v2 (v1 also published until 2027-04-01): memberId, points, reference, tier, balanceAfter
-- loyalty_kit.points.redeemed.v1 (not public): memberId, points, reference
+- loyalty_kit.points.redeemed (domain event, not public): memberId, points, reference
 - loyalty_kit.account.frozen.v1: accountId, memberId, isFrozen
 
 ## Optional
 
-- [OpenAPI document](https://docs.example.com/api-reference/openapi.json)
-- [Full docs as one file](https://docs.example.com/llms-full.txt)
+- [OpenAPI document](https://docs.acme.example/api-reference/openapi.json)
+- [Full docs as one file](https://docs.acme.example/llms-full.txt)

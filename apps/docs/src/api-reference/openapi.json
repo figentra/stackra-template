@@ -11,7 +11,7 @@
         "operationId": "loyalty_kit.account.enroll",
         "x-stackra-permission": "loyalty_kit.loyalty_account.enroll",
         "x-stackra-risk": "L1",
-        "x-stackra-package": "@stackra/loyalty-kit",
+        "x-stackra-package": "@acme/loyalty-kit",
         "parameters": [
           {
             "name": "accountId",
@@ -38,7 +38,7 @@
         "operationId": "loyalty_kit.points.balance",
         "x-stackra-permission": "loyalty_kit.loyalty_account.read",
         "x-stackra-risk": "L0",
-        "x-stackra-package": "@stackra/loyalty-kit",
+        "x-stackra-package": "@acme/loyalty-kit",
         "parameters": [
           {
             "name": "accountId",
@@ -61,7 +61,7 @@
         "operationId": "loyalty_kit.account.freeze",
         "x-stackra-permission": "loyalty_kit.loyalty_account.freeze",
         "x-stackra-risk": "L2",
-        "x-stackra-package": "@stackra/loyalty-kit",
+        "x-stackra-package": "@acme/loyalty-kit",
         "parameters": [
           {
             "name": "accountId",
@@ -85,7 +85,7 @@
         "x-stackra-permission": "loyalty_kit.loyalty_account.redeem",
         "x-stackra-risk": "L1",
         "x-stackra-idempotency": "required",
-        "x-stackra-package": "@stackra/loyalty-kit",
+        "x-stackra-package": "@acme/loyalty-kit",
         "responses": {
           "200": {
             "description": "OK"
@@ -101,6 +101,31 @@
           "429": {
             "$ref": "#/components/responses/Refusal",
             "x-stackra-codes": ["rate_limited"]
+          }
+        }
+      }
+    },
+    "/loyalty/redemptions/{reference}/confirm": {
+      "put": {
+        "operationId": "loyalty_kit.points.confirm_redemption",
+        "x-stackra-permission": "loyalty_kit.loyalty_account.redeem",
+        "x-stackra-risk": "L1",
+        "x-stackra-package": "@acme/loyalty-kit",
+        "parameters": [
+          {
+            "name": "reference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -173,7 +198,7 @@
           "412": {
             "$ref": "#/components/responses/Refusal",
             "x-stackra-codes": [
-              "tenant_suspended",
+              "orders_paused",
               "variant_unavailable",
               "insufficient_stock",
               "insufficient_points"
@@ -199,6 +224,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/stats/today": {
+      "get": {
+        "operationId": "orders.order.stats_today",
+        "x-stackra-permission": "orders.order.read",
+        "x-stackra-risk": "L0",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersTodayOutput"
                 }
               }
             }
@@ -270,10 +314,6 @@
                 }
               }
             }
-          },
-          "412": {
-            "$ref": "#/components/responses/Refusal",
-            "x-stackra-codes": ["tenant_suspended"]
           },
           "403": {
             "$ref": "#/components/responses/Refusal",
@@ -579,6 +619,28 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/StorefrontProductPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stock/low": {
+      "get": {
+        "operationId": "inventory.stock.list_low",
+        "x-stackra-permission": "inventory.stock.read",
+        "x-stackra-risk": "L1",
+        "x-stackra-query": {
+          "$ref": "#/components/schemas/LowStockInput"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LowStockOutput"
                 }
               }
             }
@@ -1303,7 +1365,7 @@
         }
       },
       "LoyaltyAccountPage": {
-        "$ref": "@stackra/loyalty-kit#/components/schemas/LoyaltyAccountPage"
+        "$ref": "@acme/loyalty-kit#/components/schemas/LoyaltyAccountPage"
       },
       "LowStockInput": {
         "type": "object",
