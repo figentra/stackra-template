@@ -121,7 +121,7 @@ Not copied, on purpose:
   workflows.
 - #10: oxfmt formats every type it supports, whole files only (`formatOnSaveMode: file`); lefthook checks the same
   globs; `format:check` is `oxfmt --check .`; CONTRIBUTING "Formatting".
-- This PR: Figentra Technologies L.L.C. everywhere; the hosted MCP at `mcp.stackra.figentra.com`; the vitest member
+- #11: Figentra Technologies L.L.C. everywhere; the hosted MCP at `mcp.stackra.figentra.com`; the vitest member
   factories (`nodePreset`, `libraryPreset`, `reactPreset`, `nativePreset`) and the coverage gate wired; member
   `AGENTS.md`, `CHANGELOG.md` and `LICENSE` files and library manifest fields; the Acme brand kept blue and separate
   from the trademarked Stackra assets; editor, spelling and Markdown fixes; this file rewritten for public readers.
