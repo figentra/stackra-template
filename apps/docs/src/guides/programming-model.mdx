@@ -22,20 +22,20 @@ Four sentences carry it:
 
 ## Grammar
 
-| Rule | What it says                                                                                                                                                                                    |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R1   | A file is `<scope>/<group>/<name>.<kind>.ts(x)`; a route, block or component is a folder, `<group>/<name>/<name>.<kind>.ts(x)`. Each suffix has one home group. Tests sit in `__tests__/`.      |
-| R2   | One primary export per file, named from the file. Noun kinds (model, schema, enum, event, signal, analytics event, type) take no suffix; errors end in `Error`.                                 |
-| R3   | The base class is the kind; its options are the argument. A member that replaces a base default carries `override`.                                                                             |
-| R4   | The type gives the shape: the initializer is the default, `?:` optional, `\| null` nullable, and a `number` carries `@Int` or `@Num`. A literal union or `any` fails gen.                       |
-| R5   | Names give identity, written once and locked; a rename carries `@Renamed(old)`.                                                                                                                 |
-| R6   | Decorators are field decorators (constraints, transforms, serializers, relations, sources), `@Step` and `@Transition`, or class facets (`@Index`, `@Searchable`, `@AccessLogged`, `@Lifetime`). |
-| R7   | Components, React hooks, plain functions, server helpers and mail bodies are functions, never classes.                                                                                          |
-| R8   | A type that serves one declaration stays in its file; a second importer moves it to `types/`.                                                                                                   |
-| R9   | One blank line between class members; a base-factory argument of two or more properties goes one per line; a four-field header and a one-line TSDoc on every member.                            |
-| R10  | `.stackra/` is generated and gitignored; the committed contracts are `stackra.manifest.json` and `openapi.json` at the member root.                                                             |
-| R11  | A model inside a decorator is a thunk (`@ManyToOne(() => Variant)`). Same module: `Ref<T>` or `Collection<T>`. Another module: `Link<T>`, an indexed id with no foreign key.                    |
-| R12  | Every member authors `stackra.config.ts` and one root module; nobody writes `main.ts` or an entry barrel. The docs app and the tooling presets are exempt.                                      |
+| Rule | What it says                                                                                                                                                                                                                                |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1   | A file is `<scope>/<group>/<name>.<kind>.ts(x)`; a route, block or component is a folder, `<group>/<name>/<name>.<kind>.ts(x)`. Each suffix has one home group. Tests sit in `__tests__/`.                                                  |
+| R2   | One primary export per file, named from the file. Noun kinds (model, schema, enum, event, signal, analytics event, type) take no suffix; errors end in `Error`.                                                                             |
+| R3   | The base class is the kind; its options are the argument. A member that replaces a base default carries `override`.                                                                                                                         |
+| R4   | The type gives the shape: the initializer is the default, `?:` optional, `\| null` nullable, and a `number` carries `@Int` or `@Num`. A literal union or `any` fails gen.                                                                   |
+| R5   | Names give identity, written once and locked; a rename carries `@Renamed(old)`.                                                                                                                                                             |
+| R6   | Decorators are field decorators (constraints, transforms, serializers and `@Classified`, relations, sources such as `@Secret("NAME")`), `@Step` and `@Transition`, or class facets (`@Index`, `@Searchable`, `@AccessLogged`, `@Lifetime`). |
+| R7   | Components, React hooks, plain functions, server helpers and mail bodies are functions, never classes.                                                                                                                                      |
+| R8   | A type that serves one declaration stays in its file; a second importer moves it to `types/`.                                                                                                                                               |
+| R9   | One blank line between class members; a base-factory argument of two or more properties goes one per line; a four-field header and a one-line TSDoc on every member.                                                                        |
+| R10  | `.stackra/` is generated and gitignored; the committed contracts are `stackra.manifest.json` and `openapi.json` at the member root.                                                                                                         |
+| R11  | A model inside a decorator is a thunk (`@ManyToOne(() => Variant)`). Same module: `Ref<T>` or `Collection<T>`. Another module: `Link<T>`, an indexed id with no foreign key.                                                                |
+| R12  | Every member authors `stackra.config.ts` and one root module; nobody writes `main.ts` or an entry barrel. The docs app and the tooling presets are exempt.                                                                                  |
 
 ## A feature, end to end
 
@@ -103,6 +103,7 @@ with its first file.
 | `listeners/`, `workflows/`           | `.listener.ts`; `.workflow.ts`, `.signal.ts`                                                         |
 | `access/`                            | `.permissions.ts`, `.policy.ts`, `.role.ts`, `.entitlement.ts`, `.precondition.ts`, `.flag.ts`       |
 | `services/`, `drivers/`              | `.service.ts`, `.repository.ts` (named reads beyond `CrudService` only); `.driver.ts`                |
+| `integrations/`, `connections/`      | `.integration.ts`, `.connection.ts`                                                                  |
 | `extensions/`                        | `.extension-point.ts`, `.extension.ts`, `.interceptor.ts`                                            |
 | `raw/`                               | `.controller.ts`, in a service only                                                                  |
 | `resources/<model>/`                 | `.resource.ts`, `.widget.ts`, `.document.ts`, `.notification.ts`, `.mail.tsx`                        |
@@ -121,38 +122,42 @@ An app's `src/` holds its root module and `app.error.tsx`, then `config/` (inclu
 `overrides/<owner>/`, `enums/`, `types/`, `styles/`, and `schemas/` and `errors/` for its own shapes
 (form inputs, nested config objects, bridge inputs) and refusals. A package's `src/` holds
 `contracts/` (the leaf: `ports/`, `enums/`, `types/`), `config/`, `core/`, `node/` (its module),
-`react/<name>/`, `native/<name>/` and `testing/`; its entry barrels are generated.
+`react/<name>/`, `native/<name>/` and `testing/` (`<name>.fake.ts`, `<name>.matcher.ts`,
+`<name>.fixture.ts`); its entry barrels are generated.
 
 ## The kind table
 
-| Kind                       | Declared as                                                                                                                                  |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Module, settings           | `extends Module` or `Module({ exports, imports, wrap })`; `extends Settings({ scopes })`                                                     |
-| Model, state machine       | `extends Model.with(...traits)`; `extends StateMachine(Model, { field })` with `@Transition` methods                                         |
-| Schema, enum               | `extends Schema`, `CursorInput` or `Page.of(X)`; `Enum.of({...})` with a type of the same name                                               |
-| Error                      | `extends Refusal({ kind })`, thrown as `X.create({...})`                                                                                     |
-| Action, query              | `extends Action({ key, ... })`, `extends Query({ key, ... })`                                                                                |
-| Event, change              | `extends DomainEvent`, `IntegrationEvent({ name })`, `WebhookEvent({ path, scheme, secret })`; `extends Change(Subject, {...})`              |
-| Listener, projection       | `extends Listener` or `Listener({ queue })`; `extends Projection(Source, {...})`                                                             |
-| Workflow, signal           | `extends Workflow({ startOn, timeout })` or `Workflow<Input>({ timeout })`; `extends Signal`                                                 |
-| Access                     | `extends Permissions`, `Policy(XPermissions)`, `Role({ grants })`, `Precondition`, `Entitlement({...})`, `Flag({...})`                       |
-| Service, driver, port      | `extends CrudService(Model)` or `Service`; `extends Driver(Port)`; `abstract class X extends Port`                                           |
-| Extension point, extension | `extends ExtensionPoint`; `extends Extension(Point, { order })`; `extends Interceptor`                                                       |
-| Interface kinds            | `extends Resource(Model, {...})`, `Widget({...})`, `Document({...})`, `Notification({ category })`                                           |
-| Database kinds             | `extends Migration`, `extends Factory(Model)`, `extends Seeder`                                                                              |
-| AI kinds                   | `extends Prompt`, `extends Skill({ tools })`, `extends Facts(Model)`                                                                         |
-| App kinds                  | `extends Route({ path })`, `Layout`, `Panel`, `Menu({ kind })`, `Shortcut({ keys })`, `Store`, `Block`, `Bridge`, `AnalyticsEvent({ name })` |
-| Config                     | `extends Config`, or a host override `<Host><Base> extends Base` with `override` members only                                                |
+| Kind                       | Declared as                                                                                                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Module, settings           | `extends Module` or `Module({ exports, imports, wrap })`; `extends Settings({ scopes })`                                                                                  |
+| Model, state machine       | `extends Model.with(...traits)`; `extends StateMachine(Model, { field })` with `@Transition` methods                                                                      |
+| Schema, enum               | `extends Schema` or another schema class (`PickType`, `OmitType`, `PartialType` derive one), `CursorInput` or `Page.of(X)`; `Enum.of({...})` with a type of the same name |
+| Error                      | `extends Refusal({ kind })`, thrown as `X.create({...})`                                                                                                                  |
+| Action, query              | `extends Action({ key, ... })`, `extends Query({ key, ... })`                                                                                                             |
+| Event, change              | `extends DomainEvent`, `IntegrationEvent({ name, broadcast: { permission, audience } })`, `WebhookEvent({ path, scheme, secret })`; `extends Change(Subject, {...})`      |
+| Listener, projection       | `extends Listener` or `Listener({ queue })`; `extends Projection(Source, {...})`                                                                                          |
+| Workflow, signal           | `extends Workflow({ startOn, timeout })` or `Workflow<Input>({ timeout })`; `extends Signal`                                                                              |
+| Access                     | `extends Permissions`, `Policy(XPermissions)`, `Role({ grants })`, `Precondition`, `Entitlement({...})`, `Flag({...})`                                                    |
+| Service, driver, port      | `extends CrudService(Model)` or `Service`; `extends Driver(Port)`; `abstract class X extends Port`                                                                        |
+| Integration, connection    | `extends Integration({ provider })`; `extends Connection(XIntegration, {...})` with `@Secret("NAME")` credential fields                                                   |
+| Extension point, extension | `extends ExtensionPoint`; `extends Extension(Point, { order })`; `extends Interceptor`                                                                                    |
+| Interface kinds            | `extends Resource(Model, {...})`, `Widget({...})` (`refreshOn` takes integration events only), `Document({...})`, `Notification({ category })`                            |
+| Database kinds             | `extends Migration`, `extends Factory(Model)`, `extends Seeder`                                                                                                           |
+| AI kinds                   | `extends Prompt` or `Prompt({...})`, `extends Skill({ tools })`, `extends Facts(Model)`                                                                                   |
+| App kinds                  | `extends Route({ path })`, `Layout`, `Panel`, `Menu({ kind })`, `Shortcut({ keys })`, `Store`, `Block`, `Bridge`, `AnalyticsEvent({ name })`                              |
+| Config                     | `extends Config` (the env contract is `<App>EnvConfig` in `env.config.ts`), or a host override `<Host><Base> extends Base` with `override` members only                   |
 
-A constructor parameter names its dependency by its type: classes are the only tokens, and
-`@Lifetime` is the only scope marker. There is no `@Injectable`, `@Inject` or providers array; gen
-writes the wiring.
+A model never takes a kind base's name, so the inbox entry model is `InboxMessage`, not
+`Notification`. A broadcast names its permission and its audience: the principal (the default, for
+an event about one person) or the tenant. A constructor parameter names its dependency by its type:
+classes are the only tokens, and `@Lifetime` is the only scope marker. There is no `@Injectable`,
+`@Inject` or providers array; gen writes the wiring.
 
 ## Derived identities
 
 | Identity            | Formula                                                                   | Example                              |
 | ------------------- | ------------------------------------------------------------------------- | ------------------------------------ |
-| Member, module key  | package name without scope and tier prefix; folder name; both snake_case  | `commerce`, `orders`                 |
+| Member, module key  | the member's folder name; the module's folder name; both snake_case       | `commerce`, `orders`                 |
 | Model key, table    | `<module>.<snake(Class)>`; the plural table in the module's schema        | `orders.order_line`, `orders.orders` |
 | Permission          | `<module>.<snake(class minus "Permissions")>.<static>`                    | `orders.order.cancel`                |
 | Action or query key | `<module>.` + `key` + `@<major>`                                          | `orders.order.cancel@1`              |
@@ -181,6 +186,7 @@ the convention would not give (`GET /orders/stats/today`).
 | link                       | a relation to another module's model, typed `Link<T>`           | a `links/` folder (retired)                                  |
 | notification, toast        | a message to people; a transient in-app message                 | a mail class (retired)                                       |
 | change                     | a versioned conversion of an event or a response                | an `@Upcast` class (retired)                                 |
+| fixture                    | a test helper value in a package's `testing/<name>.fixture.ts`  | a `.factory.ts`, which is a `Factory(Model)` only            |
 | service                    | a deployable under `services/<name>`, or a `.service.ts` class  | context makes it clear: a member or a module service         |
 
 ## Links point down
@@ -208,10 +214,11 @@ the bar. Only gen's route tree imports the route classes, so no import cycle can
 ## Reaching a sibling module
 
 Inside one member, a module imports a sibling only through the classes the sibling's
-`Module({ exports })` lists and its public groups: `schemas/`, `enums/`, `events/`, `errors/` and
-`access/*.permissions.ts`. A sibling's `models/` are imported only from `models/` and `database/`,
-for relations. A test under `__tests__/` may also import a sibling's `database/factories/` and
-`models/` to arrange its data (an orders test seeds a catalogue variant with `VariantFactory`).
+`Module({ exports })` lists and its public groups: `schemas/`, `enums/`, `events/`, `errors/`,
+`access/*.permissions.ts` and `extensions/*.extension-point.ts`. A sibling's `models/` are imported
+only from `models/` and `database/`, for relations. A test under `__tests__/` may also import a
+sibling's `database/factories/` and `models/` to arrange its data (an orders test seeds a catalogue
+variant with `VariantFactory`).
 
 ## Reaching another service
 

@@ -28,7 +28,7 @@
 # Runtime: node
 # Governing contract: Stackra ADR 0296 (root topology groups and defaults), Stackra ADR 0168 and
 #                     0169 (as amended by 0296), 0170, 0171, 0173, 0175, 0179, 0180, 0184, 0238,
-#                     0254
+#                     0254, 0299 (docs runway)
 $schema: "@stackra/runway/schema/root.json"
 version: 3
 # Prefix for stacks (`acme-platform/staging`), images (`acme-platform-core`), Workers and tags.
@@ -117,6 +117,9 @@ providers:
   # Licence keys and distribution of paid packages (Stackra ADR 0177).
   keygen:
     account: ref:keygen.account
+  # The Mintlify project the docs member deploys to (Stackra ADR 0299).
+  mintlify:
+    project: ref:mintlify.project
 
 # ── Environments: exactly these four names in every tool (Stackra ADR 0170; `local` is `dev`) ─────
 environments:
@@ -376,6 +379,8 @@ environments:
       web: cloudflare-workers
       mobile: eas
       desktop: electron-release
+      # The docs member; it follows main, not the promotion (`targets.mintlify.deployOn`).
+      docs: mintlify
     encore:
       env: production
       account: prod
@@ -573,6 +578,19 @@ targets:
       mac: macos-15
       windows: windows-2025
       linux: ubuntu-24.04
+  # The docs site (Stackra ADR 0299). CI deploys each merge to main once `mint validate`,
+  # `mint broken-links` and `mint a11y` passed on its pull request, then smoke-tests the
+  # published site; a failed smoke test fails the deploy job. The deploy on every push through
+  # Mintlify's GitHub app is switched off, so nothing deploys twice.
+  mintlify:
+    deployOn: merge-to-main
+    checks: [validate, broken-links, a11y]
+    pushDeploy: false
+    # The admin key's NAME; only the deploy job reads it, from the `ci` path (`secrets.ci`).
+    adminKey: MINTLIFY_ADMIN_KEY
+    # Every page of docs.json's navigation must answer 200 on the published host.
+    smoke:
+      pages: navigation
 
 # ── Edge (Stackra ADR 0175, 0237 layer 1) ─────────────────────────────────────────────────────────
 edge:
@@ -620,6 +638,8 @@ secrets:
     # Signs and verifies every remote-cache artefact (turbo.jsonc `remoteCache.signature`).
     - TURBO_REMOTE_CACHE_SIGNATURE_KEY
     - ENCORE_AUTH_KEY
+    # The docs deploy job alone reads it (targets.mintlify, Stackra ADR 0299).
+    - MINTLIFY_ADMIN_KEY
   # Runtime names the generated API gateway reads (Stackra ADR 0237); the gateway belongs to no
   # member, so its names sit here. The web Worker signs the visitor address it forwards with the
   # same key, which apps/web/runway.yaml names too (Stackra ADR 0297 decision 6).
@@ -648,7 +668,7 @@ release:
   # Where every release is recorded.
   records: [github-deployments, linear-release, "slack:#deploys"]
   # Build and publish order across destinations.
-  buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm]
+  buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm, mintlify]
   # On-premises upgrades (Stackra ADR 0179).
   onPrem:
     upgrades: sequential-minor

@@ -34,5 +34,5 @@ No app has an authored entry or tool config: `stackra gen` writes `.stackra/entr
 Wrangler, Playwright and electron-builder file, with gitignored shims at the member root for tools
 that read only the root (ADR 0295, decisions 5 and 7). Code hatches are the closed set of
 `*.extend.ts` files, each with a `Reason:` header (ADR 0295 decision 6). The apps also keep their
-own shapes in `src/schemas/` and their own refusals in `src/errors/`, a home ADR 0294 decision 14
-does not list yet.
+own shapes in `src/schemas/` and their own refusals in `src/errors/`, two of the app groups of ADR
+0294 decision 14.

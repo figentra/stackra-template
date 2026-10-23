@@ -9,7 +9,7 @@
     "gen": "stackra gen",
     "dev": "stackra dev",
     "build": "cd src && mint validate",
-    "lint": "cd src && mint broken-links",
+    "lint": "cd src && mint broken-links && mint a11y",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "a11y": "cd src && mint a11y",

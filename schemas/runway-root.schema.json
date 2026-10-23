@@ -234,7 +234,8 @@
         "helm",
         "cloudflare-workers",
         "eas",
-        "electron-release"
+        "electron-release",
+        "mintlify"
       ]
     },
     "memberKey": {
@@ -432,9 +433,9 @@
       "properties": {
         "destinations": {
           "type": "object",
-          "description": "Where each kind of member runs. A member runway may override its own.",
+          "description": "Where each kind of member runs; `docs` is the documentation site (ADR 0299). A member runway may override its own.",
           "propertyNames": {
-            "enum": ["services", "web", "mobile", "desktop"]
+            "enum": ["services", "web", "mobile", "desktop", "docs"]
           },
           "additionalProperties": {
             "$ref": "#/$defs/destination"
