@@ -1,15 +1,19 @@
-# yaml-language-server: $schema=../../schemas/runway-service.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/service.json
 # Stackra file contract:
 # Purpose: WHAT the commerce member needs per environment beyond what gen derives from
-#          stackra.manifest.json: the secret names it reads, the sizes of its own stores (database,
-#          cache keyspace, buckets, queues), whether crons run, health thresholds, and the config
-#          values that set its config classes, driver choices included. The member is the folder
-#          that holds this file, so the file does not name it.
+#          stackra.manifest.json: the dedicated resources it requires and why, the secret names it
+#          reads, the sizes of its own stores (database, cache, buckets, queues), whether crons
+#          run, health thresholds, and the config values that set its config classes, driver
+#          choices included. The member is the folder that holds this file, so the file does not
+#          name it.
 # Boundary: never WHERE it runs or how it is packed: deployables, groups, `isolate`, cpu, memory,
 #           instances and worker splits are the root runway's topology. No secret value (Stackra
-#           ADR 0173), no business value (src/config/*, settings). Every resource here is shared:
-#           commerce needs no dedicated cache or search engine, so there is no `requires` block.
-#           Health checks are declared in stackra.config.ts; this file tunes only their thresholds
+#           ADR 0173), no business value (src/config/*, settings). Every resource is shared except
+#           the one `requires` names: commerce's own cache instance, because its query cache and
+#           rate-limit counters need their own eviction policy (the root topology still decides
+#           where it runs; dev and preview use the memory cache driver, so it is provisioned only
+#           where the cache driver is `valkey`). Search stays on the shared Postgres. Health checks
+#           are declared in stackra.config.ts; this file tunes only their thresholds
 #           (Stackra ADR 0190). Driver choices are config fields typed `DriverName<Port>`, so they
 #           sit under `config` like every other value.
 # Runtime: node
@@ -18,7 +22,15 @@
 $schema: "@stackra/runway/schema/service.json"
 version: 3
 
-# Every @Secret of src/config/*; gen fails on a missing one. Names only.
+# Resources this member needs beyond what gen derives from stackra.manifest.json; each dedicated
+# one says why it cannot share (Stackra ADR 0296).
+requires:
+  cache:
+    dedicated: true
+    engine: valkey
+    reason: query-cache entries and rate-limit counters need volatile-ttl eviction of their own
+
+# Every @Secret of src/schemas/* (the config shapes); gen fails on a missing one. Names only.
 secrets: [PRICING_API_KEY]
 
 # Thresholds only; the path and the checks are stackra.config.ts `health`.
@@ -69,9 +81,10 @@ environments:
       extensions: [ltree, pg_trgm]
       # connections this member may hold on the shared server
       poolBudget: 20
-    # a keyspace on the shared cache cluster
+    # the dedicated instance `requires` names; volatile-ttl evicts only keys that carry a TTL
     cache:
-      keyspaceMb: 256
+      memoryMb: 256
+      eviction: volatile-ttl
     # sizes of the buckets the manifest lists
     buckets:
       product_images:
@@ -100,7 +113,8 @@ environments:
       readReplica: false
       poolBudget: 50
     cache:
-      keyspaceMb: 1024
+      memoryMb: 1024
+      eviction: volatile-ttl
     buckets:
       product_images:
         storageGb: 50

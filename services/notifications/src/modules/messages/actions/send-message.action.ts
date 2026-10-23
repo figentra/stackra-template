@@ -1,8 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: `messages.message.send@1`: the action other services queue (the `notifications`
- *          Notifier driver of @stackra/notifications calls `message.send.queue(input)`) and staff
- *          may call directly. One key, one pipeline, every reach (ADR 0260).
+ * Purpose: `messages.message.send@1`: the action other services queue (the `notifications` Notifier
+ *          driver of @stackra/notifications calls `message.send.queue(input)`) and staff may call
+ *          directly. One key, one pipeline, every reach (ADR 0260).
  * Boundary: `Idempotency.Derived`: with no Idempotency-Key the pipeline derives one from the input,
  *           which makes a redelivered queued call harmless. It only opens the dedup row and
  *           dispatches DeliverMessageAction after commit; the slow, failing part runs as a job with
@@ -14,19 +14,13 @@
  *                     ADR 0260 d4
  */
 import { Action, type ActionContext, Idempotency } from "@stackra/actions";
-import { ActorKind, HttpMethod, type PublicId } from "@stackra/contracts";
-import { Schema } from "@stackra/validation";
+import { ActorKind, HttpMethod } from "@stackra/contracts";
 import { DeliverMessageAction } from "#modules/messages/actions/deliver-message.action";
 import { MessageStatus } from "#modules/messages/enums/message-status.enum";
 import { DeliverMessageInput } from "#modules/messages/schemas/deliver-message-input.schema";
 import type { SendMessageInput } from "#modules/messages/schemas/send-message-input.schema";
+import { SendMessageOutput } from "#modules/messages/schemas/send-message-output.schema";
 import type { MessageService } from "#modules/messages/services/message.service";
-
-/** The message's public id; the same id comes back for a redelivered call. */
-export class SendMessageOutput extends Schema {
-  /** The message's public id. */
-  messageId!: PublicId<"msg">;
-}
 
 /** Accepts one message; at most 600 per minute per tenant. */
 export class SendMessageAction extends Action({

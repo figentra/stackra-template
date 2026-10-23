@@ -1,25 +1,21 @@
 /**
  * Stackra file contract:
  * Purpose: `orders.order.get@1`: one order; customers see only their own (OrderPolicy#read).
- * Boundary: read only, no transaction. The permission is derived (`OrderPermissions.read`, L0), so
- *           it is also an MCP tool under the caller's permissions; the endpoint is derived
- *           (`GET /orders/:orderId`).
+ * Boundary: read only, no transaction. The permission is derived (`OrderPermissions.read`, L0).
+ *           Surfaces by default: the endpoint is derived (`GET /orders/:orderId`) and, as an L0
+ *           query, it is the MCP tool `orders_order_get` under the caller's own permissions. It is
+ *           OrderResource's `get` operation, so its output is the View page's detail.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 2, 16 and 21), ADR 0098, ADR 0155
+ * Governing contract: ADR 0294 (decisions 2, 16 and 21, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0098, ADR 0155
  */
 import { Query, type QueryContext } from "@stackra/actions";
-import { ActorKind, type PublicId } from "@stackra/contracts";
-import { Schema } from "@stackra/validation";
+import { ActorKind } from "@stackra/contracts";
+import type { GetOrderInput } from "#modules/orders/schemas/get-order-input.schema";
 import type { OrderView } from "#modules/orders/schemas/order-view.schema";
 import type { OrderService } from "#modules/orders/services/order.service";
 
-/** The order to read, by public id. */
-export class GetOrderInput extends Schema {
-  /** The order's public id. */
-  orderId!: PublicId<"ord">;
-}
-
-/** Reads one order as OrderView; the notifications service calls it for an inbox entry's total. */
+/** Reads one order as OrderView; the notifications service calls it for an inbox entry's lines. */
 export class GetOrderQuery extends Query({
   key: "order.get",
   actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],

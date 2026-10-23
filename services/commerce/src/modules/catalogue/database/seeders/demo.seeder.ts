@@ -4,9 +4,9 @@
  *          draft product.
  * Boundary: the profile is the file name and the key is `catalogue.demo`; it runs first
  *           (stackra.config.ts `e2e`), before inventory and orders. Synthetic rows from this
- *           module's factories with fixed public ids in the ADR 0231 form (`<prefix>_<26
- *           characters>`, `01JA` plus a counter), declared once in `ids`, so docs, e2e tests and
- *           the mobile Maestro flows can name them: `mediumTee` is the M tee (barcode
+ *           module's factories with fixed public ids in the ADR 0231 form
+ *           (`<prefix>_<26 characters>`, `01JA` plus a counter), declared once in `ids`, so docs,
+ *           e2e tests and the mobile Maestro flows can name them: `mediumTee` is the M tee (barcode
  *           6281000000012, in stock), whose id the inventory and orders seeders name as data.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 20 and 24), ADR 0190 (profiles minimal, demo and

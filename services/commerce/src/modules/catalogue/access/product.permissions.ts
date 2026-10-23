@@ -25,4 +25,7 @@ export class ProductPermissions extends Permissions {
 
   /** Take a product off sale; L2, so a person confirms it and ProductPolicy#archive refines it. */
   static readonly archive = Permission.L2;
+
+  /** Import products from a CSV or XLSX file; each row still needs `create` or `update`. */
+  static readonly import = Permission.L1;
 }

@@ -9,14 +9,13 @@
  */
 import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
-import { EntitlementSource } from "@stackra/entitlements";
+import { EntitlementSource, LimitReachedError } from "@stackra/entitlements";
 import { fakeEntitlements } from "@stackra/entitlements/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
+import { CommerceModule } from "#stackra/module";
 import { ProductOperations } from "#stackra/operations";
-import { CommerceModule } from "#src/commerce.module";
 import { ProductLimitEntitlement } from "#modules/catalogue/access/product-limit.entitlement";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 
@@ -49,6 +48,6 @@ describe(ProductLimitEntitlement, () => {
 
     const result = await run(ProductOperations.Create, input, { as: actors.staff() });
 
-    expect(result).toRefuseWith(refusal(Refusals.entitlements.limit_reached));
+    expect(result).toRefuseWith(refusal(LimitReachedError));
   });
 });

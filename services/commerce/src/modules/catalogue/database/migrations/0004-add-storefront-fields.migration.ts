@@ -2,26 +2,29 @@
  * Stackra file contract:
  * Purpose: expand step: the storefront fields of a product (description, images, collections, seo)
  *          and the option values of a variant.
- * Boundary: written by `stackra db diff` after the models gained those fields, reviewed, then
- *           committed and never edited. Every column is nullable or defaulted, so there is no
- *           backfill and no contract step. The translated description uses the trait macro, so its
- *           columns match `Translatable`. Forward only.
+ * Boundary: a frozen snapshot written by `stackra db diff` after the models gained those fields;
+ *           literals only. Additive: every column is nullable or has a constant default equal to
+ *           the model's initializer, so there is no backfill and no contract step. The translated
+ *           description uses the `translatable` macro, so its columns match the Translatable trait.
+ *           No `down()`: gen derives the dev inverse.
  * Runtime: node
- * Governing contract: ADR 0294 (decision 13), ADR 0159 (as amended: expand and contract)
+ * Governing contract: ADR 0294 (decision 13, as amended by programming model v3.1, AGENTS.md),
+ *                     ADR 0159 (as amended: expand and contract)
  */
-import { type Blueprint, Migration } from "@stackra/database";
-import { Products, Variants } from "#stackra/tables";
+import { type Blueprint, Migration, type SchemaBuilder } from "@stackra/database";
 
-/** The defaults equal the models' initializers: no images, no collections, no options. */
+/** No images, no collections, no seo and no options until a merchant sets them. */
 export class AddStorefrontFieldsMigration extends Migration {
   /** Adds the storefront columns, every one nullable or defaulted. */
-  up(schema: Blueprint): void {
-    schema.table(Products, (t) => {
-      t.translatable([Products.columns.description]).nullable();
-      t.jsonb(Products.columns.images).default([]);
-      t.jsonb(Products.columns.collections).default([]);
-      t.jsonb(Products.columns.seo).nullable();
+  up(schema: SchemaBuilder): void {
+    schema.table("products", (t: Blueprint) => {
+      t.translatable(["description"]).nullable();
+      t.jsonb("images").default([]);
+      t.jsonb("collections").default([]);
+      t.jsonb("seo").nullable();
     });
-    schema.table(Variants, (t) => t.jsonb(Variants.columns.options).default({}));
+    schema.table("variants", (t: Blueprint) => {
+      t.jsonb("options").default({});
+    });
   }
 }

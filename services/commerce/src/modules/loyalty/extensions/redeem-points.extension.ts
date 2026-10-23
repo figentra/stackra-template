@@ -1,13 +1,20 @@
 /**
  * Stackra file contract:
  * Purpose: turns requested loyalty points into a negative adjustment on the order totals.
- * Boundary: implements `orders.adjustTotals` at order 200 (after promotions at 100, before gift
- *           cards at 300) and adds `extensions.loyalty` (RedeemPointsRequest) to the input of
- *           `orders.order.create@1`; the namespace is this module's key. Runs inside pricing: no
- *           writes and no network. The debit happens after commit in RedeemOnOrderPlacedListener.
- *           Ids cross into the kit as `MemberId` through `memberId(...)`.
+ * Boundary: an EXTENSION: one class in this module that plugs into exactly one slot of another
+ *           module's extension POINT. The point (OrderExtensionPoint) is orders' published seam,
+ *           owned and called by orders; this class is loyalty's contribution to it, and orders
+ *           never imports it. The slot is the indexed type argument
+ *           (`OrderExtensionPoint["adjustTotals"]`, an `after` slot: a value pipeline), so
+ *           TypeScript checks `handle` against the slot's signature. It runs at order 200 (after
+ *           promotions at 100, before gift cards at 300) and adds `extensions.loyalty`
+ *           (RedeemPointsRequest) to the input of `orders.order.create@1`; the namespace is this
+ *           module's key. Runs inside pricing: no writes and no network. The debit happens after
+ *           commit in RedeemOnOrderPlacedListener. Ids cross into the kit as `MemberId` through
+ *           `memberId(...)`.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 13 and 16), ADR 0265 (transform and typed extensions)
+ * Governing contract: ADR 0294 (decisions 13 and 16, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0265 (extension points and typed extensions)
  */
 import { type LoyaltyService, memberId } from "@acme/loyalty-kit";
 import { Extension, type ExtensionContext } from "@stackra/actions";
@@ -15,12 +22,12 @@ import { validate } from "@stackra/validation";
 import { I18n } from "#stackra/i18n";
 import { AdjustmentCode } from "#modules/loyalty/enums/adjustment-code.enum";
 import { RedeemPointsRequest } from "#modules/loyalty/schemas/redeem-points-request.schema";
-import { OrderExtensionPoint } from "#modules/orders/extensions/order.extension-point";
+import type { OrderExtensionPoint } from "#modules/orders/extensions/order.extension-point";
 import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 import { OrderTotals } from "#modules/orders/schemas/order-totals.schema";
 
 /** One point is worth one minor unit; the kit caps the redemption by balance and percentage. */
-export class RedeemPointsExtension extends Extension(OrderExtensionPoint, {
+export class RedeemPointsExtension extends Extension<OrderExtensionPoint["adjustTotals"]>({
   order: 200,
   input: RedeemPointsRequest,
 }) {
@@ -30,7 +37,7 @@ export class RedeemPointsExtension extends Extension(OrderExtensionPoint, {
   }
 
   /** Returns `totals` itself when no points were requested or the quote is zero. */
-  async adjustTotals(
+  async handle(
     totals: OrderTotals,
     draft: OrderDraft,
     _ctx: ExtensionContext,

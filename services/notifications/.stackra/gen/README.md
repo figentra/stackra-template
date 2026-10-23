@@ -13,8 +13,9 @@ here:
 | --------------------- | -------------------------------------------------------------------------------------------- |
 | `../entry/server.ts`  | the runtime entry: `createApp(NotificationsModule, { wiring })` from `@stackra/app/server`   |
 | `../vitest.config.ts` | the Vitest config (the service preset); the gitignored root `vitest.config.ts` re-exports it |
-| `wiring.ts`           | every binding, the config class, and the MailTransport drivers with the lazy `resend` one    |
-| `clients.ts`          | commerce's call shapes, the `Commerce.OrderPaid` event class, the enum, the id prefixes      |
+| `module.ts`           | `NotificationsModule`, written because no root module is authored (`#stackra/module`)        |
+| `wiring.ts`           | every binding, the integration and connection, the config class, the MailTransport drivers  |
+| `clients/commerce.ts` | commerce's client, `GetOrderQuery`, `CancelOrderAction`, `OrderPaid`, `OrderStatus` by name  |
 | `tables.ts`           | table and column constants per model, schema-qualified (`messages.messages`)                 |
 | `i18n.ts`             | the complete `messages` key tree, with loaders                                               |
 | `queues.ts`           | the worker queues this member may name (`delivery`, `inbox`)                                 |

@@ -7,8 +7,8 @@
  *           Product, gen puts the gate on the generated `catalogue.product.create@1`, and the web
  *           pricing page names the same right.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 11, 16 and 20), ADR 0213 d3 (flags are not
- *                     entitlements), ADR 0138 (as amended: the entitlement step)
+ * Governing contract: ADR 0294 (decisions 11, 16 and 20), ADR 0213 d3 (flags are not entitlements),
+ *                     ADR 0138 (as amended: the entitlement step)
  */
 import { Entitlement, EntitlementKind } from "@stackra/entitlements";
 import { Product } from "#modules/catalogue/models/product.model";

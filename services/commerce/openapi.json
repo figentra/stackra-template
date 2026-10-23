@@ -378,26 +378,30 @@
         }
       }
     },
-    "/orders/stats/today": {
+    "/orders/kpis": {
       "get": {
-        "operationId": "orders.order.stats_today@1",
+        "operationId": "orders.order.kpis@1",
         "x-stackra-permission": "orders.order.read",
         "x-stackra-risk": "L0",
+        "x-stackra-query": {
+          "$ref": "#/components/schemas/orders.OrderKpisInput"
+        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/orders.OrdersTodayOutput"
+                  "$ref": "#/components/schemas/orders.OrderKpisOutput"
                 }
               }
             }
           }
         },
         "x-stackra-cache": {
-          "ttl": "1m",
-          "invalidateOn": ["orders.order.paid.v1"]
+          "ttl": "5m",
+          "invalidateOn": ["orders.order.paid.v1"],
+          "per": "principal"
         }
       }
     },
@@ -500,6 +504,9 @@
         "operationId": "catalogue.product.list@1",
         "x-stackra-permission": "catalogue.product.read",
         "x-stackra-risk": "L0",
+        "x-stackra-query": {
+          "$ref": "#/components/schemas/catalogue.ListProductsInput"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -1041,6 +1048,37 @@
             "items": {
               "$ref": "#/components/schemas/catalogue.StorefrontCollection"
             }
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["sku"],
+              "properties": {
+                "sku": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "barcode": {
+                  "type": ["string", "null"],
+                  "maxLength": 14
+                },
+                "trackInventory": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          },
+          "seo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/catalogue.StorefrontSeo"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "x-stackra-generated-by": "ProductResource operations.create: the model's writable fields"
@@ -1074,6 +1112,57 @@
             "pattern": "^\\d{8,14}$"
           }
         }
+      },
+      "catalogue.ListProductsInput": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "enum": [20, 50, 100],
+            "default": 20
+          },
+          "sort": {
+            "type": "object",
+            "required": ["key", "direction"],
+            "properties": {
+              "key": {
+                "type": "string",
+                "enum": ["slug"]
+              },
+              "direction": {
+                "type": "string",
+                "enum": ["asc", "desc"]
+              }
+            },
+            "default": {
+              "key": "slug",
+              "direction": "asc"
+            }
+          },
+          "filter": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "status": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/components/schemas/catalogue.ProductStatus"
+                }
+              }
+            }
+          },
+          "search": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64
+          }
+        },
+        "x-stackra-table": "ProductResource",
+        "x-stackra-generated-by": "ProductResource operations.list: TableInput narrowed to the table"
       },
       "catalogue.ListStorefrontProductsInput": {
         "type": "object",
@@ -1890,14 +1979,79 @@
           },
           "limit": {
             "type": "integer",
-            "minimum": 1,
-            "maximum": 100,
+            "enum": [20, 50, 100],
             "default": 20
           },
-          "status": {
-            "$ref": "#/components/schemas/orders.OrderStatus"
+          "sort": {
+            "type": "object",
+            "required": ["key", "direction"],
+            "properties": {
+              "key": {
+                "type": "string",
+                "enum": ["createdAt", "totals.totalMinor", "paidAt"]
+              },
+              "direction": {
+                "type": "string",
+                "enum": ["asc", "desc"]
+              }
+            },
+            "default": {
+              "key": "createdAt",
+              "direction": "desc"
+            }
+          },
+          "filter": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "status": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/components/schemas/orders.OrderStatus"
+                }
+              },
+              "createdAt": {
+                "type": "object",
+                "required": ["from", "to"],
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "to": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "paidAt": {
+                "type": "object",
+                "required": ["from", "to"],
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "to": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "customerId": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 100,
+                "items": {
+                  "type": "string",
+                  "pattern": "^usr_[0-9A-Za-z]{26}$"
+                }
+              }
+            }
           }
-        }
+        },
+        "x-stackra-table": "OrderResource"
       },
       "orders.ListOrdersOutput": {
         "type": "object",
@@ -1946,6 +2100,25 @@
           },
           "reason": {
             "$ref": "#/components/schemas/orders.CancelReason"
+          }
+        }
+      },
+      "orders.OrderKpisInput": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/panel.TimeRangeInput"
+          }
+        ]
+      },
+      "orders.OrderKpisOutput": {
+        "type": "object",
+        "required": ["revenue", "orders"],
+        "properties": {
+          "revenue": {
+            "$ref": "#/components/schemas/panel.MoneyMetric"
+          },
+          "orders": {
+            "$ref": "#/components/schemas/panel.CountMetric"
           }
         }
       },
@@ -2025,6 +2198,27 @@
           }
         }
       },
+      "orders.OrderPlacedData": {
+        "type": "object",
+        "required": ["order", "url"],
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/orders.OrderView"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "orders.OrderReceiptData": {
+        "type": "object",
+        "required": ["order"],
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/orders.OrderView"
+          }
+        }
+      },
       "orders.OrderStatus": {
         "type": "string",
         "enum": ["pending_payment", "paid", "cancelled", "expired"]
@@ -2055,7 +2249,7 @@
       },
       "orders.OrderView": {
         "type": "object",
-        "required": ["id", "status", "totals", "lines", "createdAt"],
+        "required": ["id", "status", "customerId", "totals", "lines", "createdAt", "paidAt"],
         "properties": {
           "id": {
             "type": "string",
@@ -2063,6 +2257,10 @@
           },
           "status": {
             "$ref": "#/components/schemas/orders.OrderStatus"
+          },
+          "customerId": {
+            "type": "string",
+            "pattern": "^usr_[0-9A-Za-z]{26}$"
           },
           "totals": {
             "$ref": "#/components/schemas/orders.OrderTotals"
@@ -2075,6 +2273,10 @@
           },
           "createdAt": {
             "type": "string",
+            "format": "date-time"
+          },
+          "paidAt": {
+            "type": ["string", "null"],
             "format": "date-time"
           }
         }
@@ -2115,34 +2317,6 @@
           "sunset": "2028-03-01"
         }
       },
-      "orders.OrdersTodayInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "orders.OrdersTodayOutput": {
-        "type": "object",
-        "required": ["count", "revenueMinor", "currency", "hourly"],
-        "properties": {
-          "count": {
-            "type": "integer"
-          },
-          "revenueMinor": {
-            "type": "integer"
-          },
-          "currency": {
-            "type": "string",
-            "pattern": "^[A-Z]{3}$"
-          },
-          "hourly": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            },
-            "minItems": 24,
-            "maxItems": 24
-          }
-        }
-      },
       "orders.PricedLine": {
         "type": "object",
         "required": ["variantId", "quantity", "unitPriceMinor"],
@@ -2173,6 +2347,94 @@
             "minimum": 1
           }
         }
+      },
+      "panel.CountMetric": {
+        "type": "object",
+        "required": ["value", "previous", "series", "target"],
+        "properties": {
+          "value": {
+            "type": ["number", "null"]
+          },
+          "previous": {
+            "type": ["number", "null"]
+          },
+          "series": {
+            "type": ["array", "null"],
+            "maxItems": 744,
+            "items": {
+              "type": "number"
+            }
+          },
+          "target": {
+            "type": ["number", "null"]
+          }
+        },
+        "x-stackra-from": "@stackra/panel"
+      },
+      "panel.MoneyMetric": {
+        "type": "object",
+        "required": ["value", "previous", "series", "target", "currency"],
+        "properties": {
+          "value": {
+            "type": ["number", "null"]
+          },
+          "previous": {
+            "type": ["number", "null"]
+          },
+          "series": {
+            "type": ["array", "null"],
+            "maxItems": 744,
+            "items": {
+              "type": "number"
+            }
+          },
+          "target": {
+            "type": ["number", "null"]
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          }
+        },
+        "x-stackra-from": "@stackra/panel"
+      },
+      "panel.TimeRangeInput": {
+        "type": "object",
+        "properties": {
+          "range": {
+            "type": "string",
+            "enum": [
+              "today",
+              "yesterday",
+              "last_7_days",
+              "last_30_days",
+              "last_90_days",
+              "this_week",
+              "this_month",
+              "this_quarter",
+              "this_year",
+              "last_month",
+              "last_quarter",
+              "last_year",
+              "custom"
+            ],
+            "default": "last_30_days"
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "compare": {
+            "type": "string",
+            "enum": ["previous_period", "previous_year", "none"],
+            "default": "previous_period"
+          }
+        },
+        "x-stackra-from": "@stackra/panel"
       }
     },
     "responses": {

@@ -1,28 +1,24 @@
 /**
  * Stackra file contract:
- * Purpose: the index the revenue-today query reads on `orders.orders` (tenant, status, paid at), in
- *          its own migration because a concurrent build cannot run inside a transaction.
- * Boundary: written by `stackra db diff` after the model gained its `@Index` on `paidAt`, reviewed,
- *           then committed and never edited. `concurrently()` makes the compiler emit it outside a
- *           transaction, so writes continue while it builds on the live table; the timeouts are
- *           the compiler's defaults (lock 3 s, statement 30 s). Forward only.
+ * Purpose: `idx_orders_tenant_id_status_paid_at`, the index the KPI query's paid-revenue aggregates
+ *          and the paid-today view read.
+ * Boundary: a frozen snapshot written by `stackra db diff` after the model gained its `@Index`;
+ *           literals only. Online: the table already exists, so `concurrently()` is required and
+ *           the compiler emits it as its own non-transactional, single-statement step; writes
+ *           continue while it builds. No `down()`: gen derives the dev inverse (drop the index
+ *           concurrently).
  * Runtime: node
- * Governing contract: ADR 0294 (decision 13), ADR 0159 (as amended: concurrent index builds in
- *                     their own migration)
+ * Governing contract: ADR 0294 (decision 13, as amended by programming model v3.1, AGENTS.md),
+ *                     ADR 0159 (as amended: online operations)
  */
-import { type Blueprint, Migration } from "@stackra/database";
-import { Orders } from "#stackra/tables";
+import { type Blueprint, Migration, type SchemaBuilder } from "@stackra/database";
 
-/** `idx_orders_tenant_id_status_paid_at`, built without locking writes. */
+/** Built without locking writes. */
 export class OrdersPaidAtIndexMigration extends Migration {
-  /** Builds the index while writes continue; the build cannot share a transaction. */
-  up(schema: Blueprint): void {
-    schema.table(Orders, (t) => {
-      t.index([
-        Orders.columns.tenantId,
-        Orders.columns.status,
-        Orders.columns.paidAt,
-      ]).concurrently();
+  /** One concurrent index. */
+  up(schema: SchemaBuilder): void {
+    schema.table("orders", (t: Blueprint) => {
+      t.index(["tenant_id", "status", "paid_at"]).concurrently();
     });
   }
 }

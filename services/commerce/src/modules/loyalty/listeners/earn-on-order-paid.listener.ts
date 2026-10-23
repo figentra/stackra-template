@@ -3,8 +3,8 @@
  * Purpose: earns points when an order is paid.
  * Boundary: subscribed to `orders.order.paid.v1` by the type of the event parameter; queued on the
  *           default queue, once per event id, and idempotent on the order id (the ledger refuses a
- *           repeated reference). Calls `AccountService#earn`, the kit's one earn path: it enrols
- *           on the first earn, runs the `earnAdjust` chain (the tier multiplier), appends to the
+ *           repeated reference). Calls `AccountService#earn`, the kit's one earn path: it enrols on
+ *           the first earn, runs the `earnAdjust` chain (the tier multiplier), appends to the
  *           ledger and records `PointsEarned`, which promotes tiers (ADR 0265). The first paid
  *           order earns.
  * Runtime: node

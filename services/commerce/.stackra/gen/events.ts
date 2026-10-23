@@ -6,8 +6,8 @@
  * Boundary: data for the outbox, the dispatcher and the manifest. An integration event's wire name
  *           is `<module>.<name>.v<version>` and it leaves through the outbox; a domain event never
  *           leaves the service and is never versioned. A broadcast channel is derived from its
- *           audience: `tenant.{tenantId}.<module>` or `principal.{principalId}.<module>`. Model lifecycle events are domain events and are
- *           not listed.
+ *           audience: `tenant.{tenantId}.<module>` or `principal.{principalId}.<module>`. Model
+ *           lifecycle events are domain events and are not listed.
  * Runtime: isomorphic
  */
 

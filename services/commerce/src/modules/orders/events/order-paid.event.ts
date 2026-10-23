@@ -9,8 +9,8 @@
  *           data-free refresh on `tenant.{tenantId}.orders`, because the payload carries the paid
  *           total and the customer id; @stackra/realtime enforces it at delivery. The audience is
  *           the tenant, stated because the default is the principal: the refresh feeds the staff's
- *           revenue tile, a tenant-wide number, and names no person. `webhook: true`
- *           lets @stackra/webhooks deliver it, signed, to the endpoints a tenant registers.
+ *           revenue tile, a tenant-wide number, and names no person. `webhook: true` lets
+ *           @stackra/webhooks deliver it, signed, to the endpoints a tenant registers.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078, ADR 0225 (broadcast)
  */

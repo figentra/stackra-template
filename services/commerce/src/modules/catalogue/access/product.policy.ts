@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: record rules for products: only the tenant's own staff archive.
- * Boundary: a pure decision (allow, deny or abstain); no writes, no network. Each method is named
- *           after a verb of ProductPermissions and runs inside `handle` through
+ * Boundary: bound to Product by the type argument (`Policy<Product>`) and to ProductPermissions by
+ *           the shared stem. A pure decision (allow, deny or abstain); no writes, no network. Each
+ *           method is named after a verb of ProductPermissions and runs inside `handle` through
  *           `ctx.authorize(product)`, after the permission step passed. Gen requires the `archive`
  *           method because that verb is L2; the other verbs have no record rule.
  * Runtime: node
@@ -10,10 +11,10 @@
  */
 import { type Actor, Realm } from "@stackra/contracts";
 import { Decision, Policy } from "@stackra/iam";
-import { ProductPermissions } from "#modules/catalogue/access/product.permissions";
+import type { Product } from "#modules/catalogue/models/product.model";
 
 /** `deny` beats a granted permission; `abstain` leaves the permission as the whole answer. */
-export class ProductPolicy extends Policy(ProductPermissions) {
+export class ProductPolicy extends Policy<Product> {
   /** Staff abstain, so their role decides; a customer or a service principal is denied. */
   archive(actor: Actor): Decision {
     return actor.realm === Realm.Tenant ? Decision.Abstain : Decision.Deny;

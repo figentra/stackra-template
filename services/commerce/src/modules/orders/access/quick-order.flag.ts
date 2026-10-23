@@ -1,8 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: `orders.quick_order`: the release switch for the staff quick-order screen in the
- *          console and the create-order shortcut in mobile. On by default; a tenant may be switched
- *          off during a rollout, never charged for it.
+ * Purpose: `orders.quick_order`: the release switch for the staff quick-order screen in the console
+ *          and the create-order shortcut in mobile. On by default; a tenant may be switched off
+ *          during a rollout, never charged for it.
  * Boundary: a flag is a release switch with an expiry, never a commercial right (entitlements gate
  *           what a plan includes). The key is derived (`orders.quick_order`) and consumers read it
  *           as `Flags.orders.quick_order`; the label is the derived i18n key

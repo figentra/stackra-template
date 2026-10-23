@@ -2,10 +2,10 @@
  * Stackra file contract:
  * Purpose: `SendMessageInput`: the rendered parts of one mail, the recipient principal and the
  *          template key it was rendered from.
- * Boundary: a shape class in schemas/ rather than a companion of the action, because
- *           SendMessageAction takes it and MessageService#open reads it. Producers render through
- *           @stackra/notifications (the `notifications` Notifier driver) and queue it; the body
- *           travels on to the delivery job and is never stored (ADR 0134).
+ * Boundary: a shape class in schemas/, one declaration per file; SendMessageAction takes it and
+ *           MessageService#open reads it. Producers render through @stackra/notifications (the
+ *           `notifications` Notifier driver) and queue it; the body travels on to the delivery job
+ *           and is never stored (ADR 0134).
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 8 and 13), ADR 0134, ADR 0223
  */

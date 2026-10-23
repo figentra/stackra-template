@@ -10,18 +10,18 @@
 import { createTestingModule } from "@stackra/container/testing";
 import { renderMail } from "@stackra/notifications/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrderLineFactory } from "#modules/orders/database/factories/order-line.factory";
+import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrdersModule } from "#modules/orders/orders.module";
 import { OrderReceiptMail } from "#modules/orders/resources/order/order-receipt.mail";
-import type { OrderReceiptData } from "#modules/orders/resources/order/order-receipt.notification";
+import { OrderReceiptData } from "#modules/orders/schemas/order-receipt-data.schema";
 import { OrderService } from "#modules/orders/services/order.service";
 
 /** The receipt's data for an unsaved paid order with `count` lines. */
 async function receipt(count: number): Promise<OrderReceiptData> {
   const mod = await createTestingModule(OrdersModule).useDrivers("memory").compile();
   const order = OrderFactory.new().paid().has(OrderLineFactory.new().count(count)).make();
-  return { order: mod.get(OrderService).toView(order) };
+  return OrderReceiptData.create({ order: mod.get(OrderService).toView(order) });
 }
 
 /** Plural forms are where translations break first, so each category is rendered once. */

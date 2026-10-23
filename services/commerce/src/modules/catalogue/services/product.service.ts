@@ -3,11 +3,12 @@
  * Purpose: the product aggregate's service: the cached view, the one row-to-view mapping and the
  *          sellable check orders runs before pricing.
  * Boundary: exported to sibling modules (catalogue.module.ts); runs inside the caller's
- *           transaction. CrudService(Product) supplies the inherited reads and writes (`find`,
- *           `findOne`, `findOneOrFail`, `page`, `create`); ProductResource sets its `list`,
- *           `create` and `update` operations to `true`, so gen writes those three over them, and
- *           ProductLimitEntitlement gates the generated create because it counts Product. No
- *           transport and no permission checks: the pipeline does both.
+ *           transaction. `CrudService<Product>` (the model is the type argument) supplies the
+ *           inherited reads and writes (`find`, `findOne`, `findOneOrFail`, `page`, `create`);
+ *           ProductResource sets its `list`, `create` and `update` operations to `true`, so gen
+ *           writes those three over them, and ProductLimitEntitlement gates the generated create
+ *           because it counts Product. No transport and no permission checks: the pipeline does
+ *           both.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 16 and 17), ADR 0105 (as amended), ADR 0137 (cache)
  */
@@ -22,7 +23,7 @@ import { Product } from "#modules/catalogue/models/product.model";
 import { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 
 /** The in-process surface orders uses: `assertSellable` before a price is quoted. */
-export class ProductService extends CrudService(Product) {
+export class ProductService extends CrudService<Product> {
   /** @param cache - holds each view for ten minutes; ArchiveProductAction forgets it. */
   constructor(private readonly cache: Cache) {
     super();

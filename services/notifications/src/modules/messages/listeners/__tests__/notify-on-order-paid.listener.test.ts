@@ -16,20 +16,20 @@ import { actors } from "@stackra/iam/testing";
 import { SettingsReader } from "@stackra/settings";
 import { fakeSettings } from "@stackra/settings/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Commerce, CommerceClient } from "#stackra/clients";
-import { NotificationsModule } from "#src/notifications.module";
+import { CommerceClient, OrderPaid, OrderStatus } from "#stackra/clients/commerce";
+import { NotificationsModule } from "#stackra/module";
 import { InboxMessageCreated } from "#modules/messages/events/inbox-message-created.event";
 import { NotifyOnOrderPaidListener } from "#modules/messages/listeners/notify-on-order-paid.listener";
 import { MessagesSettings } from "#modules/messages/messages.settings";
 import { InboxMessage } from "#modules/messages/models/inbox-message.model";
 
-/** A booted service whose customer has `orderUpdates` as given, and the faked client. */
+/** A booted service whose customer has order updates as given, and the faked client. */
 async function setup(orderUpdates: boolean) {
   const customer = actors.customer();
   const commerce = fakeClient(CommerceClient, (fake) =>
     fake.order.get.returns(({ orderId }) => ({
       id: orderId,
-      status: Commerce.OrderStatus.Paid,
+      status: OrderStatus.Paid,
       totals: { currency: "USD", subtotalMinor: 2_000, adjustments: [], totalMinor: 2_000 },
       lines: [{ variantId: "var_00000000000000000000000001", quantity: 1, unitPriceMinor: 2_000 }],
       createdAt: new Date("2026-10-21T09:00:00Z"),
@@ -38,7 +38,10 @@ async function setup(orderUpdates: boolean) {
   const app = await createTestingModule(NotificationsModule)
     .useDrivers("memory")
     .override(CommerceClient, commerce)
-    .override(SettingsReader, fakeSettings([[MessagesSettings, { orderUpdates }]]))
+    .override(
+      SettingsReader,
+      fakeSettings([[MessagesSettings, { orders: { updates: orderUpdates } }]]),
+    )
     .compile();
   // commerce's ids: this service has no factory for another service's records
   const paid = {
@@ -57,8 +60,8 @@ describe(NotifyOnOrderPaidListener, () => {
   it("adds one inbox entry per paid order", async () => {
     const { app, commerce, paid } = await setup(true);
 
-    await deliverRemoteEvent(Commerce.OrderPaid, paid, { id: "evt_1" });
-    await deliverRemoteEvent(Commerce.OrderPaid, paid, { id: "evt_1" }); // redelivery
+    await deliverRemoteEvent(OrderPaid, paid, { id: "evt_1" });
+    await deliverRemoteEvent(OrderPaid, paid, { id: "evt_1" }); // redelivery
     await drainOutbox();
 
     expect(commerce.called(commerce.order.get)).toHaveLength(1);
@@ -71,7 +74,7 @@ describe(NotifyOnOrderPaidListener, () => {
   it("respects the customer's preference", async () => {
     const { app, commerce, paid } = await setup(false);
 
-    await deliverRemoteEvent(Commerce.OrderPaid, paid, { id: "evt_2" });
+    await deliverRemoteEvent(OrderPaid, paid, { id: "evt_2" });
     await drainOutbox();
 
     expect(commerce.called(commerce.order.get)).toHaveLength(0);

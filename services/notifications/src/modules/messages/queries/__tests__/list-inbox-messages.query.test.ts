@@ -10,7 +10,7 @@ import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { NotificationsModule } from "#src/notifications.module";
+import { NotificationsModule } from "#stackra/module";
 import { InboxMessageFactory } from "#modules/messages/database/factories/inbox-message.factory";
 import { ListInboxMessagesQuery } from "#modules/messages/queries/list-inbox-messages.query";
 

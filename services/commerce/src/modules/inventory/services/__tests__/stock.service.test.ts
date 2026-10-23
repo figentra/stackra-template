@@ -13,8 +13,8 @@ import { refusal } from "@stackra/errors/testing";
 import { SettingsReader } from "@stackra/settings";
 import { fakeSettings } from "@stackra/settings/testing";
 import { beforeEach, describe, expect, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
 import { StockLevelFactory } from "#modules/inventory/database/factories/stock-level.factory";
+import { InsufficientStockError } from "#modules/inventory/errors/insufficient-stock.error";
 import { StockLow } from "#modules/inventory/events/stock-low.event";
 import { InventoryModule } from "#modules/inventory/inventory.module";
 import { InventorySettings } from "#modules/inventory/inventory.settings";
@@ -47,7 +47,7 @@ describe(StockService, () => {
   /** Eleven of ten: the refusal must name the variant and leave the level untouched. */
   it("refuses to reserve more than is available", async () => {
     await expect(stock.reserve([{ variantId, quantity: 11 }])).rejects.toRefuseWith(
-      refusal(Refusals.inventory.insufficient_stock),
+      refusal(InsufficientStockError),
     );
     expect(await reserved()).toBe(0);
   });

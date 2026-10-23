@@ -10,11 +10,11 @@
 import assert from "node:assert/strict";
 import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
+import { ForbiddenError } from "@stackra/errors";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 import { ArchiveProductAction } from "#modules/catalogue/actions/archive-product.action";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
@@ -54,7 +54,7 @@ describe(ArchiveProductAction, () => {
 
     const result = await run(ArchiveProductAction, { productId }, { as: customer });
 
-    expect(result).toRefuseWith(refusal(Refusals.core.forbidden));
+    expect(result).toRefuseWith(refusal(ForbiddenError));
     expect(await run(GetProductQuery, { productId }, { as: customer })).toMatchObject({
       ok: true,
       output: { status: ProductStatus.Active },

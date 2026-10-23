@@ -2,9 +2,9 @@
  * Stackra file contract:
  * Purpose: commerce's driver for the kit's LoyaltyMembers port: a customer with a paid order is a
  *          member.
- * Boundary: the package declares the port; this class implements it and is named by its file
- *           prefix (`commerce`). It is the port's only candidate, so no config field selects it and
- *           no host config overrides it (ADR 0263). The package never imports this file; gen writes
+ * Boundary: the package declares the port; this class implements it and is named by its file prefix
+ *           (`commerce`). It is the port's only candidate, so no config field selects it and no
+ *           host config overrides it (ADR 0263). The package never imports this file; gen writes
  *           the binding.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 16 and 17), ADR 0260 d7 (package port, service

@@ -10,7 +10,7 @@ import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { ListOrdersQuery } from "#modules/orders/queries/list-orders.query";
 

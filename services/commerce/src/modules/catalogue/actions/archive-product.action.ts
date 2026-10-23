@@ -3,13 +3,16 @@
  * Purpose: `catalogue.product.archive@1`: take a product off sale; an idempotent state transition.
  * Boundary: one aggregate, so it runs inline in one transaction. The permission is derived from the
  *           key (`ProductPermissions.archive`, L2) and ProductPolicy#archive refines it through
- *           `ctx.authorize(product)`; the endpoint is derived (`PUT /products/:productId/archive`).
- *           The transition records `product.archived`, which leaves through the outbox at flush.
- *           The cached view is forgotten after commit, so a concurrent read never caches the view
- *           from before the archive again.
+ *           `ctx.authorize(product)`. Surfaces: the endpoint is derived
+ *           (`PUT /products/:productId/archive`); `tool: true` exposes the MCP tool
+ *           `catalogue_product_archive` (L2, so an agent's call waits for a person's approval);
+ *           `intent: true` takes its phrases from `catalogue.json`
+ *           (`actions.product.archive.intents`). The transition records `product.archived`, which
+ *           leaves through the outbox at flush. The cached view is forgotten after commit, so a
+ *           concurrent read never caches the view from before the archive again.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 2, 3, 16, 17 and 21), ADR 0098, ADR 0136, ADR 0137
- *                     (cache), ADR 0139
+ * Governing contract: ADR 0294 (decisions 2, 3, 16, 17 and 21, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0098, ADR 0136, ADR 0137 (cache), ADR 0139
  */
 import {
   Action,
@@ -18,33 +21,26 @@ import {
   IdMinting,
   OfflineMode,
   OfflinePrecondition,
-  UxAfter,
 } from "@stackra/actions";
 import { type Cache, CacheKey } from "@stackra/cache";
-import { ActorKind, type PublicId, Tone } from "@stackra/contracts";
-import { Schema } from "@stackra/validation";
+import { ActorKind } from "@stackra/contracts";
 import { Product } from "#modules/catalogue/models/product.model";
 import type { ProductStateMachine } from "#modules/catalogue/models/product.state-machine";
+import type { ArchiveProductInput } from "#modules/catalogue/schemas/archive-product-input.schema";
 import type { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 import type { ProductService } from "#modules/catalogue/services/product.service";
-
-/** The product to archive, by public id. */
-export class ArchiveProductInput extends Schema {
-  /** The product's public id. */
-  productId!: PublicId<"prd">;
-}
 
 /**
  * Moves an active product to archived. Repeating the call on an archived product returns the same
  * view and records nothing, which is what makes PUT the right method. Offline clients may queue it
  * for 24 hours; the version check decides a conflict on replay. The console asks for confirmation
- * first.
+ * first, because the permission is L2.
  */
 export class ArchiveProductAction extends Action({
   key: "product.archive",
   actors: [ActorKind.User, ActorKind.Agent],
   tool: true,
-  intents: ["archive the summer dress", "stop selling this product"],
+  intent: true,
   offline: {
     mode: OfflineMode.Queue,
     idMinting: IdMinting.Server,
@@ -55,10 +51,6 @@ export class ArchiveProductAction extends Action({
       ConflictResolution.ClientRetry,
       ConflictResolution.Manual,
     ],
-  },
-  ux: {
-    confirm: Tone.Warning,
-    after: [UxAfter.Refresh],
   },
 }) {
   /**

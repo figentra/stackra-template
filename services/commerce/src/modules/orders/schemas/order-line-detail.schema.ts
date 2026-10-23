@@ -3,7 +3,7 @@
  * Purpose: `OrderLineDetail`: one packing-slip line: the priced line plus the variant's SKU and
  *          whether it still tracks inventory, read from catalogue through the line's link.
  * Boundary: a shape class; the element type of ListOrderLinesOutput. A nested element is a named
- *           class in schemas/, because an action or query file holds only its Input and Output.
+ *           class in schemas/, one declaration per file.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 2, 4, 8 and 28), ADR 0104
  */

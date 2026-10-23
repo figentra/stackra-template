@@ -14,17 +14,17 @@ import "@acme/access-log/testing"; // registers toHaveLoggedAccess
 import { run } from "@stackra/actions/testing";
 import { fakeClient } from "@stackra/clients/testing";
 import { createTestingModule } from "@stackra/container/testing";
+import { ForbiddenError } from "@stackra/errors";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { PaymentsClient } from "#stackra/clients";
-import { Refusals } from "#stackra/manifest";
-import { CommerceModule } from "#src/commerce.module";
+import { PaymentsClient } from "#stackra/clients/payments";
+import { CommerceModule } from "#stackra/module";
 import { StockLevelFactory } from "#modules/inventory/database/factories/stock-level.factory";
 import { StockLevel } from "#modules/inventory/models/stock-level.model";
 import { CancelOrderAction } from "#modules/orders/actions/cancel-order.action";
-import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrderLineFactory } from "#modules/orders/database/factories/order-line.factory";
+import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 import { OrderCancelled } from "#modules/orders/events/order-cancelled.event";
 
@@ -51,7 +51,7 @@ describe(CancelOrderAction, () => {
       { as: actors.customer(stranger.customerId) },
     );
 
-    expect(result).toRefuseWith(refusal(Refusals.core.forbidden));
+    expect(result).toRefuseWith(refusal(ForbiddenError));
   });
 
   /** The happy path: the reserved unit comes back, one `order.cancelled` with reason `customer`. */
@@ -108,8 +108,8 @@ describe(CancelOrderAction, () => {
       { as: relay(order.customerId) },
     );
 
-    expect(bare).toRefuseWith(refusal(Refusals.core.forbidden));
-    expect(wrong).toRefuseWith(refusal(Refusals.core.forbidden));
+    expect(bare).toRefuseWith(refusal(ForbiddenError));
+    expect(wrong).toRefuseWith(refusal(ForbiddenError));
     expect(owner).toRecord(OrderCancelled, { orderId: order.id, reason: CancelReason.Customer });
     await expect(app.get(AccessLogSink)).toHaveLoggedAccess({
       target: `${CancelOrderAction.name}.handle`,

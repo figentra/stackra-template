@@ -6,8 +6,7 @@
  *           refuses a repeated reference). Reads the stored order through orders' exported
  *           OrderService. Ids cross into the kit as `MemberId`.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 4, 16 and 24), ADR 0078 d4 (listener semantics),
- *                     ADR 0265
+ * Governing contract: ADR 0294 (decisions 4, 16 and 24), ADR 0078 d4 (listener semantics), ADR 0265
  */
 import { type LoyaltyService, memberId } from "@acme/loyalty-kit";
 import { Listener, type ListenerContext } from "@stackra/events";

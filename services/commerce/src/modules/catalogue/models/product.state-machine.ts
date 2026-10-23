@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: governs `Product.status`: draft → active → archived, and the event archiving records.
- * Boundary: each method is a transition. The decorator checks `from`, runs the body in the
- *           caller's unit of work, writes `to`, and otherwise refuses with
+ * Boundary: bound to its model by the type argument (`StateMachine<Product>`); `field` names the
+ *           state column. Each method is a transition. The decorator checks `from`, runs the body
+ *           in the caller's unit of work, writes `to`, and otherwise refuses with
  *           `transition_not_allowed`. Recorded events reach the outbox when the unit of work
  *           flushes, so a rolled-back archive emits nothing. Inherited: `can(product, "archive")`
  *           and `available(product)`. No other code writes `status`.
@@ -12,10 +13,10 @@
 import { StateMachine, Transition } from "@stackra/state-machine";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { ProductArchived } from "#modules/catalogue/events/product-archived.event";
-import { Product } from "#modules/catalogue/models/product.model";
+import type { Product } from "#modules/catalogue/models/product.model";
 
 /** `active` is the only sellable state; `archived` is final. */
-export class ProductStateMachine extends StateMachine(Product, { field: "status" }) {
+export class ProductStateMachine extends StateMachine<Product>({ field: "status" }) {
   /** Puts a draft on sale; the decorator writes the status, and nothing is recorded. */
   @Transition({
     from: ProductStatus.Draft,

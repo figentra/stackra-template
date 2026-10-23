@@ -14,23 +14,13 @@
  *                     (failed job and dead letter)
  */
 import { Action, type ActionContext } from "@stackra/actions";
-import { ActorKind, type PublicId } from "@stackra/contracts";
+import { ActorKind } from "@stackra/contracts";
 import { Backoff } from "@stackra/queue";
-import { Schema } from "@stackra/validation";
 import { Queues } from "#stackra/queues";
 import { MessagePermissions } from "#modules/messages/access/message.permissions";
-import type { MessageStatus } from "#modules/messages/enums/message-status.enum";
 import type { DeliverMessageInput } from "#modules/messages/schemas/deliver-message-input.schema";
+import { DeliverMessageOutput } from "#modules/messages/schemas/deliver-message-output.schema";
 import type { MessageService } from "#modules/messages/services/message.service";
-
-/** The result of one delivery attempt that succeeded. */
-export class DeliverMessageOutput extends Schema {
-  /** The message's public id. */
-  messageId!: PublicId<"msg">;
-
-  /** The status it ended in; always `sent` on a successful run. */
-  status!: MessageStatus;
-}
 
 /** Dispatched by SendMessageAction after commit; idempotent, so a redrive never mails twice. */
 export class DeliverMessageAction extends Action({
@@ -52,7 +42,8 @@ export class DeliverMessageAction extends Action({
 
   /**
    * Sends through the transport; the pipeline clock stamps `sentAt`.
-   * @throws MailProviderUnavailableError (retryable), so the queue retries, then dead-letters.
+   * @throws ProviderUnavailableError (retryable, from the Resend integration's managed client),
+   *         so the queue retries, then dead-letters.
    */
   async handle(input: DeliverMessageInput, ctx: ActionContext): Promise<DeliverMessageOutput> {
     const message = await this.messages.deliver(input, ctx.now());

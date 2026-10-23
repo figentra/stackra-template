@@ -1,25 +1,32 @@
 /**
  * Stackra file contract:
- * Purpose: where other modules may change order totals or refuse a placement.
- * Boundary: each property is one point, typed by `transform` (returns the changed value) or
- *           `verify` (refuses by throwing a Refusal); the extra tuple types are the read-only
- *           arguments every implementer also receives. OrderPricingService injects this class and
- *           calls each point as a method, so every call site is greppable. An implementer is an
- *           `Extension(OrderExtensionPoint, { order })` class with one method named after one
- *           point. No `around`, no replacement. Point keys are `orders.adjustTotals` and
- *           `orders.verifyPlacement`.
+ * Purpose: the seams orders publishes for other modules: change an order's totals while it is
+ *          priced, or refuse a placement before anything is reserved.
+ * Boundary: an extension POINT is owned by the module that calls it and is part of that module's
+ *           contract, like an event: orders declares it, injects it and calls each slot as a method
+ *           (OrderPricingService), so every call site is greppable. An EXTENSION is one class in
+ *           another module that plugs into exactly one slot
+ *           (`extends Extension<OrderExtensionPoint["adjustTotals"]>`, see
+ *           ../../loyalty/extensions); orders never imports its extensions. Slots use Magento's
+ *           words: `after` is a value pipeline (each extension receives the previous result and
+ *           returns the adjusted value, ascending `order`); `before` runs ahead of the owner's step
+ *           and may refuse by throwing a Refusal or return replacement arguments of the same type.
+ *           Magento's `around` is not a slot: it is an `Interceptor` on a whole action call. Slot
+ *           keys are `orders.adjustTotals` and `orders.verifyPlacement`; a renamed slot needs
+ *           `@Renamed`, like any identity.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 13, 16 and 23), ADR 0265 (transform and verify)
+ * Governing contract: ADR 0294 (decisions 13, 16 and 23, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0265 (extension points; no method-level around)
  */
 import { ExtensionPoint } from "@stackra/actions";
 import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 import type { OrderTotals } from "#modules/orders/schemas/order-totals.schema";
 
-/** Part of the module's contract: a renamed point needs `@Renamed`, like any identity. */
+/** The two slots orders calls while it prices and verifies a draft. */
 export class OrderExtensionPoint extends ExtensionPoint {
-  /** Runs while pricing a draft, in implementer `order`; each returns the totals it adjusted. */
-  readonly adjustTotals = ExtensionPoint.transform<OrderTotals, [draft: OrderDraft]>();
+  /** After the subtotal is priced; each extension returns the totals it adjusted, in `order`. */
+  readonly adjustTotals = ExtensionPoint.after<OrderTotals, [draft: OrderDraft]>();
 
-  /** Runs before stock or payment is touched; an implementer refuses by throwing a Refusal. */
-  readonly verifyPlacement = ExtensionPoint.verify<[draft: OrderDraft]>();
+  /** Before stock or payment is touched; an extension refuses by throwing a Refusal. */
+  readonly verifyPlacement = ExtensionPoint.before<[draft: OrderDraft]>();
 }

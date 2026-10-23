@@ -14,22 +14,9 @@
 import { Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, SortDirection } from "@stackra/contracts";
 import type { Repository } from "@stackra/database";
-import { CursorInput, Int, Page } from "@stackra/validation";
 import type { InboxMessage } from "#modules/messages/models/inbox-message.model";
-import { InboxMessageView } from "#modules/messages/schemas/inbox-message-view.schema";
-
-/** `cursor` and `limit` (1–100, default 20) come from CursorInput; the principal is the actor. */
-export class ListInboxMessagesInput extends CursorInput {
-  /** Only entries not read yet. */
-  unreadOnly = false;
-}
-
-/** One page: `items`, `nextCursor` (absent on the last page), `hasMore`, and the unread count. */
-export class ListInboxMessagesOutput extends Page.of(InboxMessageView) {
-  /** Unread entries in the whole inbox, not the page, so a client never sums pages to badge it. */
-  @Int({ min: 0 })
-  unread!: number;
-}
+import type { ListInboxMessagesInput } from "#modules/messages/schemas/list-inbox-messages-input.schema";
+import { ListInboxMessagesOutput } from "#modules/messages/schemas/list-inbox-messages-output.schema";
 
 /** Behind the console bell and the mobile inbox tab. */
 export class ListInboxMessagesQuery extends Query({

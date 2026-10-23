@@ -19,9 +19,8 @@ import { drainOutbox } from "@stackra/events/testing";
 import { actors } from "@stackra/iam/testing";
 import { beforeAll, describe, expect, freezeClock, freezeIds, it } from "@stackra/testing";
 import { StepStatus, WorkflowRunStatus } from "@stackra/workflow";
-import { PaymentsClient } from "#stackra/clients";
-import { Refusals } from "#stackra/manifest";
-import { CommerceModule } from "#src/commerce.module";
+import { CardDeclinedError, PaymentsClient } from "#stackra/clients/payments";
+import { CommerceModule } from "#stackra/module";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
 import { StockLevelFactory } from "#modules/inventory/database/factories/stock-level.factory";
@@ -45,7 +44,7 @@ describe(CreateOrderWorkflow, () => {
   /** Steps complete up to the payment, which is refused; the engine undoes two steps in reverse. */
   it("undoes the earlier steps in reverse when payment authorization fails", async () => {
     const payments = fakeClient(PaymentsClient, (fake) =>
-      fake.payment.authorize.throws(refusal(Refusals.payments.card_declined)),
+      fake.payment.authorize.throws(refusal(CardDeclinedError)),
     );
     const app = await createTestingModule(CommerceModule)
       .useDrivers({
@@ -66,7 +65,7 @@ describe(CreateOrderWorkflow, () => {
 
     const result = await run(CreateOrderAction, input, { as: actors.customer() });
 
-    expect(result).toRefuseWith(refusal(Refusals.payments.card_declined));
+    expect(result).toRefuseWith(refusal(CardDeclinedError));
     const runRecord = await app.workflows.last(CreateOrderWorkflow);
     expect(runRecord.status).toBe(WorkflowRunStatus.Compensated);
     expect(runRecord.steps.map((step) => [step.name, step.status])).toEqual([

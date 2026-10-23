@@ -13,7 +13,7 @@ import { drainOutbox } from "@stackra/events/testing";
 import { Notifier, Recipient } from "@stackra/notifications";
 import type { MemoryNotifier } from "@stackra/notifications/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrderReceiptNotification } from "#modules/orders/resources/order/order-receipt.notification";
 import { OrderService } from "#modules/orders/services/order.service";

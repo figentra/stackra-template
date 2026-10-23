@@ -1,24 +1,25 @@
 /**
  * Stackra file contract:
- * Purpose: the per-tenant unique index of `catalogue.variants.barcode`, in its own migration
- *          because a concurrent build cannot run inside a transaction.
- * Boundary: written by `stackra db diff` after the model gained its `@Index` on `barcode`,
- *           reviewed, then committed and never edited. `concurrently()` makes the compiler emit it
- *           outside a transaction, so writes continue while it builds on the live table. Forward
- *           only.
+ * Purpose: `idx_variants_tenant_id_barcode`, the per-tenant unique index of
+ *          `catalogue.variants.barcode`.
+ * Boundary: a frozen snapshot written by `stackra db diff` after the model gained its `@Index`;
+ *           literals only. Online: the table already exists, so `concurrently()` is required and
+ *           the compiler emits a single-statement, non-transactional step; writes continue while it
+ *           builds. A unique index, never an `ADD UNIQUE` constraint (a banned rewrite). Nulls
+ *           never collide in it, so existing rows stay valid. No `down()`: gen derives the dev
+ *           inverse.
  * Runtime: node
- * Governing contract: ADR 0294 (decision 13), ADR 0159 (as amended: concurrent index builds in
- *                     their own migration)
+ * Governing contract: ADR 0294 (decision 13, as amended by programming model v3.1, AGENTS.md),
+ *                     ADR 0159 (as amended: online operations)
  */
-import { type Blueprint, Migration } from "@stackra/database";
-import { Variants } from "#stackra/tables";
+import { type Blueprint, Migration, type SchemaBuilder } from "@stackra/database";
 
-/** `idx_variants_tenant_id_barcode`; nulls never collide in it, so existing rows stay valid. */
+/** Built without locking writes. */
 export class VariantsBarcodeIndexMigration extends Migration {
-  /** Builds the unique index while writes continue; the build cannot share a transaction. */
-  up(schema: Blueprint): void {
-    schema.table(Variants, (t) => {
-      t.unique([Variants.columns.tenantId, Variants.columns.barcode]).concurrently();
+  /** One concurrent unique index. */
+  up(schema: SchemaBuilder): void {
+    schema.table("variants", (t: Blueprint) => {
+      t.unique(["tenant_id", "barcode"]).concurrently();
     });
   }
 }

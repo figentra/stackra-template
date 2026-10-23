@@ -12,26 +12,10 @@
 import { Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
 import type { SettingsReader } from "@stackra/settings";
-import { Int, Schema } from "@stackra/validation";
 import { InventorySettings } from "#modules/inventory/inventory.settings";
-import type { LowStockItem } from "#modules/inventory/schemas/low-stock-item.schema";
+import type { ListLowStockInput } from "#modules/inventory/schemas/list-low-stock-input.schema";
+import { ListLowStockOutput } from "#modules/inventory/schemas/list-low-stock-output.schema";
 import type { StockService } from "#modules/inventory/services/stock.service";
-
-/** How many levels to return, lowest stock first. */
-export class ListLowStockInput extends Schema {
-  /** Levels per call; the widget asks for 5. */
-  @Int({
-    min: 1,
-    max: 100,
-  })
-  limit = 20;
-}
-
-/** The levels, lowest stock first. */
-export class ListLowStockOutput extends Schema {
-  /** Every level at or below the threshold, up to `limit`. */
-  items!: LowStockItem[];
-}
 
 /** The query behind the low-stock widget. */
 export class ListLowStockQuery extends Query({
@@ -52,7 +36,7 @@ export class ListLowStockQuery extends Query({
 
   /** Reads the tenant's threshold, then the levels at or below it, lowest first. */
   async handle(input: ListLowStockInput, _ctx: QueryContext): Promise<ListLowStockOutput> {
-    const { lowStockThreshold } = await this.settings.for(InventorySettings);
+    const { lowStockThreshold } = await this.settings.get(InventorySettings);
     const levels = await this.stock.findAtOrBelow(lowStockThreshold, input.limit);
     return ListLowStockOutput.create({
       items: levels.map((level) => ({

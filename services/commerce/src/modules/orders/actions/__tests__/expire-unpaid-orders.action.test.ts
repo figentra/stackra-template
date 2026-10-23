@@ -13,7 +13,7 @@ import { actors } from "@stackra/iam/testing";
 import { SettingsReader } from "@stackra/settings";
 import { fakeSettings } from "@stackra/settings/testing";
 import { describe, expect, freezeClock, it } from "@stackra/testing";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 import { ExpireUnpaidOrdersAction } from "#modules/orders/actions/expire-unpaid-orders.action";
 import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
@@ -26,7 +26,7 @@ describe(ExpireUnpaidOrdersAction, () => {
   it("expires only stale pending orders", async () => {
     freezeClock("2026-10-21T10:00:00Z");
     const settings = fakeSettings([
-      [OrdersSettings, { autoCancelAfterMinutes: 30, customersMayCancel: true }],
+      [OrdersSettings, { cancellation: { autoCancelAfterMinutes: 30, customersMayCancel: true } }],
     ]);
     await createTestingModule(CommerceModule)
       .useDrivers("memory")

@@ -14,7 +14,7 @@ import { createTestingModule } from "@stackra/container/testing";
 import { drainOutbox } from "@stackra/events/testing";
 import { Money } from "@stackra/money";
 import { describe, expect, it } from "@stackra/testing";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 import { EarnOnOrderPaidListener } from "#modules/loyalty/listeners/earn-on-order-paid.listener";
 import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrderService } from "#modules/orders/services/order.service";

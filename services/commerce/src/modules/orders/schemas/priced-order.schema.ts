@@ -2,9 +2,8 @@
  * Stackra file contract:
  * Purpose: `PricedOrder`: the priced draft and its totals, the result of CreateOrderWorkflow's
  *          `price` step that the later steps read.
- * Boundary: a shape class, because a step result is stored with the run and read back on resume;
- *           a named class in schemas/, because a workflow file holds only the workflow and its
- *           Input and Output.
+ * Boundary: a shape class, because a step result is stored with the run and read back on resume; a
+ *           named class in schemas/, one declaration per file.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 2, 8 and 18), ADR 0152 (durable runs)
  */

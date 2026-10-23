@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: proves marking read stamps one's own entry once, and that another principal's entry is
- *          a not-found refusal.
+ * Purpose: proves marking read stamps one's own entry once, and that another principal's entry is a
+ *          not-found refusal.
  * Boundary: unit tier through the pipeline, memory drivers, rows from the factory, clock frozen.
  * Runtime: node
  * Governing contract: ADR 0098, ADR 0140, ADR 0022
@@ -11,10 +11,10 @@ import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, freezeClock, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
-import { NotificationsModule } from "#src/notifications.module";
+import { NotificationsModule } from "#stackra/module";
 import { MarkInboxMessageReadAction } from "#modules/messages/actions/mark-inbox-message-read.action";
 import { InboxMessageFactory } from "#modules/messages/database/factories/inbox-message.factory";
+import { InboxMessageNotFoundError } from "#modules/messages/errors/inbox-message-not-found.error";
 import { InboxMessage } from "#modules/messages/models/inbox-message.model";
 
 /** Guards the inbox, where one customer must never touch another's entries. */
@@ -45,7 +45,7 @@ describe(MarkInboxMessageReadAction, () => {
       { as: actors.customer() },
     );
 
-    expect(result).toRefuseWith(refusal(Refusals.messages.inbox_message_not_found));
+    expect(result).toRefuseWith(refusal(InboxMessageNotFoundError));
     const [row] = await app.repository(InboxMessage).find({ id: entry.id });
     expect(row?.readAt).toBeNull();
   });

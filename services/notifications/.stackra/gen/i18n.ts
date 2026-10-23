@@ -15,20 +15,36 @@ export type { I18nKey };
 /** `I18n.<namespace>.<path>`; `_` holds the leaves of a branch that also has children. */
 export const I18n = keys({
   messages: {
-    permissions: { message: ["send", "read"], inbox_message: ["read", "update"] },
+    permissions: {
+      message: ["send", "read"],
+      inbox_message: ["read", "update"],
+      resend: ["read", "connect", "disconnect"],
+    },
     enums: {
       message_status: ["queued", "sent", "failed"],
       inbox_message_kind: ["order_paid"],
-      mail_auth_result: ["pass", "fail", "soft_fail", "none"],
+      mail_auth_result: ["pass", "fail", "gray", "processing_failed", "unknown"],
     },
-    errors: {
-      mail_provider_unavailable: ["message"],
-      inbox_message_not_found: ["message"],
-    },
+    errors: { inbox_message_not_found: ["message"] },
     settings: {
-      messages: ["title", "order_updates", "order_receipts", "product_updates", "marketing"],
+      _: ["title"],
+      orders: { _: ["title"], updates: ["label", "help"], receipts: ["label", "help"] },
+      promotions: {
+        _: ["title"],
+        product_updates: ["label", "help"],
+        marketing: ["label", "help"],
+      },
     },
-    integrations: { resend: ["label"] },
+    integrations: { resend: ["label", "description"] },
+    connections: {
+      resend: {
+        fields: {
+          api_key: ["label", "help"],
+          from_address: ["label", "help"],
+          webhook_secret: ["label", "help"],
+        },
+      },
+    },
   },
 });
 

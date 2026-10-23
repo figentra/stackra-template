@@ -6,8 +6,10 @@
  * Boundary: each is a real action or query registered like a hand-written one: its key is
  *           `<module>.<model>.<operation>@1`, its permission the model's same-named verb (so its
  *           risk is the permission's, ADR 0132), its endpoint the convention's, and it calls the
- *           method CrudService(Model) inherits. A limit entitlement that counts the model gates its
- *           create. OrderResource sets no operation to `true`, so nothing is written for orders.
+ *           method `CrudService<Model>` inherits; the list applies the resource table's closed
+ *           TableInput through `CrudService.table`. A limit entitlement that counts the model gates
+ *           its create. OrderResource sets no operation to `true`, so nothing is written for
+ *           orders.
  * Runtime: node
  */
 import { operationAction, operationQuery } from "@stackra/database";
@@ -18,8 +20,8 @@ import { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 import { ProductService } from "#modules/catalogue/services/product.service";
 
 /**
- * From `Resource(Product, { operations: { list: true, get: GetProductQuery, create: true, update:
- * true } })`; `get` names a hand-written query, so gen writes no operation for it.
+ * From `Resource<Product, ProductView>({ operations: { list: true, get: GetProductQuery, create:
+ * true, update: true } })`; `get` names a hand-written query, so gen writes no operation for it.
  */
 export const ProductOperations = {
   /** `catalogue.product.create@1`, `POST /products`; input from the model's writable fields. */
@@ -36,8 +38,9 @@ export const ProductOperations = {
     output: ProductView,
   }),
   /**
-   * `catalogue.product.list@1`, `GET /products`; cursor-paginated (`catalogue.ProductPage`),
-   * filterable by status.
+   * `catalogue.product.list@1`, `GET /products`; its input is the table contract ProductResource
+   * declares (`catalogue.ListProductsInput`: sort by slug, filter by status, search from
+   * `@Searchable`), its output cursor pages (`catalogue.ProductPage`).
    */
   List: operationQuery(Product, "list", {
     service: ProductService,

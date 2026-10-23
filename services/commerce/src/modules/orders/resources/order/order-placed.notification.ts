@@ -6,6 +6,7 @@
  *           The channels are the methods present (mail only); the mail template is
  *           order-placed.mail.tsx, bound by name. Key `orders.order_placed`; it appears on the
  *           order's View page in the Messages tab. Transactional, so preferences cannot mute it.
+ *           The rendered data is OrderPlacedData in schemas/ (one declaration per file).
  *           @stackra/notifications delivers through the driver runway selects; the notifications
  *           service owns delivery, preferences and the log, never the template.
  * Runtime: node
@@ -20,17 +21,8 @@ import {
 import type { CommerceConfig } from "#config/commerce.config";
 import { I18n } from "#stackra/i18n";
 import type { OrderPlaced } from "#modules/orders/events/order-placed.event";
-import type { OrderView } from "#modules/orders/schemas/order-view.schema";
+import { OrderPlacedData } from "#modules/orders/schemas/order-placed-data.schema";
 import type { OrderService } from "#modules/orders/services/order.service";
-
-/** What the mail renders. */
-export interface OrderPlacedData {
-  /** The pending order as stored. */
-  readonly order: OrderView;
-
-  /** The absolute storefront link to the order. */
-  readonly url: string;
-}
 
 /** One confirmation per placed order. */
 export class OrderPlacedNotification extends Notification({
@@ -53,7 +45,8 @@ export class OrderPlacedNotification extends Notification({
   async data(event: OrderPlaced): Promise<OrderPlacedData> {
     const row = await this.orders.findOneOrFail({ id: event.orderId }, { populate: ["lines"] });
     const order = this.orders.toView(row);
-    return { order, url: new URL(`orders/${order.id}`, this.config.storefrontBaseUrl).href };
+    const url = new URL(`orders/${order.id}`, this.config.storefrontBaseUrl).href;
+    return OrderPlacedData.create({ order, url });
   }
 
   /** The subject line, with the order id, in the recipient's locale. */

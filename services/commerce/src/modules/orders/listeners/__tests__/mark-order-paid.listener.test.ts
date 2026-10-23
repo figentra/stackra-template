@@ -11,8 +11,8 @@ import assert from "node:assert/strict";
 import { createTestingModule } from "@stackra/container/testing";
 import { deliverRemoteEvent, drainOutbox } from "@stackra/events/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Payments } from "#stackra/clients";
-import { CommerceModule } from "#src/commerce.module";
+import { PaymentCaptured } from "#stackra/clients/payments";
+import { CommerceModule } from "#stackra/module";
 import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
 import { MarkOrderPaidListener } from "#modules/orders/listeners/mark-order-paid.listener";
@@ -31,8 +31,8 @@ describe(MarkOrderPaidListener, () => {
       currency: order.total.currency,
     };
 
-    await deliverRemoteEvent(Payments.PaymentCaptured, { ...capture, reference: order.id });
-    await deliverRemoteEvent(Payments.PaymentCaptured, { ...capture, reference: "gft_1" });
+    await deliverRemoteEvent(PaymentCaptured, { ...capture, reference: order.id });
+    await deliverRemoteEvent(PaymentCaptured, { ...capture, reference: "gft_1" });
     await drainOutbox();
 
     const saved = await app.repository(Order).findOneOrFail({ id: order.id });

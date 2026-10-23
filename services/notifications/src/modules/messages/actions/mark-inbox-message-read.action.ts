@@ -12,19 +12,13 @@
  *                     state changes in the HTTP conventions
  */
 import { Action, type ActionContext } from "@stackra/actions";
-import { ActorKind, HttpMethod, type PublicId } from "@stackra/contracts";
+import { ActorKind, HttpMethod } from "@stackra/contracts";
 import type { Repository } from "@stackra/database";
-import { Schema } from "@stackra/validation";
 import { InboxMessagePermissions } from "#modules/messages/access/inbox-message.permissions";
 import { InboxMessageNotFoundError } from "#modules/messages/errors/inbox-message-not-found.error";
 import type { InboxMessage } from "#modules/messages/models/inbox-message.model";
 import { InboxMessageView } from "#modules/messages/schemas/inbox-message-view.schema";
-
-/** The entry to mark read, taken from the path; the principal is the actor, never an input. */
-export class MarkInboxMessageReadInput extends Schema {
-  /** The entry's public id. */
-  inboxMessageId!: PublicId<"inm">;
-}
+import type { MarkInboxMessageReadInput } from "#modules/messages/schemas/mark-inbox-message-read-input.schema";
 
 /** Behind the inbox's "Mark read" button. */
 export class MarkInboxMessageReadAction extends Action({

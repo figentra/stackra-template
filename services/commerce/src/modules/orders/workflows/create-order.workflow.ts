@@ -2,17 +2,22 @@
  * Stackra file contract:
  * Purpose: the steps behind `orders.order.create`: price, reserve stock, create the pending order,
  *          authorize the payment. A later failure undoes the earlier steps in reverse.
- * Boundary: the public async methods are the steps, run in declaration order; `undo<Step>`
- *           compensates its step; `output` maps the results to the action's output. Each step is
- *           its own transaction and is idempotent on the run id. Started only by
- *           CreateOrderAction through `ctx.run`, never exposed directly.
+ * Boundary: every public async method is a step, run in declaration order, whether or not it
+ *           carries `@Step`; the decorator is written only to give a step options (here the payment
+ *           call's retries), never to make it a step. `undo<Step>` compensates its step; `output`
+ *           maps the results to the action's output. Each step is its own transaction, is
+ *           idempotent on the run id and stores its result with the run, so a resume skips what is
+ *           done. Started only by CreateOrderAction through `ctx.run`, never exposed directly;
+ *           another module that needs to change a step's result uses the orders extension point,
+ *           never a step of its own here.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 6, 16 and 18), ADR 0101, ADR 0151, ADR 0152
+ * Governing contract: ADR 0294 (decisions 6, 16 and 18, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0101, ADR 0151, ADR 0152
  */
 import type { PublicId } from "@stackra/contracts";
 import { Backoff } from "@stackra/queue";
 import { type Run, Step, type StepContext, Workflow } from "@stackra/workflow";
-import type { Payments, PaymentsClient } from "#stackra/clients";
+import type { AuthorizePaymentOutput, PaymentsClient } from "#stackra/clients/payments";
 import type { StockService } from "#modules/inventory/services/stock.service";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
@@ -34,10 +39,9 @@ export class CreateOrderWorkflow extends Workflow<CreateOrderInput>({ timeout: "
     super();
   }
 
-  /** Draft, totals and both extension points; no side effects, so no undo. */
+  /** Draft, then both extension slots (verify before, totals after); no side effects, no undo. */
   async price(run: Run<this>, ctx: StepContext): Promise<PricedOrder> {
-    const draft = await this.pricing.draft(run.input, ctx);
-    await this.pricing.verify(draft, ctx);
+    const draft = await this.pricing.verify(await this.pricing.draft(run.input, ctx), ctx);
     return PricedOrder.create({ draft, totals: await this.pricing.price(draft, ctx) });
   }
 
@@ -78,7 +82,7 @@ export class CreateOrderWorkflow extends Workflow<CreateOrderInput>({ timeout: "
       backoff: Backoff.Exponential,
     },
   })
-  async authorizePayment(run: Run<this>, ctx: StepContext): Promise<Payments.AuthorizeOutput> {
+  async authorizePayment(run: Run<this>, ctx: StepContext): Promise<AuthorizePaymentOutput> {
     const orderId = run.results.createOrder;
     const { totals } = run.results.price;
     const authorization = await this.payments.payment.authorize.call(

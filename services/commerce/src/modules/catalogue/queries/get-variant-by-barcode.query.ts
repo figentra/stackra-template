@@ -14,26 +14,19 @@
 import { Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
 import type { Repository } from "@stackra/database";
-import { Schema, Str } from "@stackra/validation";
 import { ProductPermissions } from "#modules/catalogue/access/product.permissions";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { VariantNotFoundError } from "#modules/catalogue/errors/variant-not-found.error";
 import type { Variant } from "#modules/catalogue/models/variant.model";
+import type { GetVariantByBarcodeInput } from "#modules/catalogue/schemas/get-variant-by-barcode-input.schema";
 import { VariantHit } from "#modules/catalogue/schemas/variant-hit.schema";
-
-/** The scanned digits. */
-export class GetVariantByBarcodeInput extends Schema {
-  /** 8 to 14 digits as the scanner delivers them; no check-digit validation here. */
-  @Str({ pattern: /^\d{8,14}$/ })
-  barcode!: string;
-}
 
 /** One indexed lookup (`idx_variants_tenant_id_barcode`), with the product for its title. */
 export class GetVariantByBarcodeQuery extends Query({
   key: "variant.get_by_barcode",
   permission: ProductPermissions.read,
   actors: [ActorKind.User, ActorKind.Service],
-  intents: ["what is this barcode", "scan item"],
+  intent: true,
   endpoint: {
     method: HttpMethod.Get,
     path: "/variants/by-barcode/:barcode",

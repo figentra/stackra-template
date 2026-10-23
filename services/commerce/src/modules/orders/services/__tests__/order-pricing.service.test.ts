@@ -2,18 +2,19 @@
  * Stackra file contract:
  * Purpose: proves totals are subtotal plus every `adjustTotals` adjustment, in implementer order,
  *          clamped at zero.
- * Boundary: unit tier; the pricing client and catalogue are faked by class, the two extensions are
- *           registered inline. The variant id comes from a factory, never a literal.
+ * Boundary: unit tier; the pricing client and catalogue are faked by class, the two extensions of
+ *           the `adjustTotals` slot are registered inline. The variant id comes from a factory,
+ *           never a literal.
  * Runtime: node
- * Governing contract: ADR 0265 (transform and verify), ADR 0263 (override by class), ADR 0022,
- *                     ADR 0269
+ * Governing contract: ADR 0265 (extension points: after and before slots), ADR 0263 (override by
+ *                     class), ADR 0022, ADR 0269
  */
 import { extension, fakeActionContext } from "@stackra/actions/testing";
 import { fakeClient } from "@stackra/clients/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { PricingClient } from "#stackra/clients";
+import { PricingClient } from "#stackra/clients/pricing";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
 import { ProductService } from "#modules/catalogue/services/product.service";
 import { OrderExtensionPoint } from "#modules/orders/extensions/order.extension-point";

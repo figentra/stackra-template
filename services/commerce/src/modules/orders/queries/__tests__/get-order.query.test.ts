@@ -8,11 +8,11 @@
  */
 import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
+import { ForbiddenError } from "@stackra/errors";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { GetOrderQuery } from "#modules/orders/queries/get-order.query";
 
@@ -32,7 +32,7 @@ describe(GetOrderQuery, () => {
     const relayed = await run(GetOrderQuery, input, { as: relay });
 
     expect(own.output.id).toBe(order.id);
-    expect(foreign).toRefuseWith(refusal(Refusals.core.forbidden));
+    expect(foreign).toRefuseWith(refusal(ForbiddenError));
     expect(relayed.output.id).toBe(order.id);
   });
 });

@@ -34,6 +34,7 @@ import type { StorefrontSeo } from "#modules/catalogue/schemas/storefront-seo.sc
  * are keys of the model and of its populated relations, checked by gen.
  */
 @Index(["tenantId", "slug"], { unique: true })
+@Index(["tenantId", "status"])
 @Searchable({
   text: ["title", "description", "variants.sku", "variants.barcode"],
   filters: ["status", "collections.slug"],

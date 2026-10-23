@@ -2,24 +2,25 @@
  * Stackra file contract:
  * Purpose: record rules for orders. Each method is named after a verb of OrderPermissions and
  *          refines that permission for one order.
- * Boundary: a pure decision (allow, deny or abstain); no writes, no network. It runs inside
- *           `handle` through `ctx.authorize(order)`, after the permission step passed, so a method
- *           exists only where a verb needs a record rule: there is no `create` or `expire` method.
- *           A Service actor is judged as the principal it acts for, and is denied when it acts for
- *           nobody.
+ * Boundary: bound to its model by the type argument (`Policy<Order>`) and to OrderPermissions by
+ *           the shared stem, so no class is passed in. A pure decision (allow, deny or abstain); no
+ *           writes, no network. It runs inside `handle` through `ctx.authorize(order)`, after the
+ *           permission step passed, so a method exists only where a verb needs a record rule: there
+ *           is no `create` or `expire` method. A Service actor is judged as the principal it acts
+ *           for, and is denied when it acts for nobody.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 16 and 23), ADR 0132 d4, ADR 0138 (as amended), ADR 0098
+ * Governing contract: ADR 0294 (decisions 16 and 23, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0132 d4, ADR 0138 (as amended), ADR 0098
  */
 import { type Actor, ActorKind, Realm } from "@stackra/contracts";
 import { Decision, Policy } from "@stackra/iam";
 import type { SettingsReader } from "@stackra/settings";
-import { OrderPermissions } from "#modules/orders/access/order.permissions";
 import type { Order } from "#modules/orders/models/order.model";
 import type { OrderStateMachine } from "#modules/orders/models/order.state-machine";
 import { OrdersSettings } from "#modules/orders/orders.settings";
 
 /** `deny` beats a granted permission; `abstain` leaves the permission as the whole answer. */
-export class OrderPolicy extends Policy(OrderPermissions) {
+export class OrderPolicy extends Policy<Order> {
   /**
    * @param settings - reads OrdersSettings for the actor's tenant, so a change needs no redeploy.
    * @param lifecycle - answers whether a cancel is allowed from the order's current state.
@@ -41,8 +42,9 @@ export class OrderPolicy extends Policy(OrderPermissions) {
     if (actor.kind === ActorKind.Service && !actor.onBehalfOf) return Decision.Deny;
     const subject = actor.onBehalfOf ?? actor;
     if (subject.realm === Realm.Tenant) return Decision.Abstain;
-    const { customersMayCancel } = await this.settings.for(OrdersSettings);
-    return customersMayCancel && order.customerId === subject.id ? Decision.Allow : Decision.Deny;
+    const { cancellation } = await this.settings.get(OrdersSettings);
+    const mine = order.customerId === subject.id;
+    return cancellation.customersMayCancel && mine ? Decision.Allow : Decision.Deny;
   }
 
   /** A customer reads only their own orders; every other realm is left to the permission. */

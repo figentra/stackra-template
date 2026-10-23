@@ -6,9 +6,11 @@
  *           Postgres schema), public ids `ord_…`. `status` moves only through OrderStateMachine;
  *           sibling modules reach orders through OrderService (exported) or a relation. The
  *           customer is a principal public id from the actor, never a row here. Every index is an
- *           `@Index` here, so `stackra db diff` never proposes dropping one. No constructor-made
- *           state: the ORM loads rows without running the constructor, and rows are built by
- *           `em.create`, factories or CrudService, never with `new`.
+ *           `@Index` here, so `stackra db diff` never proposes dropping one; the last two back the
+ *           sortable `createdAt` and `totals.totalMinor` columns of OrderResource's table, which
+ *           gen refuses without an index (`sort_not_indexed`). No constructor-made state: the ORM
+ *           loads rows without running the constructor, and rows are built by `em.create`,
+ *           factories or CrudService, never with `new`.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0239
  *                     (BelongsToTenant), ADR 0141 (recorded events reach the outbox at flush),
@@ -37,6 +39,8 @@ import type { OrderAdjustment } from "#modules/orders/schemas/order-adjustment.s
 @Index(["customerId"])
 @Index(["tenantId", "status", "createdAt"])
 @Index(["tenantId", "status", "paidAt"])
+@Index(["tenantId", "createdAt"])
+@Index(["tenantId", "total.minor"])
 export class Order extends Model.with(
   HasPublicId("ord"),
   BelongsToTenant,

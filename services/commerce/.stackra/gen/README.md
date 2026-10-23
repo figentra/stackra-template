@@ -10,23 +10,24 @@ at the member root.
 | File                   | Holds                                                                                        | Read it to answer                          |
 | ---------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | `../entry/server.ts`   | the runtime entry: `createApp(CommerceModule, { wiring })` from `@stackra/app/server`        | "where does the service boot?"             |
+| `module.ts`            | `CommerceModule`, written because no root module is authored (`#stackra/module`)              | "which modules and packages boot?"         |
 | `../vitest.config.ts`  | the Vitest config (the service preset); the gitignored root `vitest.config.ts` re-exports it | "how do the tests run?"                    |
 | `wiring.ts`            | every binding with its kind, lifetime and dependencies; extension points; config; drivers    | "what does X get injected with?"           |
 | `schemas/<module>.ts`  | one Zod schema per shape class (`X$`) and the `X$Check` type proving it equals the class     | "what does gen validate for this shape?"   |
 | `schemas/commerce.ts`  | the schemas of the member's config classes; overrides extend the package's own `Base$`       | "what are the config defaults and rules?"  |
 | `entities/<module>.ts` | the MikroORM EntitySchema of each model, in the module's Postgres schema                     | "which columns, keys and indexes exist?"   |
-| `extensions.ts`        | every extension point and its ordered implementers, with the files that call them            | "who changes order totals, in what order?" |
+| `extensions.ts`        | every extension point, its `before` and `after` slots and their ordered extensions           | "who changes order totals, in what order?" |
 | `operations.ts`        | the standard actions and queries written for resource operations set to `true`               | "where is catalogue.product.list?"         |
-| `clients.ts`           | the client classes, call shapes and event classes of the services this one consumes          | "how do I call pricing?"                   |
+| `clients/<service>.ts` | one file per consumed service: client class, call shapes, event classes by real names       | "how do I call pricing?"                   |
 | `tables.ts`            | table and column constants per model, schema-qualified, object form                          | "what is the column of `paidAt`?"          |
 | `i18n.ts`              | the complete key tree of every namespace referenced, with loaders                            | "which i18n keys exist?"                   |
 | `permissions.ts`       | the permission keys this member hosts, with risk, users, policy and system flag              | "which permissions exist?"                 |
 | `events.ts`            | wire names, kinds, versions, broadcast channels and outbound webhooks                        | "what leaves through the outbox?"          |
-| `slots.ts`             | the panel slots a widget may name                                                            | "which slots may a widget use?"            |
+| `slots.ts`             | the panel slots a widget may name, each with its place type (Band, Grid, Aside, Tabs)        | "which slots may a widget use?"            |
 | `queues.ts`            | the worker queues this member may name                                                       | "which queue does a job run on?"           |
 | `assets.ts`            | asset keys per module with files and overridability                                          | "which assets ship?"                       |
-| `settings.ts`          | settings fields, flags and the settings pages                                                | "what can a tenant change?"                |
-| `migrations.ts`        | the ordered migration stream, package migrations included                                    | "what runs on deploy, in what order?"      |
+| `settings.ts`          | settings by path with scopes, lock, approval and client exposure; rules; flags; pages        | "what can a tenant change?"                |
+| `migrations.ts`        | the typed ids `after:` names (`#stackra/migrations`) and the ordered stream of SQL steps     | "what runs on deploy, in what order?"      |
 | `manifest.ts`          | typed view of the committed `../../stackra.manifest.json`, and the typed refusal refs        | "what does this service expose?"           |
 | `ai.ts`                | MCP tools, facts classes, skills, prompts                                                    | "what can an agent call here?"             |
 

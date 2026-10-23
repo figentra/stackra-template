@@ -9,11 +9,11 @@
     "fallback": "2026-10-01",
     "changes": [
       {
-        "date": "2027-03-01",
         "sunset": "2028-03-01",
         "of": "orders.OrderView",
         "class": "OrderView202703Change",
-        "file": "src/modules/orders/schemas/order-view-2027-03.change.ts"
+        "file": "src/modules/orders/schemas/order-view-2027-03.change.ts",
+        "from": "2027-03-01"
       }
     ]
   },
@@ -97,8 +97,10 @@
         "path": "/orders",
         "derived": true
       },
-      "tool": true,
-      "intents": ["order two of SKU-123", "buy these items"],
+      "tool": {
+        "name": "orders_order_create",
+        "default": false
+      },
       "input": {
         "$ref": "#/schemas/orders.CreateOrderInput"
       },
@@ -120,8 +122,8 @@
         "retention": "72h",
         "onConflict": ["server_wins", "manual"]
       },
-      "ux": {
-        "after": ["open_record"]
+      "intent": {
+        "phrases": "orders::actions.order.create.intents"
       }
     },
     {
@@ -139,7 +141,11 @@
         "path": "/orders/:orderId/cancel",
         "derived": true
       },
-      "tool": true,
+      "tool": {
+        "name": "orders_order_cancel",
+        "default": false,
+        "approval": "confirm"
+      },
       "input": {
         "$ref": "#/schemas/orders.CancelOrderInput"
       },
@@ -152,10 +158,6 @@
       },
       "accessLogged": {
         "classification": "pseudonymous"
-      },
-      "ux": {
-        "confirm": "danger",
-        "after": ["refresh"]
       }
     },
     {
@@ -199,7 +201,10 @@
         "path": "/orders/:orderId",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "orders_order_get",
+        "default": true
+      },
       "output": {
         "$ref": "#/schemas/orders.OrderView"
       },
@@ -221,14 +226,26 @@
         "path": "/orders",
         "derived": true
       },
-      "tool": "auto",
-      "intents": ["show my orders", "list recent orders"],
+      "tool": {
+        "name": "orders_order_list",
+        "default": true
+      },
       "pagination": "cursor",
       "input": {
         "$ref": "#/schemas/orders.ListOrdersInput"
       },
       "output": {
         "$ref": "#/schemas/orders.ListOrdersOutput"
+      },
+      "table": {
+        "resource": "OrderResource",
+        "sort": ["createdAt", "totals.totalMinor", "paidAt"],
+        "filters": ["status", "createdAt", "paidAt", "customerId"],
+        "search": false,
+        "count": "estimated"
+      },
+      "intent": {
+        "phrases": "orders::actions.order.list.intents"
       }
     },
     {
@@ -246,7 +263,10 @@
         "path": "/orders/:orderId/lines",
         "derived": false
       },
-      "tool": "auto",
+      "tool": {
+        "name": "orders_order_list_lines",
+        "default": true
+      },
       "follows": ["orders.order_line.variant"],
       "input": {
         "$ref": "#/schemas/orders.ListOrderLinesInput"
@@ -256,29 +276,40 @@
       }
     },
     {
-      "key": "orders.order.stats_today@1",
+      "key": "orders.order.kpis@1",
       "kind": "query",
       "module": "orders",
-      "class": "OrdersTodayQuery",
-      "file": "src/modules/orders/queries/orders-today.query.ts",
+      "class": "OrderKpisQuery",
+      "file": "src/modules/orders/queries/order-kpis.query.ts",
       "permission": "orders.order.read",
       "risk": "L0",
-      "actors": ["user"],
+      "actors": ["user", "agent"],
       "endpoint": {
         "method": "GET",
-        "path": "/orders/stats/today",
-        "derived": false
+        "path": "/orders/kpis",
+        "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "orders_order_kpis",
+        "default": true
+      },
       "cache": {
-        "ttl": "1m",
-        "invalidateOn": ["orders.order.paid.v1"]
+        "ttl": "5m",
+        "invalidateOn": ["orders.order.paid.v1"],
+        "per": "principal"
       },
-      "output": {
-        "$ref": "#/schemas/orders.OrdersTodayOutput"
+      "metrics": {
+        "on": "orders.order.paidAt",
+        "index": "idx_orders_tenant_id_status_paid_at"
       },
       "input": {
-        "$ref": "#/schemas/orders.OrdersTodayInput"
+        "$ref": "#/schemas/orders.OrderKpisInput"
+      },
+      "output": {
+        "$ref": "#/schemas/orders.OrderKpisOutput"
+      },
+      "intent": {
+        "phrases": "orders::actions.order.kpis.intents"
       }
     },
     {
@@ -295,7 +326,10 @@
         "path": "/products/:productId",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "catalogue_product_get",
+        "default": true
+      },
       "output": {
         "$ref": "#/schemas/catalogue.ProductView"
       },
@@ -319,7 +353,10 @@
         "path": "/public/products/by-slug/:slug",
         "derived": false
       },
-      "tool": "auto",
+      "tool": {
+        "name": "catalogue_product_get_by_slug",
+        "default": true
+      },
       "output": {
         "$ref": "#/schemas/catalogue.StorefrontProductView"
       },
@@ -343,7 +380,10 @@
         "path": "/public/products",
         "derived": false
       },
-      "tool": "auto",
+      "tool": {
+        "name": "catalogue_product_list_storefront",
+        "default": true
+      },
       "pagination": "cursor",
       "input": {
         "$ref": "#/schemas/catalogue.ListStorefrontProductsInput"
@@ -368,7 +408,10 @@
         "path": "/public/products/search",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "catalogue_product_search",
+        "default": true
+      },
       "pagination": "cursor",
       "input": {
         "$ref": "#/schemas/catalogue.SearchProductsInput"
@@ -392,15 +435,20 @@
         "path": "/variants/by-barcode/:barcode",
         "derived": false
       },
-      "tool": "auto",
-      "intents": ["what is this barcode", "scan item"],
+      "tool": {
+        "name": "catalogue_variant_get_by_barcode",
+        "default": true
+      },
       "input": {
         "$ref": "#/schemas/catalogue.GetVariantByBarcodeInput"
       },
       "output": {
         "$ref": "#/schemas/catalogue.VariantHit"
       },
-      "refusals": ["variant_not_found"]
+      "refusals": ["variant_not_found"],
+      "intent": {
+        "phrases": "catalogue::actions.variant.get_by_barcode.intents"
+      }
     },
     {
       "key": "catalogue.variant.search@1",
@@ -416,13 +464,18 @@
         "path": "/variants",
         "derived": false
       },
-      "tool": "auto",
-      "intents": ["find item by sku", "look up a product at the till"],
+      "tool": {
+        "name": "catalogue_variant_search",
+        "default": true
+      },
       "input": {
         "$ref": "#/schemas/catalogue.SearchVariantsInput"
       },
       "output": {
         "$ref": "#/schemas/catalogue.SearchVariantsOutput"
+      },
+      "intent": {
+        "phrases": "catalogue::actions.variant.search.intents"
       }
     },
     {
@@ -440,8 +493,11 @@
         "path": "/products/:productId/archive",
         "derived": true
       },
-      "tool": true,
-      "intents": ["archive the summer dress", "stop selling this product"],
+      "tool": {
+        "name": "catalogue_product_archive",
+        "default": false,
+        "approval": "confirm"
+      },
       "input": {
         "$ref": "#/schemas/catalogue.ArchiveProductInput"
       },
@@ -456,9 +512,8 @@
         "onConflict": ["server_wins", "client_retry", "manual"]
       },
       "refusals": ["not_found", "forbidden"],
-      "ux": {
-        "confirm": "warning",
-        "after": ["refresh"]
+      "intent": {
+        "phrases": "catalogue::actions.product.archive.intents"
       }
     },
     {
@@ -487,10 +542,7 @@
         "upload_bucket_mismatch",
         "upload_incomplete"
       ],
-      "buckets": ["catalogue.product_images"],
-      "ux": {
-        "after": ["refresh"]
-      }
+      "buckets": ["catalogue.product_images"]
     },
     {
       "key": "catalogue.product.create@1",
@@ -547,10 +599,23 @@
         "path": "/products",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "catalogue_product_list",
+        "default": true
+      },
       "pagination": "cursor",
       "output": {
         "$ref": "#/schemas/catalogue.ProductPage"
+      },
+      "input": {
+        "$ref": "#/schemas/catalogue.ListProductsInput"
+      },
+      "table": {
+        "resource": "ProductResource",
+        "sort": ["slug"],
+        "filters": ["status"],
+        "search": "catalogue.product",
+        "count": "estimated"
       }
     },
     {
@@ -590,7 +655,10 @@
         "path": "/stock/low",
         "derived": false
       },
-      "tool": "auto",
+      "tool": {
+        "name": "inventory_stock_list_low",
+        "default": true
+      },
       "input": {
         "$ref": "#/schemas/inventory.ListLowStockInput"
       },
@@ -612,8 +680,10 @@
         "path": "/loyalty/accounts/:accountId",
         "derived": false
       },
-      "tool": true,
-      "intents": ["enroll this customer in loyalty", "add them to the points programme"],
+      "tool": {
+        "name": "loyalty_kit_account_enroll",
+        "default": false
+      },
       "input": {
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.EnrollMemberInput"
       },
@@ -621,8 +691,8 @@
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.EnrollMemberOutput"
       },
       "refusals": ["not_own_principal"],
-      "ux": {
-        "after": ["refresh"]
+      "intent": {
+        "phrases": "loyalty_kit::actions.account.enroll.intents"
       }
     },
     {
@@ -701,18 +771,18 @@
         "path": "/loyalty/accounts/:accountId/freeze",
         "derived": false
       },
-      "tool": true,
+      "tool": {
+        "name": "loyalty_kit_account_freeze",
+        "default": false,
+        "approval": "confirm"
+      },
       "input": {
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.FreezeAccountInput"
       },
       "output": {
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.FreezeAccountOutput"
       },
-      "refusals": ["forbidden", "not_found"],
-      "ux": {
-        "confirm": "warning",
-        "after": ["refresh"]
-      }
+      "refusals": ["forbidden", "not_found"]
     },
     {
       "key": "loyalty_kit.points.expire@1",
@@ -755,8 +825,10 @@
         "path": "/loyalty/accounts/:accountId/balance",
         "derived": false
       },
-      "tool": "auto",
-      "intents": ["how many points do I have", "show my loyalty balance"],
+      "tool": {
+        "name": "loyalty_kit_points_balance",
+        "default": true
+      },
       "cache": {
         "ttl": "1m",
         "invalidateOn": ["loyalty_kit.points.earned.v2", "loyalty_kit.points.redeemed"]
@@ -766,6 +838,9 @@
       },
       "output": {
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.BalanceView"
+      },
+      "intent": {
+        "phrases": "loyalty_kit::actions.points.balance.intents"
       }
     },
     {
@@ -778,7 +853,10 @@
       "risk": "L0",
       "actors": ["user"],
       "endpoint": false,
-      "tool": "auto",
+      "tool": {
+        "name": "loyalty_kit_points_stats_today",
+        "default": true
+      },
       "input": {
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.PointsIssuedInput"
       },
@@ -801,7 +879,10 @@
         "path": "/loyalty-accounts",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "loyalty_kit_loyalty_account_list",
+        "default": true
+      },
       "pagination": "cursor",
       "output": {
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.LoyaltyAccountPage"
@@ -822,7 +903,10 @@
         "path": "/loyalty-accounts/:loyaltyAccountId",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "loyalty_kit_loyalty_account_get",
+        "default": true
+      },
       "output": {
         "$ref": "@acme/loyalty-kit#/schemas/loyalty_kit.LoyaltyAccountView"
       }
@@ -867,7 +951,10 @@
         "path": "/access-log-entries",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "access_log_access_log_entry_list",
+        "default": true
+      },
       "pagination": "cursor",
       "output": {
         "$ref": "@acme/access-log#/schemas/access_log.AccessLogEntryPage"
@@ -887,7 +974,10 @@
         "path": "/access-log-entries/:accessLogEntryId",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "access_log_access_log_entry_get",
+        "default": true
+      },
       "output": {
         "$ref": "@acme/access-log#/schemas/access_log.AccessLogEntry"
       }
@@ -1058,9 +1148,9 @@
   ],
   "extensionPoints": {
     "orders.adjustTotals": {
-      "kind": "transform",
+      "kind": "after",
       "class": "OrderExtensionPoint",
-      "implementers": [
+      "extensions": [
         {
           "order": 200,
           "class": "RedeemPointsExtension",
@@ -1070,9 +1160,9 @@
       ]
     },
     "orders.verifyPlacement": {
-      "kind": "verify",
+      "kind": "before",
       "class": "OrderExtensionPoint",
-      "implementers": [
+      "extensions": [
         {
           "order": 0,
           "class": "VerifyPointsBalanceExtension",
@@ -1081,10 +1171,10 @@
       ]
     },
     "loyalty_kit.earnAdjust": {
-      "kind": "transform",
+      "kind": "after",
       "from": "@acme/loyalty-kit",
       "class": "LoyaltyKitExtensionPoint",
-      "implementers": [
+      "extensions": [
         {
           "order": 100,
           "class": "TierMultiplierExtension",
@@ -1093,10 +1183,10 @@
       ]
     },
     "loyalty_kit.redeemVerify": {
-      "kind": "verify",
+      "kind": "before",
       "from": "@acme/loyalty-kit",
       "class": "LoyaltyKitExtensionPoint",
-      "implementers": []
+      "extensions": []
     }
   },
   "permissions": [
@@ -1116,6 +1206,10 @@
       "key": "catalogue.product.archive",
       "risk": "L2",
       "policy": "ProductPolicy.archive"
+    },
+    {
+      "key": "catalogue.product.import",
+      "risk": "L1"
     },
     {
       "key": "inventory.stock.read",
@@ -1146,12 +1240,36 @@
       "system": true
     },
     {
+      "key": "orders.order.export",
+      "risk": "L1"
+    },
+    {
+      "key": "orders.settings.read",
+      "risk": "L0",
+      "generatedBy": "OrdersSettings"
+    },
+    {
       "key": "orders.settings.update",
       "risk": "L2",
       "generatedBy": "OrdersSettings"
     },
     {
+      "key": "orders.settings.approve",
+      "risk": "L2",
+      "generatedBy": "OrdersSettings"
+    },
+    {
+      "key": "inventory.settings.read",
+      "risk": "L0",
+      "generatedBy": "InventorySettings"
+    },
+    {
       "key": "inventory.settings.update",
+      "risk": "L2",
+      "generatedBy": "InventorySettings"
+    },
+    {
+      "key": "inventory.settings.approve",
       "risk": "L2",
       "generatedBy": "InventorySettings"
     },
@@ -1209,7 +1327,14 @@
       "publicId": "prd",
       "traits": ["HasPublicId", "BelongsToTenant", "Timestamps", "Versioned", "Translatable"],
       "stateMachine": "ProductStateMachine",
-      "searchable": true
+      "searchable": true,
+      "indexes": [
+        "idx_products_tenant_id_slug",
+        "idx_products_tenant_id_status",
+        "idx_products_search_vector_en",
+        "idx_products_search_vector_ar",
+        "idx_products_search_text_trgm"
+      ]
     },
     {
       "key": "catalogue.variant",
@@ -1236,7 +1361,14 @@
       "publicId": "ord",
       "traits": ["HasPublicId", "BelongsToTenant", "Timestamps", "UserStamps", "Versioned"],
       "stateMachine": "OrderStateMachine",
-      "money": ["subtotal", "total"]
+      "money": ["subtotal", "total"],
+      "indexes": [
+        "idx_orders_customer_id",
+        "idx_orders_tenant_id_status_created_at",
+        "idx_orders_tenant_id_status_paid_at",
+        "idx_orders_tenant_id_created_at",
+        "idx_orders_tenant_id_total_minor"
+      ]
     },
     {
       "key": "orders.order_line",
@@ -1311,7 +1443,99 @@
         },
         "uploads": {
           "images": "catalogue.product.attach_image@1"
-        }
+        },
+        "row": "catalogue.ProductView",
+        "detail": "catalogue.ProductView",
+        "navigation": {
+          "group": "catalogue::nav.catalogue",
+          "icon": "package",
+          "order": 10,
+          "badge": "drafts"
+        },
+        "table": {
+          "columns": ["title", "slug", "status", "variants"],
+          "sortable": ["slug"],
+          "filters": [
+            {
+              "key": "status",
+              "pinned": true
+            }
+          ],
+          "search": "catalogue.product",
+          "defaultSort": {
+            "key": "slug",
+            "direction": "asc"
+          },
+          "count": "estimated"
+        },
+        "views": [
+          {
+            "name": "on_sale",
+            "filter": {
+              "status": ["active"]
+            }
+          },
+          {
+            "name": "drafts",
+            "filter": {
+              "status": ["draft"]
+            }
+          },
+          {
+            "name": "archived",
+            "filter": {
+              "status": ["archived"]
+            }
+          }
+        ],
+        "form": {
+          "steps": {
+            "basics": ["title", "slug"],
+            "media": ["images"],
+            "variants": ["variants"],
+            "seo": ["seo"]
+          }
+        },
+        "infolist": {
+          "sections": {
+            "summary": ["title", "slug", "status"],
+            "variants": ["variants"]
+          }
+        },
+        "actions": [
+          {
+            "action": "catalogue.product.archive@1",
+            "places": ["row", "view", "bulk"],
+            "confirm": "danger"
+          },
+          {
+            "action": "catalogue.product.attach_image@1",
+            "places": ["view", "edit"],
+            "form": "modal"
+          },
+          {
+            "import": {
+              "mode": "upsert",
+              "match": "slug",
+              "maxRows": 10000
+            },
+            "permission": "catalogue.product.import",
+            "places": ["list_header", "empty"]
+          },
+          {
+            "operation": "create",
+            "then": "view"
+          }
+        ],
+        "slots": [
+          "catalogue.product.list.header",
+          "catalogue.product.list.footer",
+          "catalogue.product.view.header",
+          "catalogue.product.view.aside",
+          "catalogue.product.view.tabs",
+          "catalogue.product.view.footer",
+          "catalogue.product.edit.aside"
+        ]
       },
       {
         "key": "orders.order",
@@ -1321,7 +1545,112 @@
           "list": "orders.order.list@1",
           "get": "orders.order.get@1"
         },
-        "notifications": ["orders.order_placed", "orders.order_receipt"]
+        "notifications": ["orders.order_placed", "orders.order_receipt"],
+        "row": "orders.OrderView",
+        "detail": "orders.OrderView",
+        "navigation": {
+          "group": "orders::nav.sales",
+          "icon": "receipt",
+          "order": 20,
+          "badge": "awaiting_payment"
+        },
+        "table": {
+          "columns": [
+            "id",
+            "status",
+            "customerId",
+            "totals.totalMinor",
+            "lines",
+            "createdAt",
+            "paidAt"
+          ],
+          "sortable": ["totals.totalMinor", "createdAt"],
+          "hidden": ["paidAt"],
+          "filters": [
+            {
+              "key": "status",
+              "default": ["pending_payment", "paid"],
+              "pinned": true
+            },
+            {
+              "key": "createdAt"
+            },
+            {
+              "key": "paidAt"
+            },
+            {
+              "key": "customerId"
+            }
+          ],
+          "defaultSort": {
+            "key": "createdAt",
+            "direction": "desc"
+          },
+          "count": "estimated"
+        },
+        "views": [
+          {
+            "name": "awaiting_payment",
+            "filter": {
+              "status": ["pending_payment"]
+            }
+          },
+          {
+            "name": "paid_today",
+            "filter": {
+              "status": ["paid"],
+              "paidAt": "today"
+            },
+            "sort": {
+              "key": "paidAt",
+              "direction": "desc"
+            }
+          },
+          {
+            "name": "closed",
+            "filter": {
+              "status": ["cancelled", "expired"]
+            }
+          }
+        ],
+        "infolist": {
+          "sections": {
+            "summary": ["id", "status", "customerId", "createdAt", "paidAt"],
+            "totals": ["totals.subtotalMinor", "totals.adjustments", "totals.totalMinor"]
+          },
+          "aside": ["totals"]
+        },
+        "relations": [
+          {
+            "query": "orders.order.list_lines@1",
+            "bind": {
+              "orderId": "record.id"
+            },
+            "columns": ["sku", "quantity", "unitPriceMinor", "trackInventory"]
+          }
+        ],
+        "actions": [
+          {
+            "action": "orders.order.cancel@1",
+            "places": ["row", "view", "bulk"],
+            "confirm": "danger"
+          },
+          {
+            "export": {
+              "formats": ["csv", "xlsx"]
+            },
+            "permission": "orders.order.export",
+            "places": ["list_header", "bulk"]
+          }
+        ],
+        "slots": [
+          "orders.order.list.header",
+          "orders.order.list.footer",
+          "orders.order.view.header",
+          "orders.order.view.aside",
+          "orders.order.view.tabs",
+          "orders.order.view.footer"
+        ]
       },
       {
         "key": "loyalty_kit.loyalty_account",
@@ -1350,41 +1679,92 @@
         "key": "inventory.low_stock",
         "class": "LowStockWidget",
         "slot": "dashboard.main",
-        "size": "md",
+        "size": "medium",
         "query": "inventory.stock.list_low@1",
         "params": {
           "limit": 5
         },
         "display": {
           "kind": "list",
+          "rows": "items",
           "primary": "variantId",
-          "secondary": "available"
+          "secondary": "locationId",
+          "meta": "available",
+          "limit": 5
         },
         "permission": "inventory.stock.read",
-        "refreshOn": ["inventory.stock.low.v1"]
+        "refreshOn": ["inventory.stock.low.v1"],
+        "order": 20
       },
       {
-        "key": "orders.revenue_today",
-        "class": "RevenueTodayWidget",
+        "key": "orders.order_kpis",
+        "class": "OrderKpisWidget",
         "slot": "dashboard.header",
-        "size": "sm",
-        "query": "orders.order.stats_today@1",
+        "size": "full",
+        "order": 10,
+        "query": "orders.order.kpis@1",
+        "ranges": ["today", "last_7_days", "last_30_days", "this_month"],
+        "range": "today",
         "display": {
-          "kind": "kpi",
-          "value": "revenueMinor",
-          "currency": "currency",
-          "sparkline": "hourly"
+          "kind": "kpi_group",
+          "items": [
+            {
+              "metric": "revenue",
+              "icon": "banknote",
+              "tone": [
+                ["below_target", 0.8, "danger"],
+                ["below_target", 1, "warning"],
+                ["above_target", 1, "success"]
+              ],
+              "drill": {
+                "resource": "orders.order",
+                "filter": {
+                  "status": ["paid"],
+                  "paidAt": "range"
+                }
+              }
+            },
+            {
+              "metric": "orders",
+              "icon": "receipt",
+              "drill": {
+                "resource": "orders.order",
+                "filter": {
+                  "status": ["paid"],
+                  "paidAt": "range"
+                }
+              }
+            }
+          ]
         },
         "permission": "orders.order.read",
         "roles": ["owner", "manager"],
-        "refreshOn": ["orders.order.paid.v1"]
+        "refreshOn": {
+          "derivedFrom": "orders.order.kpis@1.cache.invalidateOn",
+          "events": ["orders.order.paid.v1"]
+        }
+      },
+      {
+        "key": "orders.awaiting_payment",
+        "class": "AwaitingPaymentWidget",
+        "size": "full",
+        "query": "orders.order.list@1",
+        "display": {
+          "kind": "view",
+          "resource": "orders.order",
+          "view": "awaiting_payment",
+          "limit": 10
+        },
+        "permission": "orders.order.read",
+        "refreshOn": ["orders.order.paid.v1"],
+        "refreshEvery": "60s"
       },
       {
         "key": "loyalty_kit.points_issued",
         "from": "@acme/loyalty-kit",
         "class": "PointsIssuedWidget",
         "slot": "dashboard.main",
-        "size": "sm",
+        "size": "small",
         "query": "loyalty_kit.points.stats_today@1",
         "display": {
           "kind": "custom",
@@ -1398,7 +1778,7 @@
         "key": "loyalty_kit.points_balance",
         "from": "@acme/loyalty-kit",
         "class": "PointsBalanceWidget",
-        "size": "md",
+        "size": "medium",
         "query": "loyalty_kit.points.balance@1",
         "params": {
           "accountId": "actor.accountId"
@@ -1412,12 +1792,31 @@
     ],
     "documents": [
       {
-        "key": "orders.sales_today",
-        "class": "SalesTodayDocument",
+        "key": "orders.sales_overview",
+        "class": "SalesOverviewDocument",
         "kind": "dashboard",
         "path": "/sales",
         "area": "admin",
-        "permission": "orders.order.read"
+        "permission": "orders.order.read",
+        "navigation": {
+          "group": "orders::nav.sales",
+          "icon": "chart-line",
+          "order": 10
+        },
+        "range": {
+          "ranges": ["today", "yesterday", "last_7_days", "last_30_days", "this_month", "custom"],
+          "default": "last_30_days"
+        },
+        "blocks": [
+          {
+            "widget": "orders.order_kpis"
+          },
+          {
+            "widget": "orders.awaiting_payment",
+            "size": "full"
+          }
+        ],
+        "slots": ["orders.sales_overview.header", "orders.sales_overview.main"]
       },
       {
         "key": "orders.my_orders",
@@ -1425,7 +1824,26 @@
         "kind": "page",
         "path": "/orders",
         "area": "app",
-        "permission": "orders.order.read"
+        "permission": "orders.order.read",
+        "navigation": {
+          "group": "orders::nav.orders",
+          "icon": "shopping-bag",
+          "order": 10
+        },
+        "layout": "single_column",
+        "blocks": [
+          {
+            "table": "orders.order.list@1",
+            "params": {
+              "limit": 20,
+              "sort": {
+                "key": "createdAt",
+                "direction": "desc"
+              }
+            },
+            "columns": ["id", "status", "totals.totalMinor", "createdAt"]
+          }
+        ]
       },
       {
         "key": "loyalty_kit.loyalty_overview",
@@ -1452,23 +1870,67 @@
       "key": "orders",
       "class": "OrdersSettings",
       "scopes": ["platform", "tenant"],
+      "navigation": {
+        "group": "orders::nav.sales",
+        "icon": "receipt",
+        "order": 20
+      },
       "fields": {
-        "autoCancelAfterMinutes": {
-          "type": "integer",
-          "default": 30,
-          "min": 5,
-          "max": 1440,
-          "renamed": ["autoCancelMinutes"]
-        },
-        "customersMayCancel": {
-          "type": "boolean",
-          "default": true,
-          "lockable": true
-        },
         "acceptingOrders": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "client": true
+        },
+        "dailyRevenueTargetMinor": {
+          "type": "integer",
+          "default": null,
+          "nullable": true,
+          "min": 0,
+          "scopes": ["tenant"],
+          "approval": true
         }
+      },
+      "sections": {
+        "cancellation": {
+          "class": "OrderCancellationSettings",
+          "fields": {
+            "autoCancelAfterMinutes": {
+              "type": "integer",
+              "default": 30,
+              "min": 5,
+              "max": 1440,
+              "renamed": ["autoCancelAfterMinutes"]
+            },
+            "maxAutoCancelAfterMinutes": {
+              "type": "integer",
+              "default": 60,
+              "min": 5,
+              "max": 1440,
+              "scopes": ["platform"]
+            },
+            "customersMayCancel": {
+              "type": "boolean",
+              "default": true,
+              "lockable": true,
+              "client": true,
+              "renamed": ["customersMayCancel"]
+            }
+          }
+        }
+      },
+      "rules": [
+        {
+          "kind": "at_most",
+          "a": "cancellation.autoCancelAfterMinutes",
+          "b": "cancellation.maxAutoCancelAfterMinutes"
+        }
+      ],
+      "operations": {
+        "get": "orders.settings.get@1",
+        "update": "orders.settings.update@1",
+        "history": "orders.settings.history@1",
+        "revert": "orders.settings.revert@1",
+        "approve": "orders.settings.approve@1"
       },
       "page": {
         "area": "admin",
@@ -1479,16 +1941,32 @@
       "key": "inventory",
       "class": "InventorySettings",
       "scopes": ["platform", "tenant"],
+      "navigation": {
+        "group": "inventory::nav.stock",
+        "icon": "warehouse",
+        "order": 30
+      },
       "fields": {
         "lowStockThreshold": {
           "type": "integer",
           "default": 5,
-          "min": 0
+          "min": 0,
+          "scopes": ["tenant"],
+          "client": true
         },
         "allowBackorders": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "lockable": true,
+          "approval": true
         }
+      },
+      "operations": {
+        "get": "inventory.settings.get@1",
+        "update": "inventory.settings.update@1",
+        "history": "inventory.settings.history@1",
+        "revert": "inventory.settings.revert@1",
+        "approve": "inventory.settings.approve@1"
       },
       "page": {
         "area": "admin",
@@ -1535,6 +2013,9 @@
       "channels": ["mail"],
       "templates": {
         "mail": "src/modules/orders/resources/order/order-placed.mail.tsx"
+      },
+      "data": {
+        "$ref": "#/schemas/orders.OrderPlacedData"
       }
     },
     {
@@ -1546,6 +2027,9 @@
       "channels": ["mail"],
       "templates": {
         "mail": "src/modules/orders/resources/order/order-receipt.mail.tsx"
+      },
+      "data": {
+        "$ref": "#/schemas/orders.OrderReceiptData"
       }
     }
   ],
@@ -1713,33 +2197,174 @@
       }
     ]
   },
-  "migrations": [
-    "src/modules/inventory/database/migrations/0001-create-inventory.migration.ts",
-    "src/modules/catalogue/database/migrations/0001-create-catalogue.migration.ts",
-    "src/modules/catalogue/database/migrations/0002-add-variant-barcode.migration.ts",
-    "src/modules/catalogue/database/migrations/0003-variants-barcode-index.migration.ts",
-    "src/modules/catalogue/database/migrations/0004-add-storefront-fields.migration.ts",
-    "src/modules/catalogue/database/migrations/0005-add-product-search-columns.migration.ts",
-    "src/modules/catalogue/database/migrations/0006-products-search-index.migration.ts",
-    "src/modules/orders/database/migrations/0001-create-orders.migration.ts",
-    "src/modules/orders/database/migrations/0002-add-order-paid-at.migration.ts",
-    "src/modules/orders/database/migrations/0003-orders-paid-at-index.migration.ts",
-    {
-      "from": "@acme/loyalty-kit/node",
-      "class": "CreateLoyaltyTablesMigration",
+  "migrations": {
+    "$comment": "Nothing is released yet, so every migration is pending and no step carries a SHA-256: the lock (`release` and each step's `sha256`) is written by the first changesets version, and from then the released prefix never moves.",
+    "search.0001_create_text_functions": {
+      "from": "@stackra/search",
+      "steps": [
+        {
+          "seq": 1,
+          "transactional": true
+        }
+      ],
       "createsSchema": true
     },
-    {
+    "loyalty_kit.0001_create_loyalty_tables": {
       "from": "@acme/loyalty-kit/node",
-      "class": "LedgerEntriesAccountIdIndexMigration",
-      "concurrent": true
+      "steps": [
+        {
+          "seq": 2,
+          "transactional": true
+        }
+      ],
+      "createsSchema": true
     },
-    {
+    "loyalty_kit.0002_ledger_entries_account_id_index": {
+      "from": "@acme/loyalty-kit/node",
+      "steps": [
+        {
+          "seq": 3,
+          "transactional": false
+        }
+      ]
+    },
+    "access_log.0001_create_access_log_entries": {
       "from": "@acme/access-log/node",
-      "class": "CreateAccessLogEntriesMigration",
+      "steps": [
+        {
+          "seq": 4,
+          "transactional": true
+        }
+      ],
       "createsSchema": true
+    },
+    "inventory.0001_create_inventory": {
+      "file": "src/modules/inventory/database/migrations/0001-create-inventory.migration.ts",
+      "steps": [
+        {
+          "seq": 5,
+          "transactional": true
+        }
+      ],
+      "createsSchema": true
+    },
+    "catalogue.0001_create_catalogue": {
+      "file": "src/modules/catalogue/database/migrations/0001-create-catalogue.migration.ts",
+      "steps": [
+        {
+          "seq": 6,
+          "transactional": true
+        }
+      ],
+      "createsSchema": true
+    },
+    "catalogue.0002_add_variant_barcode": {
+      "file": "src/modules/catalogue/database/migrations/0002-add-variant-barcode.migration.ts",
+      "steps": [
+        {
+          "seq": 7,
+          "transactional": true
+        }
+      ]
+    },
+    "catalogue.0003_variants_barcode_index": {
+      "file": "src/modules/catalogue/database/migrations/0003-variants-barcode-index.migration.ts",
+      "steps": [
+        {
+          "seq": 8,
+          "transactional": false
+        }
+      ]
+    },
+    "catalogue.0004_add_storefront_fields": {
+      "file": "src/modules/catalogue/database/migrations/0004-add-storefront-fields.migration.ts",
+      "steps": [
+        {
+          "seq": 9,
+          "transactional": true
+        }
+      ]
+    },
+    "catalogue.0005_add_product_search_columns": {
+      "file": "src/modules/catalogue/database/migrations/0005-add-product-search-columns.migration.ts",
+      "steps": [
+        {
+          "seq": 10,
+          "transactional": true
+        }
+      ],
+      "macros": ["@stackra/search#searchable"]
+    },
+    "catalogue.0006_products_search_index": {
+      "file": "src/modules/catalogue/database/migrations/0006-products-search-index.migration.ts",
+      "after": ["search.0001_create_text_functions"],
+      "steps": [
+        {
+          "seq": 11,
+          "transactional": false
+        },
+        {
+          "seq": 12,
+          "transactional": false
+        },
+        {
+          "seq": 13,
+          "transactional": false,
+          "inverse": "stated"
+        }
+      ]
+    },
+    "catalogue.0007_products_status_index": {
+      "file": "src/modules/catalogue/database/migrations/0007-products-status-index.migration.ts",
+      "steps": [
+        {
+          "seq": 14,
+          "transactional": false
+        }
+      ]
+    },
+    "orders.0001_create_orders": {
+      "file": "src/modules/orders/database/migrations/0001-create-orders.migration.ts",
+      "steps": [
+        {
+          "seq": 15,
+          "transactional": true
+        }
+      ],
+      "createsSchema": true
+    },
+    "orders.0002_add_order_paid_at": {
+      "file": "src/modules/orders/database/migrations/0002-add-order-paid-at.migration.ts",
+      "steps": [
+        {
+          "seq": 16,
+          "transactional": true
+        }
+      ]
+    },
+    "orders.0003_orders_paid_at_index": {
+      "file": "src/modules/orders/database/migrations/0003-orders-paid-at-index.migration.ts",
+      "steps": [
+        {
+          "seq": 17,
+          "transactional": false
+        }
+      ]
+    },
+    "orders.0004_orders_list_indexes": {
+      "file": "src/modules/orders/database/migrations/0004-orders-list-indexes.migration.ts",
+      "steps": [
+        {
+          "seq": 18,
+          "transactional": false
+        },
+        {
+          "seq": 19,
+          "transactional": false
+        }
+      ]
     }
-  ],
+  },
   "seeders": [
     {
       "key": "catalogue.demo",
@@ -1867,6 +2492,37 @@
           "items": {
             "$ref": "#/schemas/catalogue.StorefrontCollection"
           }
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["sku"],
+            "properties": {
+              "sku": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "barcode": {
+                "type": ["string", "null"],
+                "maxLength": 14
+              },
+              "trackInventory": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
+        },
+        "seo": {
+          "oneOf": [
+            {
+              "$ref": "#/schemas/catalogue.StorefrontSeo"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "x-stackra-generated-by": "ProductResource operations.create: the model's writable fields"
@@ -1900,6 +2556,57 @@
           "pattern": "^\\d{8,14}$"
         }
       }
+    },
+    "catalogue.ListProductsInput": {
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "enum": [20, 50, 100],
+          "default": 20
+        },
+        "sort": {
+          "type": "object",
+          "required": ["key", "direction"],
+          "properties": {
+            "key": {
+              "type": "string",
+              "enum": ["slug"]
+            },
+            "direction": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          },
+          "default": {
+            "key": "slug",
+            "direction": "asc"
+          }
+        },
+        "filter": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/schemas/catalogue.ProductStatus"
+              }
+            }
+          }
+        },
+        "search": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        }
+      },
+      "x-stackra-table": "ProductResource",
+      "x-stackra-generated-by": "ProductResource operations.list: TableInput narrowed to the table"
     },
     "catalogue.ListStorefrontProductsInput": {
       "type": "object",
@@ -2545,14 +3252,79 @@
         },
         "limit": {
           "type": "integer",
-          "minimum": 1,
-          "maximum": 100,
+          "enum": [20, 50, 100],
           "default": 20
         },
-        "status": {
-          "$ref": "#/schemas/orders.OrderStatus"
+        "sort": {
+          "type": "object",
+          "required": ["key", "direction"],
+          "properties": {
+            "key": {
+              "type": "string",
+              "enum": ["createdAt", "totals.totalMinor", "paidAt"]
+            },
+            "direction": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          },
+          "default": {
+            "key": "createdAt",
+            "direction": "desc"
+          }
+        },
+        "filter": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/schemas/orders.OrderStatus"
+              }
+            },
+            "createdAt": {
+              "type": "object",
+              "required": ["from", "to"],
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "to": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "paidAt": {
+              "type": "object",
+              "required": ["from", "to"],
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "to": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "customerId": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 100,
+              "items": {
+                "type": "string",
+                "pattern": "^usr_[0-9A-Za-z]{26}$"
+              }
+            }
+          }
         }
-      }
+      },
+      "x-stackra-table": "OrderResource"
     },
     "orders.ListOrdersOutput": {
       "type": "object",
@@ -2601,6 +3373,25 @@
         },
         "reason": {
           "$ref": "#/schemas/orders.CancelReason"
+        }
+      }
+    },
+    "orders.OrderKpisInput": {
+      "allOf": [
+        {
+          "$ref": "@stackra/panel#/schemas/TimeRangeInput"
+        }
+      ]
+    },
+    "orders.OrderKpisOutput": {
+      "type": "object",
+      "required": ["revenue", "orders"],
+      "properties": {
+        "revenue": {
+          "$ref": "@stackra/panel#/schemas/MoneyMetric"
+        },
+        "orders": {
+          "$ref": "@stackra/panel#/schemas/CountMetric"
         }
       }
     },
@@ -2680,6 +3471,27 @@
         }
       }
     },
+    "orders.OrderPlacedData": {
+      "type": "object",
+      "required": ["order", "url"],
+      "properties": {
+        "order": {
+          "$ref": "#/schemas/orders.OrderView"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "orders.OrderReceiptData": {
+      "type": "object",
+      "required": ["order"],
+      "properties": {
+        "order": {
+          "$ref": "#/schemas/orders.OrderView"
+        }
+      }
+    },
     "orders.OrderStatus": {
       "type": "string",
       "enum": ["pending_payment", "paid", "cancelled", "expired"]
@@ -2710,7 +3522,7 @@
     },
     "orders.OrderView": {
       "type": "object",
-      "required": ["id", "status", "totals", "lines", "createdAt"],
+      "required": ["id", "status", "customerId", "totals", "lines", "createdAt", "paidAt"],
       "properties": {
         "id": {
           "type": "string",
@@ -2718,6 +3530,10 @@
         },
         "status": {
           "$ref": "#/schemas/orders.OrderStatus"
+        },
+        "customerId": {
+          "type": "string",
+          "pattern": "^usr_[0-9A-Za-z]{26}$"
         },
         "totals": {
           "$ref": "#/schemas/orders.OrderTotals"
@@ -2730,6 +3546,10 @@
         },
         "createdAt": {
           "type": "string",
+          "format": "date-time"
+        },
+        "paidAt": {
+          "type": ["string", "null"],
           "format": "date-time"
         }
       }
@@ -2768,34 +3588,6 @@
         "of": "orders.OrderView",
         "date": "2027-03-01",
         "sunset": "2028-03-01"
-      }
-    },
-    "orders.OrdersTodayInput": {
-      "type": "object",
-      "properties": {}
-    },
-    "orders.OrdersTodayOutput": {
-      "type": "object",
-      "required": ["count", "revenueMinor", "currency", "hourly"],
-      "properties": {
-        "count": {
-          "type": "integer"
-        },
-        "revenueMinor": {
-          "type": "integer"
-        },
-        "currency": {
-          "type": "string",
-          "pattern": "^[A-Z]{3}$"
-        },
-        "hourly": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          },
-          "minItems": 24,
-          "maxItems": 24
-        }
       }
     },
     "orders.PricedLine": {

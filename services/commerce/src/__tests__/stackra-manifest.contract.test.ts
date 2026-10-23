@@ -5,9 +5,9 @@
  *          renamed refusal code), that every broadcast declares a permission and an audience
  *          (OrderPaid's are `orders.order.read` and the tenant) and that openapi.json is its
  *          projection.
- * Boundary: contract tier; reads the two committed files at the member root, boots nothing. A
- *           break needs a dated change, a new event version or a new key; a rename needs
- *           `@Renamed`, which `stackra gen --check` enforces separately.
+ * Boundary: contract tier; reads the two committed files at the member root, boots nothing. A break
+ *           needs a dated change, a new event version or a new key; a rename needs `@Renamed`,
+ *           which `stackra gen --check` enforces separately.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 10, 20 and 22), ADR 0158, ADR 0131, ADR 0260
  */

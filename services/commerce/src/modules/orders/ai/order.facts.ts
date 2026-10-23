@@ -1,19 +1,21 @@
 /**
  * Stackra file contract:
  * Purpose: facts about one order for an agent's context window, plus what the agent may do next.
- * Boundary: attached when a conversation names an order id (the model's prefix comes from the
- *           base factory's argument). Permission-checked reads through the same service the
- *           queries use, public ids only (ADR 0156 guardrails).
+ * Boundary: attached when a conversation names an order id (the model, and so the `ord` prefix,
+ *           comes from the type argument `Facts<Order>`; nothing passes it at run time).
+ *           Permission-checked reads through the same service the queries use, public ids only
+ *           (ADR 0156 guardrails).
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 11, 16 and 23), ADR 0245 (context facts), ADR 0155
+ * Governing contract: ADR 0294 (decisions 11, 16 and 23, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0245 (context facts), ADR 0155
  */
 import { type ContextFacts, Facts, type FactsContext } from "@stackra/ai";
-import { Order } from "#modules/orders/models/order.model";
+import type { Order } from "#modules/orders/models/order.model";
 import type { OrderStateMachine } from "#modules/orders/models/order.state-machine";
 import type { OrderService } from "#modules/orders/services/order.service";
 
 /** One sentence and the order view, read as the agent's principal. */
-export class OrderFacts extends Facts(Order) {
+export class OrderFacts extends Facts<Order> {
   /** @param lifecycle - tells the agent whether a cancel would be allowed now. */
   constructor(
     private readonly orders: OrderService,

@@ -5,14 +5,16 @@
  *          (runway.yaml beside this file) or how its packages behave (src/config/*).
  * Boundary: static data that gen reads from the syntax tree without running it: enum values and
  *           literals, never a function or an environment read. The member key (`commerce`) comes
- *           from the package name and the root module is src/commerce.module.ts, so neither is
- *           written here. Consumed services are inferred from the generated clients the code
- *           injects; infrastructure needs (database, queues, crons, buckets) are derived from the
- *           modules into stackra.manifest.json. Health checks live here; runway tunes their
- *           thresholds.
+ *           from the package name, so it is not written here. There is no authored root module: the
+ *           member's modules are the folders under src/modules/ and its package imports are the
+ *           package.json dependencies that ship a module (@acme/loyalty-kit, @acme/access-log), so
+ *           gen writes `CommerceModule` into `.stackra/gen/module.ts`. Consumed services are
+ *           inferred from the generated clients the code injects; infrastructure needs (database,
+ *           queues, crons, buckets) are derived from the modules into stackra.manifest.json. Health
+ *           checks live here; runway tunes their thresholds.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 12 and 20), ADR 0295 (decisions 1, 4 and 7), ADR 0159,
- *                     ADR 0190
+ * Governing contract: ADR 0294 (decisions 12 and 20, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0295 (decisions 1, 4 and 7), ADR 0159, ADR 0190
  */
 import { defineService } from "@stackra/app";
 import { MigrationRunner } from "@stackra/config";

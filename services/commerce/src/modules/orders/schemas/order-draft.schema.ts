@@ -3,8 +3,8 @@
  * Purpose: `OrderDraft`: the order as the extension points see it: the customer (from the actor),
  *          the quote currency, priced lines and `extensions`, a map from an extending module's key
  *          to the input that module declared (`extensions.loyalty`).
- * Boundary: a shape class shared by the pricing service, the workflow and the extension point.
- *           Gen types `extensions` per extending module from each extension's `input` option.
+ * Boundary: a shape class shared by the pricing service, the workflow and the extension point. Gen
+ *           types `extensions` per extending module from each extension's `input` option.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4 and 26), ADR 0265 (typed extensions)
  */

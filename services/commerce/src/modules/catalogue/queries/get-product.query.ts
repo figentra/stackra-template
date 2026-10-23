@@ -9,16 +9,10 @@
  * Governing contract: ADR 0294 (decisions 2, 16 and 21), ADR 0098, ADR 0155
  */
 import { Query, type QueryContext } from "@stackra/actions";
-import { ActorKind, type PublicId } from "@stackra/contracts";
-import { Schema } from "@stackra/validation";
+import { ActorKind } from "@stackra/contracts";
+import type { GetProductInput } from "#modules/catalogue/schemas/get-product-input.schema";
 import type { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 import type { ProductService } from "#modules/catalogue/services/product.service";
-
-/** The product to read, by public id. */
-export class GetProductInput extends Schema {
-  /** The product's public id. */
-  productId!: PublicId<"prd">;
-}
 
 /** No record rule: the permission alone decides; also the View page of ProductResource. */
 export class GetProductQuery extends Query({

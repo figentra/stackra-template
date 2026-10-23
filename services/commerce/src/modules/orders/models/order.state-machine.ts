@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: governs `Order.status`: the allowed transitions and the events each one records.
- * Boundary: each method is a transition. The decorator checks `from`, runs the body in the
- *           caller's unit of work, writes `to`, and otherwise refuses with
+ * Boundary: bound to its model by the type argument (`StateMachine<Order>`); `field` names the
+ *           state column. Each method is a transition. The decorator checks `from`, runs the body
+ *           in the caller's unit of work, writes `to`, and otherwise refuses with
  *           `transition_not_allowed`. Bodies set fields and record events; recorded events reach
  *           the outbox when the unit of work flushes, so a rolled-back change emits nothing.
  *           Inherited: `can(order, "cancel")` and `available(order)`. No other code writes
@@ -15,10 +16,10 @@ import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
 import { OrderCancelled } from "#modules/orders/events/order-cancelled.event";
 import { OrderPaid } from "#modules/orders/events/order-paid.event";
-import { Order } from "#modules/orders/models/order.model";
+import type { Order } from "#modules/orders/models/order.model";
 
 /** `pending_payment` is the only state with exits; `paid`, `cancelled` and `expired` are final. */
-export class OrderStateMachine extends StateMachine(Order, { field: "status" }) {
+export class OrderStateMachine extends StateMachine<Order>({ field: "status" }) {
   /**
    * Writes the payment facts and records `order.paid` with the paid total.
    * @param capturedAt - the capture time from the event, so a redelivery keeps the same `paidAt`.

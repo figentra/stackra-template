@@ -2,11 +2,14 @@
  * Stackra file contract:
  * Purpose: the permissions of the order model: `orders.order.<verb>`, each with its risk.
  * Boundary: statics only; the value is the risk and nothing else. Names are derived from the
- *           module, the class (minus `Permissions`) and the static. An action's permission
- *           defaults from its key (`order.cancel` → `cancel`); OrderPolicy refines a verb per
- *           record. Labels are the derived i18n keys `orders::permissions.order.<verb>`.
+ *           module, the class (minus `Permissions`) and the static. An action's permission defaults
+ *           from its key (`order.cancel` → `cancel`); OrderPolicy refines a verb per record. Every
+ *           button OrderResource places needs its verb here (`cancel`, `export`), or gen fails
+ *           (`action_permission_missing`, `export_permission_missing`). Labels are the derived i18n
+ *           keys `orders::permissions.order.<verb>`.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0132, ADR 0208 (names), ADR 0099 (risk)
+ * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0132, ADR 0208 (names), ADR 0099 (risk),
+ *                     ADR 0164 (as amended for v3.1)
  */
 import { Permission, Permissions } from "@stackra/iam";
 
@@ -23,4 +26,7 @@ export class OrderPermissions extends Permissions {
 
   /** Expire unpaid orders in bulk; held only by the system actor, so no role may grant it. */
   static readonly expire = Permission.L2.system();
+
+  /** Export the order list (OrderResource's Export button); every export is access-logged. */
+  static readonly export = Permission.L1;
 }

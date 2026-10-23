@@ -2,15 +2,15 @@
  * Stackra file contract:
  * Purpose: boots the service from its generated wiring on memory drivers and checks that the
  *          runtime registry matches the committed stackra.manifest.json.
- * Boundary: unit tier (no database: the memory repository driver); the `.int` boot against
- *           Postgres lives in commerce as the example.
+ * Boundary: unit tier (no database: the memory repository driver); the `.int` boot against Postgres
+ *           lives in commerce as the example.
  * Runtime: node
  * Governing contract: ADR 0143, ADR 0144, ADR 0263, ADR 0294 (decisions 20 and 22)
  */
 import { createTestingModule } from "@stackra/container/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { manifest } from "#stackra/manifest";
-import { NotificationsModule } from "#src/notifications.module";
+import { NotificationsModule } from "#stackra/module";
 
 /** Guards the notifications service boot and its committed manifest. */
 describe(NotificationsModule, () => {

@@ -1,16 +1,20 @@
 /**
  * Stackra file contract:
  * Purpose: the write side of the order aggregate and its named reads: create pending, attach a
- *          payment, mark paid, cancel or expire, the expiry and revenue reads, and the one mapping
- *          from row to OrderView.
- * Boundary: exported to sibling modules; runs inside the caller's transaction. CrudService(Order)
- *           supplies the inherited reads and writes (`find`, `findOneOrFail`, `count`, `create`).
- *           State moves only through OrderStateMachine; events are recorded on the aggregate and
- *           reach the outbox when the unit of work flushes, so a rolled-back change emits nothing.
- *           Access to an order is logged against its customer (`@AccessLogged`).
+ *          payment, mark paid, cancel or expire, the expiry read, and the one mapping from row to
+ *          OrderView.
+ * Boundary: exported to sibling modules; runs inside the caller's transaction. `CrudService<Order>`
+ *           (the model is the type argument) supplies the inherited reads and writes (`find`,
+ *           `findOneOrFail`, `count`, `create`), the table read the list query applies (`table`:
+ *           sort, filters and keyset cursor from a closed TableInput) and the aggregates the KPI
+ *           query computes (`metrics`). State moves only through OrderStateMachine; events are
+ *           recorded on the aggregate and reach the outbox when the unit of work flushes, so a
+ *           rolled-back change emits nothing. Access to an order is logged against its customer
+ *           (`@AccessLogged`).
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 6, 13, 16 and 27), ADR 0105 (as amended), ADR 0136,
- *                     ADR 0141, ADR 0212, ADR 0220 (money)
+ * Governing contract: ADR 0294 (decisions 6, 13, 16 and 27, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0105 (as amended), ADR 0136, ADR 0141, ADR 0212,
+ *                     ADR 0220 (money)
  */
 import { AccessLogged } from "@acme/access-log";
 import { DataClassification } from "@acme/access-log/contracts";
@@ -21,7 +25,7 @@ import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
 import { OrderNotPayableError } from "#modules/orders/errors/order-not-payable.error";
 import { OrderPlaced } from "#modules/orders/events/order-placed.event";
-import { Order } from "#modules/orders/models/order.model";
+import type { Order } from "#modules/orders/models/order.model";
 import type { OrderStateMachine } from "#modules/orders/models/order.state-machine";
 import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 import type { OrderTotals } from "#modules/orders/schemas/order-totals.schema";
@@ -29,13 +33,13 @@ import { OrderView } from "#modules/orders/schemas/order-view.schema";
 
 /**
  * No resource operation is set to `true` for orders, so gen writes no standard action from this
- * service: `order.list` and `order.get` are hand-written queries.
+ * service: `order.list` and `order.get` are hand-written queries over `table` and `findOneOrFail`.
  */
 @AccessLogged({
   classification: DataClassification.Pseudonymous,
   subjects: "customerId",
 })
-export class OrderService extends CrudService(Order) {
+export class OrderService extends CrudService<Order> {
   /** @param lifecycle - the only writer of `Order.status`. */
   constructor(private readonly lifecycle: OrderStateMachine) {
     super();
@@ -112,16 +116,12 @@ export class OrderService extends CrudService(Order) {
     );
   }
 
-  /** Paid orders captured since `since`; the rows of the revenue-today query. */
-  findPaidSince(since: Date): Promise<Order[]> {
-    return this.find({ status: OrderStatus.Paid, paidAt: { $gte: since } });
-  }
-
   /** The one mapping from row to OrderView; the lines must be populated. */
   toView(order: Order): OrderView {
     return OrderView.create({
       id: order.id,
       status: order.status,
+      customerId: order.customerId,
       totals: {
         currency: order.total.currency,
         subtotalMinor: order.subtotal.minor,
@@ -134,6 +134,7 @@ export class OrderService extends CrudService(Order) {
         unitPriceMinor: line.unitPrice.minor,
       })),
       createdAt: order.createdAt,
+      paidAt: order.paidAt,
     });
   }
 }

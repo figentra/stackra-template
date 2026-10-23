@@ -1,28 +1,28 @@
 /**
  * Stackra file contract:
  * Purpose: prices an order: the sellable check (catalogue), unit prices (the pricing service), the
- *          `adjustTotals` extensions, then the `verifyPlacement` extensions.
- * Boundary: computation plus reads; no writes. The single place where order totals are produced,
- *           so every extension of an amount is listed under `orders.adjustTotals` in
- *           `#stackra/extensions`. Arithmetic is `Money` from @stackra/money (no hand-summed
- *           integers); the wire keeps integer minor units (ADR 0220).
+ *          `verifyPlacement` (before) extensions, then the `adjustTotals` (after) extensions.
+ * Boundary: a plain `Service`: computation plus reads; no writes. The one caller of the orders
+ *           extension point and the single place where order totals are produced, so every
+ *           extension of an amount is listed under `orders.adjustTotals` in `#stackra/extensions`.
+ *           Arithmetic is `Money` from @stackra/money (no hand-summed integers); the wire keeps
+ *           integer minor units (ADR 0220).
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 16 and 17), ADR 0260 (a call is the authoritative answer
- *                     now), ADR 0265, ADR 0220 (money)
+ * Governing contract: ADR 0294 (decisions 16 and 17, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0260 (a call is the authoritative answer now),
+ *                     ADR 0265, ADR 0220 (money)
  */
 import type { ActionContext } from "@stackra/actions";
 import { Service } from "@stackra/app";
 import type { Logger } from "@stackra/contracts";
 import { Money } from "@stackra/money";
-import type { PricingClient } from "#stackra/clients";
+import type { PricingClient } from "#stackra/clients/pricing";
 import type { ProductService } from "#modules/catalogue/services/product.service";
+import { DRAFT_PRICED } from "#modules/orders/constants/draft-priced.constant";
 import type { OrderExtensionPoint } from "#modules/orders/extensions/order.extension-point";
 import type { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
 import { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 import { OrderTotals } from "#modules/orders/schemas/order-totals.schema";
-
-/** The structured log event this service writes once per priced draft. */
-const DRAFT_PRICED = "orders.draft_priced";
 
 /** Turns a create-order input into a priced, verified draft; the workflow's first step calls it. */
 export class OrderPricingService extends Service {
@@ -30,7 +30,7 @@ export class OrderPricingService extends Service {
    * @param products - catalogue's exported service; gen records the orders → catalogue edge.
    * @param pricing - the generated pricing client; the transport (in-process or RPC) follows the
    *                  root runway topology.
-   * @param extensions - the orders extension points; each runs its implementers in `order`.
+   * @param extensions - the orders extension point; each slot runs its extensions in `order`.
    * @param logger - the contracts port; @stackra/logger supplies the driver and the redaction that
    *                 src/config/logging.config.ts configures.
    */
@@ -66,7 +66,8 @@ export class OrderPricingService extends Service {
   }
 
   /**
-   * Subtotal, then every `adjustTotals` implementer in `order`; only this method computes a total.
+   * Subtotal, then every `adjustTotals` extension in `order`, each receiving the previous result;
+   * only this method computes a total.
    * @returns totals whose `totalMinor` is subtotal plus adjustments, clamped at zero so a generous
    *          discount never refunds.
    */
@@ -97,10 +98,13 @@ export class OrderPricingService extends Service {
   }
 
   /**
-   * Lets other modules refuse the order before anything is reserved.
-   * @throws Refusal the first implementer's refusal, with its own code (`insufficient_points`).
+   * Lets other modules refuse the order before anything is reserved. A `before` slot may also hand
+   * back a replacement draft of the same type, so the draft the workflow prices is the one
+   * returned.
+   * @throws Refusal the first extension's refusal, with its own code (`insufficient_points`).
    */
-  async verify(draft: OrderDraft, ctx: ActionContext): Promise<void> {
-    await this.extensions.verifyPlacement(draft, ctx);
+  async verify(draft: OrderDraft, ctx: ActionContext): Promise<OrderDraft> {
+    const [verified] = await this.extensions.verifyPlacement(draft, ctx);
+    return verified;
   }
 }

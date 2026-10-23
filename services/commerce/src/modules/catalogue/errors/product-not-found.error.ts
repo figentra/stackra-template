@@ -3,8 +3,8 @@
  * Purpose: the refusal when no product with the given id or slug is visible to the caller.
  * Boundary: a refusal class: kind `NotFound` (HTTP 404 through the generated adapter), the code is
  *           derived from the class name (`product_not_found`) and the fields are the envelope's
- *           details. A draft or archived slug is the same refusal to the public, so the state
- *           never leaks.
+ *           details. A draft or archived slug is the same refusal to the public, so the state never
+ *           leaks.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0140 (envelope and kinds), ADR 0232
  */

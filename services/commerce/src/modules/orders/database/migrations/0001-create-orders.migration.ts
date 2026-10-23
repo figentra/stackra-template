@@ -1,47 +1,53 @@
 /**
  * Stackra file contract:
  * Purpose: the first tables of the orders module, `orders.orders` and `orders.order_lines`, with
- *          every column and `@Index` the models declared at the time.
- * Boundary: written by `stackra db diff` from `orders.order` and `orders.order_line`, reviewed,
- *           then committed and never edited. It changes only the module's own Postgres schema
- *           (`orders`); the table constants carry the qualified names, and gen creates the schema
- *           before the module's first migration. `stackra db compile` turns the blueprint into SQL
- *           with the lock and statement timeouts. Forward only: there is no `down()`.
+ *          every column and index the models declared at the time.
+ * Boundary: a frozen snapshot, written by `stackra db diff` from `orders.order` and
+ *           `orders.order_line`, reviewed, then never edited once on main: it imports only
+ *           @stackra/database, and every table name, column name and enum value is a literal, so a
+ *           later model change can never rewrite it (`stackra db check` replays the history and
+ *           diffs it against the models). Table names are relative to the module's Postgres schema
+ *           (`orders`); gen creates the schema before the module's first migration. The partner
+ *           macros write the columns of the trait or field type they are named after
+ *           (`hasPublicId`, `belongsToTenant`, `timestamps`, `userStamps`, `versioned`, `money`),
+ *           and gen fails if their output differs from the models. Indexes on tables created here
+ *           build inside the one transaction (additive: lock 3 s, statement 30 s). No `down()`: gen
+ *           derives the dev inverse; production is forward only.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 13, 20, 27 and 28), ADR 0159 (as amended), ADR 0231
- *                     (index and key names)
+ * Governing contract: ADR 0294 (decisions 13, 20 and 27, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0159 (as amended), ADR 0239 (tenant isolation),
+ *                     ADR 0231 (index and key names)
  */
-import { type Blueprint, Migration } from "@stackra/database";
-import { OrderLines, Orders } from "#stackra/tables";
-import { OrderStatus } from "#modules/orders/enums/order-status.enum";
+import { type Blueprint, Migration, type SchemaBuilder } from "@stackra/database";
 
 /** `paid_at` is not here: it arrived later as an expand step (0002). */
 export class CreateOrdersMigration extends Migration {
   /** Creates both tables, the customer index and the expiry job's status index. */
-  up(schema: Blueprint): void {
-    schema.create(Orders, (t) => {
-      t.publicId("ord");
-      t.tenant();
+  up(schema: SchemaBuilder): void {
+    schema.create("orders", (t: Blueprint) => {
+      t.hasPublicId("ord");
+      t.belongsToTenant();
       t.timestamps();
       t.userStamps();
       t.versioned();
-      t.string(Orders.columns.customerId, 30);
-      t.enum(Orders.columns.status, OrderStatus); // text with ck_orders_status
-      t.money(Orders.columns.subtotal); // subtotal_minor bigint, subtotal_currency char(3)
-      t.jsonb(Orders.columns.adjustments);
-      t.money(Orders.columns.total);
-      t.string(Orders.columns.paymentId, 64).nullable();
-      t.index([Orders.columns.customerId]); // idx_orders_customer_id
-      // idx_orders_tenant_id_status_created_at, the expiry job's scan
-      t.index([Orders.columns.tenantId, Orders.columns.status, Orders.columns.createdAt]);
+      t.string("customer_id", 30);
+      t.enum("status", ["pending_payment", "paid", "cancelled", "expired"]).default(
+        "pending_payment",
+      );
+      t.money("subtotal");
+      t.jsonb("adjustments").default([]);
+      t.money("total");
+      t.string("payment_id", 64).nullable();
+      t.index(["customer_id"]);
+      t.index(["tenant_id", "status", "created_at"]);
     });
-    schema.create(OrderLines, (t) => {
-      t.publicId("oln");
-      t.tenant();
-      t.belongsTo(Orders).cascadeOnDelete(); // fk_order_lines_order_id and its index
-      t.link(OrderLines.columns.variant); // variant_id varchar(30), indexed, no foreign key
-      t.integer(OrderLines.columns.quantity);
-      t.money(OrderLines.columns.unitPrice);
+    schema.create("order_lines", (t: Blueprint) => {
+      t.hasPublicId("oln");
+      t.belongsToTenant();
+      t.belongsTo("orders", { column: "order_id" }).cascadeOnDelete();
+      t.link("variant_id");
+      t.integer("quantity");
+      t.money("unit_price");
     });
   }
 }

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/runway-service.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/service.json
 # Stackra file contract:
 # Purpose: WHAT the notifications member needs per environment beyond what gen derives from
 #          stackra.manifest.json: the secret names it reads, the sizes of its own stores (database,
@@ -8,10 +8,11 @@
 # Boundary: never WHERE it runs or how it is packed: deployables, groups, `isolate`, cpu, memory,
 #           instances and worker splits are the root runway's topology (staging groups it with
 #           commerce, production gives it its own group). No secret value (Stackra ADR 0173), no
-#           business value (src/config/*, settings). Every resource here is shared, so there is no
-#           `requires` block. Health checks are declared in stackra.config.ts; this file tunes only
-#           their thresholds (Stackra ADR 0190). The `delivery` dead-letter queue is where
-#           DeliverMessageAction's `deadLetter: true` lands.
+#           business value (src/config/*, settings). Every resource here is shared (its queues and
+#           database fit the shared pools), so there is no `requires` block. Health checks are
+#           declared in stackra.config.ts; this file tunes only their thresholds (Stackra ADR
+#           0190). The `delivery` dead-letter queue is where DeliverMessageAction's
+#           `deadLetter: true` lands.
 # Runtime: node
 # Governing contract: Stackra ADR 0296 (member runway), ADR 0168 (as amended), ADR 0173, ADR 0190,
 #                     ADR 0238 (one logical database per service), ADR 0294 (config keys), ADR 0223
@@ -19,10 +20,12 @@
 $schema: "@stackra/runway/schema/service.json"
 version: 3
 
-# Every @Secret of src/config/* and the WebhookEvent's signing secret; gen fails on a missing one.
-# Names only. The Web Push private key lives here, not in a client: this service signs the pushes,
-# and the console holds only the public half (`VITE_WEB_PUSH_VAPID_PUBLIC_KEY`).
-secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
+# Every platform @Secret: the config shape's (src/schemas/*) and ResendIntegration's (the platform
+# key and the signing secret of the platform account's webhooks); gen fails on a missing one. Names
+# only. A tenant's own Resend secrets live in the connection store, never here. The Web Push private
+# key lives here, not in a client: this service signs the pushes, and the console holds only the
+# public half (`VITE_WEB_PUSH_VAPID_PUBLIC_KEY`).
+secrets: [RESEND_API_KEY, RESEND_WEBHOOK_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
 
 # Thresholds only; the path and the checks are stackra.config.ts `health`.
 health:

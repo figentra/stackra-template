@@ -5,11 +5,10 @@
  *          `messages.inbox_message.created.v1`.
  * Boundary: an integration event recorded on the InboxMessage by the inbox listener that creates
  *           the entry. It is an integration event because only those may broadcast. The audience is
- *           the principal: only that principal's own sessions holding
- *           `messages.inbox_message.read` receive a data-free refresh, on
- *           `principal.{principalId}.messages`, never the payload, and refetch their own inbox; no
- *           other session of the tenant hears about one person's inbox. It carries ids and the
- *           kind only, never the entry's data.
+ *           the principal: only that principal's own sessions holding `messages.inbox_message.read`
+ *           receive a data-free refresh, on `principal.{principalId}.messages`, never the payload,
+ *           and refetch their own inbox; no other session of the tenant hears about one person's
+ *           inbox. It carries ids and the kind only, never the entry's data.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078, ADR 0225 (broadcast)
  */

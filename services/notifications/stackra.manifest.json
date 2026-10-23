@@ -63,7 +63,7 @@
       "output": {
         "$ref": "#/schemas/messages.DeliverMessageOutput"
       },
-      "refusals": ["mail_provider_unavailable"]
+      "refusals": ["provider_unavailable"]
     },
     {
       "key": "messages.inbox_message.list@1",
@@ -79,7 +79,10 @@
         "path": "/inbox-messages",
         "derived": true
       },
-      "tool": "auto",
+      "tool": {
+        "name": "messages_inbox_message_list",
+        "default": true
+      },
       "pagination": "cursor",
       "input": {
         "$ref": "#/schemas/messages.ListInboxMessagesInput"
@@ -178,6 +181,21 @@
     {
       "key": "messages.inbox_message.update",
       "risk": "L0"
+    },
+    {
+      "key": "messages.resend.read",
+      "risk": "L0",
+      "generatedBy": "ResendIntegration"
+    },
+    {
+      "key": "messages.resend.connect",
+      "risk": "L2",
+      "generatedBy": "ResendIntegration"
+    },
+    {
+      "key": "messages.resend.disconnect",
+      "risk": "L2",
+      "generatedBy": "ResendIntegration"
     }
   ],
   "models": [
@@ -199,26 +217,51 @@
       "key": "messages",
       "class": "MessagesSettings",
       "scopes": ["user"],
-      "fields": {
-        "orderUpdates": {
-          "type": "boolean",
-          "default": true
+      "sections": {
+        "orders": {
+          "class": "OrderMessageSettings",
+          "fields": {
+            "updates": {
+              "type": "boolean",
+              "default": true,
+              "client": true,
+              "renamed": ["orderUpdates"]
+            },
+            "receipts": {
+              "type": "boolean",
+              "default": true,
+              "client": true,
+              "renamed": ["orderReceipts"]
+            }
+          }
         },
-        "orderReceipts": {
-          "type": "boolean",
-          "default": true
-        },
-        "productUpdates": {
-          "type": "boolean",
-          "default": false
-        },
-        "marketing": {
-          "type": "boolean",
-          "default": false
+        "promotions": {
+          "class": "PromotionMessageSettings",
+          "fields": {
+            "productUpdates": {
+              "type": "boolean",
+              "default": false,
+              "client": true,
+              "renamed": ["productUpdates"]
+            },
+            "marketing": {
+              "type": "boolean",
+              "default": false,
+              "client": true,
+              "renamed": ["marketing"]
+            }
+          }
         }
       },
+      "operations": {
+        "get": "messages.settings.get@1",
+        "update": "messages.settings.update@1",
+        "history": "messages.settings.history@1",
+        "revert": "messages.settings.revert@1"
+      },
       "page": {
-        "area": "app"
+        "area": "app",
+        "path": "/me/preferences"
       }
     }
   ],
@@ -235,29 +278,76 @@
     {
       "key": "messages.resend",
       "class": "ResendIntegration",
+      "file": "src/modules/messages/integrations/resend.integration.ts",
       "provider": "resend",
-      "category": "email"
+      "category": "email",
+      "levels": ["tenant"],
+      "multiple": false,
+      "auth": {
+        "type": "api_key",
+        "header": "Authorization",
+        "format": "Bearer {apiKey}"
+      },
+      "baseUrl": "https://api.resend.com",
+      "hosts": ["api.resend.com"],
+      "rateLimits": [
+        {
+          "requests": 10,
+          "per": "1s",
+          "by": "credential"
+        }
+      ],
+      "retry": {
+        "idempotencyHeader": "Idempotency-Key"
+      },
+      "health": {
+        "every": "6h",
+        "failAfter": 3
+      },
+      "webhooks": {
+        "scheme": "standard_webhooks",
+        "secret": "{webhookSecret}",
+        "routing": "url",
+        "eventType": {
+          "path": "type"
+        },
+        "path": "/webhooks/messages/resend/:connectionId",
+        "events": ["messages.resend.email.received"]
+      },
+      "listing": {
+        "docsUrl": "https://resend.com/docs",
+        "listed": true,
+        "label": "messages::integrations.resend.label",
+        "description": "messages::integrations.resend.description",
+        "logo": "messages::integrations/resend.svg"
+      },
+      "secrets": {
+        "apiKey": "RESEND_API_KEY",
+        "webhookSecret": "RESEND_WEBHOOK_SECRET"
+      },
+      "permissions": [
+        "messages.resend.read",
+        "messages.resend.connect",
+        "messages.resend.disconnect"
+      ]
     }
   ],
   "connections": [
     {
       "key": "messages.resend",
       "class": "ResendConnection",
+      "file": "src/modules/messages/connections/resend.connection.ts",
       "integration": "messages.resend",
-      "fields": ["apiKey", "fromAddress"],
+      "fields": ["apiKey", "fromAddress", "webhookSecret"],
       "secrets": {
-        "apiKey": "RESEND_TENANT_API_KEY"
-      }
+        "apiKey": "RESEND_TENANT_API_KEY",
+        "webhookSecret": "RESEND_TENANT_WEBHOOK_SECRET"
+      },
+      "check": true,
+      "subscribe": false
     }
   ],
   "errors": [
-    {
-      "code": "mail_provider_unavailable",
-      "kind": "unavailable",
-      "category": "unavailable",
-      "retryable": true,
-      "module": "messages"
-    },
     {
       "code": "inbox_message_not_found",
       "kind": "not_found",
@@ -266,10 +356,28 @@
       "module": "messages"
     }
   ],
-  "migrations": [
-    "src/modules/messages/database/migrations/0001-create-messages.migration.ts",
-    "src/modules/messages/database/migrations/0002-create-inbox-messages.migration.ts"
-  ],
+  "migrations": {
+    "$comment": "Nothing is released yet, so every migration is pending and no step carries a SHA-256: the lock (`release` and each step's `sha256`) is written by the first changesets version, and from then the released prefix never moves.",
+    "messages.0001_create_messages": {
+      "file": "src/modules/messages/database/migrations/0001-create-messages.migration.ts",
+      "steps": [
+        {
+          "seq": 1,
+          "transactional": true
+        }
+      ],
+      "createsSchema": true
+    },
+    "messages.0002_create_inbox_messages": {
+      "file": "src/modules/messages/database/migrations/0002-create-inbox-messages.migration.ts",
+      "steps": [
+        {
+          "seq": 2,
+          "transactional": true
+        }
+      ]
+    }
+  },
   "seeders": [],
   "infra": {
     "database": "notifications",
@@ -278,14 +386,16 @@
     "queues": ["delivery", "inbox"],
     "crons": [],
     "buckets": [],
-    "secrets": ["RESEND_API_KEY", "RESEND_INBOUND_SIGNING_SECRET", "WEB_PUSH_VAPID_PRIVATE_KEY"],
-    "configKeys": ["notifications.delivery"]
+    "secrets": ["RESEND_API_KEY", "RESEND_WEBHOOK_SECRET", "WEB_PUSH_VAPID_PRIVATE_KEY"],
+    "configKeys": ["notifications.delivery"],
+    "egress": ["api.resend.com"]
   },
   "assets": {
     "lang": {
       "messages": ["en", "ar"]
     },
-    "overridable": ["messages::lang/*"]
+    "overridable": ["messages::lang/*"],
+    "integrations": ["messages::integrations/resend.svg"]
   },
   "schemas": {
     "messages.DeliverMessageInput": {
@@ -321,22 +431,20 @@
     },
     "messages.InboundMailReceived": {
       "type": "object",
-      "required": ["fromAddress", "subject", "text", "authentication"],
+      "required": ["type", "created_at", "data"],
       "properties": {
-        "fromAddress": {
+        "type": {
+          "const": "email.received"
+        },
+        "created_at": {
           "type": "string",
-          "format": "email"
+          "format": "date-time"
         },
-        "subject": {
-          "type": "string"
-        },
-        "text": {
-          "type": "string"
-        },
-        "authentication": {
-          "$ref": "#/schemas/messages.MailAuthentication"
+        "data": {
+          "$ref": "#/schemas/messages.ResendEmailReceivedData"
         }
-      }
+      },
+      "x-stackra-provider-payload": "resend"
     },
     "messages.InboxMessageCreated": {
       "type": "object",
@@ -428,16 +536,19 @@
     },
     "messages.MailAuthResult": {
       "type": "string",
-      "enum": ["pass", "fail", "soft_fail", "none"]
+      "enum": ["pass", "fail", "gray", "processing_failed", "unknown"]
     },
     "messages.MailAuthentication": {
       "type": "object",
-      "required": ["dkim", "spf"],
+      "required": ["spf", "dkim", "dmarc"],
       "properties": {
+        "spf": {
+          "$ref": "#/schemas/messages.MailAuthResult"
+        },
         "dkim": {
           "$ref": "#/schemas/messages.MailAuthResult"
         },
-        "spf": {
+        "dmarc": {
           "$ref": "#/schemas/messages.MailAuthResult"
         }
       }
@@ -483,6 +594,96 @@
       "type": "string",
       "enum": ["queued", "sent", "failed"]
     },
+    "messages.ResendDomain": {
+      "type": "object",
+      "required": ["id", "name", "status"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "x-stackra-provider-payload": "resend"
+    },
+    "messages.ResendDomainList": {
+      "type": "object",
+      "required": ["data"],
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/messages.ResendDomain"
+          }
+        }
+      },
+      "x-stackra-provider-payload": "resend"
+    },
+    "messages.ResendEmailReceivedData": {
+      "type": "object",
+      "required": ["email_id", "from", "to", "subject"],
+      "properties": {
+        "email_id": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string",
+          "format": "email"
+        },
+        "to": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "subject": {
+          "type": "string"
+        }
+      },
+      "x-stackra-provider-payload": "resend"
+    },
+    "messages.ResendReceivedEmail": {
+      "type": "object",
+      "required": ["id", "from", "text", "authentication"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string",
+          "format": "email"
+        },
+        "text": {
+          "type": ["string", "null"]
+        },
+        "authentication": {
+          "oneOf": [
+            {
+              "$ref": "#/schemas/messages.MailAuthentication"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "x-stackra-provider-payload": "resend"
+    },
+    "messages.ResendSendResult": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "x-stackra-provider-payload": "resend"
+    },
     "messages.SendMessageInput": {
       "type": "object",
       "required": ["mail", "to", "subject", "html", "text"],
@@ -525,10 +726,13 @@
       {
         "class": "InboundMailReceived",
         "module": "messages",
-        "path": "/webhooks/inbound-mail",
+        "key": "messages.resend.email.received",
+        "integration": "messages.resend",
+        "type": "email.received",
+        "path": "/webhooks/messages/resend/:connectionId",
         "area": "public",
         "scheme": "standard_webhooks",
-        "secret": "RESEND_INBOUND_SIGNING_SECRET",
+        "secret": "{webhookSecret}",
         "fields": {
           "$ref": "#/schemas/messages.InboundMailReceived"
         },

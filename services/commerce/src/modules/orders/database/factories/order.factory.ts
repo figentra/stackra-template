@@ -2,11 +2,11 @@
  * Stackra file contract:
  * Purpose: builds Order rows with named states for tests and seeders; the one owner of a "typical
  *          order".
- * Boundary: bound to Order by the base factory's argument. Laravel's API: `new`, `count`, `state`,
- *           `for`, `has`, `sequence`, `make` and `create`; a named state is a method. Faker comes
- *           from @stackra/database/testing, so only tests and seeders import a factory and Faker
- *           never reaches a runtime entry. Tests read the ids a factory returns instead of typing
- *           them.
+ * Boundary: bound to Order by the type argument (`Factory<Order>`). Laravel's API: `new`, `count`,
+ *           `state`, `for`, `has`, `sequence`, `make` and `create`; a named state is a method.
+ *           Faker comes from @stackra/database/testing, so only tests and seeders import a factory
+ *           and Faker never reaches a runtime entry. Tests read the ids a factory returns instead
+ *           of typing them.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 11, 13 and 16), ADR 0190 (factories with states),
  *                     ADR 0269 (helper placement)
@@ -15,7 +15,7 @@ import { Factory, type Faker } from "@stackra/database/testing";
 import type { Attributes } from "@stackra/model";
 import { Money } from "@stackra/money";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
-import { Order } from "#modules/orders/models/order.model";
+import type { Order } from "#modules/orders/models/order.model";
 
 /**
  * A pending order in USD with a random subtotal and no adjustments, for a random customer.
@@ -24,7 +24,7 @@ import { Order } from "#modules/orders/models/order.model";
  * const order = await OrderFactory.new().paid().create();
  * const orders = OrderFactory.new().has(OrderLineFactory.new().count(2)).count(3).make();
  */
-export class OrderFactory extends Factory(Order) {
+export class OrderFactory extends Factory<Order> {
   /** The default attributes of one order; tests override what they assert on. */
   definition(faker: Faker): Attributes<Order> {
     const subtotal = Money.ofMinor(faker.number.int({ min: 500, max: 50_000 }), "USD");

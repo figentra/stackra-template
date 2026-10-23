@@ -1,35 +1,29 @@
 /**
  * Stackra file contract:
  * Purpose: the in-app inbox table of the messages module, `messages.inbox_messages`.
- * Boundary: written by `stackra db diff` from `messages.inbox_message`, reviewed, then committed
- *           and never edited. It changes only the module's own Postgres schema (`messages`). The
- *           recipient is a principal's public id in `varchar(30)`. Forward only.
+ * Boundary: a frozen snapshot written by `stackra db diff` from `messages.inbox_message`, reviewed,
+ *           then never edited once on main; literals only. The recipient is a principal's public id
+ *           in `varchar(30)`. Additive: a new table and its index in one transaction. No `down()`:
+ *           gen derives the dev inverse.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 13, 20 and 27), ADR 0159 (as amended), ADR 0231
- *                     (index and key names)
+ * Governing contract: ADR 0294 (decisions 13, 20 and 27, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0159 (as amended), ADR 0231 (index and key names)
  */
-import { type Blueprint, Migration } from "@stackra/database";
-import { InboxMessages } from "#stackra/tables";
-import { InboxMessageKind } from "#modules/messages/enums/inbox-message-kind.enum";
+import { type Blueprint, Migration, type SchemaBuilder } from "@stackra/database";
 
 /** The per-principal, newest-first index is the one the inbox query reads. */
 export class CreateInboxMessagesMigration extends Migration {
   /** Creates the table and its index. */
-  up(schema: Blueprint): void {
-    schema.create(InboxMessages, (t) => {
-      t.publicId("inm");
-      t.tenant();
+  up(schema: SchemaBuilder): void {
+    schema.create("inbox_messages", (t: Blueprint) => {
+      t.hasPublicId("inm");
+      t.belongsToTenant();
       t.timestamps();
-      t.string(InboxMessages.columns.principalId, 30); // PublicId<"usr">
-      t.enum(InboxMessages.columns.kind, InboxMessageKind); // text with ck_inbox_messages_kind
-      t.jsonb(InboxMessages.columns.data);
-      t.timestamp(InboxMessages.columns.readAt).nullable();
-      // idx_inbox_messages_tenant_id_principal_id_created_at
-      t.index([
-        InboxMessages.columns.tenantId,
-        InboxMessages.columns.principalId,
-        InboxMessages.columns.createdAt,
-      ]);
+      t.string("principal_id", 30);
+      t.enum("kind", ["order_paid"]);
+      t.jsonb("data");
+      t.timestamp("read_at").nullable();
+      t.index(["tenant_id", "principal_id", "created_at"]);
     });
   }
 }

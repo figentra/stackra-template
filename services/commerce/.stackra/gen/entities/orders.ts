@@ -28,6 +28,8 @@ export const OrderSchema = new EntitySchema<Order>({
       properties: ["tenantId", "status", "createdAt"],
     },
     { name: "idx_orders_tenant_id_status_paid_at", properties: ["tenantId", "status", "paidAt"] },
+    { name: "idx_orders_tenant_id_created_at", properties: ["tenantId", "createdAt"] },
+    { name: "idx_orders_tenant_id_total_minor", expression: ["tenant_id", "total_minor"] },
   ],
   properties: {
     id: { type: "string", primary: true, columnType: "varchar(30)" }, // trait HasPublicId("ord")
@@ -76,7 +78,9 @@ export const OrderLineSchema = new EntitySchema<OrderLine>({
   },
 });
 
-/** Every entity of the module, in source order; the module graph merges them into the ORM config. */
+/**
+ * Every entity of the module, in source order; the module graph merges them into the ORM config.
+ */
 export const entities = [OrderSchema, OrderLineSchema] as const;
 
 declare module "#modules/orders/models/order.model" {

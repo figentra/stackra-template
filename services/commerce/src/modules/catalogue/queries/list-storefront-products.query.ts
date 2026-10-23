@@ -9,29 +9,18 @@
  *           market. The permission is derived (`ProductPermissions.read`); the path is kept as
  *           `/public/products` instead of the derived one.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 2, 16 and 21), ADR 0098, ADR 0082 (public area),
- *                     ADR 0221 (hybrid search), cursor pagination in the HTTP conventions
+ * Governing contract: ADR 0294 (decisions 2, 16 and 21), ADR 0098, ADR 0082 (public area), ADR 0221
+ *                     (hybrid search), cursor pagination in the HTTP conventions
  */
 import { Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, ApiArea, HttpMethod } from "@stackra/contracts";
 import type { Search } from "@stackra/search";
-import { CursorInput, Str } from "@stackra/validation";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { Product } from "#modules/catalogue/models/product.model";
+import type { ListStorefrontProductsInput } from "#modules/catalogue/schemas/list-storefront-products-input.schema";
 import { StorefrontProductPage } from "#modules/catalogue/schemas/storefront-product-page.schema";
 import type { ProductService } from "#modules/catalogue/services/product.service";
 import type { StorefrontService } from "#modules/catalogue/services/storefront.service";
-
-/** `cursor` and `limit` (1–100, default 20) come from CursorInput. */
-export class ListStorefrontProductsInput extends CursorInput {
-  /** A search phrase; the product's hybrid index ranks the matches (ADR 0221). */
-  @Str({ max: 200 })
-  search?: string;
-
-  /** A collection slug; only products listed in that collection are returned. */
-  @Str({ max: 200 })
-  collection?: string;
-}
 
 /** One page read (index or table) plus one quote per product on the page. */
 export class ListStorefrontProductsQuery extends Query({

@@ -22,7 +22,7 @@ import { OrdersSettings } from "#modules/orders/orders.settings";
 /** A policy bound to a tenant whose `customersMayCancel` is as given. */
 async function policyFor(customersMayCancel: boolean): Promise<OrderPolicy> {
   const settings = fakeSettings([
-    [OrdersSettings, { autoCancelAfterMinutes: 30, customersMayCancel }],
+    [OrdersSettings, { cancellation: { autoCancelAfterMinutes: 30, customersMayCancel } }],
   ]);
   const mod = await createTestingModule(OrdersModule).override(SettingsReader, settings).compile();
   return mod.get(OrderPolicy);

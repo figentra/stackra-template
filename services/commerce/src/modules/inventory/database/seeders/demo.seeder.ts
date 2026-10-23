@@ -12,12 +12,6 @@
 import { Seeder } from "@stackra/database";
 import { StockLevelFactory } from "#modules/inventory/database/factories/stock-level.factory";
 
-/** Catalogue's seeded M tee (`catalogue.demo`). */
-const MEDIUM_TEE = "var_01JA0000000000000000000001";
-
-/** Catalogue's seeded L tee (`catalogue.demo`). */
-const LARGE_TEE = "var_01JA0000000000000000000002";
-
 /** The storefront shows the L tee out of stock. */
 export class InventoryDemoSeeder extends Seeder {
   /** The only place these stock-level ids are typed. */
@@ -26,10 +20,22 @@ export class InventoryDemoSeeder extends Seeder {
     largeTee: "stk_01JA0000000000000000000002",
   } as const;
 
+  /** Catalogue's seeded M and L tees (`catalogue.demo`), named as data. */
+  static readonly variants = {
+    mediumTee: "var_01JA0000000000000000000001",
+    largeTee: "var_01JA0000000000000000000002",
+  } as const;
+
   /** Writes one level per seeded variant at the main location. */
   async run(): Promise<void> {
-    const { ids } = InventoryDemoSeeder;
-    await StockLevelFactory.new().create({ id: ids.mediumTee, variantId: MEDIUM_TEE, onHand: 50 });
-    await StockLevelFactory.new().soldOut().create({ id: ids.largeTee, variantId: LARGE_TEE });
+    const { ids, variants } = InventoryDemoSeeder;
+    await StockLevelFactory.new().create({
+      id: ids.mediumTee,
+      variantId: variants.mediumTee,
+      onHand: 50,
+    });
+    await StockLevelFactory.new()
+      .soldOut()
+      .create({ id: ids.largeTee, variantId: variants.largeTee });
   }
 }

@@ -1,7 +1,6 @@
 /**
  * Stackra file contract:
- * Purpose: `OrderAdjustment`: one amount an `adjustTotals` extension added to or took off an
- *          order.
+ * Purpose: `OrderAdjustment`: one amount an `adjustTotals` extension added to or took off an order.
  * Boundary: a shape class; stored as an element of the order's `adjustments` jsonb column and sent
  *           inside OrderTotals. Integer minor units (ADR 0220).
  * Runtime: isomorphic

@@ -7,8 +7,8 @@
  *           and RLS). The recipient is a principal's public id, never an address, and the body is
  *           never stored, only the subject, for support (ADR 0134). Written only by MessageService.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0134 (no address stored),
- *                     ADR 0239 (BelongsToTenant)
+ * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0134 (no address stored), ADR 0239
+ *                     (BelongsToTenant)
  */
 import type { PublicId } from "@stackra/contracts";
 import { Index, Model } from "@stackra/model";

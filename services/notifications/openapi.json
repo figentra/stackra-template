@@ -97,9 +97,9 @@
         }
       }
     },
-    "/webhooks/inbound-mail": {
+    "/webhooks/messages/resend/{connectionId}": {
       "post": {
-        "operationId": "messages.inbound_mail_received",
+        "operationId": "messages.resend.email.received",
         "security": [],
         "x-stackra-area": "public",
         "x-stackra-signature": "standard_webhooks",
@@ -121,7 +121,19 @@
             "$ref": "#/components/responses/Refusal",
             "x-stackra-codes": ["invalid_signature"]
           }
-        }
+        },
+        "x-stackra-integration": "messages.resend",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^con_[0-9A-Za-z]{26}$"
+            }
+          }
+        ]
       }
     }
   },
@@ -160,22 +172,20 @@
       },
       "messages.InboundMailReceived": {
         "type": "object",
-        "required": ["fromAddress", "subject", "text", "authentication"],
+        "required": ["type", "created_at", "data"],
         "properties": {
-          "fromAddress": {
+          "type": {
+            "const": "email.received"
+          },
+          "created_at": {
             "type": "string",
-            "format": "email"
+            "format": "date-time"
           },
-          "subject": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "authentication": {
-            "$ref": "#/components/schemas/messages.MailAuthentication"
+          "data": {
+            "$ref": "#/components/schemas/messages.ResendEmailReceivedData"
           }
-        }
+        },
+        "x-stackra-provider-payload": "resend"
       },
       "messages.InboxMessageKind": {
         "type": "string",
@@ -250,16 +260,19 @@
       },
       "messages.MailAuthResult": {
         "type": "string",
-        "enum": ["pass", "fail", "soft_fail", "none"]
+        "enum": ["pass", "fail", "gray", "processing_failed", "unknown"]
       },
       "messages.MailAuthentication": {
         "type": "object",
-        "required": ["dkim", "spf"],
+        "required": ["spf", "dkim", "dmarc"],
         "properties": {
+          "spf": {
+            "$ref": "#/components/schemas/messages.MailAuthResult"
+          },
           "dkim": {
             "$ref": "#/components/schemas/messages.MailAuthResult"
           },
-          "spf": {
+          "dmarc": {
             "$ref": "#/components/schemas/messages.MailAuthResult"
           }
         }
@@ -287,6 +300,30 @@
       "messages.MessageStatus": {
         "type": "string",
         "enum": ["queued", "sent", "failed"]
+      },
+      "messages.ResendEmailReceivedData": {
+        "type": "object",
+        "required": ["email_id", "from", "to", "subject"],
+        "properties": {
+          "email_id": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string",
+            "format": "email"
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "x-stackra-provider-payload": "resend"
       },
       "messages.SendMessageInput": {
         "type": "object",

@@ -6,14 +6,14 @@
  * Boundary: integration tier (.int): Testcontainers Postgres for this file; every other driver
  *           memory; no network.
  * Runtime: node
- * Governing contract: ADR 0143 (boot errors for lifetimes and cycles), ADR 0144, ADR 0263,
- *                     ADR 0294 (decisions 20 and 22), ADR 0295 (decision 9)
+ * Governing contract: ADR 0143 (boot errors for lifetimes and cycles), ADR 0144, ADR 0263, ADR 0294
+ *                     (decisions 20 and 22), ADR 0295 (decision 9)
  */
 import { createTestingModule } from "@stackra/container/testing";
 import { usePostgres } from "@stackra/database/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { manifest } from "#stackra/manifest";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 
 usePostgres();
 

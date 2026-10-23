@@ -2,8 +2,8 @@
  * Stackra file contract:
  * Purpose: `CreateOrderOutput`: the new order, always pending, its totals and the payment
  *          provider's client secret the storefront collects the payment with.
- * Boundary: a shape class in schemas/ rather than a companion of the action, because the action
- *           returns it and CreateOrderWorkflow#output builds it.
+ * Boundary: a shape class in schemas/, one declaration per file; the action returns it and
+ *           CreateOrderWorkflow#output builds it.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 8 and 13)
  */

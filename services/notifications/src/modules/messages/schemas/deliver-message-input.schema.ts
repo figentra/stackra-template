@@ -2,10 +2,9 @@
  * Stackra file contract:
  * Purpose: `DeliverMessageInput`: what the delivery job carries: the message row and the rendered
  *          body.
- * Boundary: a shape class in schemas/ rather than a companion of the job, because
- *           SendMessageAction builds it, DeliverMessageAction takes it and MessageService#deliver
- *           reads it. The body lives only in the job payload, never in a table (ADR 0134); the
- *           queue drops it once the job ends.
+ * Boundary: a shape class in schemas/, one declaration per file; SendMessageAction builds it,
+ *           DeliverMessageAction takes it and MessageService#deliver reads it. The body lives only
+ *           in the job payload, never in a table (ADR 0134); the queue drops it once the job ends.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 8 and 13), ADR 0134, ADR 0148
  */

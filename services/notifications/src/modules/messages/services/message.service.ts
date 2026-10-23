@@ -61,7 +61,7 @@ export class MessageService extends Service {
 
   /**
    * Sends a queued message once and records `message.sent`; an already sent message returns as is.
-   * @throws MailProviderUnavailableError (retryable) when the transport cannot take it now.
+   * @throws ProviderUnavailableError (retryable) when the transport cannot take it now.
    */
   async deliver(input: DeliverMessageInput, at: Date): Promise<Message> {
     const message = await this.messages.findOneOrFail({ id: input.messageId });

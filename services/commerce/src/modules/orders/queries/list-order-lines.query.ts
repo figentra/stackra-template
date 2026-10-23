@@ -4,30 +4,22 @@
  *          links to, read across the module boundary with the query graph.
  * Boundary: read only. Orders never queries catalogue's table: the graph reader follows the
  *           `OrderLine.variant` link and fans out to catalogue's generated read, under the limits
- *           of ADR 0268 R10 (20 per relation by default, 100 at most, depth 3, fan-out 1,000). The
- *           path is kept as `/orders/:orderId/lines` instead of the derived query path.
+ *           of ADR 0268 R10 (20 per relation by default, 100 at most, depth 3, fan-out 1,000). Its
+ *           input holds the parent's id, so OrderResource shows it as the Lines relation on the
+ *           View page with `orderId` bound from the record. The `endpoint` surface keeps the path
+ *           `/orders/:orderId/lines` instead of the derived query path; as an L0 query it is also
+ *           the MCP tool `orders_order_list_lines`.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 2, 21 and 28), ADR 0104 d2 (query graph), ADR 0268 R10
+ * Governing contract: ADR 0294 (decisions 2, 21 and 28, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0104 d2 (query graph), ADR 0268 R10
  */
 import { Query, type QueryContext } from "@stackra/actions";
-import { ActorKind, HttpMethod, type PublicId } from "@stackra/contracts";
+import { ActorKind, HttpMethod } from "@stackra/contracts";
 import type { GraphQuery } from "@stackra/database";
-import { Schema } from "@stackra/validation";
 import { OrderLine } from "#modules/orders/models/order-line.model";
-import type { OrderLineDetail } from "#modules/orders/schemas/order-line-detail.schema";
+import type { ListOrderLinesInput } from "#modules/orders/schemas/list-order-lines-input.schema";
+import { ListOrderLinesOutput } from "#modules/orders/schemas/list-order-lines-output.schema";
 import type { OrderService } from "#modules/orders/services/order.service";
-
-/** The order to read the lines of, by public id. */
-export class ListOrderLinesInput extends Schema {
-  /** The order's public id. */
-  orderId!: PublicId<"ord">;
-}
-
-/** Each line with the variant's SKU and whether it still tracks inventory. */
-export class ListOrderLinesOutput extends Schema {
-  /** The packing-slip lines. */
-  lines!: OrderLineDetail[];
-}
 
 /** The packing-slip read: the one place orders reads catalogue data, through the link. */
 export class ListOrderLinesQuery extends Query({

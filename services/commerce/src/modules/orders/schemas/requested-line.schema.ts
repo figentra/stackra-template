@@ -2,8 +2,8 @@
  * Stackra file contract:
  * Purpose: `RequestedLine`: a catalogue variant and how many units of it, as a caller asks for it
  *          and as `order.placed` reports it.
- * Boundary: a shape class; gen compiles it to `RequestedLine$` in `#stackra/schemas`. Shared by
- *           the create input, PricedLine and the OrderPlaced event, so it lives in schemas/.
+ * Boundary: a shape class; gen compiles it to `RequestedLine$` in `#stackra/schemas`. Shared by the
+ *           create input, PricedLine and the OrderPlaced event, so it lives in schemas/.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 13 and 26)
  */

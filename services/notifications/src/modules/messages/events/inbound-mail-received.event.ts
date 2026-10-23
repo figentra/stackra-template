@@ -1,36 +1,34 @@
 /**
  * Stackra file contract:
- * Purpose: the inbound mail the provider posts to `/webhooks/inbound-mail`: a customer's reply to a
- *          confirmation, such as "CANCEL <order id>".
- * Boundary: a webhook event: always in the public area, verified with the provider's Standard
- *           Webhooks signature against the secret it names (listed in runway `secrets`) before any
- *           field is parsed, so a bad signature is refused and nothing runs (safeguard a). The
- *           fields are the provider's payload; CancelFromMailListener holds the logic and the other
- *           two safeguards. The provider receives 2xx for every verified mail, so it never retries
- *           one that will never qualify.
- * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 5 and 16), ADR 0082 (areas), ADR 0173 (secret names)
+ * Purpose: Resend's `email.received` webhook: a mail arrived at an inbound address, such as a
+ *          customer's reply "CANCEL <order id>" to a confirmation.
+ * Boundary: a webhook event of the Resend integration (`WebhookEvent<ResendIntegration>`): it names
+ *           only the provider's event type. Verification and routing are declared once on
+ *           ResendIntegration: the Standard Webhooks signature (Resend signs through Svix) is
+ *           checked against the connection's or the platform's webhook secret before any field is
+ *           parsed, so a bad signature is refused and nothing runs (safeguard a), and the `type`
+ *           field selects this class. The URL is per connection
+ *           (`/webhooks/messages/resend/:connectionId`, the platform's own account included) and
+ *           listeners run in that connection's tenant. The fields are Resend's payload;
+ *           CancelFromMailListener holds the logic and the other two safeguards. Resend receives
+ *           2xx for every verified delivery, so it never retries a mail that will never qualify.
+ *           The wire key is `messages.resend.email.received`.
+ * Runtime: node
+ * Governing contract: ADR 0294 (decisions 5 and 16, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0224 (webhooks), ADR 0082 (areas), ADR 0173 (secret
+ *                     names)
  */
-import type { Email } from "@stackra/contracts";
 import { WebhookEvent } from "@stackra/events";
-import { SignatureScheme } from "@stackra/webhooks";
-import type { MailAuthentication } from "#modules/messages/schemas/mail-authentication.schema";
+import type { ResendIntegration } from "#modules/messages/integrations/resend.integration";
+import type { ResendEmailReceivedData } from "#modules/messages/schemas/resend-email-received-data.schema";
 
-/** The bare sender address, subject, plain text and the DKIM and SPF results. */
-export class InboundMailReceived extends WebhookEvent({
-  path: "/webhooks/inbound-mail",
-  scheme: SignatureScheme.StandardWebhooks,
-  secret: "RESEND_INBOUND_SIGNING_SECRET",
+/** Delivered at least once and deduplicated by the Svix message id. */
+export class InboundMailReceived extends WebhookEvent<ResendIntegration>({
+  type: "email.received",
 }) {
-  /** The sender's bare address. */
-  fromAddress!: Email;
+  /** When Resend created the event, ISO 8601 on the wire. */
+  created_at!: Date;
 
-  /** The subject line. */
-  subject!: string;
-
-  /** The plain-text body, where a customer writes `CANCEL <order id>`. */
-  text!: string;
-
-  /** The provider's sender-authentication results. */
-  authentication!: MailAuthentication;
+  /** The received mail's metadata; the body is read from Resend's API. */
+  data!: ResendEmailReceivedData;
 }

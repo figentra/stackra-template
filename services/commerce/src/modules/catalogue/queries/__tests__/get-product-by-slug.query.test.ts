@@ -14,11 +14,11 @@ import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { PricingClient } from "#stackra/clients";
-import { Refusals } from "#stackra/manifest";
-import { CommerceModule } from "#src/commerce.module";
+import { PricingClient } from "#stackra/clients/pricing";
+import { CommerceModule } from "#stackra/module";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
+import { ProductNotFoundError } from "#modules/catalogue/errors/product-not-found.error";
 import { GetProductBySlugQuery } from "#modules/catalogue/queries/get-product-by-slug.query";
 import { StockLevelFactory } from "#modules/inventory/database/factories/stock-level.factory";
 
@@ -70,6 +70,6 @@ describe(GetProductBySlugQuery, () => {
       { as: actors.anonymous() },
     );
 
-    expect(result).toRefuseWith(refusal(Refusals.catalogue.product_not_found));
+    expect(result).toRefuseWith(refusal(ProductNotFoundError));
   });
 });

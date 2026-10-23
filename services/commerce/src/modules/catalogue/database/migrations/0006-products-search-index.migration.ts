@@ -1,25 +1,39 @@
 /**
  * Stackra file contract:
- * Purpose: the hybrid search indexes of `catalogue.products` (one per locale's tsvector and the
- *          trigram index for prefix typing at the POS), in their own migration because a
- *          concurrent build cannot run inside a transaction.
- * Boundary: written by `stackra db diff` after the model gained `@Searchable`, reviewed, then
- *           committed and never edited. `searchIndexes` is the @stackra/search macro over the
- *           columns 0005 added, so the indexes always match the facet. `concurrently()` makes the
- *           compiler emit them outside a transaction, so writes continue while they build on the
- *           live table. Forward only.
+ * Purpose: the hybrid search indexes of `catalogue.products`: one GIN index per locale's tsvector,
+ *          and the accent-insensitive trigram index for prefix typing at the POS.
+ * Boundary: a frozen snapshot written by `stackra db diff` (the two tsvector indexes) plus the
+ *           trigram expression index added by hand before the first commit; literals only. The
+ *           expression calls `search.unaccent_immutable(text)`, a function @stackra/search creates
+ *           in its own migration, so `after` names that migration by its typed id from
+ *           `#stackra/migrations`; gen parses the raw SQL and fails without that edge. A blueprint
+ *           cannot express an operator class, so the expression index is `schema.sql` with its
+ *           hand-written `inverse`. Online: every statement is a concurrent build on the live
+ *           table, so the compiler emits three single-statement, non-transactional steps; writes
+ *           continue throughout. No `down()`: gen derives the inverse of the two blueprint indexes
+ *           and uses the stated one for the raw step.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 6 and 13), ADR 0159 (as amended: concurrent index builds
- *                     in their own migration), ADR 0221 (Postgres hybrid search)
+ * Governing contract: ADR 0294 (decisions 6 and 13, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0159 (as amended: online operations, dependencies, raw
+ *                     SQL), ADR 0160 (approved extensions), ADR 0221 (Postgres hybrid search)
  */
-import { type Blueprint, Migration } from "@stackra/database";
-import { Products } from "#stackra/tables";
-import { Product } from "#modules/catalogue/models/product.model";
+import { type Blueprint, Migration, type SchemaBuilder } from "@stackra/database";
+import { Migrations } from "#stackra/migrations";
 
-/** Reads the text and filter fields from the model's `@Searchable` facet. */
-export class ProductsSearchIndexMigration extends Migration {
-  /** Builds the search indexes while writes continue; the build cannot share a transaction. */
-  up(schema: Blueprint): void {
-    schema.table(Products, (t) => t.searchIndexes(Product).concurrently());
+/** Needs `search.unaccent_immutable(text)` from @stackra/search. */
+export class ProductsSearchIndexMigration extends Migration({
+  after: [Migrations.search.createTextFunctions],
+}) {
+  /** Builds the three search indexes while writes continue. */
+  up(schema: SchemaBuilder): void {
+    schema.table("products", (t: Blueprint) => {
+      t.index(["search_vector_en"]).using("gin").concurrently();
+      t.index(["search_vector_ar"]).using("gin").concurrently();
+    });
+    schema.sql(
+      "CREATE INDEX CONCURRENTLY idx_products_search_text_trgm ON catalogue.products " +
+        "USING gin (search.unaccent_immutable(search_text) gin_trgm_ops)",
+      { inverse: "DROP INDEX CONCURRENTLY IF EXISTS catalogue.idx_products_search_text_trgm" },
+    );
   }
 }

@@ -12,11 +12,10 @@ import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
-import { MediaType } from "@stackra/media";
+import { MediaType, UploadBucketMismatchError } from "@stackra/media";
 import { fakeUpload } from "@stackra/media/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
-import { CommerceModule } from "#src/commerce.module";
+import { CommerceModule } from "#stackra/module";
 import { AttachProductImageAction } from "#modules/catalogue/actions/attach-product-image.action";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 import { ProductImagesBucket } from "#modules/catalogue/models/product-images.bucket";
@@ -52,7 +51,7 @@ describe(AttachProductImageAction, () => {
       { as: actors.staff() },
     );
 
-    expect(result).toRefuseWith(refusal(Refusals.media.upload_bucket_mismatch));
+    expect(result).toRefuseWith(refusal(UploadBucketMismatchError));
     const saved = await app.repository(Product).findOneOrFail({ id: product.id });
     expect(saved.images).toEqual(product.images);
   });

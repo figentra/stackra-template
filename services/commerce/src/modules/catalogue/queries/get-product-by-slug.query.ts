@@ -13,19 +13,12 @@
  */
 import { Query, type QueryContext } from "@stackra/actions";
 import { ActorKind, ApiArea, HttpMethod } from "@stackra/contracts";
-import { Schema, Str } from "@stackra/validation";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { ProductNotFoundError } from "#modules/catalogue/errors/product-not-found.error";
+import type { GetProductBySlugInput } from "#modules/catalogue/schemas/get-product-by-slug-input.schema";
 import type { StorefrontProductView } from "#modules/catalogue/schemas/storefront-product-view.schema";
 import type { ProductService } from "#modules/catalogue/services/product.service";
 import type { StorefrontService } from "#modules/catalogue/services/storefront.service";
-
-/** The product to read, by its tenant-unique slug. */
-export class GetProductBySlugInput extends Schema {
-  /** The storefront URL segment. */
-  @Str({ max: 200 })
-  slug!: string;
-}
 
 /** One indexed read (`idx_products_tenant_id_slug`), one price quote, one stock read. */
 export class GetProductBySlugQuery extends Query({

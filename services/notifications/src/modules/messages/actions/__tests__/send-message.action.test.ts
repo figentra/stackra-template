@@ -15,7 +15,7 @@ import { fakeIdentity } from "@stackra/identity/testing";
 import { MailTransport } from "@stackra/notifications/contracts";
 import { drainQueue } from "@stackra/queue/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { NotificationsModule } from "#src/notifications.module";
+import { NotificationsModule } from "#stackra/module";
 import { SendMessageAction } from "#modules/messages/actions/send-message.action";
 import type { MemoryMailTransportDriver } from "#modules/messages/drivers/memory-mail-transport.driver";
 import { MessageSent } from "#modules/messages/events/message-sent.event";

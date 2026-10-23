@@ -8,8 +8,7 @@
  *           StockService adds an advisory lock around reservations. No constructor-made state: a
  *           getter and a static are computed, never stored.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0149
- *                     (locking)
+ * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0149 (locking)
  */
 import type { PublicId } from "@stackra/contracts";
 import { Index, Model } from "@stackra/model";

@@ -9,21 +9,21 @@
  * Governing contract: ADR 0148, ADR 0130 (failed job and dead letter), ADR 0022
  */
 import { createTestingModule } from "@stackra/container/testing";
+import { ProviderUnavailableError } from "@stackra/integrations";
 import { MailTransport } from "@stackra/notifications/contracts";
 import { runJob } from "@stackra/queue/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { NotificationsModule } from "#src/notifications.module";
+import { NotificationsModule } from "#stackra/module";
 import { DeliverMessageAction } from "#modules/messages/actions/deliver-message.action";
 import { MessageFactory } from "#modules/messages/database/factories/message.factory";
 import { MessageStatus } from "#modules/messages/enums/message-status.enum";
-import { MailProviderUnavailableError } from "#modules/messages/errors/mail-provider-unavailable.error";
 import { Message } from "#modules/messages/models/message.model";
 
 /** A transport whose provider is down for good. */
 class DownMailTransport extends MailTransport {
-  /** Always refuses with the retryable provider refusal. */
+  /** Always refuses with the retryable refusal the managed client throws after its retries. */
   async send(): Promise<string> {
-    throw MailProviderUnavailableError.create();
+    throw ProviderUnavailableError.create({ provider: "resend" });
   }
 }
 

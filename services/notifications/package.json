@@ -49,7 +49,6 @@
     "@stackra/app": "catalog:stackra",
     "@stackra/clients": "catalog:stackra",
     "@stackra/config": "catalog:stackra",
-    "@stackra/connections": "catalog:stackra",
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
     "@stackra/database": "catalog:stackra",
@@ -67,7 +66,6 @@
     "@stackra/transport": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "@stackra/webhooks": "catalog:stackra",
-    "resend": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

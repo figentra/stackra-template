@@ -9,8 +9,8 @@
  *           console e2e tests and the mobile Maestro flows name. The customers are the loyalty
  *           kit's demo principals, imported from its ./testing entry, so no principal id is typed
  *           here; the e2e identity stub signs in as `bronze`, who holds 1,000 points. The variant
- *           is catalogue's M tee, named as data: a sibling module's seeder is not one of its
- *           public groups.
+ *           is catalogue's M tee, named as data: a sibling module's seeder is not one of its public
+ *           groups.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 20 and 24), ADR 0190 (profiles minimal, demo and
  *                     test), ADR 0231 (public ids)
@@ -20,9 +20,6 @@ import { Seeder } from "@stackra/database";
 import { Money } from "@stackra/money";
 import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrderLineFactory } from "#modules/orders/database/factories/order-line.factory";
-
-/** Catalogue's seeded M tee (`catalogue.demo`); every demo line sells one of it. */
-const MEDIUM_TEE = "var_01JA0000000000000000000001";
 
 /** `ids.pending` is the pending order an e2e test may cancel. */
 export class OrdersDemoSeeder extends Seeder {
@@ -34,12 +31,15 @@ export class OrdersDemoSeeder extends Seeder {
     otherCustomer: "ord_01JA0000000000000000000004",
   } as const;
 
+  /** Catalogue's seeded M tee (`catalogue.demo`), named as data; every demo line sells one. */
+  static readonly variants = { mediumTee: "var_01JA0000000000000000000001" } as const;
+
   /** Writes the four orders, each of the first customer's with one line of the M tee. */
   async run(): Promise<void> {
-    const { ids } = OrdersDemoSeeder;
+    const { ids, variants } = OrdersDemoSeeder;
     const { bronze, silver } = LoyaltyKitDemoSeeder.ids;
     const line = OrderLineFactory.new().state({
-      variant: MEDIUM_TEE,
+      variant: variants.mediumTee,
       unitPrice: Money.ofMinor(1_000, "USD"),
     });
     await OrderFactory.new().paid().has(line).create({ id: ids.paidFirst, customerId: bronze });

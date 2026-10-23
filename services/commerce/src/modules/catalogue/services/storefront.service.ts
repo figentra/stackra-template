@@ -12,7 +12,7 @@
  */
 import type { QueryContext } from "@stackra/actions";
 import { Service } from "@stackra/app";
-import type { PricingClient } from "#stackra/clients";
+import type { PricingClient } from "#stackra/clients/pricing";
 import type { StockService } from "#modules/inventory/services/stock.service";
 import type { Product } from "#modules/catalogue/models/product.model";
 import { StorefrontProductCard } from "#modules/catalogue/schemas/storefront-product-card.schema";

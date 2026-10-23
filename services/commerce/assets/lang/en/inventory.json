@@ -1,4 +1,7 @@
 {
+  "nav": {
+    "stock": "Stock"
+  },
   "permissions": {
     "stock": {
       "read": "View stock",
@@ -6,15 +9,21 @@
     }
   },
   "settings": {
-    "inventory": {
-      "title": "Inventory",
-      "low_stock_threshold": "Low-stock threshold",
-      "allow_backorders": "Allow backorders"
+    "title": "Inventory",
+    "low_stock_threshold": {
+      "label": "Low-stock threshold",
+      "help": "Units at or below which a variant is listed as low."
+    },
+    "allow_backorders": {
+      "label": "Allow backorders",
+      "help": "Lets reservations exceed stock; a second admin approves the change."
     }
   },
   "widgets": {
     "low_stock": {
-      "title": "Low stock"
+      "title": "Low stock",
+      "description": "Variants at or below the threshold.",
+      "empty": "Nothing is running low"
     }
   },
   "enums": {

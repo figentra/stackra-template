@@ -3,12 +3,12 @@
  * Purpose: stock reservation for orders and availability for the storefront, plus the low-stock
  *          read. Orders calls `reserve` as a workflow step with `release` as its undo.
  * Boundary: exported to sibling modules (orders reserves, catalogue reads `available`); runs inside
- *           the caller's transaction and never calls the network. CrudService(StockLevel) supplies
- *           the inherited reads and writes (`find`, `findOne`, `findOneOrFail`, `create`). The
- *           advisory lock is an explicit call on the injected `Locks` port. `stock.low` is recorded
- *           on the aggregate and reaches the outbox when the unit of work flushes. The low-stock
- *           scan subtracts in SQL through the `sql` tag, the one sanctioned raw escape (ADR 0160),
- *           with column names from the generated table constants.
+ *           the caller's transaction and never calls the network. `CrudService<StockLevel>`
+ *           supplies the inherited reads and writes (`find`, `findOne`, `findOneOrFail`, `create`).
+ *           The advisory lock is an explicit call on the injected `Locks` port. `stock.low` is
+ *           recorded on the aggregate and reaches the outbox when the unit of work flushes. The
+ *           low-stock scan subtracts in SQL through the `sql` tag, the one sanctioned raw escape
+ *           (ADR 0160), with column names from the generated table constants.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 16 and 17), ADR 0149 (locking), ADR 0101 (workflow
  *                     steps call module services), ADR 0141, ADR 0160 (raw SQL)
@@ -29,7 +29,7 @@ import type { StockLine } from "#modules/inventory/types/stock-line.type";
  * are a pair: whoever reserves owns the matching release (orders does it through the workflow's
  * undo step and through cancel).
  */
-export class StockService extends CrudService(StockLevel) {
+export class StockService extends CrudService<StockLevel> {
   /**
    * @param settings - the threshold and the backorder policy, read per call for the tenant.
    * @param locks - the advisory locks `reserve` holds per variant.
@@ -50,7 +50,7 @@ export class StockService extends CrudService(StockLevel) {
   reserve(lines: readonly StockLine[]): Promise<void> {
     const keys = lines.map((line) => StockLevel.lockKey(line.variantId));
     return this.locks.with(keys, Duration.seconds(5), async () => {
-      const { lowStockThreshold, allowBackorders } = await this.settings.for(InventorySettings);
+      const { lowStockThreshold, allowBackorders } = await this.settings.get(InventorySettings);
       for (const line of lines) {
         const level = await this.findOneOrFail({ variantId: line.variantId });
         if (!allowBackorders && level.available < line.quantity) {

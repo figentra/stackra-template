@@ -11,7 +11,9 @@ import type { PublicId } from "@stackra/contracts";
 import { IntegrationEvent } from "@stackra/events";
 import type { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 
-/** Recorded for every kind of end (customer, staff, expiry, failed payment); `reason` says which. */
+/**
+ * Recorded for every kind of end (customer, staff, expiry, failed payment); `reason` says which.
+ */
 export class OrderCancelled extends IntegrationEvent({ name: "order.cancelled" }) {
   /** The order that ended. */
   orderId!: PublicId<"ord">;

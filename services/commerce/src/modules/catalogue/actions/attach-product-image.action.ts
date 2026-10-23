@@ -13,27 +13,14 @@
  * Governing contract: ADR 0294 (decisions 2, 3, 16 and 21), ADR 0098, ADR 0234, ADR 0130 (file
  *                     upload)
  */
-import { Action, type ActionContext, UxAfter } from "@stackra/actions";
-import { ActorKind, HttpMethod, type PublicId } from "@stackra/contracts";
-import type { MediaLibrary, Upload } from "@stackra/media";
-import { Schema, Str } from "@stackra/validation";
+import { Action, type ActionContext } from "@stackra/actions";
+import { ActorKind, HttpMethod } from "@stackra/contracts";
+import type { MediaLibrary } from "@stackra/media";
 import { ProductPermissions } from "#modules/catalogue/access/product.permissions";
 import { ProductImagesBucket } from "#modules/catalogue/models/product-images.bucket";
+import type { AttachProductImageInput } from "#modules/catalogue/schemas/attach-product-image-input.schema";
 import type { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 import type { ProductService } from "#modules/catalogue/services/product.service";
-
-/** The product, the finished upload and its alternative text. */
-export class AttachProductImageInput extends Schema {
-  /** The product's public id. */
-  productId!: PublicId<"prd">;
-
-  /** A token for a file the client already put through a signed URL of the bucket; never bytes. */
-  image!: Upload<ProductImagesBucket>;
-
-  /** The text a screen reader announces; null falls back to the product title. */
-  @Str({ max: 200 })
-  alt!: string | null;
-}
 
 /** Appends the image; the first image of a product becomes its card image on the storefront. */
 export class AttachProductImageAction extends Action({
@@ -44,7 +31,6 @@ export class AttachProductImageAction extends Action({
     method: HttpMethod.Post,
     path: "/products/:productId/images",
   },
-  ux: { after: [UxAfter.Refresh] },
 }) {
   /** @param media - the @stackra/media library; it owns storage, variants and upload tokens. */
   constructor(
