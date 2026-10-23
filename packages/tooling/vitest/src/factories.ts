@@ -1,13 +1,16 @@
 /**
  * Stackra file contract:
- * Purpose: the role vocabulary a member's vitest.config.ts uses, one export per member role:
- *          `libraryPreset` (packages, coverage-gated), `servicePreset` (services), `appPreset` (the Vite
- *          and React Router apps), `mobilePreset` (the Expo app) and `tooling` (the preset packages'
- *          own tests). `stackra gen` writes the app configs in `.stackra/` against these same names.
- * Boundary: test layout only (projects, environments, the coverage gate); no setup file, matcher or global
- *           setup is registered here.
+ * Purpose: the role vocabulary of the vitest configs, one export per member role: `libraryPreset`
+ *          (packages, coverage-gated), `servicePreset` (services), `appPreset` (the Vite and React
+ *          Router apps), `mobilePreset` (the Expo app) and `tooling` (the preset packages' own
+ *          tests). `stackra gen` writes every member's `.stackra/vitest.config.ts` against these
+ *          names, with a gitignored shim at the member root; only the tooling packages author their
+ *          own config.
+ * Boundary: test layout only (projects, environments, the coverage gate); no setup file, matcher or
+ *           global setup is registered here.
  * Runtime: node
- * Governing contract: Stackra ADR 0005 (legacy decorators), Stackra ADR 0022 (test placement)
+ * Governing contract: Stackra ADR 0005 (legacy decorators), Stackra ADR 0022 (test placement),
+ *                     Stackra ADR 0295 decision 5 (generated tool configs)
  */
 import { configDefaults, defineConfig, mergeConfig, type ViteUserConfig } from "vitest/config";
 import { withCoverage } from "./coverage.ts";
@@ -23,7 +26,7 @@ const reactWithDecorators = mergeConfig(stackraVitestReact, decoratorTransform);
 
 /** Options of {@link servicePreset}. */
 export interface ServicePresetOptions {
-  /** The member root, usually `import.meta.dirname`. */
+  /** The member root: the folder above `.stackra/`. */
   root: string;
   /** Extra globs no project runs. */
   exclude?: string[];
@@ -31,7 +34,7 @@ export interface ServicePresetOptions {
 
 /** Options of {@link libraryPreset}. */
 export interface LibraryPresetOptions {
-  /** The member root, usually `import.meta.dirname`. */
+  /** The member root: the folder above `.stackra/`. */
   root: string;
   /** A source folder whose `.test.tsx` files run in jsdom, for example `src/react`. */
   react?: string;

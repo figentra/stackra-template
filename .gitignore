@@ -1,13 +1,15 @@
 # Stackra file contract:
-# Purpose: what git never tracks. Everything under a member's .stackra/ is rebuilt by `stackra gen`
-#          except the two committed contract artefacts, app-manifest.json and openapi.json (Stackra
-#          ADR 0158). Each member's .gitignore repeats the rules that apply to it, so a member folder
-#          copied elsewhere keeps them.
+# Purpose: what git never tracks. Everything under a member's .stackra/ is rebuilt by `stackra gen`,
+#          and so are the root shims of its tool configs. The committed contract, a member's
+#          stackra.manifest.json and openapi.json, sits at the member root, outside .stackra/, so
+#          nothing in .stackra/ is re-included. Each member's .gitignore repeats the rules that
+#          apply to it, so a member folder copied elsewhere keeps them.
 # Boundary: ignore rules only. A Stackra project has no .env files (Stackra ADR 0173: values live in
 #           the secret store); they are ignored anyway as a second safeguard beside the guard hook.
 # Runtime: node
-# Governing contract: Stackra ADR 0091 and 0261 (gen output is derived), Stackra ADR 0158 (committed
-#                     contracts), Stackra ADR 0173 (secrets never in files)
+# Governing contract: Stackra ADR 0294 decision 10 (generated output is never authored; contracts at
+#                     the member root), Stackra ADR 0295 decision 5 (generated tool configs and
+#                     their root shims), Stackra ADR 0173 (secrets never in files)
 
 # Operating-system and editor droppings.
 .DS_Store
@@ -31,14 +33,31 @@ maestro-report/
 .lighthouseci/
 # Logs from any tool.
 *.log
-# stackra gen output, except the two committed contracts.
+# stackra gen output: runtime entries, gen modules, tool configs, compiled migration SQL, the Encore
+# app.
 .stackra/*
-!.stackra/app-manifest.json
-!.stackra/openapi.json
 # Template only, while the stackra CLI is unpublished: the generated samples are committed so they can
 # be read beside their source. Remove this line from the root and every member's .gitignore in one
 # change once `stackra gen` runs.
 !.stackra/**
+# The root shims gen writes for the tools that read only the member root; each re-exports or copies
+# its `.stackra/` file.
+/apps/*/vitest.config.ts
+/apps/*/vite.config.ts
+/apps/*/react-router.config.ts
+/apps/*/playwright.config.ts
+/apps/*/wrangler.jsonc
+/apps/*/lighthouserc.yaml
+/apps/*/app.config.ts
+/apps/*/eas.json
+/apps/*/metro.config.js
+/apps/*/babel.config.js
+/services/*/vitest.config.ts
+/packages/*/*/vitest.config.ts
+/packages/*/*/tsdown.config.ts
+# The tooling presets are tool configuration and run no gen (Stackra ADR 0294 rule R12), so their
+# own test configs stay authored.
+!/packages/tooling/*/vitest.config.ts
 # React Router typegen output (apps/web).
 .react-router/
 # Wrangler's local state and its local secret file (secrets come from the store, never a file).

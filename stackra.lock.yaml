@@ -2,21 +2,22 @@
 # Stackra file contract:
 # Purpose: the pinned revision of every external producer manifest this workspace builds clients
 #          from, once per workspace. `stackra gen` reads a producer's committed
-#          `.stackra/app-manifest.json` at this revision, and every member's generated `clients.ts`
-#          header cites the same revision.
+#          `stackra.manifest.json` (at its member root) at this revision, and every member's
+#          generated `clients.ts` header cites the same revision.
 # Boundary: producer to revision only; no secret and no URL. A producer that lives in this
 #           repository is not listed: its manifest is read from the working tree. Bumping a revision
 #           is one commit that regenerates every member.
 # Runtime: node
 # Governing contract: Stackra ADR 0158 (the manifest is the contract), Stackra ADR 0260 (clients are
-#                     generated from manifests)
+#                     generated from manifests), Stackra ADR 0294 decision 10 (committed at the
+#                     member root)
 version: 1
 # The repository these pins belong to (root package.json `name`).
 repository: acme-platform
 # Module key → the full 40-character commit SHA of that producer's committed manifest. The members
-# consume acme-platform producers that live outside this repository (identity, experience, platform,
-# billing, content, marketing, pricing and payments; each member's app-manifest.json names them with
-# `pin: stackra.lock.yaml#<key>`). Each gets its SHA here when its repository publishes its
-# manifest; until then the map is empty, the committed `.stackra/gen` client samples stand in, and a
-# revision is never invented.
+# consume acme-platform producers that live outside this repository (identity, experience,
+# platform, billing, content, marketing, pricing and payments; each member's stackra.manifest.json
+# names them with `pin: stackra.lock.yaml#<key>`). Each gets its SHA here when its repository
+# publishes its manifest; until then the map is empty, the committed `.stackra/gen` client samples
+# stand in, and a revision is never invented.
 producers: {}

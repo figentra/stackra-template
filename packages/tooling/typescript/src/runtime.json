@@ -1,9 +1,10 @@
 // Stackra file contract:
-// Purpose: the tsconfig a runtime TypeScript loader (tsx in a package's `bin/*.mjs`) applies when it
-//          executes workspace sources directly. tsx uses ONE tsconfig and applies it only to the files
-//          its `include` matches; the library role includes the package's own `src`, so sources of
-//          other workspace packages (legacy parameter decorators) would be transformed without
-//          `experimentalDecorators` and fail. This preset widens the match to every package.
+// Purpose: the tsconfig a runtime TypeScript loader (tsx in a package's `bin/*.mjs`) applies when
+//          it executes workspace sources directly. tsx uses ONE tsconfig and applies it only to the
+//          files its `include` matches; the library role includes the package's own `src`, so
+//          sources of other workspace packages (legacy field and class facet decorators) would be
+//          transformed without `experimentalDecorators` and fail. This preset widens the match to
+//          every package.
 // Boundary: referenced from `packages/<category>/<name>/bin/tsconfig.runtime.json` (that depth is
 //           what the include below assumes); never by tsc, the build or the tests.
 // Runtime: node

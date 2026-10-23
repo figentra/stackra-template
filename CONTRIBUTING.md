@@ -8,10 +8,12 @@ in the [Stackra docs](https://docs.stackra.figentra.com). The short version:
    machine, `stackra agents setup` installs the Stackra skills, sub-agents and guard hooks for your
    assistant.
 2. Branch from `main`; one change per branch, linked to its issue.
-3. Versions come only from `pnpm-workspace.yaml` catalogs or `workspace:*`. Tests sit in
-   `__tests__/` beside their subject. Run `pnpm gen` after changing a declaration; commit the
-   member's `.stackra/app-manifest.json` (and a service's `openapi.json`) with the change, never the
-   rest of `.stackra/`.
+3. Versions come only from `pnpm-workspace.yaml` catalogs or `workspace:*`. A file's group folder
+   and kind suffix say what it is, and its class extends that kind's base (`AGENTS.md`). Tests sit
+   in `__tests__/` beside their subject. Run `pnpm gen` after changing a declaration; commit the
+   member's `stackra.manifest.json` and `openapi.json` (at the member root) with the change. A
+   changed identity fails `stackra gen --check` unless the class or field carries `@Renamed(old)`.
+   `.stackra/` is never committed.
 4. When a published package changes, add a changeset in the same change: `pnpm changeset`, pick the
    packages and the bump (`patch`, `minor`, `major`), and write the release note
    ([`.changeset/README.md`](.changeset/README.md)). Apps and services need none; they deploy by
@@ -49,9 +51,9 @@ It owns `ts` `tsx` `mts` `cts` `js` `jsx` `mjs` `cjs`, `json` `jsonc` `json5`, `
   whole repository. `.oxfmtrc.jsonc` ignores generated and vendored paths only.
 - A file type gets a second formatter only when oxfmt cannot format it (shell scripts would take
   shfmt), and is added to this section.
-- Spelling is British English (`cspell.config.yaml`): `pnpm spell` checks the repository, lefthook
-  checks staged files and CI checks everything. Add a real project word to the `words` list there,
-  never to your own editor settings.
+- Spelling is British English with US English accepted (`cspell.config.yaml`, Stackra ADR 0300):
+  `pnpm spell` checks the repository, lefthook checks staged files and CI checks everything. Add a
+  real project word to the `words` list there, never to your own editor settings.
 
 ## Conduct
 

@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://static.stackra.figentra.com/schemas/runway/root.json",
-  "$comment": "Stackra file contract: Purpose: the shape of the ROOT runway.yaml, the infrastructure itself. Boundary: shape only; `stackra infra`, `stackra gen`, `stackra dev` and the runway workflows read the file. Member facts live in member runways (runway/app.json, runway/service.json). Runtime: node (editors and validators). Governing contract: ADR 0168 (one schema-validated runway.yaml, its sections), ADR 0169 (topology), ADR 0170 (environments, release), ADR 0171 (ref: values), ADR 0173 (secrets), ADR 0175 (edge), ADR 0184 (observability), ADR 0238 (one database server per environment).",
+  "$comment": "Stackra file contract: Purpose: the shape of the ROOT runway.yaml, the infrastructure itself and the topology that packs the service members. Boundary: shape only; `stackra infra`, `stackra gen`, `stackra dev` and the runway workflows read the file. Member facts live in member runways (runway/app.json, runway/service.json). JSON Schema cannot see across groups, so `stackra validate` adds the placement check (each service member in exactly one group of a grouped environment, `default` naming a group). Runtime: node (editors and validators). Governing contract: ADR 0296 (root topology groups, defaults), ADR 0168 and ADR 0169 (as amended by 0296), ADR 0170 (environments, release), ADR 0171 (ref: values), ADR 0173 (secrets), ADR 0175 (edge), ADR 0184 (observability), ADR 0238 (one database server per environment), ADR 0294 (member keys, config keys).",
   "title": "runway.yaml (root)",
-  "description": "The root runway: destinations per environment, shared resources, provider target blocks, the edge, the secrets defaults, the release policy and the defaults members inherit (ADR 0168, 0169, 0170, 0173). It never lists deployables: gen collects them from every member's runway.yaml. No secret value. `ref:<path>` resolves from the private stacks repo's Pulumi config at infra time (ADR 0171 d4).",
+  "description": "The root runway: WHERE things run and HOW they are packed. Destinations per environment, shared resources, the topology of the service members, provider target blocks, the edge, the secrets defaults, the release policy and the defaults members inherit (ADR 0296, 0168, 0170, 0173). No secret value. `ref:<path>` resolves from the private stacks repo's Pulumi config at infra time (ADR 0171 d4).",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "project", "environments"],
@@ -14,8 +14,8 @@
       "examples": ["@stackra/runway/schema/root.json"]
     },
     "version": {
-      "const": 2,
-      "description": "Runway format version. Version 2 splits root and member runways (ADR 0169)."
+      "const": 3,
+      "description": "Runway format version. Version 3 splits WHAT a member needs (member runways) from WHERE and HOW PACKED (this file, ADR 0296)."
     },
     "project": {
       "type": "string",
@@ -143,7 +143,7 @@
     },
     "environments": {
       "type": "object",
-      "description": "Per-environment destinations, shared resources and member defaults. Exactly these four names in every tool (ADR 0170 DP5; `local` is `dev`).",
+      "description": "Per-environment destinations, shared resources, the topology and member defaults. Exactly these four names in every tool (ADR 0170 DP5; `local` is `dev`).",
       "propertyNames": {
         "$ref": "#/$defs/envName"
       },
@@ -183,6 +183,14 @@
         "ci": {
           "type": "array",
           "description": "CI-only secret names the release workflows read over OIDC; never given to a runtime.",
+          "items": {
+            "$ref": "#/$defs/secretName"
+          },
+          "uniqueItems": true
+        },
+        "gateway": {
+          "type": "array",
+          "description": "Runtime secret names the generated API gateway reads, which belongs to no member: the HMAC key that verifies the visitor address a web Worker forwards (ADR 0237, ADR 0297 d6). The web member names the same key in its own runway.",
           "items": {
             "$ref": "#/$defs/secretName"
           },
@@ -229,75 +237,66 @@
         "electron-release"
       ]
     },
-    "drivers": {
+    "memberKey": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "A member key: the package name without its scope and tier prefix, snake_case (ADR 0294 decision 20).",
+      "examples": ["commerce", "notifications"]
+    },
+    "groupName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "A group name; it names the process allocation in the generated Encore application.",
+      "examples": ["core", "commerce"]
+    },
+    "config": {
       "type": "object",
-      "description": "Default driver per port. A member runway overrides one per environment.",
-      "properties": {
-        "queue": {
-          "type": "string",
-          "description": "Job queue driver.",
-          "examples": ["memory", "encore-pubsub"]
-        },
-        "cache": {
-          "type": "string",
-          "description": "Cache driver.",
-          "examples": ["memory", "valkey"]
-        },
-        "events": {
-          "type": "string",
-          "description": "Integration event bus driver (ADR 0142).",
-          "examples": ["memory", "encore-pubsub"]
-        },
-        "workflow": {
-          "type": "string",
-          "description": "Workflow engine driver.",
-          "examples": ["native"]
-        },
-        "realtime": {
-          "type": "string",
-          "description": "Realtime push driver.",
-          "examples": ["memory", "sse"]
-        },
-        "scheduler": {
-          "type": "string",
-          "description": "Cron scheduler driver.",
-          "examples": ["croner"]
-        },
-        "storage": {
-          "type": "string",
-          "description": "Object storage driver.",
-          "examples": ["local", "s3"]
-        },
-        "mail": {
-          "type": "string",
-          "description": "The per-environment layer of `MailConfig.driver`: `memory` in dev and preview, `notifications` in staging and production.",
-          "examples": ["memory", "notifications"]
-        },
-        "search": {
-          "type": "string",
-          "description": "Default of the `@stackra/search` port (ADR 0221).",
-          "examples": ["memory", "postgres"]
-        },
-        "media": {
-          "type": "string",
-          "description": "Default of the `@stackra/media` port.",
-          "examples": ["memory", "s3"]
-        },
-        "webhooks": {
-          "type": "string",
-          "description": "Default of the `@stackra/webhooks` port.",
-          "examples": ["memory", "native"]
-        }
+      "description": "A config layer keyed by config key (ADR 0294 decision 20): each value overrides fields of one config class. Driver choices are config fields typed `DriverName<Port>`, so they sit here (`queue.driver`, `notifications.driver`, `media.disk`).",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$"
       },
       "additionalProperties": {
-        "type": "string",
-        "description": "Driver of another port."
+        "type": "object",
+        "description": "Field values of one config class.",
+        "examples": [
+          {
+            "driver": "memory"
+          }
+        ]
       }
     },
-    "resources": {
+    "instances": {
       "type": "object",
-      "description": "Compute size and scaling of one process.",
+      "description": "Instance count bounds.",
+      "additionalProperties": false,
       "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Fewest instances kept running."
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Most instances scaling may add."
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "description": "One process allocation inside the one generated Encore application (ADR 0296 decision 3): the members it runs, its size, and whether its background work runs apart.",
+      "additionalProperties": false,
+      "required": ["members"],
+      "properties": {
+        "members": {
+          "type": "array",
+          "description": "The service members this group runs. A member appears in one group only.",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/memberKey"
+          }
+        },
         "cpu": {
           "type": "number",
           "exclusiveMinimum": 0,
@@ -311,20 +310,7 @@
           "examples": ["512Mi", "2Gi"]
         },
         "instances": {
-          "type": "object",
-          "description": "Instance count bounds.",
-          "properties": {
-            "min": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Fewest instances kept running."
-            },
-            "max": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Most instances scaling may add."
-            }
-          }
+          "$ref": "#/$defs/instances"
         },
         "scaling": {
           "type": "object",
@@ -340,8 +326,104 @@
               "description": "Target value of the metric, in percent for cpu."
             }
           }
+        },
+        "workers": {
+          "type": "object",
+          "description": "Background work of the group (queue consumers, crons, the outbox relay).",
+          "additionalProperties": false,
+          "properties": {
+            "split": {
+              "type": "boolean",
+              "description": "Run background work in its own process, sized below; off runs it in the group's process."
+            },
+            "cpu": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "vCPUs per instance.",
+              "examples": [0.25, 1]
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[0-9]+(\\.[0-9]+)?(Mi|Gi)$",
+              "description": "Memory per instance, in Mi or Gi.",
+              "examples": ["512Mi", "2Gi"]
+            },
+            "instances": {
+              "$ref": "#/$defs/instances"
+            }
+          }
         }
       }
+    },
+    "topology": {
+      "type": "object",
+      "description": "How the service members of this repository are packed into processes in this environment (ADR 0296 decision 2). Apps run on their destinations and are not placed here.",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["monolith", "grouped", "split"],
+          "description": "`monolith`: every service member in one process. `grouped`: the processes of `groups`, each member in exactly one. `split`: one process per member."
+        },
+        "isolate": {
+          "type": "array",
+          "description": "Members that keep their own database server and network policy.",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/memberKey"
+          }
+        },
+        "default": {
+          "$ref": "#/$defs/groupName",
+          "description": "The group for a member no group lists; it names a key of `groups`. Without it, an unplaced member fails `stackra validate`."
+        },
+        "groups": {
+          "type": "object",
+          "description": "The process allocations of a grouped environment.",
+          "propertyNames": {
+            "$ref": "#/$defs/groupName"
+          },
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/group"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "grouped"
+              }
+            }
+          },
+          "then": {
+            "required": ["groups"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "enum": ["monolith", "split"]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["groups"]
+                },
+                {
+                  "required": ["default"]
+                }
+              ]
+            }
+          }
+        }
+      ]
     },
     "environment": {
       "type": "object",
@@ -360,7 +442,7 @@
         },
         "infra": {
           "type": "object",
-          "description": "Dev only: the containers `stackra dev` brings (gateway, postgres, valkey, minio, zitadel, mailpit, otel-lgtm). A driver set to `memory` in every service removes its container.",
+          "description": "Dev only: the shared containers `stackra dev` brings (gateway, postgres, otel-lgtm). A driver package adds its own container only when a member's config selects that driver.",
           "additionalProperties": {
             "type": "object",
             "description": "One container: image, ports and when it starts."
@@ -397,7 +479,7 @@
         },
         "encore": {
           "type": "object",
-          "description": "Encore Cloud environment name, account and process allocation (`from-deployables`)."
+          "description": "Encore Cloud environment name, account and process allocation (`from-topology`: one allocation per group of `topology`)."
         },
         "ttl": {
           "type": "string",
@@ -437,30 +519,34 @@
             }
           }
         },
+        "topology": {
+          "$ref": "#/$defs/topology"
+        },
         "defaults": {
           "type": "object",
-          "description": "Defaults every member of that kind inherits in this environment.",
+          "description": "Defaults every member of that kind inherits in this environment; a member runway overrides them, never the reverse.",
           "additionalProperties": false,
           "properties": {
             "service": {
               "type": "object",
               "description": "Service member defaults.",
+              "additionalProperties": false,
               "properties": {
-                "resources": {
-                  "$ref": "#/$defs/resources"
+                "config": {
+                  "$ref": "#/$defs/config",
+                  "description": "The config layer every service member starts from; a member runway's `config` overrides a key."
                 },
-                "deployable": {
-                  "type": "string",
-                  "description": "The deployable a service joins unless it names another (ADR 0169).",
-                  "examples": ["core"]
-                },
-                "poolBudget": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "description": "Database connections one service may hold (ADR 0238)."
-                },
-                "drivers": {
-                  "$ref": "#/$defs/drivers"
+                "database": {
+                  "type": "object",
+                  "description": "Defaults of each member's logical database on the shared server.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "poolBudget": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "Database connections one member may hold on the shared server (ADR 0238)."
+                    }
+                  }
                 }
               }
             },
@@ -469,14 +555,6 @@
               "description": "App member defaults (dev server flags, Workers observability)."
             }
           }
-        },
-        "isolate": {
-          "type": "array",
-          "description": "Services never packed with another (ADR 0169 d1). A member runway cannot undo it.",
-          "items": {
-            "type": "string"
-          },
-          "examples": [["identity", "payments"]]
         },
         "domains": {
           "type": "object",

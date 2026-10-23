@@ -4,10 +4,12 @@
 //          preset cannot `extends` a package its own folder does not install.
 // Boundary: a member's tsconfig.json is exactly `{ "extends": "@stackra/typescript-config/mobile" }`;
 //           it covers the app's source, stackra.config.ts, its `*.extend.ts` hatches and the generated
-//           `.stackra/` (entries, Expo and Metro config, and the Uniwind types gen writes there).
+//           `.stackra/` (the runtime entry in `.stackra/entry/`, the Expo and Metro config, and the
+//           Uniwind types gen writes there).
 // Runtime: node
-// Governing contract: Stackra ADR 0005 (legacy decorators, no metadata), Stackra ADR 0094
-//                     (decorators in every member, mobile included)
+// Governing contract: Stackra ADR 0005 (legacy decorators, no metadata), Stackra ADR 0294 rule R6
+//                     (field, method and class facet decorators in every member, mobile included),
+//                     Stackra ADR 0295 (generated entries and tool configs)
 {
   "display": "@stackra/typescript-config — mobile",
   "extends": "./base.json",

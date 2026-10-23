@@ -8,7 +8,8 @@
 #           packages/tooling presets) are `workspace:*`, never catalog entries.
 # Runtime: node
 # Governing contract: Stackra ADR 0013 (versions come only from catalogs and workspace references),
-#                     Stackra ADR 0019 (supply-chain hardening)
+#                     Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0294 (decisions 23 and
+#                     26: package names, the zod pin)
 packages:
   - apps/*
   - packages/*/*
@@ -58,15 +59,14 @@ catalogs:
     "@stackra/iam": 1.0.0
     "@stackra/identity": 1.0.0
     "@stackra/integrations": 1.0.0
-    "@stackra/kbd": 1.0.0
     "@stackra/ledger": 1.0.0
     "@stackra/locking": 1.0.0
     "@stackra/logger": 1.0.0
-    "@stackra/mail": 1.0.0
     "@stackra/media": 1.0.0
     "@stackra/model": 1.0.0
     "@stackra/money": 1.0.0
     "@stackra/navigation": 1.0.0
+    "@stackra/notifications": 1.0.0
     "@stackra/outbox": 1.0.0
     "@stackra/panel": 1.0.0
     "@stackra/peripherals": 1.0.0
@@ -76,10 +76,10 @@ catalogs:
     "@stackra/realtime": 1.0.0
     "@stackra/runway": 1.0.0
     "@stackra/scheduler": 1.0.0
-    "@stackra/schema": 1.0.0
     "@stackra/search": 1.0.0
     "@stackra/seo": 1.0.0
     "@stackra/settings": 1.0.0
+    "@stackra/shortcuts": 1.0.0
     "@stackra/state": 1.0.0
     "@stackra/state-machine": 1.0.0
     "@stackra/storage": 1.0.0
@@ -110,6 +110,10 @@ catalogs:
     # React's types follow the React 19.2 line above, for web, desktop and mobile alike.
     "@types/react": 19.2.18
     "@types/react-dom": 19.2.7
+    # The schemas `stackra gen` compiles from shape classes import zod, so every member that authors
+    # shapes depends on it; authored code never imports it, except through the `@Field(zod)` hatch.
+    # 4.1 or later is needed for codecs and `.exactOptional()` (Stackra ADR 0294 decision 26).
+    zod: 4.6.7
   # HeroUI's design-system stylesheet (web and desktop).
   ui:
     "@heroui/styles": 3.2.6

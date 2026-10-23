@@ -6,7 +6,8 @@
 # Boundary: dictionaries, ignores and project words only. A word goes here, never into a user's
 #           settings; a file is ignored only when it is generated, vendored or not English.
 # Runtime: node
-# Governing contract: Stackra ADR 0007 (documentation standard)
+# Governing contract: Stackra ADR 0300 decision 5 (enforced spell checking, British English with
+#                     the en fallback), Stackra ADR 0007 (documentation standard)
 version: "0.2"
 # British English (en-GB) first, US English (en) accepted: code and third-party names use US spelling.
 language: en-GB,en
@@ -42,6 +43,7 @@ ignoreRegExpList:
   - "/sha256:[0-9a-f]{64}/g"
 words:
   - acme
+  - allkeys
   - applinks
   - assetlinks
   - autocapture
@@ -52,6 +54,7 @@ words:
   - changesets
   - clamav
   - cldr
+  - clickhouse
   - commitlint
   - commitlintrc
   - contentful
@@ -60,6 +63,7 @@ words:
   - cosign
   - croner
   - cyclonedx
+  - debezium
   - dedup
   - dedups
   - deeplink
@@ -70,6 +74,7 @@ words:
   - dtos
   - easignore
   - encore
+  - encoredev
   - endonym
   - entitlements
   - esbuild
@@ -86,9 +91,11 @@ words:
   - healthz
   - hermes
   - heroui
+  - hmac
   - hreflang
   - hsts
   - idempotency
+  - indexability
   - infisical
   - infolist
   - isbot
@@ -107,9 +114,12 @@ words:
   - maestro
   - mailpit
   - maxage
+  - meilisearch
   - menuitemradio
+  - metatags
   - mikro
   - mikroorm
+  - milvus
   - minidumps
   - minio
   - mintlify
@@ -120,12 +130,15 @@ words:
   - modeline
   - monorepo
   - nnnn
+  - nodenv
+  - noeviction
   - noindex
   - nonprod
   - npmjs
   - nsis
   - oklch
   - opencode
+  - opensearch
   - otel
   - otlp
   - oxc
@@ -147,10 +160,13 @@ words:
   - preconnects
   - prerender
   - prerendered
+  - prerendering
   - pressable
   - pulumi
   - pwa
+  - qdrant
   - realtime
+  - redpanda
   - redrive
   - redriven
   - refetches
@@ -166,6 +182,7 @@ words:
   - slos
   - sparkline
   - spatie
+  - spicedb
   - ssr
   - stackra
   - stylesheet
@@ -185,6 +202,7 @@ words:
   - turborepo
   - typecheck
   - typegen
+  - typesense
   - ungrantable
   - uniwind
   - unlogged
@@ -194,6 +212,7 @@ words:
   - valkey
   - vite
   - vitest
+  - webp
   - worklets
   - worktrees
   - zitadel

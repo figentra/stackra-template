@@ -10,5 +10,5 @@ package's `src/`.
 | `base.jsonc`       | —       | categories: `correctness` error, `suspicious` warn; `any`, unused code, cycles are errors |
 | `node.jsonc`       | base    | node env                                                                                  |
 | `boundaries.jsonc` | node    | the tier dependency rule; the repo root extends this one                                  |
-| `decorators.jsonc` | node    | decorated classes: `new-cap` relaxed for decorator factories, empty decorated classes     |
+| `decorators.jsonc` | node    | kind classes: `new-cap` relaxed for base and decorator factories, facet-only classes      |
 | `react.jsonc`      | base    | react + jsx-a11y plugins, hooks rules                                                     |

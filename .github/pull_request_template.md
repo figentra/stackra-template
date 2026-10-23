@@ -9,8 +9,8 @@ Change risk:
 
 - [ ] `pnpm verify` green (while the Stackra packages are unpublished, the CI gate runs
       `node .github/scripts/preview-gate.mjs`; run it locally instead)
-- [ ] Committed `.stackra/app-manifest.json` (and a service's `openapi.json`) regenerated with
-      `pnpm gen` when a declaration changed
+- [ ] The member's committed `stackra.manifest.json` and `openapi.json` regenerated with `pnpm gen`
+      when a declaration changed (a changed identity carries `@Renamed`)
 - [ ] A changeset (`pnpm changeset`) when a published package changes
 - [ ] Docs updated: the member README, a guide or an ADR when behaviour or a decision changed
 - [ ] Breaking change: none, or described above with the migration consumers need

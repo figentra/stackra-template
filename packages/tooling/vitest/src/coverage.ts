@@ -1,14 +1,17 @@
 /**
  * Stackra file contract:
- * Purpose: the ONE coverage gate for the workspace packages. Every `packages/**` vitest.config.ts gets it
- *          through `libraryPreset()`, which wraps its config in `withCoverage()`; `pnpm test:coverage` runs
- *          `vitest run --coverage` against these thresholds (no CI step runs it while @stackra/* is
- *          unpublished). Apps are NOT gated here. Provider: @vitest/coverage-v8.
+ * Purpose: the ONE coverage gate for the workspace packages. Every package's generated
+ *          `.stackra/vitest.config.ts` gets it through `libraryPreset()`, which wraps its config in
+ *          `withCoverage()`; `pnpm test:coverage` runs `vitest run --coverage` against these
+ *          thresholds (no CI step runs it while @stackra/* is unpublished). Apps are NOT gated
+ *          here. Provider: @vitest/coverage-v8.
  * Boundary: the shared coverage block and its wrapper; it runs no tests itself.
  * Runtime: node
  * Governing contract: ADR 0007 (documentation); ADR 0022 (test placement).
- * Change policy: a threshold moves only upward, in a changeset; a package that cannot meet it names why in
- *                its own vitest.config.ts (`withCoverage(config, { thresholds: {...} })`).
+ * Change policy: a threshold moves only upward, in a changeset; a package that cannot meet it
+ *                records the lower threshold and its reason in its stackra.config.ts (a build-tool
+ *                fact, ADR 0295 decision 4), and its generated vitest config passes it to
+ *                `withCoverage`.
  */
 import type { ViteUserConfig as UserConfig } from "vitest/config";
 
@@ -21,7 +24,8 @@ export const COVERAGE_THRESHOLDS = Object.freeze({ lines: 80, functions: 80, bra
  * The shared `test.coverage` block.
  * - `include: src/**` — an untested file counts (the v8 default only sees what a test imported).
  * - `src/encore/**` is excluded: the Encore-bound half of a package cannot load outside the Encore runtime.
- * - generated files, barrels, type-only, bin and test files carry no logic to measure.
+ * - generated files, entry barrels (generated, never authored), type-only, bin and test files carry
+ *   no logic to measure.
  */
 export const coverage = Object.freeze({
   provider: "v8",
@@ -48,7 +52,7 @@ export const coverage = Object.freeze({
 export interface CoverageOverrides {
   /** Additional exclude globs appended to the shared list. */
   exclude?: string[];
-  /** Lower a threshold — only with a documented reason in the package's vitest.config.ts. */
+  /** Lower a threshold — only with a documented reason beside the package's override. */
   thresholds?: Partial<typeof COVERAGE_THRESHOLDS>;
 }
 

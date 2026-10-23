@@ -7,7 +7,8 @@
 # Boundary: advisory only; the CI Quality Gate (.github/workflows/ci.yml) is the gate, so a commit
 #           made with `--no-verify` still meets every check before it reaches main.
 # Runtime: node
-# Governing contract: Stackra ADR 0158 (committed manifests), Stackra ADR 0173 (secrets never in git)
+# Governing contract: Stackra ADR 0158 (committed manifests), Stackra ADR 0173 (secrets never in
+#                     git), Stackra ADR 0300 decision 5 (spell checking in the hook and the gate)
 
 pre-commit:
   # The jobs read staged files only and never write, so they run side by side.
@@ -49,7 +50,7 @@ commit-msg:
 
 pre-push:
   jobs:
-    # Committed .stackra/app-manifest.json and openapi.json equal what gen derives now.
+    # Each member's committed stackra.manifest.json and openapi.json equal what gen derives now.
     - name: gen-check
       run: pnpm exec stackra gen --check
     # The full gate over the members the pushed commits touch.

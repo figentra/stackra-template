@@ -7,18 +7,21 @@
 //          oxlint does not merge one rule across overrides: the LAST matching override's options replace
 //          the earlier ones. So the no-restricted-imports overrides run general → specific and each one
 //          repeats the patterns of the broader ones it narrows. Keep that when adding a pattern.
-//          Not here, because they need the module graph: cross-module internals inside one member (gen
-//          fails on the import) and links point down (planned rule `no-upward-route-import`: only a route
-//          imports its layout and page class; everything else uses `Routes.x` from #stackra/routes).
+//          Not here, because they need the module graph: the sibling-module rule inside one member
+//          (a module imports a sibling only through its exported classes and public groups, Stackra
+//          ADR 0294 decision 24; a planned Stackra rule) and links point down (planned rule
+//          `no-upward-route-import`: only a route imports its layout class; everything else uses
+//          `Routes.x` from #stackra/routes).
 //          Service packages are matched by name in any npm scope (`@<scope>/service-<name>`), so the
 //          preset names no project's scope; service paths are matched as `services/<name>/src` or
-//          `services/<name>/.stackra`, so a member's own `services/` kind folder
+//          `services/<name>/.stackra`, so a member's own `services/` group folder
 //          (`#node/services/x.service`) is not mistaken for a service member.
 // Boundary: import bans only; every other rule comes from node.jsonc, and the decorator rules from the
 //           last override below.
 // Runtime: node
-// Governing contract: Stackra ADR 0003 (tier direction), Stackra ADR 0004 (package entries), Stackra
-//                     ADR 0260 (cross-service calls through clients and events)
+// Governing contract: Stackra ADR 0003 (tier direction), Stackra ADR 0004 and ADR 0294 decision 15
+//                     (package entries), Stackra ADR 0260 (cross-service calls through clients and
+//                     events)
 {
   "extends": ["./node.jsonc"],
   "overrides": [
@@ -233,8 +236,9 @@
         "**/apps/**/*.tsx",
         "**/services/**/*.tsx"
       ],
-      // Decorator factories are PascalCase, so `new-cap` must not treat them as constructors; an empty
-      // decorated class (`@Module({...}) class X {}`) is the normal spelling of a kind.
+      // Kind base factories (`extends Action({ key })`) and decorator factories are PascalCase
+      // calls, so `new-cap` must not treat them as constructors; a class with only a facet
+      // decorator stays legal.
       "rules": {
         "eslint/new-cap": [
           "warn",

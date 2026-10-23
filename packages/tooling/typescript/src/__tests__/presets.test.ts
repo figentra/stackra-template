@@ -1,7 +1,8 @@
 /**
  * Proves every preset listed in package.json `exports` exists, parses as JSONC, and resolves its
  * `extends` chain back to base.json — so a broken preset fails here, not in the first consumer's typecheck —
- * and that the five member roles are exported under one spelling, without `.json`.
+ * that the five member roles are exported under one spelling, without `.json`, and that the class
+ * semantics the kind bases rely on hold (ADR 0300 decision 6).
  */
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -55,10 +56,21 @@ describe("@stackra/typescript-config presets", () => {
       "strict",
       "noUncheckedIndexedAccess",
       "exactOptionalPropertyTypes",
+      "noImplicitOverride",
+      "useDefineForClassFields",
       "isolatedModules",
       "verbatimModuleSyntax",
     ]) {
       expect(base[flag], flag).toBe(true);
+    }
+  });
+
+  /** Isolated declarations refuse a called kind base (`extends Action({ key })`). */
+  it("no preset turns on isolatedDeclarations", () => {
+    for (const file of new Set(Object.values(pkg.exports))) {
+      expect(readJsonc(join(root, file)).compilerOptions?.isolatedDeclarations, file).not.toBe(
+        true,
+      );
     }
   });
 });
