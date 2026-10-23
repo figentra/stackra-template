@@ -268,6 +268,36 @@
       }
     },
     {
+      // Components are classes that gen compiles to function components (Stackra ADR 0305): a hook
+      // field (`t = useTranslation()`) and hooks inside render() are legal, but the hooks rules read
+      // the class source and refuse both by design. `stackra lint` runs the two rules on gen's
+      // compiled output and maps each finding back to the class line, so they are off on the
+      // component source. Custom hooks (`use-<name>.ts`) keep them through the override above.
+      "files": [
+        "**/packages/**/src/react/**/*.tsx",
+        "**/packages/**/src/native/**/*.tsx",
+        "**/apps/**/src/**/*.tsx"
+      ],
+      "plugins": ["react"],
+      "rules": {
+        "react/rules-of-hooks": "off",
+        "react/exhaustive-deps": "off"
+      }
+    },
+    {
+      // Component tests are function code (render callbacks, renderHook): the hooks rules apply.
+      "files": [
+        "**/packages/**/src/react/**/__tests__/**/*.tsx",
+        "**/packages/**/src/native/**/__tests__/**/*.tsx",
+        "**/apps/**/src/**/__tests__/**/*.tsx"
+      ],
+      "plugins": ["react"],
+      "rules": {
+        "react/rules-of-hooks": "error",
+        "react/exhaustive-deps": "warn"
+      }
+    },
+    {
       "files": ["**/__tests__/**/*.ts", "**/__tests__/**/*.tsx", "**/__fixtures__/**/*.ts"],
       "rules": {
         "typescript/no-extraneous-class": "off"

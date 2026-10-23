@@ -314,7 +314,10 @@ not follow later prop changes; a derived value is a getter. **Methods are memoiz
 stable**, and in development `mount()` and `unmount()` run twice under StrictMode, as an effect
 does. Own state needs nothing new: a field is state, a hook field reads a context, and a provider is
 a component that renders `<Ctx value={…}>`. Custom hooks stay plain functions in `use-<name>.ts`;
-their result interface is `types/<name>.type.ts`.
+their result interface is `types/<name>.type.ts`. **Lint**: the hooks rules refuse hook fields by
+design, so the oxlint preset turns `rules-of-hooks` and `exhaustive-deps` off on component `.tsx`
+source; `stackra lint` runs both on gen's compiled output and reports each finding at the class
+line. Custom hooks and component tests keep the rules on.
 
 ## Modules
 

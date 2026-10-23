@@ -22,6 +22,15 @@ import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrdersSettings } from "#modules/orders/orders.settings";
 import { OrderKpisQuery } from "#modules/orders/queries/order-kpis.query";
 
+/** The factory attributes of an order paid at the given instant. */
+const paidAt = (iso: string) => ({ paidAt: new Date(iso) });
+
+/** The factory attributes of an order whose subtotal and total are the given USD minor units. */
+const total = (minor: number) => ({
+  subtotal: Money.ofMinor(minor, "USD"),
+  total: Money.ofMinor(minor, "USD"),
+});
+
 /** A tenant whose daily revenue target is as given, with the clock at noon on 21 October. */
 async function setup(dailyRevenueTargetMinor: number | null) {
   freezeClock("2026-10-21T12:00:00Z");
@@ -29,11 +38,6 @@ async function setup(dailyRevenueTargetMinor: number | null) {
     .useDrivers("memory")
     .override(SettingsReader, fakeSettings([[OrdersSettings, { dailyRevenueTargetMinor }]]))
     .compile();
-  const paidAt = (iso: string) => ({ paidAt: new Date(iso) });
-  const total = (minor: number) => ({
-    subtotal: Money.ofMinor(minor, "USD"),
-    total: Money.ofMinor(minor, "USD"),
-  });
   await OrderFactory.new()
     .paid()
     .create({ ...total(2_000), ...paidAt("2026-10-21T09:00:00Z") });

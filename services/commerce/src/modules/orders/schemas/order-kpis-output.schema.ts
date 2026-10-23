@@ -10,7 +10,7 @@
  * Governing contract: ADR 0294 (decisions 4 and 26, as amended by programming model
  *                     v3.1, AGENTS.md), ADR 0164 (as amended for v3.1)
  */
-import { CountMetric, MoneyMetric } from "@stackra/panel";
+import type { CountMetric, MoneyMetric } from "@stackra/panel";
 import { Schema } from "@stackra/validation";
 
 /** The two sales numbers of a period, each with its comparison and per-bucket series. */
