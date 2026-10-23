@@ -8,9 +8,9 @@ icon: "radio"
 
 Subscribe through a webhook subscription (Standard Webhooks signing) for events marked webhook, or,
 inside the platform, with a listener whose `handle` takes the event class the producer's generated
-client exports (`handle(event: Commerce.OrderPlaced, ctx)`). Names are
-`<module>.<aggregate>.<verb>.v<n>`; a new major is a new name, and the old one keeps flowing until
-the sunset its change file sets.
+client exports by name (`handle(event: OrderPlaced, ctx)`, with `OrderPlaced` imported from
+`#stackra/clients/commerce`). Names are `<module>.<aggregate>.<verb>.v<n>`; a new major is a new
+name, and the old one keeps flowing until the sunset its change file sets.
 
 Every envelope is `{ id, name, version, occurredAt, tenantId, actor, data }`; `data` is the schema
 below. Ids are public ids (`ord_…`, `usr_…`); money is in minor units with its currency.

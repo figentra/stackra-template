@@ -9,11 +9,13 @@ in the [Stackra docs](https://docs.stackra.figentra.com). The short version:
    assistant.
 2. Branch from `main`; one change per branch, linked to its issue.
 3. Versions come only from `pnpm-workspace.yaml` catalogs or `workspace:*`. A file's group folder
-   and kind suffix say what it is, and its class extends that kind's base (`AGENTS.md`). Tests sit
-   in `__tests__/` beside their subject. Run `pnpm gen` after changing a declaration; commit the
-   member's `stackra.manifest.json` and `openapi.json` (at the member root) with the change. A
-   changed identity fails `stackra gen --check` unless the class or field carries `@Renamed(old)`.
-   `.stackra/` is never committed.
+   and kind suffix say what it is, its class extends that kind's base, and it exports exactly one
+   declaration: an action's Input and Output go to `schemas/`, a component's Props to
+   `<name>.props.ts` (`AGENTS.md`, programming model v3.1). Tests sit in `__tests__/` beside their
+   subject. Run `pnpm gen` after changing a declaration; commit the member's `stackra.manifest.json`
+   and `openapi.json` (at the member root) with the change. A changed identity fails
+   `stackra gen --check` unless the class or field carries `@Renamed(old)`. `.stackra/` is never
+   committed.
 4. When a published package changes, add a changeset in the same change: `pnpm changeset`, pick the
    packages and the bump (`patch`, `minor`, `major`), and write the release note
    ([`.changeset/README.md`](.changeset/README.md)). Apps and services need none; they deploy by

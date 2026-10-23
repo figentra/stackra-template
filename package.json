@@ -2,7 +2,7 @@
   "name": "acme-platform",
   "version": "0.0.0",
   "private": true,
-  "description": "Stackra reference template: the v3 programming model (kind base classes, group folders, derived identities) in one pnpm + Turborepo workspace (apps, services, packages by category, tooling presets).",
+  "description": "Stackra monorepo template in the programming model v3.1 (kind base classes, one declaration per file, class components, derived identities): one pnpm + Turborepo workspace with services, apps, packages by category and tooling presets, built around the Acme example product.",
   "license": "MIT",
   "type": "module",
   "scripts": {

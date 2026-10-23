@@ -37,7 +37,7 @@
 - orders.order.get@1 (query) — GET /orders/{orderId} — app, orders.order.read, L0, policy OrderPolicy.read
 - orders.order.list@1 (query) — GET /orders — app, orders.order.read, L0
 - orders.order.list_lines@1 (query) — GET /orders/{orderId}/lines — app, orders.order.read, L0, policy OrderPolicy.read
-- orders.order.stats_today@1 (query) — GET /orders/stats/today — app, orders.order.read, L0
+- orders.order.kpis@1 (query) — GET /orders/kpis — app, orders.order.read, L0, cached 5m (invalidated by orders.order.paid.v1)
 - loyalty_kit.account.enroll@1 (action) — PUT /loyalty/accounts/{accountId} — app, loyalty_kit.loyalty_account.enroll, L1; refusals: not_own_principal
 - loyalty_kit.points.redeem@1 (action) — POST /loyalty/redemptions — app, loyalty_kit.loyalty_account.redeem, L1, Idempotency-Key required; waits up to 15m for confirmation, then credits the points back; refusals: not_a_member, insufficient_points, workflow_timed_out, rate_limited
 - loyalty_kit.points.confirm_redemption@1 (action) — PUT /loyalty/redemptions/{reference}/confirm — app, loyalty_kit.loyalty_account.redeem, L1; keeps the debit of a pending redemption
