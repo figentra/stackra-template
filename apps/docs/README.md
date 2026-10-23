@@ -2,7 +2,7 @@
 
 The project's documentation site, built with Mintlify. Everything Mintlify reads lives in `src/`:
 `docs.json`, the MDX pages, and the API reference. Three things are written by hand; the rest is
-generated from the services' committed manifests (the docs app reads only `./contracts` and
+generated from the services' committed manifests (the docs app reads only committed contracts and
 generated output, never a service's source).
 
 | Path                          | Written by | Holds                                                                                   |
@@ -15,10 +15,11 @@ generated output, never a service's source).
 | `src/llms.txt`                | gen        | the agent-readable index: every page, every action key, every event                     |
 | `src/assets/`                 | hand       | favicon and logos; Mintlify's content root is `src/`, so this is the member's `assets/` |
 
-`stackra gen` runs before `build` in the turbo graph and reads the committed
-`.stackra/app-manifest.json` of every service member in the workspace (there is no `stackra` field
-in `package.json` and no `consumes` list). The generated files are gitignored in a real project and
-committed here only to be read.
+`stackra gen` runs before `build` in the turbo graph and reads the committed `stackra.manifest.json`
+at the root of every service member in the workspace (there is no `stackra` field in `package.json`
+and no `consumes` list). The docs app is the one app with no `stackra.config.ts` and no root module:
+it is a Mintlify site with no TypeScript runtime (Stackra ADR 0294 rule R12). Pages and data gen
+writes for the docs are committed, and `stackra gen --check` fails when they are stale.
 
 | Command      | Does                                       |
 | ------------ | ------------------------------------------ |

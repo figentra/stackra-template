@@ -1,17 +1,14 @@
 # yaml-language-server: $schema=../../schemas/runway-app.schema.json
 # Stackra file contract:
-# Purpose: how and where the docs site runs: the one dev port, written only here.
-# Boundary: a minimal app runway; Mintlify hosts the built site (connected to `apps/docs/src`), so
-#           there is no deploy target, no var and no secret here yet. `stackra dev` reads the port
-#           and records it in `.stackra/dev/ports.json`; nothing else in the docs names a port.
+# Purpose: what the docs site needs per environment: the one dev port, written only here.
+# Boundary: a minimal member runway. The member is the folder that holds this file, so it does not
+#           name itself; Mintlify hosts the built site (connected to `apps/docs/src`), so there is
+#           no destination, var or secret here. `stackra dev` reads the port and records it in
+#           `.stackra/dev/ports.json`; nothing else in the docs names a port.
 # Runtime: node
-# Governing contract: ADR 0002, ADR 0170
+# Governing contract: ADR 0296 (member runway), ADR 0002 (docs on Mintlify), ADR 0170
 $schema: "@stackra/runway/schema/app.json"
-version: 2
-# = the member folder name; the docs app has no stackra.config.ts
-member: docs
-# the site holds no secret: Mintlify builds it from the repository
-secrets: {}
+version: 3
 environments:
   dev:
     # `mint dev` on this port, through `stackra dev`

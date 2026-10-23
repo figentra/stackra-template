@@ -1,8 +1,8 @@
 # api-reference (generated, except `introduction.mdx`)
 
-`stackra gen` writes this folder from the committed `.stackra/app-manifest.json` of every service
-member in the workspace: a generated API reference per member; the docs app reads only contracts and
-generated output.
+`stackra gen` writes this folder from the committed `stackra.manifest.json` and `openapi.json` at
+the root of every service member in the workspace; the docs app reads only contracts and generated
+output.
 
 | File               | Written by | Holds                                                                                                                                     |
 | ------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- |

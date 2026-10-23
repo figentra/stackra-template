@@ -14,7 +14,7 @@ service's committed manifest, so it cannot drift from the code.
     Run the service, the console and the site locally in ten minutes.
   </Card>
   <Card title="The programming model" icon="shapes" href="/guides/programming-model">
-    Everything with identity is a class with a kind decorator; folders say the kind.
+    The path says the kind, the base class is the kind; gen derives and locks the identities.
   </Card>
   <Card title="Decisions" icon="landmark" href="/adr">
     Why the repository looks the way it does, one ADR per decision.
@@ -26,7 +26,8 @@ service's committed manifest, so it cannot drift from the code.
 
 ## Reading order for a new contributor
 
-1. `AGENTS.md` at the repository root: the glossary and the "where does X go" table.
+1. `AGENTS.md` at the repository root: the grammar, the group folders, the kind table and the
+   dictionary.
 2. `services/commerce/src/modules/orders/README.md`, then `actions/create-order.action.ts`.
 3. The [programming model](/guides/programming-model) guide.
 4. [Add a field end to end](/guides/add-a-field): one change through every file it touches.

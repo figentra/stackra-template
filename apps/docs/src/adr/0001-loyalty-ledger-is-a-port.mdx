@@ -1,7 +1,23 @@
 ---
 title: "0001 — The loyalty ledger is a port with a postgres driver and a memory driver"
-description: "Accepted · 2026-10-21"
+description: "Accepted, amended by stackra/0294 · 2026-10-21"
 ---
+
+<Note>
+  Amended by `stackra/0294` (programming model v3). The decision stands; its forms changed.
+  `LoyaltyLedger` is `abstract class LoyaltyLedger extends Port` in the kit's
+  `src/contracts/ports/`, and each driver is `extends Driver(LoyaltyLedger)`, named by its file
+  prefix (`postgres-loyalty-ledger.driver.ts` is `postgres`), instead of `@Driver(LoyaltyLedger,
+  name)`. `LoyaltyKitConfig.ledger` is a plain field typed `DriverName<LoyaltyLedger>` (no
+  `@DriverOf`), and runway sets it per environment as `config.loyalty_kit.ledger`, not
+  `drivers.ledger`. The ledger table is `loyalty_kit.ledger_entries`, in the kit's Postgres schema.
+  Commerce extends order pricing with `RedeemPointsExtension extends Extension(OrderExtensionPoint,
+  { order: 200 })` instead of a `@Hook` on `OrderHooks.adjustTotals`, and implements
+  `LoyaltyMembers` as `CommerceLoyaltyMembersDriver`. The enforcing tests are now
+  `services/commerce/src/modules/loyalty/extensions/__tests__/redeem-points.extension.test.ts` and
+  `services/commerce/src/__tests__/stackra-manifest.contract.test.ts`; the other two paths below
+  are unchanged.
+</Note>
 
 ## Context
 

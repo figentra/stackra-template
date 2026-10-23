@@ -9,8 +9,9 @@ icon: "rocket"
     `mise install` pins Node, pnpm, the Encore CLI and gitleaks. Then `pnpm install`.
   </Step>
   <Step title="Generate">
-    `pnpm gen` runs `stackra gen` in every member: the service's `app-manifest.json`, the console's
-    routes and clients, the site's clients and sitemap sources, and this site's API reference.
+    `pnpm gen` runs `stackra gen` in every member: the service's `stackra.manifest.json` and
+    `openapi.json`, every member's entries and tool configs, the console's routes and clients, the
+    site's clients and sitemap sources, and this site's API reference.
   </Step>
   <Step title="Run everything">
     `pnpm dev` starts the service (gen in watch mode plus the generated Encore app), the console,
