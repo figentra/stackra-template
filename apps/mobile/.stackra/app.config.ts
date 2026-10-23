@@ -45,15 +45,15 @@ const ENVIRONMENTS = ["dev", "preview", "staging", "production"] as const;
 /** EAS sets `EAS_BUILD=true` on its workers, which always build an eas.json profile. */
 const isEasBuild = process.env.EAS_BUILD === "true";
 
-// A worker without STACKRA_ENVIRONMENT would build the dev values into a store binary (localhost
-// universal links, no project id, updates off); fail instead.
-if (isEasBuild && !process.env.STACKRA_ENVIRONMENT) {
-  throw new Error(
-    `STACKRA_ENVIRONMENT is not set on EAS build profile "${process.env.EAS_BUILD_PROFILE ?? "unknown"}": run \`stackra gen\` to rewrite eas.json.`,
-  );
-}
-
-const environment = env.enum(ENVIRONMENTS).default("dev").parse(process.env.STACKRA_ENVIRONMENT);
+/**
+ * On an EAS worker the value is required: without it a store binary would carry the dev values
+ * (localhost universal links, no project id, updates off), so the parse fails the build with the
+ * typed env error naming STACKRA_ENVIRONMENT (`stackra gen` rewrites eas.json to set it). A local
+ * run defaults to dev.
+ */
+const environment = isEasBuild
+  ? env.enum(ENVIRONMENTS).parse(process.env.STACKRA_ENVIRONMENT)
+  : env.enum(ENVIRONMENTS).default("dev").parse(process.env.STACKRA_ENVIRONMENT);
 const isDev = environment === "dev";
 /**
  * Dev inlines the resolved values; every other environment reads what EAS set from the synced EAS
@@ -73,18 +73,17 @@ const appHost = new URL(env.url().parse(vars.EXPO_PUBLIC_APP_ORIGIN)).host;
  * absent on a local dev run, where Xcode signs with the developer's own team.
  */
 const appleTeamId = env.str().optional().parse(process.env.STACKRA_APPLE_TEAM_ID);
+/** An Android release build on an EAS worker: the one build that needs the FCM config. */
+const isAndroidRelease = isEasBuild && !isDev && process.env.EAS_BUILD_PLATFORM === "android";
 /**
  * The path EAS gives the `GOOGLE_SERVICES_JSON` file variable on the worker: the FCM client config
- * Android push delivery needs (eas-sync.json `files`).
+ * Android push delivery needs (eas-sync.json `files`). Required for an Android release build, which
+ * would otherwise install but never receive a push: the parse fails the build with the typed env
+ * error naming the variable.
  */
-const googleServicesFile = env.str().optional().parse(process.env.GOOGLE_SERVICES_JSON);
-
-// Without the FCM config an Android release build installs but never receives a push.
-if (isEasBuild && !isDev && process.env.EAS_BUILD_PLATFORM === "android" && !googleServicesFile) {
-  throw new Error(
-    `GOOGLE_SERVICES_JSON is not set in the "${environment}" EAS environment: Android push cannot be delivered.`,
-  );
-}
+const googleServicesFile = isAndroidRelease
+  ? env.str().parse(process.env.GOOGLE_SERVICES_JSON)
+  : env.str().optional().parse(process.env.GOOGLE_SERVICES_JSON);
 
 const config: ExpoConfig = {
   name: "Acme", // stackra.config.ts name
@@ -120,7 +119,9 @@ const config: ExpoConfig = {
       dark: "./.stackra/icons/app-icon-dark-1024.png",
       tinted: "./.stackra/icons/app-icon-tinted-1024.png",
     },
-    // EnvConfig.appOrigin; the member that serves it publishes apple-app-site-association
+    // EnvConfig.appOrigin, served by the console: it publishes
+    // apps/console/.stackra/public/.well-known/apple-app-site-association (`<teamId>.<bundleId>`,
+    // paths `/m/*`), which Apple fetches to verify this claim
     associatedDomains: [`applinks:${appHost}`],
     config: { usesNonExemptEncryption: false }, // stackra.config.ts expo.ios
     privacyManifests: {
@@ -201,7 +202,9 @@ const config: ExpoConfig = {
       "android.permission.READ_EXTERNAL_STORAGE",
       "android.permission.WRITE_EXTERNAL_STORAGE",
     ],
-    // EnvConfig.appOrigin; the member that serves it publishes assetlinks.json
+    // EnvConfig.appOrigin, served by the console: it publishes
+    // apps/console/.stackra/public/.well-known/assetlinks.json (this package and the SHA-256 of the
+    // app signing certificate), which Android fetches to verify `autoVerify`
     intentFilters: [
       {
         action: "VIEW",

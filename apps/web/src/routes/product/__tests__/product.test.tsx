@@ -1,7 +1,8 @@
 /**
  * Stackra file contract:
  * Purpose: proves the product page links every breadcrumb to a page that exists (the store, the
- *          store filtered by collection) and disables "Add to cart" for a variant out of stock.
+ *          store filtered by collection), shows the chosen variant's stock and links the enquiry to
+ *          the contact page with the product and the variant's SKU.
  * Boundary: unit tier, jsdom; the page renders with ProductRoute's loader data.
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0135
@@ -45,10 +46,20 @@ describe(Product, () => {
     ]);
   });
 
-  /** Selling what is not there would fail at checkout; the button says so up front. */
-  it("disables Add to cart while the chosen variant is out of stock", () => {
+  /** The storefront sells nothing anonymously; the enquiry names the exact variant asked about. */
+  it("links the enquiry to the contact page with the product and the variant's SKU", () => {
     render(<Product data={{ product: PRODUCT }} />, { locale: "en", route: "/store/demo-tee" });
     expect(screen.getByText("Out of stock")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Add to cart" })).toBeDisabled();
+    const enquiry = screen.getByRole("link", { name: "Ask about this product" });
+    const target = new URL(enquiry.getAttribute("href") ?? "", "https://acme.example");
+    expect(target.pathname).toBe("/contact");
+    expect(Object.fromEntries(target.searchParams)).toEqual({ product: "Demo tee", sku: "TEE-M" });
+  });
+
+  /** The Arabic page offers the same enquiry in Arabic, to the Arabic contact page. */
+  it("offers the enquiry in Arabic under the Arabic mount", () => {
+    render(<Product data={{ product: PRODUCT }} />, { locale: "ar", route: "/ar/store/demo-tee" });
+    const enquiry = screen.getByRole("link", { name: "اسأل عن هذا المنتج" });
+    expect(enquiry.getAttribute("href")).toMatch(/^\/ar\/contact\?/);
   });
 });

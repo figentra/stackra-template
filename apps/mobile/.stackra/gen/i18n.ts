@@ -187,6 +187,7 @@ export const I18n = keys({
     },
   },
   theming: { enums: { color_scheme: ["light", "dark", "system"] } },
+  consent: { enums: { consent_category: ["necessary", "analytics", "crash_replay"] } },
   mobile: {
     state: ["loading", "error", "retry"],
     offline: ["banner", "pending", "retry", "conflicts"],
@@ -194,10 +195,7 @@ export const I18n = keys({
     order_card: ["open", "cancel"],
     push: ["channel_orders"],
     usage: ["camera"],
-    enums: {
-      consent_category: ["necessary", "analytics", "crash_replay"],
-      cta_verb: ["navigate", "action"],
-    },
+    enums: { cta_verb: ["navigate", "action"] },
     errors: { session_required: ["message"] },
   },
   pages: {
@@ -253,6 +251,10 @@ export const loaders = {
   theming: {
     en: () => import("../lang/en/theming.json"),
     ar: () => import("../lang/ar/theming.json"),
+  },
+  consent: {
+    en: () => import("../lang/en/consent.json"),
+    ar: () => import("../lang/ar/consent.json"),
   },
   mobile: {
     en: () => import("#assets/lang/en/mobile.json"),

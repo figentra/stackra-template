@@ -66,7 +66,7 @@
     "in_stock": "متوفر"
   },
   "product": {
-    "add_to_cart": "أضف إلى السلة",
+    "enquire": "اسأل عن هذا المنتج",
     "breadcrumb_home": "المتجر",
     "variant_axis": "الخيار: {axis}",
     "breadcrumb": "مسار التنقل"
@@ -78,6 +78,8 @@
     "email": "البريد الإلكتروني للعمل",
     "company": "الشركة (اختياري)",
     "message": "كيف يمكننا المساعدة؟",
+    "enquiry": "أرغب في معرفة المزيد عن {product}.",
+    "enquiry_variant": "أرغب في معرفة المزيد عن {product} (رمز المنتج {sku}).",
     "consent": "يمكنكم التواصل معي بخصوص هذا الطلب.",
     "submit": "إرسال",
     "sent": "شكرًا {name}. سنرد على {email}.",

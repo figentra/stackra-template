@@ -11,7 +11,7 @@
 #           here may override a root default, never the reverse. Validated by
 #           `@stackra/runway/schema/app.json`. The health check lives here alone; stackra.config.ts
 #           does not repeat it. Config is keyed by config key: `web.<stem>` for the site's own
-#           classes, the base's key for an override of a package's config.
+#           classes, the base's key for an override of a package's config (`logger.telemetry`).
 # Runtime: node
 # Governing contract: ADR 0296 (member runway), ADR 0294 (config keys), ADR 0297 (decision 6:
 #                     the signed visitor address), ADR 0175, ADR 0173, ADR 0231 d4
@@ -29,7 +29,8 @@ health:
   path: /healthz
   expects: sha
 
-# the org is root `providers.sentry.org`; the DSN is a var below
+# the org is root `providers.sentry.org`; the DSN is the public var `VITE_SENTRY_DSN` below (a DSN
+# is not a secret), inlined into the browser bundle and the Worker build alike
 telemetry:
   sentryProject: acme-web
 
@@ -46,15 +47,15 @@ environments:
     vars:
       # empty disables analytics and error reporting in dev
       VITE_POSTHOG_KEY: ""
+      VITE_SENTRY_DSN: ""
       # Cloudflare's published always-pass test site key
       VITE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       # STACKRA_API_URL is omitted: gen fills it from the root gateway (lane offsets applied)
       # this member's own dev origin; gen expands host:port so the number is never repeated
       STACKRA_SITE_URL: from-port
-      STACKRA_SENTRY_DSN: ""
     # the last config layer: every trace in dev, no analytics
     config:
-      web.telemetry:
+      logger.telemetry:
         traces:
           sampleRate: 1
       analytics:
@@ -73,9 +74,9 @@ environments:
     vars:
       VITE_POSTHOG_KEY: ""
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.preview
+      VITE_SENTRY_DSN: ref:sentry.dsn.web
       STACKRA_API_URL: "https://api-pr-${pr}.preview.acme.example"
       STACKRA_SITE_URL: "https://web-pr-${pr}.preview.acme.example"
-      STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     config:
       web.site:
         previewHostPrefixes: [web-pr-]
@@ -88,12 +89,12 @@ environments:
     vars:
       VITE_POSTHOG_KEY: ref:posthog.key.web
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.staging
+      VITE_SENTRY_DSN: ref:sentry.dsn.web
       STACKRA_API_URL: https://api.staging.acme.example
       STACKRA_SITE_URL: https://staging.acme.example
-      STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     # half of the traces and half of the Worker's requests are sampled
     config:
-      web.telemetry:
+      logger.telemetry:
         traces:
           sampleRate: 0.5
     workers:
@@ -107,9 +108,9 @@ environments:
     vars:
       VITE_POSTHOG_KEY: ref:posthog.key.web
       VITE_TURNSTILE_SITE_KEY: ref:turnstile.siteKey.production
+      VITE_SENTRY_DSN: ref:sentry.dsn.web
       STACKRA_API_URL: https://api.acme.example
       STACKRA_SITE_URL: https://www.acme.example
-      STACKRA_SENTRY_DSN: ref:sentry.dsn.web
     # one request in ten is sampled; the SSR Worker gets 50 ms of CPU per request
     workers:
       observability:

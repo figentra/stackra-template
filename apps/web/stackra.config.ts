@@ -11,7 +11,7 @@
  *           runs is `src/config/*.config.ts`; where it runs (port, domains, vars, Worker knobs, the
  *           health check) is `runway.yaml`. Consumed services are inferred from the
  *           `#stackra/clients/<service>` imports; `ApiArea.Public` makes a reference to any other
- *           area a gen error. The one code hatch is `vite.extend.ts`.
+ *           area a gen error. The site needs no code hatch (no `vite.extend.ts`).
  * Runtime: node
  * Governing contract: ADR 0294 (decision 12, as amended by programming model v3.1, AGENTS.md), ADR
  *                     0295 (decisions 1 to 6), ADR 0297 (decisions 1 and 2), ADR 0165 (React Router
@@ -25,7 +25,7 @@ import { EnvConfig } from "./src/config/env.config";
 /**
  * `targets` and `render` pick the generated outputs: the Worker and browser entries, Wrangler. The
  * public site is `Target.Web` only: it is a marketing site and a storefront read per request, so
- * there is nothing to install and no offline journey (a cart and checkout do not work offline).
+ * there is nothing to install and no offline journey (an enquiry needs the network).
  */
 export default defineApp({
   targets: [Target.Web],

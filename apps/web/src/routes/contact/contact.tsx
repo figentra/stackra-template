@@ -4,7 +4,8 @@
  *          the form with the errors the route's `submit` returned; the thank-you records the
  *          `LeadSubmitted` analytics event once, because only then does a lead exist.
  * Boundary: presentation; props are `RouteProps<typeof ContactRoute>` (`submitted` holds the
- *           submit's data, `search.plan` the plan a "contact sales" link carried). The event
+ *           submit's data, `search.plan` the plan a "contact sales" link carried, `search.product`
+ *           and `search.sku` the product a product page's enquiry link carried). The event
  *           carries the plan, never the visitor's name or email; before the visitor decides it
  *           waits in the analytics package's bounded queue, and a refusal drops it.
  * Runtime: isomorphic
@@ -54,6 +55,8 @@ export class Contact extends Component<RouteProps<typeof ContactRoute>> {
             fieldErrors={submitted?.fieldErrors}
             formError={submitted?.formError}
             plan={search.plan}
+            product={search.product}
+            sku={search.sku}
           />
         )}
       </section>

@@ -28,7 +28,10 @@ export class EnvOptions extends Schema {
   /** Origin of the generated gateway the clients call. */
   apiOrigin!: Url;
 
-  /** Web origin of universal links (`<origin>/m/...`); its member hosts the association files. */
+  /**
+   * Origin of universal links (`<origin>/m/...`): the console's, which serves the two association
+   * files under `/.well-known/` and opens the matching console page for a visitor without the app.
+   */
   appOrigin!: Url;
 
   /** Origin of the realtime gateway (`ws:` or `wss:`); feeds `realtime.origin`. */

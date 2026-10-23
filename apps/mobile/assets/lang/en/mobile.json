@@ -28,11 +28,6 @@
     "camera": "Acme scans product barcodes to add them to an order."
   },
   "enums": {
-    "consent_category": {
-      "necessary": "Necessary",
-      "analytics": "Product analytics",
-      "crash_replay": "Crash replays"
-    },
     "cta_verb": {
       "navigate": "Open a screen",
       "action": "Run an action"

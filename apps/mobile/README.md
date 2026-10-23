@@ -59,7 +59,7 @@ apps/mobile
 │   ├── schemas/               route params, the form, the block's call to action, EnvOptions
 │   ├── types/                 the hooks' result types (`<name>.type.ts`)
 │   ├── overrides/             commerce/orders/assets/lang/: this app's wording of one orders string
-│   ├── enums/                 ConsentCategory, CtaVerb
+│   ├── enums/                 CtaVerb (consent categories are @stackra/consent's ConsentCategory)
 │   ├── errors/                SessionRequiredError
 │   ├── analytics/             BarcodeScanned
 │   └── styles/global.css      Tailwind v4, Uniwind, HeroUI Native and the `acme` theme

@@ -67,9 +67,6 @@ import { OrderStatus$, RequestedLine$ } from "../clients/commerce";
 
 // --- enums ---------------------------------------------------------------------------------------
 
-/** enum `ConsentCategory` (enums/consent-category.enum.ts), codes in source order. */
-export const ConsentCategory$ = z.enum(["necessary", "analytics", "crash_replay"]);
-
 /** enum `CtaVerb` (enums/cta-verb.enum.ts), codes in source order. */
 export const CtaVerb$ = z.enum(["navigate", "action"]);
 
@@ -339,8 +336,9 @@ export type RealtimeConfig$Check = Assert<
 /** override `AnalyticsConfig` (src/config/analytics.config.ts), key `analytics`. */
 export const AnalyticsConfig$ = BaseAnalyticsConfig$.extend({
   driver: BaseAnalyticsConfig$.shape.driver.unwrap().default("posthog"),
-  consent: BaseAnalyticsConfig$.shape.consent.unwrap().default("analytics"),
-  autocaptureScreens: BaseAnalyticsConfig$.shape.autocaptureScreens.unwrap().default(true),
+  consentCategory: BaseAnalyticsConfig$.shape.consentCategory.unwrap().default("analytics"),
+  autocapturePageviews: BaseAnalyticsConfig$.shape.autocapturePageviews.unwrap().default(true),
+  autocaptureClicks: BaseAnalyticsConfig$.shape.autocaptureClicks.unwrap().default(false),
   denyProperties: BaseAnalyticsConfig$.shape.denyProperties
     .unwrap()
     .default(() => ["email", "phone"]),
@@ -351,9 +349,26 @@ export type AnalyticsConfig$Check = Assert<
 
 /** override `ConsentConfig` (src/config/consent.config.ts), key `consent`. */
 export const ConsentConfig$ = BaseConsentConfig$.extend({
-  categories: BaseConsentConfig$.shape.categories
-    .unwrap()
-    .default(() => ["necessary", "analytics", "crash_replay"]),
+  categories: BaseConsentConfig$.shape.categories.unwrap().default(() => [
+    {
+      category: "necessary",
+      required: true,
+      defaultGranted: true,
+      descriptionKey: "mobile::consent.necessary_hint",
+    },
+    {
+      category: "analytics",
+      required: false,
+      defaultGranted: false,
+      descriptionKey: "mobile::consent.analytics_hint",
+    },
+    {
+      category: "crash_replay",
+      required: false,
+      defaultGranted: false,
+      descriptionKey: "mobile::consent.crash_replay_hint",
+    },
+  ]),
   policyVersion: BaseConsentConfig$.shape.policyVersion.unwrap().default("2026-10"),
   askOnFirstLaunch: BaseConsentConfig$.shape.askOnFirstLaunch.unwrap().default(true),
 });

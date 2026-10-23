@@ -53,6 +53,7 @@
     "@stackra/i18n": "catalog:stackra",
     "@stackra/iam": "catalog:stackra",
     "@stackra/icons": "catalog:stackra",
+    "@stackra/logger": "catalog:stackra",
     "@stackra/media": "catalog:stackra",
     "@stackra/money": "catalog:stackra",
     "@stackra/navigation": "catalog:stackra",

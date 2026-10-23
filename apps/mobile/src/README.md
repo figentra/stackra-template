@@ -15,7 +15,7 @@ The groups of an app (ADR 0294 decision 14); a group folder appears with its fir
 | `schemas/`           | shape classes: route params, the form, the block's call to action, the env options                       |
 | `types/`             | types only: each hook's result (`<name>.type.ts`)                                                        |
 | `overrides/<owner>/` | the one tree that changes another member's files, mirroring the owner's path                             |
-| `enums/`             | enums only this app uses (`ConsentCategory`, `CtaVerb`)                                                  |
+| `enums/`             | enums only this app uses (`CtaVerb`); a package's enum is imported, never redefined                      |
 | `errors/`            | refusals this app raises (`SessionRequiredError`)                                                        |
 | `analytics/`         | analytics events (`BarcodeScanned`)                                                                      |
 | `styles/global.css`  | the one stylesheet entry                                                                                 |

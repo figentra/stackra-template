@@ -2,8 +2,9 @@
  * Stackra file contract:
  * Purpose: the env contract of the public site, referenced by `stackra.config.ts` `env`: the shape
  *          is `EnvOptions`, and `env` maps each field read from the environment to its variable.
- *          Public fields (`VITE_`) are inlined into the client bundle; server fields (`STACKRA_`)
- *          are read from the Worker's `env` at run time; the two secrets are named on their schema
+ *          Public fields (`VITE_`) are inlined at build time into the client bundle and the Worker
+ *          build alike, so both sides read one value; server fields (`STACKRA_`) are read from the
+ *          Worker's `env` at run time; the two secrets are named on their schema
  *          fields and synced by runway. A field named after a package config field feeds it when
  *          `createApp` layers the env over the config defaults (`analyticsPosthogKey` feeds
  *          `analytics.posthogKey`, `featureFlagsPosthogKey` feeds `feature_flags.posthogKey`,
@@ -27,8 +28,8 @@ export class EnvConfig extends Config({
     analyticsPosthogKey: "VITE_POSTHOG_KEY",
     featureFlagsPosthogKey: "VITE_POSTHOG_KEY",
     turnstileSiteKey: "VITE_TURNSTILE_SITE_KEY",
+    telemetryDsn: "VITE_SENTRY_DSN",
     apiUrl: "STACKRA_API_URL",
     siteUrl: "STACKRA_SITE_URL",
-    telemetryDsn: "STACKRA_SENTRY_DSN",
   },
 }) {}

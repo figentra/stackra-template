@@ -1,12 +1,14 @@
 /**
  * Stackra file contract:
  * Purpose: changing the language persists it to the `Prefs` area; sign out calls the session;
- *          analytics stays off until the user turns its consent switch on.
+ *          analytics stays off until the user turns its consent switch on; the required
+ *          necessary category is locked on.
  * Boundary: unit tier; the storage fake is in memory; the session fake records `signOut`; the
  *           consent fake records decisions.
  * Runtime: react-native
  * Governing contract: ADR 0022, ADR 0298, ADR 0071, ADR 0256
  */
+import { ConsentCategory } from "@stackra/consent";
 import { fakeConsent } from "@stackra/consent/testing";
 import { Locale } from "@stackra/i18n";
 import { SessionStatus } from "@stackra/identity";
@@ -14,7 +16,6 @@ import { fakeSession } from "@stackra/identity/testing";
 import { fakeStorage } from "@stackra/storage/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen, userEvent } from "@stackra/testing/native";
-import { ConsentCategory } from "#src/enums/consent-category.enum";
 import { Routes } from "#stackra/routes";
 
 /** The settings page over its route. */
@@ -43,5 +44,11 @@ describe("Settings", () => {
     await userEvent.press(screen.getByTestId(`consent-${ConsentCategory.Analytics}`));
     expect(consent.isGranted(ConsentCategory.Analytics)).toBe(true);
     expect(consent.isGranted(ConsentCategory.CrashReplay)).toBe(false);
+  });
+
+  /** The necessary category is required: shown, granted and locked, never a choice. */
+  it("locks the necessary category on", () => {
+    renderRoute(Routes.settings, { locale: "en", consent: fakeConsent() });
+    expect(screen.getByTestId(`consent-${ConsentCategory.Necessary}`)).toBeDisabled();
   });
 });

@@ -1,7 +1,8 @@
 /**
  * Stackra file contract:
  * Purpose: the shape of the public site's env contract: the public fields (inlined into the client
- *          bundle), the server fields (read from the Worker's `env` per request) and the two
+ *          bundle and the Worker build), the server fields (read from the Worker's `env` per
+ *          request) and the two
  *          secrets, by field, with their defaults. `EnvConfig` maps each environment-read field to
  *          its variable name; the secrets are named on their fields. A field a package's context
  *          reads is named `<package><Field>` after the config field it feeds (`analyticsPosthogKey`
@@ -33,17 +34,18 @@ export class EnvOptions extends Schema {
   /** Turnstile site key rendered in the contact form; its pair is `turnstileSecret`. */
   turnstileSiteKey!: string;
 
+  /**
+   * The public Sentry DSN (`VITE_SENTRY_DSN`; a DSN is not a secret): inlined into the browser
+   * bundle and the Worker build, so both report to one project. Empty disables error reporting.
+   * Feeds `logger.telemetry.dsn`.
+   */
+  telemetryDsn = "";
+
   /** The gateway origin the Worker reads the public area from. */
   apiUrl!: Url;
 
   /** The canonical origin; absolute URLs in sitemaps, canonicals and OG tags are built from it. */
   siteUrl!: Url;
-
-  /**
-   * Sentry DSN of the Worker and the browser; empty disables error reporting. Feeds
-   * `logger.telemetry.dsn`.
-   */
-  telemetryDsn = "";
 
   /** The Turnstile secret, verified in the contact submit. */
   @Secret("TURNSTILE_SECRET_KEY")

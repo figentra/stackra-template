@@ -17,8 +17,10 @@ exactly two public actions (`leads.lead.create`, `seo.not_found.record`). It own
 through `@stackra/ui`, like the console, and the look is the `acme` theme of `@acme/theme`.
 
 It is a website, not an installable app: `Target.Web` only. A marketing site and a storefront read
-per request have no offline journey (a cart and a checkout need the network), so there is no web app
-manifest, service worker or offline page; the console is the installable PWA.
+per request have no offline journey, so there is no web app manifest, service worker or offline
+page; the console is the installable PWA. The storefront sells nothing to an anonymous visitor (the
+public area of commerce is three read queries): a product page's call to action is an enquiry that
+opens the contact page with the product and the chosen variant's SKU written into the message.
 
 | Command                  | Does                                                                                                |
 | ------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -34,16 +36,15 @@ manifest, service worker or offline page; the console is the installable PWA.
 ```text
 apps/web
 ├── stackra.config.ts        defineApp: Target.Web, render: RenderMode.Server, ApiArea.Public, env class, e2e
-├── vite.extend.ts           the one code hatch (with its Reason): an extra Vite plugin, merged after the stackra plugin
 ├── runway.yaml              dev port/host, domains and aliases, public + server vars, secret names, Worker knobs, health
 ├── stackra.manifest.json    the committed contract: routes, blocks, menus, flag, consumes, forwarding, config keys
 ├── package.json             three aliases: #src/*, #assets/* and #stackra/*
 ├── assets/lang/<locale>/    web.json per locale: en and ar complete; en-US and ar-SA hold only the keys that differ
 ├── .stackra/                GENERATED (see .stackra/README.md); the entries live in .stackra/entry/
 └── src/
-    ├── config/              one class per fact: env, site, edge and telemetry are the site's own (`Config({ schema })`
-    │                        over a shape in schemas/); i18n, theming, seo, consent, analytics, feature-flags and csp
-    │                        override a package's config under the base's own name (`extends BaseI18nConfig`)
+    ├── config/              one class per fact: env, site and edge are the site's own (`Config({ schema })` over a
+    │                        shape in schemas/); i18n, theming, seo, consent, analytics, telemetry, feature-flags and
+    │                        csp override a package's config under the base's own name (`extends BaseI18nConfig`)
     ├── routes/<name>/       <name>.route.ts or <name>.layout.ts, <name>.tsx bound by name, __tests__/: landing,
     │                        pricing, contact, store, product, page (with page.fallback.tsx); the site layout
     ├── menus/               Menu classes of kind Navigation: site (the header: groups with sub-navigation, a
@@ -58,8 +59,8 @@ apps/web
     ├── blocks/<name>/       one folder per block: <name>.block.ts (props as fields), <name>.tsx with <name>.props.ts,
     │                        __tests__/: hero-section, feature-grid, pricing-table, testimonials, faq-section,
     │                        cta-banner, product-grid
-    ├── schemas/             shape classes: the four config options, contact, the store and contact query strings,
-    │                        call-to-action, feature, the cache rule and the nested telemetry config objects
+    ├── schemas/             shape classes: the three config options (env, site, edge), contact, the store and
+    │                        contact query strings, call-to-action, feature and the cache rule
     ├── types/               resolved-site, site-market, variant, variant-choice, feature-card, call-to-action-link,
     │                        and the hook results (analytics-consent-state, billing-interval-state,
     │                        locale-suggestion-state)
@@ -118,7 +119,6 @@ overrides stay in `src/config/`.
 | Fact                                                       | File                                                        | Consumed by                                                   |
 | ---------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
 | Targets, render mode, area, env class, e2e seeds           | `stackra.config.ts`                                         | every generated file                                          |
-| Extra Vite plugins                                         | `vite.extend.ts`                                            | `.stackra/vite.config.ts` (merged last)                       |
 | Dev port and host, domains, vars, secret names, Worker     | `runway.yaml`                                               | `vite.config.ts`, `wrangler.jsonc`, Playwright, Lighthouse    |
 | The env contract (`VITE_*`, `STACKRA_*`, the secret names) | `src/config/env.config.ts`                                  | `gen/env.ts`, `env.d.ts`, `wrangler.jsonc` vars               |
 | Locales, overlays, RTL, fallback chains, URL strategy      | `src/config/i18n.config.ts`                                 | per-locale mounts in `routes.ts`, `<html lang dir>`           |
@@ -127,6 +127,7 @@ overrides stay in `src/config/`.
 | Title template, robots groups, sitemap paging, OG, noindex | `src/config/seo.config.ts`                                  | the SEO route modules, `gen/sitemap.ts`, the store route      |
 | Consent categories, cookie, policy version, regions        | `src/config/consent.config.ts`                              | the banner and the consent context                            |
 | Analytics and flag drivers, consent gating                 | `src/config/analytics.config.ts`, `feature-flags.config.ts` | `gen/wiring.ts`, the contexts `createApp` mounts              |
+| Error reporting, sampling, vitals, bundle and Lighthouse   | `src/config/telemetry.config.ts` (DSN: `VITE_SENTRY_DSN`)   | the reporter, `vite.config.ts` budgets, `lighthouserc.yaml`   |
 | Data cache windows per `CacheProfile`, redirects, 404 log  | `src/config/edge.config.ts`                                 | the Workers cache driver, `middleware.ts`, `entry.server.tsx` |
 | CSP additions, Report-Only rollout                         | `src/config/csp.config.ts`                                  | `middleware.ts`, root preconnects                             |
 | Pages, header and footer navigation, page-builder blocks   | `src/routes/`, `src/menus/`, `src/blocks/`                  | `routes.ts`, `route-modules/`, the experience service         |
@@ -190,7 +191,7 @@ Tenant pages (`*`) differ in one way: `RenderMode.Client` builds the head on the
 ## Catalog entries this member needs (root `pnpm-workspace.yaml`)
 
 Runtime:
-`@stackra/{analytics,app,assets,cache,clients,config,consent,container,content,contracts,csp,errors,events,experience,feature-flags,i18n,iam,icons,media,money,navigation,platform,seo,state,theming,tokens,ui,validation}`
+`@stackra/{analytics,app,assets,cache,clients,config,consent,container,content,contracts,csp,errors,events,experience,feature-flags,i18n,iam,icons,logger,media,money,navigation,platform,seo,state,theming,tokens,ui,validation}`
 in `catalog:stackra` (`@acme/theme` is the workspace package); `react`, `react-dom`, `react-router`,
 `isbot` and `zod` in the default catalog; `@heroui/styles` in `catalog:ui`; `tailwindcss` in
 `catalog:frontend`.

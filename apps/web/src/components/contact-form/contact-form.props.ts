@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: the Props of `ContactForm`: what the route passes back after a POST, and the plan the
- *          visitor came from.
+ * Purpose: the Props of `ContactForm`: what the route passes back after a POST, and the plan or
+ *          the product the visitor came from.
  * Boundary: a type only; the errors are i18n keys, never English text.
  * Runtime: browser
  * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md: Props in
@@ -17,4 +17,8 @@ export interface ContactFormProps {
   readonly formError?: I18nKey;
   /** The plan key from `?plan=` when the visitor came from "contact sales". */
   readonly plan?: string;
+  /** The product title from `?product=` when the visitor came from a product page's enquiry. */
+  readonly product?: string;
+  /** The chosen variant's SKU from `?sku=`, named in the prefilled message beside the product. */
+  readonly sku?: string;
 }

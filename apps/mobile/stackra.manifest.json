@@ -533,12 +533,6 @@
   },
   "enums": [
     {
-      "key": "mobile.consent_category",
-      "class": "ConsentCategory",
-      "file": "src/enums/consent-category.enum.ts",
-      "codes": ["necessary", "analytics", "crash_replay"]
-    },
-    {
       "key": "mobile.cta_verb",
       "class": "CtaVerb",
       "file": "src/enums/cta-verb.enum.ts",

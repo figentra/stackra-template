@@ -1,11 +1,12 @@
 /**
  * Stackra file contract:
  * Purpose: the shopping journey: list, search, open a product, change a variant (price updates),
- *          and the 404 page for an unknown slug; plus the crawler's view: Product JSON-LD, robots
- *          and the products sitemap.
+ *          ask about the chosen variant (the contact page opens with the message written), and
+ *          the 404 page for an unknown slug; plus the crawler's view: Product JSON-LD, robots and
+ *          the products sitemap.
  * Boundary: end-to-end tier against the commerce service on memory drivers with the `orders.demo`
- *           seed (the `demo-tee` product, size M in stock and L out of stock). No cart assertions:
- *           the cart arrives with checkout.
+ *           seed (the `demo-tee` product, size M in stock and L out of stock). The public area
+ *           sells nothing anonymously, so the journey ends in an enquiry, not a cart.
  * Runtime: node
  * Governing contract: ADR 0182, ADR 0183
  */
@@ -18,7 +19,7 @@ test.beforeEach(async () => {
 });
 
 /** Covers the whole shopping path end to end, including accessibility and the not-found case. */
-test("store: list, search, detail, variant, 404", async ({ page }) => {
+test("store: list, search, detail, variant, enquiry, 404", async ({ page }) => {
   await page.goto("/store");
   await expect(await axe(page)).toHaveNoViolations();
   await page.getByRole("searchbox", { name: /search products|ابحث عن المنتجات/ }).fill("tee");
@@ -34,6 +35,12 @@ test("store: list, search, detail, variant, 404", async ({ page }) => {
   await page.getByRole("option", { name: "L" }).click();
   await expect(price).not.toHaveText(before);
   await expect(await axe(page)).toHaveNoViolations();
+
+  await page.getByRole("link", { name: /ask about this product|اسأل عن هذا المنتج/ }).click();
+  await expect(page).toHaveURL(/\/contact\?product=/);
+  await expect(
+    page.getByRole("textbox", { name: /how can we help|كيف يمكننا المساعدة/ }),
+  ).toHaveValue(/demo tee/i);
 
   const missing = await page.goto("/store/does-not-exist");
   expect(missing?.status()).toBe(404);

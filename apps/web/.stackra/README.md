@@ -25,7 +25,7 @@ stackra.config.ts, `C/<fact>` = src/config/<fact>.config.ts, `RM` = this member'
 | `route-modules/<key>.tsx` | one route class and the page beside it, the layout, C/seo (SEO defaults), C/i18n, `context.ts`                       | one framework-mode module per route class (sample: `route-modules/product.tsx`)              |
 | `route-modules/<seo>.ts`  | C/seo, the site layout, consumed sitemap sources                                                                     | `robots`, `sitemap-index`, `sitemap` (paged), `og-image`                                     |
 | `react-router.config.ts`  | K (`prerender`), C/site (`fixedSiteId`), C/i18n                                                                      | SSR on, the middleware flag on, the prerender list (empty without a fixed site)              |
-| `vite.config.ts`          | S (targets, render), C/telemetry (budgets), **RM.environments.dev**, RM vars, `vite.extend.ts` (merged last)         | the stackra plugin, then the member's extra plugins; `server` from the member runway         |
+| `vite.config.ts`          | S (targets, render), C/telemetry (budgets), **RM.environments.dev**, RM vars                                         | the stackra plugin and `classComponents()`; `server` from the member runway                  |
 | `wrangler.jsonc`          | S (member key, env class), **RM.environments.<env>** (domain, aliases, vars, workers), RR.targets.cloudflare-workers | the Worker's deploy shape per environment, `run_worker_first`; secret NAMES only             |
 | `env.d.ts` / `gen/env.ts` | S.env (`EnvConfig`), RM.environments.<env>.vars, RM.secrets                                                          | typed `import.meta.env` and the Worker `Env`; validated public and server env                |
 | `vitest.config.ts`        | S                                                                                                                    | the app preset (jsdom); Playwright's `.e2e.test.ts` files excluded                           |
@@ -35,7 +35,7 @@ stackra.config.ts, `C/<fact>` = src/config/<fact>.config.ts, `RM` = this member'
 | `gen/*.ts`                | consumed manifests, C/\*, K, `assets/`                                                                               | see `gen/README.md`                                                                          |
 
 No authored entry: React Router 7 framework mode's entries, root and the Worker are all generated.
-The one build hatch is the member-root `vite.extend.ts`, merged last into `vite.config.ts`. The
-gitignored `vite.config.ts`, `vitest.config.ts`, `playwright.config.ts`, `react-router.config.ts`,
+The site needs no build hatch, so there is no member-root `vite.extend.ts`. The gitignored
+`vite.config.ts`, `vitest.config.ts`, `playwright.config.ts`, `react-router.config.ts`,
 `wrangler.jsonc` and `lighthouserc.yaml` at the member root are shims that re-export or copy the
 files here.

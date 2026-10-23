@@ -16,8 +16,8 @@
  * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
  *                     alias), ADR 0295 (decision 10), ADR 0071, ADR 0180, ADR 0184, ADR 0232
  */
+import { ConsentCategory } from "@stackra/consent";
 import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
-import { ConsentCategory } from "#src/enums/consent-category.enum";
 
 /** The dev-safe rates; runway lowers them per environment. */
 export class TelemetryConfig extends BaseTelemetryConfig {

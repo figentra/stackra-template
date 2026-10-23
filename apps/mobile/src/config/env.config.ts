@@ -2,9 +2,9 @@
  * Stackra file contract:
  * Purpose: the env contract of the mobile app, named by `stackra.config.ts` `env`: every public
  *          value the binary carries (the EAS project for the update URL, the gateway origin the
- *          generated clients call, the web origin of universal links, and the values the packages'
- *          contexts read: the realtime origin, the identity issuer and client, the Sentry DSN, the
- *          push transport, the PostHog key). Values per environment come from runway.yaml
+ *          generated clients call, the console origin of universal links, and the values the
+ *          packages' contexts read: the realtime origin, the identity issuer and client, the Sentry
+ *          DSN, the push transport, the PostHog key). Values per environment come from runway.yaml
  *          `environments.<env>.vars`; gen inlines the dev values into the Expo config and runway
  *          syncs the others into the EAS environment of each profile. Never a `.env`, never the EAS
  *          dashboard by hand.

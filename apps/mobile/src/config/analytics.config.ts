@@ -17,8 +17,8 @@
  */
 import { AnalyticsConfig as BaseAnalyticsConfig } from "@stackra/analytics";
 import type { AnalyticsDriver } from "@stackra/analytics/contracts";
+import { ConsentCategory } from "@stackra/consent";
 import type { DriverName } from "@stackra/container";
-import { ConsentCategory } from "#src/enums/consent-category.enum";
 
 /** PostHog on the phone, gated by the analytics consent, with contact fields stripped. */
 export class AnalyticsConfig extends BaseAnalyticsConfig {
@@ -26,10 +26,13 @@ export class AnalyticsConfig extends BaseAnalyticsConfig {
   override driver: DriverName<AnalyticsDriver> = "posthog";
 
   /** The consent category that gates every event; gen checks it is in consent.config.ts. */
-  override consent: ConsentCategory = ConsentCategory.Analytics;
+  override consentCategory: ConsentCategory = ConsentCategory.Analytics;
 
-  /** Record a screen view per route change. */
-  override autocaptureScreens = true;
+  /** Record a page view per route change: on native a screen view is a page view. */
+  override autocapturePageviews = true;
+
+  /** Record taps without an explicit event; off so only declared events are sent. */
+  override autocaptureClicks = false;
 
   /** Property names stripped from every event before it leaves the device. */
   override denyProperties = ["email", "phone"];

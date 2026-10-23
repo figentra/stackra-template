@@ -12,6 +12,7 @@
 interface ImportMetaEnv {
   readonly VITE_POSTHOG_KEY?: string;
   readonly VITE_TURNSTILE_SITE_KEY?: string;
+  readonly VITE_SENTRY_DSN?: string;
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv;
@@ -25,7 +26,6 @@ interface ImportMeta {
 interface Env {
   readonly STACKRA_API_URL: string;
   readonly STACKRA_SITE_URL: string;
-  readonly STACKRA_SENTRY_DSN: string;
   readonly TURNSTILE_SECRET_KEY: string;
   readonly GATEWAY_VISITOR_SIGNING_KEY: string;
   readonly ASSETS: Fetcher;

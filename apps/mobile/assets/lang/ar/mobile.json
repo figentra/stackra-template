@@ -28,11 +28,6 @@
     "camera": "يمسح Acme الرموز الشريطية للمنتجات لإضافتها إلى الطلب."
   },
   "enums": {
-    "consent_category": {
-      "necessary": "ضرورية",
-      "analytics": "تحليلات المنتج",
-      "crash_replay": "تسجيلات الأعطال"
-    },
     "cta_verb": {
       "navigate": "فتح شاشة",
       "action": "تنفيذ إجراء"

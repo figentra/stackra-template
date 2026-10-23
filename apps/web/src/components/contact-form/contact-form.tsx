@@ -4,8 +4,9 @@
  *          whose fields are the @stackra/ui adapters over the schema, so the browser shows the same
  *          messages the route's `submit` returns.
  * Boundary: UI and client-side validation only; `ContactRoute.submit` is the authority. Server
- *           field errors arrive as props and show immediately; the Turnstile widget supplies
- *           `captchaToken`. The form records no analytics: a lead exists only once the server
+ *           field errors arrive as props and show immediately; a product enquiry seeds the message
+ *           with the product and SKU, which the visitor edits before sending; the Turnstile
+ *           widget supplies `captchaToken`. The form records no analytics: a lead exists only once the server
  *           accepted it, so the contact page records `LeadSubmitted` from the submit's answer.
  * Runtime: browser
  * Governing contract: ADR 0294 (decision 14, as amended by programming model v3.1, AGENTS.md: class
@@ -29,8 +30,20 @@ export class ContactForm extends Component<ContactFormProps> {
   /** The router's navigation state; `submitting` while the POST is in flight. */
   navigation = useNavigation();
 
-  /** The schema form, seeded with the server's field errors. */
-  form = useSchemaForm(ContactInput, { serverErrors: this.props.fieldErrors });
+  /** The schema form, seeded with the server's field errors and a product enquiry's message. */
+  form = useSchemaForm(ContactInput, {
+    serverErrors: this.props.fieldErrors,
+    defaultValues: this.props.product
+      ? {
+          message: this.props.sku
+            ? this.translation.t(I18n.web.contact.enquiry_variant, {
+                product: this.props.product,
+                sku: this.props.sku,
+              })
+            : this.translation.t(I18n.web.contact.enquiry, { product: this.props.product }),
+        }
+      : undefined,
+  });
 
   /** The fields, the honeypot, the plan, the captcha and the form-level refusal. */
   render() {

@@ -70,7 +70,7 @@ export const I18n = keys({
     faq: ["title"],
     cta: ["title", "body", "button"],
     store: ["title", "search", "empty", "more", "out_of_stock", "in_stock"],
-    product: ["add_to_cart", "variant_axis", "breadcrumb", "breadcrumb_home"],
+    product: ["enquire", "variant_axis", "breadcrumb", "breadcrumb_home"],
     contact: {
       _: [
         "title",
@@ -79,6 +79,8 @@ export const I18n = keys({
         "email",
         "company",
         "message",
+        "enquiry",
+        "enquiry_variant",
         "consent",
         "submit",
         "sent",

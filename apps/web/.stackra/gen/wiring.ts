@@ -24,6 +24,7 @@ import { Renderer } from "@stackra/experience/contracts";
 import { FeatureFlagsConfig as BaseFeatureFlagsConfig } from "@stackra/feature-flags";
 import { FlagProvider } from "@stackra/feature-flags/contracts";
 import { I18nConfig as BaseI18nConfig } from "@stackra/i18n";
+import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
 import { CaptchaVerifier } from "@stackra/platform/contracts";
 import { SeoConfig as BaseSeoConfig } from "@stackra/seo";
 import { OgRenderer } from "@stackra/seo/contracts";
@@ -71,6 +72,8 @@ export const wiring = {
         "money",
         "consent",
         "analytics",
+        "logger",
+        "errors",
         "feature_flags",
         "seo",
         "csp",
@@ -84,20 +87,27 @@ export const wiring = {
     { module: "web", provide: LandingRoute, kind: "route", deps: [SiteConfig] },
     { module: "web", provide: PricingRoute, kind: "route", deps: [SiteConfig] },
     { module: "web", provide: StoreRoute, kind: "route", deps: [BaseSeoConfig] },
-    { module: "web", provide: BaseAnalyticsConfig, config: AnalyticsConfig },
-    { module: "web", provide: BaseConsentConfig, config: ConsentConfig },
-    { module: "web", provide: BaseCspConfig, config: CspConfig },
-    { module: "web", provide: EdgeConfig, config: EdgeConfig },
-    { module: "web", provide: EnvConfig, config: EnvConfig },
-    { module: "web", provide: BaseFeatureFlagsConfig, config: FeatureFlagsConfig },
-    { module: "web", provide: BaseI18nConfig, config: I18nConfig },
-    { module: "web", provide: BaseSeoConfig, config: SeoConfig },
-    { module: "web", provide: SiteConfig, config: SiteConfig },
-    { module: "web", provide: TelemetryConfig, config: TelemetryConfig },
-    { module: "web", provide: BaseThemingConfig, config: ThemingConfig },
+  ],
+  /**
+   * Config classes: the site's own, then each package base (imported as `Base<Name>`) with the
+   * override that replaces it across the app; a package's context reads its base and gets the
+   * override. `EnvConfig`'s package-named fields feed the overrides after their defaults.
+   */
+  config: [
+    { key: "web.env", provide: EnvConfig },
+    { key: "web.site", provide: SiteConfig },
+    { key: "web.edge", provide: EdgeConfig },
+    { key: "feature_flags", provide: BaseFeatureFlagsConfig, override: FeatureFlagsConfig },
+    { key: "theming", provide: BaseThemingConfig, override: ThemingConfig },
+    { key: "i18n", provide: BaseI18nConfig, override: I18nConfig },
+    { key: "consent", provide: BaseConsentConfig, override: ConsentConfig },
+    { key: "analytics", provide: BaseAnalyticsConfig, override: AnalyticsConfig },
+    { key: "logger.telemetry", provide: BaseTelemetryConfig, override: TelemetryConfig },
+    { key: "seo", provide: BaseSeoConfig, override: SeoConfig },
+    { key: "csp", provide: BaseCspConfig, override: CspConfig },
   ],
   /** Mounted by `createApp` outermost first, from the config classes in the module graph. */
-  contexts: ["feature_flags", "theming", "i18n", "consent", "analytics", "web.telemetry", "ui"],
+  contexts: ["feature_flags", "theming", "i18n", "consent", "analytics", "logger.telemetry", "ui"],
   drivers: [
     {
       port: Cache,
@@ -159,7 +169,7 @@ export const wiring = {
     blockAccepts: "all resolved",
     areas: "public only",
     configsRead: "all",
-    overrides: "7 config overrides, each of one base",
+    overrides: "8 config overrides, each of one base",
     providers: "none (no root module file, so no wrap)",
     prerender: "none (SiteConfig.fixedSiteId unset)",
   },

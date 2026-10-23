@@ -66,7 +66,7 @@
     "in_stock": "In stock"
   },
   "product": {
-    "add_to_cart": "Add to cart",
+    "enquire": "Ask about this product",
     "breadcrumb_home": "Store",
     "variant_axis": "Option: {axis}",
     "breadcrumb": "Breadcrumb"
@@ -78,6 +78,8 @@
     "email": "Work email",
     "company": "Company (optional)",
     "message": "How can we help?",
+    "enquiry": "I would like to know more about {product}.",
+    "enquiry_variant": "I would like to know more about {product} (SKU {sku}).",
     "consent": "You may contact me about this request.",
     "submit": "Send",
     "sent": "Thanks, {name}. We will reply to {email}.",

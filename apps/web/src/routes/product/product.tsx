@@ -1,11 +1,12 @@
 /**
  * Stackra file contract:
- * Purpose: the product page, bound to `ProductRoute` by name: breadcrumb, image, title, price of
- *          the chosen variant, picker, the (disabled) cart button, the description document.
+ * Purpose: the product page, bound to `ProductRoute` by name: breadcrumb, image, title, price and
+ *          stock of the chosen variant, picker, the enquiry link, the description document.
  * Boundary: presentation over ProductRoute's loader data; the variant choice is the shared hook's.
- *           "Add to cart" posts to the commerce headless cart when that wave lands; today it is a
- *           disabled button with the i18n label so the layout, the a11y and the e2e journey are
- *           already right. Links are route keys.
+ *           The public area sells nothing to an anonymous visitor (commerce exposes only the three
+ *           storefront queries), so the call to action is an enquiry: it opens the contact page
+ *           with the product title and the chosen variant's SKU, which prefill the message of the
+ *           lead the contact submit creates. Links are route keys.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 7 and 14, as amended by programming model v3.1,
  *                     AGENTS.md: class components), ADR 0110 (the description is a document), ADR
@@ -27,7 +28,7 @@ import type { ProductRoute } from "#src/routes/product/product.route";
 /** The hero image width; the box is square. */
 const HERO_IMAGE_WIDTH = 960;
 
-/** Breadcrumb, image, title, variant price and picker, and the disabled cart button. */
+/** Breadcrumb, image, title, variant price and picker, and the enquiry about the variant. */
 export class Product extends Component<RouteProps<typeof ProductRoute>> {
   /** The translator of the visitor's locale. */
   translation = useTranslation();
@@ -87,9 +88,14 @@ export class Product extends Component<RouteProps<typeof ProductRoute>> {
             {variant.inStock ? t(I18n.web.store.in_stock) : t(I18n.web.store.out_of_stock)}
           </p>
           <VariantPicker choice={this.choice} />
-          {/* shortcut: no cart until the checkout wave; the real button keeps a11y and e2e honest */}
-          <Button className="mt-6" isDisabled={!variant.inStock} fullWidth>
-            {t(I18n.web.product.add_to_cart)}
+          <Button
+            className="mt-6"
+            fullWidth
+            render={
+              <Link to={Routes.contact} search={{ product: product.title, sku: variant.sku }} />
+            }
+          >
+            {t(I18n.web.product.enquire)}
           </Button>
           <section className="prose mt-8">
             <DocumentRenderer document={product.description} />

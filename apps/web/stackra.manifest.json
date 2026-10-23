@@ -372,9 +372,9 @@
         "analyticsPosthogKey": "VITE_POSTHOG_KEY",
         "featureFlagsPosthogKey": "VITE_POSTHOG_KEY",
         "turnstileSiteKey": "VITE_TURNSTILE_SITE_KEY",
+        "telemetryDsn": "VITE_SENTRY_DSN",
         "apiUrl": "STACKRA_API_URL",
-        "siteUrl": "STACKRA_SITE_URL",
-        "telemetryDsn": "STACKRA_SENTRY_DSN"
+        "siteUrl": "STACKRA_SITE_URL"
       },
       "secrets": {
         "turnstileSecret": "TURNSTILE_SECRET_KEY",
@@ -397,12 +397,6 @@
       "class": "SiteConfig",
       "file": "src/config/site.config.ts",
       "schema": "src/schemas/site-options.schema.ts#SiteOptions"
-    },
-    {
-      "key": "web.telemetry",
-      "class": "TelemetryConfig",
-      "file": "src/config/telemetry.config.ts",
-      "schema": "src/schemas/telemetry-options.schema.ts#TelemetryOptions"
     },
     {
       "key": "analytics",
@@ -445,15 +439,15 @@
       "class": "ThemingConfig",
       "overrides": "@stackra/theming#ThemingConfig",
       "file": "src/config/theming.config.ts"
-    }
-  ],
-  "hatches": [
+    },
     {
-      "file": "vite.extend.ts",
-      "tool": "vite",
-      "reason": "no stackra.config.ts section writes into the HTML head, and the build mode in the page is what support asks for first"
+      "key": "logger.telemetry",
+      "class": "TelemetryConfig",
+      "overrides": "@stackra/logger#TelemetryConfig",
+      "file": "src/config/telemetry.config.ts"
     }
   ],
+  "hatches": [],
   "secrets": ["TURNSTILE_SECRET_KEY", "GATEWAY_VISITOR_SIGNING_KEY"],
   "assets": {
     "lang": {
@@ -646,6 +640,18 @@
       "properties": {
         "plan": {
           "type": "string",
+          "maxLength": 64,
+          "x-stackra-catch": "dropped when malformed"
+        },
+        "product": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "x-stackra-catch": "dropped when malformed"
+        },
+        "sku": {
+          "type": "string",
+          "minLength": 1,
           "maxLength": 64,
           "x-stackra-catch": "dropped when malformed"
         }
