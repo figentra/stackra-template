@@ -1,5 +1,5 @@
 {
-  "$comment": "Stackra file contract — Purpose: the public site's own strings in ar (namespace `web::`); Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries zero, one, two, few, many and other; another namespace's strings are overridden in assets/overrides/<namespace>/<locale>.json; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the public site's own strings in ar (namespace `web::`); Boundary: same keys in every base locale (gen fails otherwise); the regional overlays (`en-US`, `ar-SA`) hold only the keys that differ and fall back along the i18n.config.ts chain; the derived keys of the site's classes live under `errors.<code>.message`, `enums.<enum>.<code>` and `flags.<flag>.label`; every Arabic plural carries zero, one, two, few, many and other; another member's strings are reworded in src/overrides/<owner>/…/assets/lang/<locale>/<namespace>.json; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0294 (decision 20: derived keys), ADR 0192 (ICU plurals)",
   "nav": {
     "home": "الرئيسية",
     "pricing": "الأسعار",
@@ -7,7 +7,12 @@
     "contact": "تواصل معنا",
     "skip": "انتقل إلى المحتوى",
     "locale": "اللغة",
-    "main": "التنقل الرئيسي"
+    "main": "التنقل الرئيسي",
+    "shop": "تسوّق",
+    "resources": "الموارد",
+    "help": "مركز المساعدة",
+    "docs": "وثائق المطورين",
+    "new_tab": "(يُفتح في علامة تبويب جديدة)"
   },
   "hero": {
     "title": "بِع أينما كان عملاؤك",
@@ -33,8 +38,6 @@
   "pricing": {
     "title": "أسعار واضحة بلا مفاجآت",
     "subtitle": "كل خطة تبدأ بتجربة مجانية لمدة {days, plural, zero {بلا أيام} one {يوم واحد} two {يومين} few {# أيام} many {# يومًا} other {# يوم}}. لا حاجة لبطاقة.",
-    "month": "شهريًا",
-    "year": "سنويًا",
     "year_hint": "شهران مجانًا",
     "per_month": "{amount} شهريًا",
     "contact_sales": "تواصل مع المبيعات",
@@ -63,7 +66,7 @@
     "in_stock": "متوفر"
   },
   "product": {
-    "add_to_cart": "أضف إلى السلة",
+    "enquire": "اسأل عن هذا المنتج",
     "breadcrumb_home": "المتجر",
     "variant_axis": "الخيار: {axis}",
     "breadcrumb": "مسار التنقل"
@@ -75,6 +78,8 @@
     "email": "البريد الإلكتروني للعمل",
     "company": "الشركة (اختياري)",
     "message": "كيف يمكننا المساعدة؟",
+    "enquiry": "أرغب في معرفة المزيد عن {product}.",
+    "enquiry_variant": "أرغب في معرفة المزيد عن {product} (رمز المنتج {sku}).",
     "consent": "يمكنكم التواصل معي بخصوص هذا الطلب.",
     "submit": "إرسال",
     "sent": "شكرًا {name}. سنرد على {email}.",
@@ -95,6 +100,12 @@
     "necessary": "ضروري لعمل الموقع.",
     "analytics_category": "يساعدنا على معرفة الصفحات المهمة."
   },
+  "locale_suggestion": {
+    "label": "اقتراح اللغة",
+    "body": "هذه الصفحة متاحة أيضًا باللغة {language}.",
+    "switch": "التبديل إلى {language}",
+    "stay": "إبقاء هذه اللغة"
+  },
   "theme": {
     "light": "فاتح",
     "dark": "داكن",
@@ -108,15 +119,28 @@
     "legal": "الشؤون القانونية"
   },
   "errors": {
-    "not_found": {
-      "title": "الصفحة غير موجودة",
-      "body": "هذه الصفحة انتقلت أو لم تكن موجودة.",
-      "home": "العودة إلى الصفحة الرئيسية"
+    "site_context_missing": {
+      "message": "استُدعي useSite خارج تخطيط الموقع."
+    }
+  },
+  "enums": {
+    "billing_interval": {
+      "month": "شهريًا",
+      "year": "سنويًا"
     },
-    "server": {
-      "title": "حدث خطأ ما",
-      "body": "تم إبلاغنا. يرجى المحاولة بعد قليل.",
-      "reference": "المرجع: {reference}"
+    "cache_profile": {
+      "marketing": "محتوى تسويقي",
+      "catalogue": "بيانات الكتالوج",
+      "page": "الصفحات",
+      "none": "بلا تخزين مؤقت"
+    }
+  },
+  "flags": {
+    "pricing_yearly_first": {
+      "label": "صفحة الأسعار تفتح على الأسعار السنوية"
+    },
+    "help_centre": {
+      "label": "الترويسة تعرض رابط مركز المساعدة"
     }
   }
 }

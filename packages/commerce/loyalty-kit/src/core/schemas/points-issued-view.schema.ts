@@ -1,14 +1,21 @@
 /**
  * Stackra file contract:
- * Purpose: the read shape of `loyalty_kit.points.stats_today`: today's movement for the dashboard
- *          widget.
- * Boundary: a schema class only; also the props of the points-issued tile.
+ * Purpose: `PointsIssuedView`: the output of `loyalty_kit.points.stats_today@1`, today's movement
+ *          for the dashboard widget.
+ * Boundary: a shape class shared by the query (node) and the widget's renderer (react), so it lives
+ *           in core.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0128
+ * Governing contract: ADR 0294 (decisions 4, 15 and 26)
  */
-import { Schema, z } from "@stackra/schema";
+import { Int, Schema } from "@stackra/validation";
 
 /** Points credited and points spent today, in whole points. */
-export class PointsIssuedView extends Schema(
-  z.object({ earned: z.number().int(), redeemed: z.number().int() }),
-) {}
+export class PointsIssuedView extends Schema {
+  /** Points earned today. */
+  @Int
+  earned!: number;
+
+  /** Points redeemed today, as a positive number. */
+  @Int
+  redeemed!: number;
+}

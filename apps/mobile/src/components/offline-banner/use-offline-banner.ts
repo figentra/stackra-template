@@ -1,0 +1,29 @@
+/**
+ * Stackra file contract:
+ * Purpose: the hook behind the banner: online state from the platform `network` port, and the
+ *          mutation queue's pending and conflict counts from @stackra/query.
+ * Boundary: reads only, plus `retry`, which asks the queue to replay now. Conflict resolution UI is
+ *           not here: storage owns the conflict record, a screen owns the resolution. Used by the
+ *           banner only, so it sits beside it; a hook stays a plain function, and its result type
+ *           is `types/offline-banner-state.type.ts`.
+ * Runtime: react-native
+ * Governing contract: ADR 0294 (decision 14), ADR 0059, ADR 0252, ADR 0250
+ */
+import { useCapability } from "@stackra/platform/react";
+import { useMutationQueue } from "@stackra/query/react";
+import { useSignal } from "@stackra/state/react";
+import type { OfflineBannerState } from "#src/types/offline-banner-state.type";
+
+/** Combines the network signal and the queue counters; re-renders only when one of them changes. */
+export function useOfflineBanner(): OfflineBannerState {
+  const network = useCapability("network", { required: true });
+  // a @stackra/state signal the Expo driver updates from expo-network
+  const isOnline = useSignal(network.isOnline);
+  const queue = useMutationQueue();
+  return {
+    isOnline,
+    pending: queue.pending,
+    conflicts: queue.conflicts.length,
+    retry: () => queue.drain(),
+  };
+}

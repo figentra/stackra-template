@@ -1,19 +1,31 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: the Electron desktop target. Desktop mode, windows, named overlays (each with
- *          its global shortcut), menus, tray, deep links, auto-update behaviour, renderer
- *          permissions, tighten-only hardening knobs and packaging.
- * Boundary: no identity, password, certificate, feed domain or origin list: signing switches and
- *           the feed path are `runway.yaml` `release.desktop`, the feed URL is derived by gen, and
- *           `connect-src` is csp.config.ts. The hardening baseline (context isolation, sandbox,
- *           fuses, CSP from main; ADR 0251) applies regardless. `titleBarStyle`, `standardRoles`,
- *           `channels`, `allow` and the packaging targets are Electron's and electron-builder's own
- *           values, typed by their unions, not house enums.
+ * Purpose: the console's override of @stackra/platform's desktop configuration, read by the
+ *          Electron main process while the app runs: desktop mode, windows, named overlays (each
+ *          with its global shortcut), the shell's menu switches and roles, tray, deep links,
+ *          auto-update behaviour, the devices the console uses with the reason for each, renderer
+ *          permissions and the tighten-only hardening knobs.
+ * Boundary: an override keeps the base's name and imports the base as `BaseDesktopConfig`; it sets
+ *           `override` field defaults only and inherits the base's key (`platform.desktop`); a
+ *           nested object is replaced whole, so each one spreads the base first and restates its
+ *           type. A second override of the same base fails gen. `devices` is the one source of the
+ *           macOS entitlements and usage strings: gen derives `entitlements.mac.plist` and
+ *           electron-builder's `mac.extendInfo` from it, with each reason taken from
+ *           `devices::<device>.reason` in every locale. Packaging (bundle id, installers) is read
+ *           by electron-builder only, so it is stackra.config.ts `electron`. No identity, password,
+ *           certificate, feed domain or origin list: signing switches and the feed path are
+ *           `runway.yaml` `release.desktop`, the feed URL is derived by gen, and `connect-src` is
+ *           csp.config.ts. The hardening baseline (context isolation, sandbox, fuses, CSP from
+ *           main; ADR 0251) applies regardless. `titleBarStyle`, `standardRoles`, `allow` and
+ *           `devices` in `permissions` are Electron's own values.
  * Runtime: isomorphic
- * Governing contract: ADR 0249, ADR 0251, ADR 0254, ADR 0181, ADR 0281
+ * Governing contract: ADR 0294 (decisions 14 and 19; as amended by programming model v3.1,
+ *                     AGENTS.md: the Base alias), ADR 0295 (decision 4), ADR 0249, ADR 0251, ADR
+ *                     0253, ADR 0254, ADR 0181, ADR 0281
  */
-import { Config } from "@stackra/config";
+import { Duration } from "@stackra/contracts";
 import {
+  DesktopConfig as BaseDesktopConfig,
   DesktopMode,
   InstallMoment,
   OverlayAnchor,
@@ -22,239 +34,171 @@ import {
   WindowKind,
 } from "@stackra/platform";
 import { OfflineStore } from "@stackra/storage";
-import { Bool, Duration, Int, List, Map, Nested, OneOf, Str, Url } from "@stackra/validation";
-
-/** One window: size limits, the route it opens and its frame. */
-class WindowConfig {
-  /** Route the window opens. @defaultValue "/" */
-  @Str({ pattern: /^\// }) route = "/";
-  /** Initial width. @defaultValue 1280 */
-  @Int({ min: 320 }) width = 1280;
-  /** Initial height. @defaultValue 800 */
-  @Int({ min: 240 }) height = 800;
-  /** Smallest width the layout supports. @defaultValue 960 */
-  @Int({ min: 320 }) minWidth = 960;
-  /** Smallest height the layout supports. @defaultValue 640 */
-  @Int({ min: 240 }) minHeight = 640;
-  /** Whether the user may resize the window. @defaultValue true */
-  @Bool() resizable = true;
-  /** Remember bounds per display in the prefs store. @defaultValue true */
-  @Bool() persistBounds = true;
-  /** Electron `titleBarStyle`. @defaultValue "hiddenInset" */
-  @OneOf(["default", "hidden", "hiddenInset", "customButtonsOnHover"]) titleBarStyle =
-    "hiddenInset";
-  /** Normal, modal or panel window. @defaultValue WindowKind.Normal */
-  @OneOf(WindowKind) kind = WindowKind.Normal;
-  /** Open at launch. @defaultValue true */
-  @Bool() openOnLaunch = true;
-}
-
-/**
- * One floating overlay (ADR 0281 d4): any route rendered inside `LauncherOverlay` or
- * `PanelOverlay` from `@stackra/platform/react`; the same route also works in the main window.
- */
-class OverlayConfig {
-  /** Launcher bar or docked panel. @defaultValue OverlayStyle.Launcher */
-  @OneOf(OverlayStyle) style = OverlayStyle.Launcher;
-  /** Route the overlay renders. @defaultValue "/" */
-  @Str({ pattern: /^\// }) route = "/";
-  /**
-   * Electron accelerator that toggles it, registered by main only; empty means none.
-   * @defaultValue ""
-   */
-  @Str() shortcut = "";
-  /** The user may rebind or turn the shortcut off in settings. @defaultValue true */
-  @Bool() userConfigurable = true;
-  /** Where it opens. @defaultValue OverlayAnchor.ScreenCenter */
-  @OneOf(OverlayAnchor) anchor = OverlayAnchor.ScreenCenter;
-  /** Float above other apps. @defaultValue true */
-  @Bool() alwaysOnTop = true;
-  /** Hide when it loses focus (launcher behaviour). @defaultValue true */
-  @Bool() hideOnBlur = true;
-  /** The user may pin it open (panel behaviour). @defaultValue false */
-  @Bool() pinnable = false;
-  /** The user may resize it; size and position are remembered. @defaultValue false */
-  @Bool() resizable = false;
-  /** Vibrancy or blur background; opaque where the OS has none. @defaultValue true */
-  @Bool() vibrancy = true;
-  /** Displays it may open on: the active one or any. @defaultValue "active" */
-  @OneOf(["active", "any"]) displays = "active";
-}
-
-/** Shell switches of the application and context menus; the items are the `@Menu` classes. */
-class MenusConfig {
-  /** Show the application menu. @defaultValue true */
-  @Bool() applicationMenu = true;
-  /** Show the right-click menu. @defaultValue true */
-  @Bool() contextMenu = true;
-  /** Electron menu roles kept besides the contributed items. */
-  @List(Str) standardRoles: string[] = ["undo", "redo", "cut", "copy", "paste", "selectAll"];
-  /** The Help menu's documentation link. @defaultValue "https://docs.acme.example/console" */
-  @Url() docsUrl = "https://docs.acme.example/console";
-}
-
-/** The tray icon. */
-class TrayConfig {
-  /** Show a tray icon. @defaultValue true */
-  @Bool() enabled = true;
-  /**
-   * Keep the app alive in the tray after the last window closes; opt-in by the user (ADR 0254).
-   * @defaultValue false
-   */
-  @Bool() keepAliveDefault = false;
-  /** What a click on the icon does. @defaultValue TrayClickAction.ToggleMain */
-  @OneOf(TrayClickAction) onClick = TrayClickAction.ToggleMain;
-  /** Mirror the unread count on the icon. @defaultValue true */
-  @Bool() badge = true;
-}
-
-/** Deep links into the app. */
-class DeepLinksConfig {
-  /**
-   * Custom scheme, registered as the default handler at install.
-   * @defaultValue "acme-console"
-   */
-  @Str({ pattern: /^[a-z][a-z0-9-]+$/ }) scheme = "acme-console";
-  /** Also claim the app's https origin as universal links. @defaultValue false */
-  @Bool() claimHttpsOrigin = false;
-  /**
-   * Route a deep link opens; `%s` is the link after the scheme, which the `/open` route
-   * (`OpenRoute`) resolves to an in-app path or refuses. @defaultValue "/open?url=%s"
-   */
-  @Str({ pattern: /^\/open\?url=%s$/ }) route = "/open?url=%s";
-}
-
-/** Auto-update behaviour; the active channel per environment is runway's. */
-class UpdatesConfig {
-  /** Check for updates at all. @defaultValue true */
-  @Bool() enabled = true;
-  /**
-   * electron-updater channels; `latest` is stable (ADR 0254 d3).
-   * @defaultValue ["beta", "latest"]
-   */
-  @List(OneOf(["beta", "latest"])) channels = ["beta", "latest"];
-  /** How often to check. @defaultValue "4h" */
-  @Duration() checkEvery = "4h";
-  /** When a downloaded update installs. @defaultValue InstallMoment.Quit */
-  @OneOf(InstallMoment) installOn = InstallMoment.Quit;
-  /** Staged rollout percentage written to the feed (ADR 0181 d3). @defaultValue 20 */
-  @Int({ min: 1, max: 100 }) stagingPercentage = 20;
-  /** Let the user switch to the beta channel in settings. @defaultValue true */
-  @Bool() userSelectableChannel = true;
-  /** Download block-map deltas instead of the whole installer. @defaultValue true */
-  @Bool() differential = true;
-}
-
-/** Renderer permission requests main grants; everything else is denied by the baseline. */
-class PermissionsConfig {
-  /**
-   * Electron permission names granted; `usb` and `hid` serve the POS peripherals and match the
-   * `com.apple.security.device.usb` entitlement in `packaging.macEntitlements`.
-   * @defaultValue ["notifications", "clipboard-read", "fullscreen", "usb", "hid"]
-   */
-  @List(
-    OneOf([
-      "notifications",
-      "media",
-      "display-capture",
-      "clipboard-read",
-      "fullscreen",
-      "serial",
-      "usb",
-      "hid",
-    ]),
-  )
-  allow = ["notifications", "clipboard-read", "fullscreen", "usb", "hid"];
-  /**
-   * Origins the renderer may navigate to; everything else opens in the system browser. The
-   * packaged renderer is served from `app://bundle`, so no other `app:` host is reachable.
-   * @defaultValue ["app://bundle"]
-   */
-  @List(Str) allowedNavigationOrigins: string[] = ["app://bundle"];
-}
-
-/** Tighten-only knobs; the baseline cannot be loosened from config (ADR 0251 d3). */
-class HardeningConfig {
-  /** Remove devtools from production builds. @defaultValue true */
-  @Bool() disableDevToolsInProduction = true;
-  /** Certificate pinning of the API origin (SPKI hashes); empty means none. @defaultValue [] */
-  @List(Str) pinnedSpki: string[] = [];
-}
-
-/** electron-builder packaging; runway's `release.desktop.platforms` may only narrow it. */
-class PackagingConfig {
-  /** Bundle identifier, the reverse of the product domain. @defaultValue "example.acme.console" */
-  @Str() appId = "example.acme.console";
-  /** Name in the dock and the start menu. @defaultValue "Acme Console" */
-  @Str() productName = "Acme Console";
-  /** Copyright line of the installers. @defaultValue "Copyright © 2026 Acme" */
-  @Str() copyright = "Copyright © 2026 Acme";
-  /** macOS targets; `zip` is required by electron-updater. @defaultValue ["dmg", "zip"] */
-  @List(OneOf(["dmg", "zip", "pkg", "mas"])) mac = ["dmg", "zip"];
-  /** Windows targets. @defaultValue ["nsis"] */
-  @List(OneOf(["nsis", "msi", "appx", "portable"])) windows = ["nsis"];
-  /** Linux targets; AppImage only on day one (ADR 0254 d2). @defaultValue ["AppImage"] */
-  @List(OneOf(["AppImage", "deb", "rpm", "snap", "flatpak"])) linux = ["AppImage"];
-  /** macOS architectures. @defaultValue ["universal"] */
-  @List(OneOf(["x64", "arm64", "universal"])) macArch = ["universal"];
-  /** Windows architectures. @defaultValue ["x64", "arm64"] */
-  @List(OneOf(["x64", "arm64"])) windowsArch = ["x64", "arm64"];
-  /** Linux architectures. @defaultValue ["x64"] */
-  @List(OneOf(["x64", "arm64"])) linuxArch = ["x64"];
-  /** NSIS: per-user install, no admin. @defaultValue false */
-  @Bool() perMachine = false;
-  /**
-   * Extra entitlements beyond the hardened-runtime set; the POS peripherals need USB (ADR 0253).
-   */
-  @List(Str) macEntitlements: string[] = ["com.apple.security.device.usb"];
-  /** File extensions the app opens, extension → description. @defaultValue {} */
-  @Map(Str) fileAssociations: Record<string, string> = {};
-}
+import { I18n } from "#stackra/i18n";
 
 /**
  * The Electron desktop target: mode, windows, overlays, menus, tray, deep links, auto-update and
  * permissions.
  */
-@Config("console.desktop")
-export class DesktopConfig {
-  /** Dock app, menu-bar app or both (ADR 0281 d3). @defaultValue DesktopMode.Hybrid */
-  @OneOf(DesktopMode) mode = DesktopMode.Hybrid;
-  /** One window per key; `main` is required. */
-  @Map(Nested(WindowConfig)) windows: Record<string, WindowConfig> = {
-    main: new WindowConfig(),
+export class DesktopConfig extends BaseDesktopConfig {
+  /** Dock app, menu-bar app or both (ADR 0281 d3). */
+  override mode: DesktopMode = DesktopMode.Hybrid;
+
+  /** One window per key; `main` is required and opens at launch. */
+  override windows: BaseDesktopConfig["windows"] = {
+    main: {
+      route: "/",
+      width: 1280,
+      height: 800,
+      minWidth: 960,
+      minHeight: 640,
+      resizable: true,
+      persistBounds: true,
+      titleBarStyle: "hiddenInset",
+      kind: WindowKind.Normal,
+      openOnLaunch: true,
+    },
   };
-  /** Named overlays, each opened by its shortcut, the tray menu or an in-app button. */
-  @Map(Nested(OverlayConfig)) overlays: Record<string, OverlayConfig> = {
-    // A launcher bar centred on the active display that takes a quick order; Esc or blur closes it.
-    quick: Object.assign(new OverlayConfig(), {
+
+  /**
+   * Named overlays (ADR 0281 d4), each opened by its shortcut, the tray menu or an in-app button:
+   * `quick` is a launcher bar centred on the active display that takes a quick order; Esc or blur
+   * closes it, and the same route works in the main window.
+   */
+  override overlays: BaseDesktopConfig["overlays"] = {
+    quick: {
       style: OverlayStyle.Launcher,
       route: "/quick-order",
       shortcut: "CommandOrControl+Shift+Space",
+      userConfigurable: true,
       anchor: OverlayAnchor.ScreenCenter,
-    }),
+      alwaysOnTop: true,
+      hideOnBlur: true,
+      pinnable: false,
+      resizable: false,
+      vibrancy: true,
+      displays: "active",
+    },
   };
-  /** Which shell menus are shown and where Help points. */
-  @Nested(MenusConfig) menus = new MenusConfig();
-  /** Whether the tray icon shows and what it does. */
-  @Nested(TrayConfig) tray = new TrayConfig();
-  /** The custom scheme and the route a deep link opens. */
-  @Nested(DeepLinksConfig) deepLinks = new DeepLinksConfig();
-  /** How and when updates are checked and installed. */
-  @Nested(UpdatesConfig) updates = new UpdatesConfig();
-  /** What the renderer may ask main to grant. */
-  @Nested(PermissionsConfig) permissions = new PermissionsConfig();
-  /** Knobs that only tighten the hardening baseline. */
-  @Nested(HardeningConfig) hardening = new HardeningConfig();
-  /** How electron-builder packages each platform. */
-  @Nested(PackagingConfig) packaging = new PackagingConfig();
-  /** Launch-at-login default; the user toggles it. @defaultValue false */
-  @Bool() launchAtLoginDefault = false;
-  /** Minidumps through the reporter port with the DSN from env. @defaultValue true */
-  @Bool() crashReporter = true;
+
+  /**
+   * The shell's menus: the menu classes give the items; the Electron roles are placed by the shell
+   * in their platform's usual menus (the macOS app menu, File, Edit, View, Window, the tray's Quit
+   * and the context menu's edit entries), and the context menu adds spelling suggestions and the
+   * items the element under the pointer contributed.
+   */
+  override menus: BaseDesktopConfig["menus"] = {
+    ...this.menus,
+    applicationMenu: true,
+    contextMenu: true,
+    standardRoles: [
+      "appMenu",
+      "close",
+      "editMenu",
+      "undo",
+      "redo",
+      "cut",
+      "copy",
+      "paste",
+      "selectAll",
+      "togglefullscreen",
+      "resetZoom",
+      "zoomIn",
+      "zoomOut",
+      "windowMenu",
+      "quit",
+    ],
+    docsUrl: "https://docs.acme.example/console",
+  };
+
+  /**
+   * The tray icon: shown, a click toggles the main window, the unread count is mirrored, and its
+   * menu opens with a "Show console" item (`menus::tray.show`); keeping the app alive after the
+   * last window closes is the user's opt-in (ADR 0254).
+   */
+  override tray: BaseDesktopConfig["tray"] = {
+    ...this.tray,
+    enabled: true,
+    keepAliveDefault: false,
+    onClick: TrayClickAction.ToggleMain,
+    badge: true,
+    showItem: true,
+  };
+
+  /**
+   * Deep links: the custom scheme is registered as the default handler at install; a link opens the
+   * `/open` route (`OpenRoute`), which resolves it to an in-app path or refuses it.
+   */
+  override deepLinks: BaseDesktopConfig["deepLinks"] = {
+    ...this.deepLinks,
+    scheme: "acme-console",
+    claimHttpsOrigin: false,
+    route: "/open?url=%s",
+  };
+
+  /**
+   * Auto-update: electron-updater channels (`latest` is stable, ADR 0254 d3), checked every four
+   * hours, installed on quit, with a 20 % staged rollout written to the feed (ADR 0181 d3); the
+   * active channel per environment is runway's.
+   */
+  override updates: BaseDesktopConfig["updates"] = {
+    ...this.updates,
+    enabled: true,
+    channels: ["beta", "latest"],
+    checkEvery: Duration.hours(4),
+    installOn: InstallMoment.Quit,
+    stagingPercentage: 20,
+    userSelectableChannel: true,
+    differential: true,
+  };
+
+  /**
+   * The point-of-sale devices the console uses, each with the reason the operating system shows
+   * when it asks the user. Gen writes the matching hardened-runtime entitlements (camera
+   * `device.camera`, microphone `device.audio-input`, USB `device.usb`, Bluetooth
+   * `device.bluetooth`; serial needs none outside the App Sandbox) and the macOS usage strings
+   * (`NSCameraUsageDescription`, `NSMicrophoneUsageDescription`,
+   * `NSBluetoothAlwaysUsageDescription`) from this list.
+   */
+  override devices: BaseDesktopConfig["devices"] = {
+    camera: { reason: I18n.devices.camera.reason },
+    microphone: { reason: I18n.devices.microphone.reason },
+    usb: { reason: I18n.devices.usb.reason },
+    bluetooth: { reason: I18n.devices.bluetooth.reason },
+    serial: { reason: I18n.devices.serial.reason },
+  };
+
+  /**
+   * What main grants the renderer: `allow` answers Electron's permission requests (`media` is the
+   * camera and microphone above), `devices` answers its device chooser and device permission
+   * handlers for the USB, HID, serial and Bluetooth peripherals; anything else is refused. The
+   * renderer may navigate only within the packaged bundle (`app://bundle`); everything else opens
+   * in the system browser.
+   */
+  override permissions: BaseDesktopConfig["permissions"] = {
+    ...this.permissions,
+    allow: ["notifications", "clipboard-read", "fullscreen", "media"],
+    mediaTypes: ["video", "audio"],
+    devices: ["usb", "hid", "serial", "bluetooth"],
+    allowedNavigationOrigins: ["app://bundle"],
+  };
+
+  /** Tighten-only knobs (ADR 0251 d3): no devtools in production builds, no certificate pins. */
+  override hardening: BaseDesktopConfig["hardening"] = {
+    ...this.hardening,
+    disableDevToolsInProduction: true,
+    pinnedSpki: [],
+  };
+
+  /** Launch-at-login default; the user toggles it. */
+  override launchAtLoginDefault = false;
+
+  /** Minidumps through the reporter port with the DSN from env. */
+  override crashReporter = true;
+
   /**
    * Where the persisted query cache and the offline queue live on desktop: the same encrypted
    * IndexedDB persister as web and PWA, with its key held by Electron `safeStorage`.
-   * @defaultValue OfflineStore.EncryptedIndexedDb
    */
-  @OneOf(OfflineStore) offlineStore = OfflineStore.EncryptedIndexedDb;
+  override offlineStore: OfflineStore = OfflineStore.EncryptedIndexedDb;
 }

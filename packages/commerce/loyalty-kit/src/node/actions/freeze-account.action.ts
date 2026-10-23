@@ -1,48 +1,48 @@
 /**
  * Stackra file contract:
- * Purpose: `loyalty_kit.account.freeze`: freeze or unfreeze an account for review. Bound as a row
- *          and bulk action of the account resource, so the console shows its confirmation and
- *          success message.
- * Boundary: single aggregate, inline; its permission is L2, so an agent may call it only as an
- *           opted-in tool.
+ * Purpose: `loyalty_kit.account.freeze@1`: freeze or unfreeze an account for review. Placed by the
+ *          account resource on rows, the View page and the bulk bar.
+ * Boundary: single aggregate, inline. Its permission is L2, so the panel asks a person to confirm
+ *           it and an agent may call the tool only with approval; LoyaltyAccountPolicy#freeze
+ *           refines it through `ctx.authorize(account)`. The template's path is kept, so
+ *           `endpoint` is written. The confirmation and success texts are the derived keys
+ *           `loyalty_kit::actions.account.freeze.confirm` and `.success`; no UX option is written.
  * Runtime: node
- * Governing contract: ADR 0098, 0139
+ * Governing contract: ADR 0294 (decisions 2, 3, 16 and 21, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0098, ADR 0099 (risk)
  */
-import { Action, AsEndpoint, AsTool, UxAfter, type ActionContext } from "@stackra/actions";
-import { ActorKind, HttpMethod, Tone } from "@stackra/contracts";
-import { I18n } from "#stackra/i18n";
-import { FreezeAccountInput } from "#core/schemas/freeze-account-input.schema";
-import { FreezeAccountOutput } from "#core/schemas/freeze-account-output.schema";
+import { Action, type ActionContext } from "@stackra/actions";
+import { ActorKind, HttpMethod } from "@stackra/contracts";
+import { LoyaltyAccountPermissions } from "#node/access/loyalty-account.permissions";
+import type { FreezeAccountInput } from "#node/schemas/freeze-account-input.schema";
+import { FreezeAccountOutput } from "#node/schemas/freeze-account-output.schema";
 import type { AccountService } from "#node/services/account.service";
-import { LoyaltyAccountPermissions } from "#node/permissions/loyalty-account.permission";
 
 /** Idempotent (PUT): freezing a frozen account changes nothing and records nothing. */
-@Action({
+export class FreezeAccountAction extends Action({
   key: "account.freeze",
-  input: FreezeAccountInput,
-  output: FreezeAccountOutput,
   permission: LoyaltyAccountPermissions.freeze,
   actors: [ActorKind.User, ActorKind.Agent],
-  ux: {
-    requiresConfirmation: { text: I18n.loyalty_kit.account.freeze_confirm, color: Tone.Warning },
-    success: I18n.loyalty_kit.account.frozen,
-    after: [UxAfter.Refresh],
+  endpoint: {
+    method: HttpMethod.Put,
+    path: "/loyalty/accounts/:accountId/freeze",
   },
-})
-@AsEndpoint({ method: HttpMethod.Put, path: "/loyalty/accounts/:accountId/freeze" })
-@AsTool()
-export class FreezeAccountAction {
-  constructor(private readonly accounts: AccountService) {}
+  tool: true,
+}) {
+  /** @param accounts - loads the account and flips the flag. */
+  constructor(private readonly accounts: AccountService) {
+    super();
+  }
 
   /**
    * Loads the account, authorizes the freeze against it and sets the flag.
-   * @throws a `NotFound` refusal when no account has this id in the actor's tenant;
-   * `Forbidden` when the policy denies.
+   * @throws Refusal `not_found` when no account has this id in the actor's tenant; `forbidden`
+   *         when the policy denies.
    */
   async handle(input: FreezeAccountInput, ctx: ActionContext): Promise<FreezeAccountOutput> {
     const account = await this.accounts.findOneOrFail({ id: input.accountId });
-    await ctx.authorize(LoyaltyAccountPermissions.freeze, account);
+    await ctx.authorize(account);
     await this.accounts.setFrozen(account, input.isFrozen, ctx.now());
-    return { accountId: account.id, isFrozen: account.isFrozen };
+    return FreezeAccountOutput.create({ accountId: account.id, isFrozen: account.isFrozen });
   }
 }

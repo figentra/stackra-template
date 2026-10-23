@@ -1,30 +1,39 @@
-# yaml-language-server: $schema=../../schemas/runway-service.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/service.json
 # Stackra file contract:
-# Purpose: how and where THIS service runs, per environment: dev port and host, the deployable it
-#          joins, resources and scaling, the sizes of what it needs (its logical database, cache
-#          keyspace, queues, crons), drivers per environment, secret NAMES, health thresholds and
-#          per-environment config values. The root runway holds the destinations (accounts, zones,
-#          the shared server) and the defaults this file may override.
-# Boundary: what the service IS is stackra.config.ts; what it NEEDS is derived by gen from the
-#           module declarations into .stackra/app-manifest.json `infra` (database, queues from
-#           @AsJob/@OnEvent, crons from @Cron, secrets from @Secret) and this file only sizes those.
-#           No secret value, no business value (src/config/*, settings). Health checks are declared
-#           in stackra.config.ts; this file tunes only their thresholds (ADR 0190). The mail driver
-#           is chosen here per environment (`drivers.mail`), the one home of that choice (ADR 0266).
-#           Validated by `@stackra/runway/schema/service.json`.
+# Purpose: WHAT the commerce member needs per environment beyond what gen derives from
+#          stackra.manifest.json: the dedicated resources it requires and why, the secret names it
+#          reads, the sizes of its own stores (database, cache, buckets, queues), whether crons
+#          run, health thresholds, and the config values that set its config classes, driver
+#          choices included. The member is the folder that holds this file, so the file does not
+#          name it.
+# Boundary: never WHERE it runs or how it is packed: deployables, groups, `isolate`, cpu, memory,
+#           instances and worker splits are the root runway's topology. No secret value (Stackra
+#           ADR 0173), no business value (src/config/*, settings). Every resource is shared except
+#           the one `requires` names: commerce's own cache instance, because its query cache and
+#           rate-limit counters need their own eviction policy (the root topology still decides
+#           where it runs; dev and preview use the memory cache driver, so it is provisioned only
+#           where the cache driver is `valkey`). Search stays on the shared Postgres. Health checks
+#           are declared in stackra.config.ts; this file tunes only their thresholds
+#           (Stackra ADR 0190). Driver choices are config fields typed `DriverName<Port>`, so they
+#           sit under `config` like every other value.
 # Runtime: node
-# Governing contract: ADR 0168; ADR 0169, 0238, 0266, 0148, 0173, 0147 d2
+# Governing contract: Stackra ADR 0296 (member runway), ADR 0168 (as amended), ADR 0173, ADR 0190,
+#                     ADR 0238 (one logical database per service), ADR 0294 (config keys)
 $schema: "@stackra/runway/schema/service.json"
-version: 2
-# must equal stackra.config.ts `key`
-member: commerce
+version: 3
 
-# Every @Secret of src/config/*; gen fails on a missing one. Path `runtime` (root default), per
-# environment.
-secrets:
-  PRICING_API_KEY: {}
+# Resources this member needs beyond what gen derives from stackra.manifest.json; each dedicated
+# one says why it cannot share (Stackra ADR 0296).
+requires:
+  cache:
+    dedicated: true
+    engine: valkey
+    reason: query-cache entries and rate-limit counters need volatile-ttl eviction of their own
 
-# thresholds only; the path and checks are stackra.config.ts `health`
+# Every @Secret of src/schemas/* (the config shapes); gen fails on a missing one. Names only.
+secrets: [PRICING_API_KEY]
+
+# Thresholds only; the path and the checks are stackra.config.ts `health`.
 health:
   readiness:
     requireMigrations: true
@@ -34,74 +43,53 @@ health:
 
 environments:
   dev:
-    # the service's own listener when run standalone; under `encore run` the root gateway fronts it
+    # the service's own listener when run standalone; under `encore run` the gateway fronts it
     port: 4001
-    host: localhost
-    devConsolePort: 4901
-    # dev is a monolith (ADR 0169 d2)
-    deployable: core
-    drivers:
-      queue: memory
-      cache: memory
-      events: memory
-      workflow: native
-      realtime: memory
-      mail: memory
-      search: memory
-      media: memory
-    # one logical db `commerce` per lane (ADR 0238 d2)
+    # one logical database `commerce` per lane, one Postgres schema per module inside it
     database:
       extensions: [ltree, pg_trgm]
-    # the last config layer (ADR 0146): per-environment @Env values and driver names
+    # `encore run` does not run crons; the dev console triggers them
+    crons:
+      enabled: false
+    # the last config layer: per-environment values, keyed by config key, over the root runway's
+    # `defaults.service.config` (the queue, cache, events, workflow, realtime, notifications and
+    # media drivers come from there)
     config:
-      commerce.service:
-        # the web member's dev origin, resolved by gen; no literal port (ADR 0170)
+      commerce:
+        # the web member's dev origin, resolved by gen; no literal port (Stackra ADR 0170)
         storefrontBaseUrl:
           from-member: web
+      # the in-memory index, so a fresh clone searches without building the Postgres index
+      search:
+        driver: memory
       loyalty_kit:
         ledger: memory
       access_log:
         sink: memory
-    # `encore run` does not run crons (ADR 0091); the dev console triggers them
-    crons:
-      enabled: false
 
   preview:
-    deployable: core
     database:
       plan: shared
-    # previews never mail a real address
-    drivers:
-      mail: memory
-    secrets: [PRICING_API_KEY]
+    # previews never mail a real address: the root defaults pick the memory notifications driver
     config:
-      commerce.service:
+      commerce:
         storefrontBaseUrl: "https://web-pr-${pr}.preview.acme.example"
 
   staging:
-    # grouped with notifications: the NotificationsClient calls in-process (ADR 0260 d4)
-    deployable: core
-    isolate: false
-    resources:
-      cpu: 0.5
-      memory: 1Gi
-      instances:
-        min: 1
-        max: 2
-      scaling:
-        metric: cpu
-        target: 70
-    poolBudget: 20
     database:
       storageGb: 20
       extensions: [ltree, pg_trgm]
+      # connections this member may hold on the shared server
+      poolBudget: 20
+    # the dedicated instance `requires` names; volatile-ttl evicts only keys that carry a TTL
     cache:
-      keyspaceMb: 256
-    # sizes of the `@Bucket` declarations the manifest lists
+      memoryMb: 256
+      eviction: volatile-ttl
+    # sizes of the buckets the manifest lists
     buckets:
       product_images:
         storageGb: 5
-    # names come from the manifest (`@AsJob` / `@OnEvent` queues); sizes here
+    # queue names come from the manifest (job queues, listeners, notifications); sizes here
     queues:
       default:
         visibilityTimeoutSeconds: 300
@@ -114,42 +102,19 @@ environments:
         dlq: true
     crons:
       enabled: true
-    drivers:
-      queue: encore-pubsub
-      cache: valkey
-      events: encore-pubsub
-      workflow: native
-      realtime: sse
-      mail: notifications
-      search: postgres
-      media: s3
-    secrets: [PRICING_API_KEY]
     config:
-      commerce.service:
+      commerce:
         storefrontBaseUrl: https://staging.acme.example
-    workers:
-      split: false
 
   production:
-    # split: its own process; the same code reaches notifications over RPC
-    deployable: commerce
-    isolate: false
-    resources:
-      cpu: 1
-      memory: 2Gi
-      instances:
-        min: 2
-        max: 10
-      scaling:
-        metric: cpu
-        target: 60
-    poolBudget: 50
     database:
       storageGb: 100
       extensions: [ltree, pg_trgm]
       readReplica: false
+      poolBudget: 50
     cache:
-      keyspaceMb: 1024
+      memoryMb: 1024
+      eviction: volatile-ttl
     buckets:
       product_images:
         storageGb: 50
@@ -165,25 +130,6 @@ environments:
         dlq: true
     crons:
       enabled: true
-    drivers:
-      queue: encore-pubsub
-      cache: valkey
-      events: encore-pubsub
-      workflow: native
-      realtime: sse
-      mail: notifications
-      search: postgres
-      media: s3
-    secrets: [PRICING_API_KEY]
     config:
-      commerce.service:
+      commerce:
         storefrontBaseUrl: https://www.acme.example
-    # queue, cron and outbox work runs in `commerce-worker`
-    workers:
-      split: true
-      resources:
-        cpu: 0.5
-        memory: 1Gi
-        instances:
-          min: 1
-          max: 4

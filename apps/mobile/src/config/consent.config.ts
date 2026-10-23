@@ -1,29 +1,49 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: consent on the device. The categories the user decides on, the policy version
- *          that invalidates old decisions, and whether the first launch asks.
- * Boundary: values only; @stackra/consent stores the decision in the `Prefs` area and the settings
- *           page renders the switches. `ConsentCategory.Necessary` is always granted and never
- *           asked; everything else is off until the user turns it on (app-store review requires the
- *           choice before tracking).
+ * Purpose: this app's override of @stackra/consent's configuration: the categories the user decides
+ *          on, the policy version that invalidates old decisions, and whether the first launch
+ *          asks.
+ * Boundary: an override declares `override` members only and inherits the base's key (`consent`);
+ *           the package stores the decision with its policy version in the `Prefs` area and the
+ *           settings page renders the switches. Each category is a `{ category, required,
+ *           defaultGranted }` object over `ConsentCategory` from @stackra/consent (the app defines
+ *           no enum of its own), with the hint the switch shows. `ConsentCategory.Necessary` is
+ *           required: always granted and never asked; everything else is off until the user turns
+ *           it on (decline by default; app-store review requires the choice before tracking).
  * Runtime: react-native
- * Governing contract: ADR 0071
+ * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
+ *                     alias), ADR 0298 (decisions 1 and 3), ADR 0071
  */
-import { Config } from "@stackra/config";
-import { Bool, List, OneOf, Str } from "@stackra/validation";
-import { ConsentCategory } from "#src/enums/consent-category.enum";
+import { ConsentCategory, ConsentConfig as BaseConsentConfig } from "@stackra/consent";
+import { I18n } from "#stackra/i18n";
 
-/** The categories, their defaults and the policy version. */
-@Config("mobile.consent")
-export class ConsentConfig {
-  /** The categories shown in settings, in order; `Necessary` is listed but locked on. */
-  @List(OneOf(ConsentCategory)) categories = [
-    ConsentCategory.Necessary,
-    ConsentCategory.Analytics,
-    ConsentCategory.CrashReplay,
+/** The categories in settings order, the policy version and the first-launch prompt. */
+export class ConsentConfig extends BaseConsentConfig {
+  /** The categories shown in settings, in order; `Necessary` is required, so it is locked on. */
+  override categories: BaseConsentConfig["categories"] = [
+    {
+      category: ConsentCategory.Necessary,
+      required: true,
+      defaultGranted: true,
+      descriptionKey: I18n.mobile.consent.necessary_hint,
+    },
+    {
+      category: ConsentCategory.Analytics,
+      required: false,
+      defaultGranted: false,
+      descriptionKey: I18n.mobile.consent.analytics_hint,
+    },
+    {
+      category: ConsentCategory.CrashReplay,
+      required: false,
+      defaultGranted: false,
+      descriptionKey: I18n.mobile.consent.crash_replay_hint,
+    },
   ];
-  /** Bumping it asks everyone again. @defaultValue "2026-10" */
-  @Str({ pattern: /^\d{4}-\d{2}$/ }) policyVersion = "2026-10";
-  /** Ask on the first signed-in launch, before any optional category runs. @defaultValue true */
-  @Bool() askOnFirstLaunch = true;
+
+  /** The consent policy version (`YYYY-MM`); bumping it asks everyone again. */
+  override policyVersion = "2026-10";
+
+  /** Ask on the first signed-in launch, before any optional category runs. */
+  override askOnFirstLaunch = true;
 }

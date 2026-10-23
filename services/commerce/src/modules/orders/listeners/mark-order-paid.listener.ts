@@ -1,33 +1,29 @@
 /**
  * Stackra file contract:
  * Purpose: when the payments service reports a capture for an order, mark the order paid.
- * Boundary: consumes another service's public event through the generated event map; never imports
- *           payments code. Runs once per event id (inbox dedup) in its own transaction. A listener
- *           is marked by its `@OnEvent` method, not a class decorator (ADR 0264).
+ * Boundary: subscribed to `payments.payment.captured.v1` by the type of the event parameter, a
+ *           class gen writes into `#stackra/clients/payments` from the payments manifest; never
+ *           imports payments code. Runs once per event id (inbox dedup) in its own transaction. A
+ *           capture whose reference is not an order id (a gift card) returns at once.
  * Runtime: node
- * Governing contract: ADR 0260 d3 (events across services), ADR 0078 d4 (listener semantics),
- *                     guides/programming-model.mdx#listeners
+ * Governing contract: ADR 0294 (decisions 4 and 16), ADR 0260 d3 (events across services), ADR 0078
+ *                     d4 (listener semantics)
  */
-import { type EventOf, OnEvent, type ListenerContext } from "@stackra/events";
-import { Payments } from "#stackra/clients";
+import { Listener, type ListenerContext } from "@stackra/events";
+import type { PaymentCaptured } from "#stackra/clients/payments";
 import { Order } from "#modules/orders/models/order.model";
 import type { OrderService } from "#modules/orders/services/order.service";
 
 /** Bridges the payments capture fact into the order lifecycle; the only consumer of the capture. */
-export class MarkOrderPaidListener {
-  constructor(private readonly orders: OrderService) {}
+export class MarkOrderPaidListener extends Listener {
+  /** @param orders - its `markPaid` is idempotent on the payment id. */
+  constructor(private readonly orders: OrderService) {
+    super();
+  }
 
-  /**
-   * `where` filters at the subscription, by the model's own id prefix, so captures for gift cards
-   * never reach this inbox. The capture time from the event becomes `paidAt`.
-   */
-  @OnEvent(Payments.events.PaymentCaptured, {
-    where: (e) => e.data.reference.startsWith(`${Order.idPrefix}_`),
-  })
-  async handle(
-    event: EventOf<typeof Payments.events.PaymentCaptured>,
-    ctx: ListenerContext,
-  ): Promise<void> {
-    await this.orders.markPaid(event.data.reference, event.data.paymentId, ctx.now());
+  /** The reference is whatever the authorizer passed; orders pass the order's public id. */
+  async handle(event: PaymentCaptured, ctx: ListenerContext): Promise<void> {
+    if (!Order.isPublicId(event.reference)) return;
+    await this.orders.markPaid(event.reference, event.paymentId, ctx.now());
   }
 }

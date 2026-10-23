@@ -1,43 +1,42 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: the look. The one logo source, schemes and theme colours. Gen rasterises every
- *          icon (PWA 192/512/maskable, .icns, .ico, the tray template) from `logo`.
- * Boundary: tokens themselves are `@acme/brand`. Per-tenant brand at runtime is Pro (brand
- *           service), so the console shows the house brand only; the public site is where a
- *           tenant's brand is real.
+ * Purpose: the console's override of @stackra/theming's configuration: the look. The theme (`acme`,
+ *          built with `defineTheme` in `@acme/theme`), the one logo source, the schemes and the
+ *          fonts. Gen rasterises every icon (PWA 192/512, maskable, monochrome, .icns, .ico, the
+ *          tray template) from `logo`, and takes `theme-color` and the manifest's background and
+ *          theme colours per scheme from the theme's `background` token.
+ * Boundary: an override keeps the base's name and imports the base as `BaseThemingConfig`; it sets
+ *           `override` field defaults only and inherits the base's key (`theming`). A second
+ *           override of the same base fails gen. Colours are tokens, never literals here: the
+ *           stylesheet imports `@acme/theme/themes/acme/web.css` and the faces from
+ *           `@stackra/tokens/fonts/fonts.css`. Per-tenant brand at runtime is Pro (brand service),
+ *           so the console shows the house theme only.
  * Runtime: isomorphic
- * Governing contract: ADR 0080 d4 (light and dark from tokens), ADR 0234 (asset keys)
+ * Governing contract: ADR 0294 (decision 19; as amended by programming model v3.1, AGENTS.md: the
+ *                     Base alias), ADR 0302 (design system), ADR 0080 d4 (light and dark from
+ *                     tokens), ADR 0234 (asset keys)
  */
-import { Config } from "@stackra/config";
-import { ColorScheme } from "@stackra/theming";
-import { Bool, List, Nested, OneOf, Str } from "@stackra/validation";
+import { ColorScheme, ThemingConfig as BaseThemingConfig } from "@stackra/theming";
 import { Assets } from "#stackra/assets";
 
-/** The `<meta name="theme-color">` pair and the desktop frame colour. */
-class ThemeColors {
-  /** Light scheme colour. @defaultValue "#f7f7f5" */
-  @Str({ pattern: /^#[0-9a-f]{6}$/i }) light = "#f7f7f5";
-  /** Dark scheme colour. @defaultValue "#1c1e22" */
-  @Str({ pattern: /^#[0-9a-f]{6}$/i }) dark = "#1c1e22";
-}
+/** Look of the console: theme, logo source, schemes and fonts. */
+export class ThemingConfig extends BaseThemingConfig {
+  /** The theme `@acme/theme` builds; its web CSS is the stylesheet's, its tokens gen's. */
+  override theme = "acme";
 
-/** Look of the console: logo source, schemes and theme colours. */
-@Config("console.theming")
-export class ThemingConfig {
-  /** The one SVG every icon derives from. @defaultValue Assets.console.public.logo_svg */
-  logo = Assets.console.public.logo_svg;
-  /** Monochrome variant for the tray; derived from `logo` when absent. */
-  monochromeLogo?: typeof Assets.console.public.logo_svg;
-  /** Schemes the toggle cycles through, in order. @defaultValue ColorScheme.values() */
-  @List(OneOf(ColorScheme)) schemes = ColorScheme.values();
-  /** The scheme of a first visit. @defaultValue ColorScheme.System */
-  @OneOf(ColorScheme) defaultScheme = ColorScheme.System;
-  /** `<meta name="theme-color">` and the desktop frame. */
-  @Nested(ThemeColors) themeColor = new ThemeColors();
+  /** The one SVG every icon derives from. */
+  override logo = Assets.console.public.logo_svg;
+
+  /** Schemes the toggle cycles through, in order. */
+  override schemes: ColorScheme[] = [ColorScheme.Light, ColorScheme.Dark, ColorScheme.System];
+
+  /** The scheme of a first visit. */
+  override defaultScheme: ColorScheme = ColorScheme.System;
+
   /**
-   * Self-host and preload the brand fonts instead of the system families `@acme/brand` names.
-   * Off: the brand ships no font files, so there is nothing to host, preload or cache.
-   * @defaultValue false
+   * Self-host and preload the theme's faces (Geist, IBM Plex Sans Arabic) from
+   * `@stackra/tokens/fonts/`, so the first paint uses them offline too; the worker precaches the
+   * files with the shell.
    */
-  @Bool() selfHostedFonts = false;
+  override selfHostedFonts = true;
 }

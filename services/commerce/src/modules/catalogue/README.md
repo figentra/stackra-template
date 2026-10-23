@@ -1,30 +1,36 @@
 # catalogue
 
 Products and variants. Never stores a price (prices belong to the pricing service) and never stores
-stock (inventory). Exports `ProductService` to sibling modules.
+stock (inventory). Exports `ProductService` to sibling modules. Each file's path says its kind, its
+class extends one kind base, and its identities are derived from names (Stackra ADR 0294); the
+orders module is the reference for every kind, so this table lists only what catalogue adds.
 
-| Kind        | Files                                                                         | Shows                                                                       |
-| ----------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| model       | `models/product.model.ts`, `models/variant.model.ts`                          | `Translatable(["title"])`, a relation inside the module, every `@Index`     |
-| state       | `states/product.state.ts`                                                     | Draft → Active → Archived on `@stackra/state-machine`; `Archive` records    |
-| enum        | `enums/product-status.enum.ts`                                                | class enum with i18n labels                                                 |
-| schema      | `schemas/*.schema.ts`                                                         | one schema per file: views, filters, pages, inputs                          |
-| permission  | `permissions/product.permission.ts`                                           | read, create, update, archive; the only home of risk (ADR 0132)             |
-| policy      | `policies/product.policy.ts`                                                  | the L2 `archive` verb: staff only                                           |
-| event       | `events/product-archived.event.ts`                                            | one public `@Event`                                                         |
-| errors      | `errors/*.error.ts`                                                           | `variant_unavailable`, `variant_not_found`, `product_not_found`             |
-| service     | `./services/product.service.ts`                                               | `@Crud(Product, { actions, requires })`, `@Cacheable` by model tag          |
-| entitlement | `entitlements/product-limit.entitlement.ts`                                   | `@Entitlement`: the plan's product limit gates the generated create         |
-| search      | `search/product.search.ts`                                                    | `@SearchIndex(Product)`: the hybrid index the storefront and POS query      |
-| bucket      | `buckets/product-images.bucket.ts`                                            | `@Bucket`: where product images upload, with types, size and variants       |
-| action      | `actions/archive-product.action.ts`                                           | idempotent PUT transition, `@CacheEvict`, `offline`, confirmation UX        |
-| action      | `actions/attach-product-image.action.ts`                                      | an `Upload` input claimed through `MediaLibrary` (signed URL, no bytes)     |
-| query       | `queries/get-product.query.ts`, `queries/get-product-by-slug.query.ts`        | L0 reads; the public slug lookup under `/public`                            |
-| query       | `queries/list-storefront-products.query.ts`                                   | `catalogue.product.list_storefront`: index search or table page             |
-| query       | `queries/search-products.query.ts`                                            | `catalogue.product.search`: public ranked search, `/public/products/search` |
-| query       | `queries/get-variant-by-barcode.query.ts`, `queries/search-variants.query.ts` | the mobile POS lookups (L0 through `ProductPermissions.read`)               |
-| resource    | `resources/product.resource.ts`                                               | `table`, `form` (with an upload field), `infolist`                          |
-| seed        | `seeds/demo.seed.ts`                                                          | seeder key `catalogue.demo`                                                 |
-| factory     | `factories/*.factory.ts`                                                      | `ProductFactory.has(VariantFactory, n)`                                     |
-| migration   | `migrations/*.migration.ts`                                                   | diff output: initial tables, expand steps, the search index                 |
-| tests       | `actions/__tests__/`, `queries/__tests__/`, `entitlements/__tests__/`         | `run`, `toRecord`, `toRefuseWith`, `fakeUpload`, `fakeEntitlements`         |
+| Group        | Files                                                           | Shows                                                                                |
+| ------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| (root)       | `catalogue.module.ts`                                           | `extends Module({ exports: [ProductService] })`                                      |
+| `models/`    | `product.model.ts`, `variant.model.ts`                          | `Translatable([...])`, `Ref<Product>` with a foreign key, `@Searchable`, `@Index`    |
+| `models/`    | `product-collection.model.ts`                                   | storefront collections; `Product.collections` is a `@ManyToMany` over a pivot table  |
+| `models/`    | `product.state-machine.ts`                                      | draft → active → archived; `archive` records `product.archived`                      |
+| `models/`    | `product-images.bucket.ts`                                      | `extends Bucket({...})`: accepted types, size and image variants                     |
+| `access/`    | `product.permissions.ts`, `product.policy.ts`                   | read, create, update, archive, import with their risk; `Policy<Product>`             |
+| `access/`    | `product-collection.permissions.ts`                             | read, create, update for collections                                                 |
+| `access/`    | `product-limit.entitlement.ts`                                  | `Entitlement({ kind, counts })`: the plan's product limit gates the generated create |
+| `services/`  | `product.service.ts`                                            | `CrudService<Product>`; the cached view through the injected `Cache` port            |
+| `services/`  | `product-collection.service.ts`                                 | `CrudService<ProductCollection>`, the generated operations' service                  |
+| `services/`  | `storefront.service.ts`                                         | `extends Service`: price (pricing client) and stock (inventory) for the public area  |
+| `actions/`   | `archive-product.action.ts`                                     | idempotent PUT transition, `offline`, `tool`, `intent`, the cache forgotten          |
+| `actions/`   | `attach-product-image.action.ts`                                | an `Upload` field claimed through `MediaLibrary` (signed URL, no bytes)              |
+| `queries/`   | `get-product.query.ts`, `get-product-by-slug.query.ts`          | L0 reads; the public slug lookup under `/public`                                     |
+| `queries/`   | `list-storefront-products.query.ts`, `search-products.query.ts` | the public grid and the ranked search, both `StorefrontProductPage`                  |
+| `queries/`   | `get-variant-by-barcode.query.ts`, `search-variants.query.ts`   | the mobile POS lookups, with `permission: ProductPermissions.read` named             |
+| `schemas/`   | `*.schema.ts`                                                   | every Input and Output in its own file, and the shared shapes                        |
+| `resources/` | `product/product.resource.ts`                                   | `Resource<Product, ProductView>`: views, a wizard form, import, `.in()` placement    |
+| `resources/` | `product-collection/product-collection.resource.ts`             | `Resource<ProductCollection>`: the row is the model                                  |
+| `database/`  | `migrations/`, `factories/`, `seeders/demo.seeder.ts`           | snapshots, `t.searchable(...)`, an `after:` edge with raw SQL; `ProductFactory`      |
+| tests        | `access/__tests__/`, `actions/__tests__/`, `queries/__tests__/` | `run`, `toRecord`, `toRefuseWith`, `fakeUpload`, `fakeEntitlements`                  |
+
+`operations` set to `true` make gen write `catalogue.product.list@1` (its input the table contract),
+`.create@1` and `.update@1` into `#stackra/operations` (`ProductOperations.Create` and the others;
+`ProductCollectionOperations` for collections), so tests and the panel name them by class. The
+member root holds what the module reads but does not own: `assets/lang/<locale>/catalogue.json`, the
+`I18n.catalogue.*` tree.

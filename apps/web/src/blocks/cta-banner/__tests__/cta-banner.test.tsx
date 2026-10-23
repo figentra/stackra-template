@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
-import { CtaBanner } from "#src/blocks/cta-banner";
+import { CtaBanner } from "#src/blocks/cta-banner/cta-banner";
 
 /** Guards the closing call to action a tenant places at the end of a page. */
 describe(CtaBanner, () => {

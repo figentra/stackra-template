@@ -1,21 +1,18 @@
 /**
  * Stackra file contract:
- * Purpose: the refusal when an order is placed while the tenant has paused ordering; thrown by
- *          AcceptingOrdersGuard.
- * Boundary: a typed AppError subclass: one category, one snake_case code; the HTTP status is
- *           derived from the category by the generated adapter and never written here.
+ * Purpose: the refusal when an order is placed while the tenant has paused ordering; raised by
+ *          AcceptingOrdersPrecondition.
+ * Boundary: a refusal class: kind `FailedPrecondition` reports under the `precondition_failed`
+ *           category, the code is derived from the class name (`orders_paused`), and the clients
+ *           show the text `orders::refusals.orders_paused`. It carries no details.
  * Runtime: isomorphic
- * Governing contract: ADR 0140 (envelope), ADR 0232 (every error extends AppError),
- *                     guides/programming-model.mdx#errors
+ * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0140 (as amended: the precondition
+ *                     category), ADR 0232
  */
-import { AppError, ErrorCategory } from "@stackra/errors";
+import { ErrorKind, Refusal } from "@stackra/errors";
 
-/** `precondition_failed` / `orders_paused`; not retryable until the tenant resumes ordering. */
-export class OrdersPausedError extends AppError {
-  /** The category every caller branches on. */
-  readonly category = ErrorCategory.PreconditionFailed;
-  /** The code the clients map to `orders::refusals.orders_paused`. */
-  readonly code = "orders_paused";
-  /** Retrying does not help; a tenant admin must switch ordering back on first. */
-  readonly retryable = false;
-}
+/** Not retryable until a tenant admin switches ordering back on. */
+export class OrdersPausedError extends Refusal({
+  kind: ErrorKind.FailedPrecondition,
+  retryable: false,
+}) {}

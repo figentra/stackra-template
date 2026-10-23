@@ -1,25 +1,23 @@
 /**
  * Stackra file contract:
- * Purpose: the Order aggregate root: who ordered, the totals snapshot and the lifecycle state.
- * Boundary: data, invariants and recorded events. Status moves only through OrderState transitions;
- *           other modules reach this table only through OrderService (exported) or a link. The
+ * Purpose: the Order aggregate root: who ordered, the totals snapshot, the lifecycle state and the
+ *          lines.
+ * Boundary: data, relations and indexes. Key `orders.order`, table `orders.orders` (the module's
+ *           Postgres schema), public ids `ord_…`. `status` moves only through OrderStateMachine;
+ *           sibling modules reach orders through OrderService (exported) or a relation. The
  *           customer is a principal public id from the actor, never a row here. Every index is an
- *           `@Index` here, so `stackra db diff` never proposes dropping one (ADR 0159).
+ *           `@Index` here, so `stackra db diff` never proposes dropping one; the last two back the
+ *           sortable `createdAt` and `totals.totalMinor` columns of OrderResource's table, which
+ *           gen refuses without an index (`sort_not_indexed`). No constructor-made state: the ORM
+ *           loads rows without running the constructor, and rows are built by `em.create`,
+ *           factories or CrudService, never with `new`.
  * Runtime: node
- * Governing contract: ADR 0095, 0133 (traits), 0239 (BelongsToTenant), 0141 (recorded events reach
- *                     the outbox at flush), ADR 0220 (money), guides/programming-model.mdx#models
+ * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0239
+ *                     (BelongsToTenant), ADR 0141 (recorded events reach the outbox at flush),
+ *                     ADR 0159, ADR 0220 (money)
  */
-import {
-  DateTime,
-  HasMany,
-  HasState,
-  Index,
-  Json,
-  Model,
-  MoneyColumn,
-  Nullable,
-  Str,
-} from "@stackra/model";
+import type { PublicId } from "@stackra/contracts";
+import { Collection, Index, Model, OneToMany } from "@stackra/model";
 import {
   BelongsToTenant,
   HasPublicId,
@@ -27,19 +25,22 @@ import {
   UserStamps,
   Versioned,
 } from "@stackra/model/traits";
+import type { Money } from "@stackra/money";
+import { Str } from "@stackra/validation";
+import { OrderStatus } from "#modules/orders/enums/order-status.enum";
 import { OrderLine } from "#modules/orders/models/order-line.model";
-import { OrderAdjustment } from "#modules/orders/schemas/order-adjustment.schema";
-import { OrderState } from "#modules/orders/states/order.state";
+import type { OrderAdjustment } from "#modules/orders/schemas/order-adjustment.schema";
 
 /**
- * An order as persisted. Totals are a snapshot taken at placement: a later price change never
- * alters an existing order. Key `orders.order`, table `orders` (derived). Traits add `id`
- * (`Order.idPrefix` is `ord`), tenant, timestamps, user stamps and the optimistic version.
+ * An order as persisted. Totals are a snapshot taken at placement, so a later price change never
+ * alters an existing order. Traits add `id`, the tenant, timestamps, user stamps and the optimistic
+ * version.
  */
-@Model()
-@Index(["customerId"]) // → idx_orders_customer_id
-@Index(["tenantId", "status", "createdAt"]) // → idx_orders_tenant_id_status_created_at
-@Index(["tenantId", "status", "paidAt"]) // → idx_orders_tenant_id_status_paid_at
+@Index(["customerId"])
+@Index(["tenantId", "status", "createdAt"])
+@Index(["tenantId", "status", "paidAt"])
+@Index(["tenantId", "createdAt"])
+@Index(["tenantId", "total.minor"])
 export class Order extends Model.with(
   HasPublicId("ord"),
   BelongsToTenant,
@@ -47,24 +48,29 @@ export class Order extends Model.with(
   UserStamps,
   Versioned,
 ) {
-  /** Public id of the customer principal who placed the order; set from the actor, never input. */
-  @Str({ max: 64 }) customerId!: string;
-  /**
-   * Where the order is in its lifecycle; moves only through a transition (states/order.state.ts).
-   */
-  @HasState(OrderState) status!: OrderState;
-  /** ISO 4217 code every money column on this row is denominated in. */
-  @Str({ length: 3 }) currency!: string;
-  /** Sum of line prices before adjustments, in minor units (a `Money` with `currency`). */
-  @MoneyColumn({ currencyField: "currency" }) subtotalMinor!: number;
-  /** Adjustments the adjustTotals hook chain applied at placement, in the order they ran. */
-  @Json(OrderAdjustment.schema.array()) adjustments!: OrderAdjustment[];
-  /** Amount charged, in minor units; never below zero. */
-  @MoneyColumn({ currencyField: "currency" }) totalMinor!: number;
-  /** The payments service's id once a payment is authorized; null until then. */
-  @Nullable() @Str({ max: 64 }) paymentId!: string | null;
-  /** When the payment was captured; null until the order is paid. */
-  @Nullable() @DateTime() paidAt!: Date | null;
-  /** The product lines; owned by this aggregate (cascade delete), loaded with `populate`. */
-  @HasMany(() => OrderLine, (line) => line.order) lines!: OrderLine[];
+  /** The customer principal who placed it; set from the actor, never from input. */
+  customerId!: PublicId<"usr">;
+
+  /** Lifecycle; written only by OrderStateMachine. The initializer is the initial state. */
+  status: OrderStatus = OrderStatus.PendingPayment;
+
+  /** Sum of line prices before adjustments; columns `subtotal_minor` and `subtotal_currency`. */
+  subtotal!: Money;
+
+  /** What the `adjustTotals` extensions applied at placement, in the order they ran; jsonb. */
+  adjustments: OrderAdjustment[] = [];
+
+  /** Amount charged, never below zero; columns `total_minor` and `total_currency`. */
+  total!: Money;
+
+  /** The payments service's id once a payment is authorized. */
+  @Str({ max: 64 })
+  paymentId: string | null = null;
+
+  /** When the payment was captured. */
+  paidAt: Date | null = null;
+
+  /** The product lines; owned by the order and deleted with it. */
+  @OneToMany(() => OrderLine, (line) => line.order, { orphanRemoval: true })
+  lines = new Collection<OrderLine>(this);
 }

@@ -1,11 +1,41 @@
 {
-  "permissions": { "stock": { "read": "عرض المخزون", "manage": "تعديل المخزون" } },
+  "nav": {
+    "stock": "المخزون"
+  },
+  "permissions": {
+    "stock": {
+      "read": "عرض المخزون",
+      "manage": "تعديل المخزون"
+    }
+  },
   "settings": {
     "title": "المخزون",
-    "low_stock_threshold": "حد المخزون المنخفض",
-    "allow_backorders": "السماح بالطلب المسبق"
+    "low_stock_threshold": {
+      "label": "حد المخزون المنخفض",
+      "help": "عدد الوحدات الذي يُعد الصنف عنده أو دونه منخفضًا."
+    },
+    "allow_backorders": {
+      "label": "السماح بالطلب المسبق",
+      "help": "يسمح بحجز ما يتجاوز المخزون؛ يعتمد التغيير مسؤول ثانٍ."
+    }
   },
-  "widgets": { "low_stock": "مخزون منخفض" },
-  "adjust_reason": { "count": "جرد", "delivery": "توريد", "damage": "شطب تالف" },
-  "refusals": { "insufficient_stock": "المخزون غير كافٍ." }
+  "widgets": {
+    "low_stock": {
+      "title": "مخزون منخفض",
+      "description": "الأصناف التي بلغت الحد أو دونه.",
+      "empty": "لا يوجد صنف منخفض"
+    }
+  },
+  "enums": {
+    "stock_adjust_reason": {
+      "count": "جرد",
+      "delivery": "توريد",
+      "damage": "شطب تالف"
+    }
+  },
+  "errors": {
+    "insufficient_stock": {
+      "message": "المخزون غير كافٍ."
+    }
+  }
 }

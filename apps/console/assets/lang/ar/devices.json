@@ -1,0 +1,18 @@
+{
+  "$comment": "Stackra file contract — Purpose: why the console asks for each device it declares (namespace `devices::`, `<device>.reason`): shown in the operating system's permission prompt and written by gen into the macOS usage strings (NSCameraUsageDescription and friends); Boundary: one entry per device desktop.config.ts declares; gen fails on a declared device without a reason in any locale; Runtime: node; Governing contract: ADR 0251 (desktop hardening), ADR 0253 (peripherals), ADR 0080",
+  "camera": {
+    "reason": "تستخدم وحدة تحكم Acme الكاميرا لمسح رموز المنتجات الشريطية وتصوير المنتجات للكتالوج."
+  },
+  "microphone": {
+    "reason": "تستخدم وحدة تحكم Acme الميكروفون عندما تُملي طلبًا على لوحة الأوامر."
+  },
+  "usb": {
+    "reason": "تستخدم وحدة تحكم Acme منفذ USB للوصول إلى طابعة الإيصالات ودرج النقود والماسحات السلكية."
+  },
+  "bluetooth": {
+    "reason": "تستخدم وحدة تحكم Acme البلوتوث لإقران الماسحات وطابعات الإيصالات اللاسلكية."
+  },
+  "serial": {
+    "reason": "تستخدم وحدة تحكم Acme المنفذ التسلسلي لقراءة موازين الوزن وتشغيل شاشات العملاء."
+  }
+}

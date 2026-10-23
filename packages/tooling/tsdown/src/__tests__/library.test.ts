@@ -1,6 +1,7 @@
 /**
- * Proves `libraryPreset()` returns the agreed shape (ESM, dts, sourcemap, clean, treeshake) and that the decorators
- * flag installs the inputOptions hook which adds the legacy transform and swallows only the known conflict log.
+ * Proves `libraryPreset(entries)` returns the agreed shape (ESM, dts, sourcemap, clean, treeshake)
+ * for the entries it is given, and that the decorators flag installs the inputOptions hook which
+ * adds the legacy transform and swallows only the known conflict log.
  */
 import { describe, expect, it, vi } from "vitest";
 import { libraryPreset } from "../index.ts";
@@ -16,9 +17,10 @@ type Resolved = {
 };
 
 describe("@stackra/tsdown-config libraryPreset()", () => {
-  it("defaults to the barrel entry and the agreed options", () => {
-    const cfg = libraryPreset() as unknown as Resolved;
-    expect(cfg.entry).toEqual({ index: "src/index.ts" });
+  it("builds exactly the entries it is given, with the agreed options", () => {
+    const entries = { index: ".stackra/entry/index.ts", node: ".stackra/entry/node.ts" };
+    const cfg = libraryPreset(entries) as unknown as Resolved;
+    expect(cfg.entry).toEqual(entries);
     expect(cfg.format).toEqual(["esm"]);
     expect(cfg.dts).toBe(true);
     expect(cfg.sourcemap).toBe(true);
@@ -29,11 +31,12 @@ describe("@stackra/tsdown-config libraryPreset()", () => {
 
   it("decorators: true adds the legacy transform (no metadata) and filters the duplicate-flag log", () => {
     const cfg = libraryPreset(
-      { index: "src/index.ts" },
+      { index: ".stackra/entry/index.ts" },
       { decorators: true },
     ) as unknown as Resolved;
     expect(cfg.inputOptions).toBeTypeOf("function");
-    if (!cfg.inputOptions) throw new Error("unreachable: asserted above");
+    // The assertion above already failed the test when it is missing; this narrows the type.
+    if (!cfg.inputOptions) return expect.unreachable("inputOptions is asserted above");
     const out = cfg.inputOptions({ transform: { target: "es2022" } }) as {
       transform: {
         decorator: { legacy: boolean; emitDecoratorMetadata: boolean };

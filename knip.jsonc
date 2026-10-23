@@ -1,12 +1,13 @@
 // Stackra file contract:
 // Purpose: unused files, exports and dependencies detection. Runs in `pnpm verify`.
-// Boundary: knip settings only. Gen discovers every declaration by its kind folder (Stackra ADR 0264)
-//           and imports it from the generated `.stackra/` entries and `#stackra/wiring`, so the
-//           generated files are the entries: a kind file nothing generated reaches is the unused file
-//           knip reports.
+// Boundary: knip settings only. Gen discovers every declaration by its group folder and kind suffix
+//           (Stackra ADR 0294 decisions 1 and 13) and imports it from the generated `.stackra/`
+//           entries and `#stackra/wiring`, so the generated files and each member's root module are
+//           the entries: a kind file nothing generated reaches is the unused file knip reports.
 // Runtime: node
-// Governing contract: Stackra ADR 0264 (kind folders), Stackra ADR 0261 (generated imports), Stackra
-//                     ADR 0003 (members)
+// Governing contract: Stackra ADR 0294 (group folders, one root module), Stackra ADR 0295 decision
+//                     7 (generated entries), Stackra ADR 0261 (generated imports), Stackra ADR 0003
+//                     (members)
 {
   "$schema": "https://unpkg.com/knip@6.41.0/schema-jsonc.json",
   "workspaces": {
@@ -25,24 +26,29 @@
       "ignoreDependencies": ["@stackra/typescript-config", "jsdom", "@vitest/coverage-v8"]
     },
     "packages/*/*": {
-      // package.json `exports` are entries already; gen reaches the node module through `stackra.module`.
-      "entry": [".stackra/gen/*.ts", "src/node/*.module.ts"],
+      // package.json `exports` are entries already; the root module is src/node/<key>.module.ts.
+      "entry": [".stackra/gen/*.ts", "src/node/*.module.ts", "stackra.config.ts"],
       "project": ["src/**/*.{ts,tsx}"]
     },
     "apps/*": {
-      // App entries are generated (.stackra/main.tsx, entry.client.tsx, main.ts); authored code starts at the app root.
+      // App entries are generated (.stackra/entry/<target>.ts) and tool configs too; authored code
+      // starts at the root module, src/<key>.module.ts.
       "entry": [
         ".stackra/*.{ts,tsx}",
+        ".stackra/entry/*.{ts,tsx}",
         ".stackra/gen/*.{ts,tsx}",
         "stackra.config.ts",
-        "src/*.app.ts"
+        "*.extend.ts",
+        "src/*.module.ts"
       ],
       "project": ["src/**/*.{ts,tsx}"]
     },
     "services/*": {
-      // src/main.ts is the only authored entry; gen reaches every module through #stackra/wiring.
-      "entry": ["src/main.ts", ".stackra/gen/*.ts", "stackra.config.ts"],
-      "project": ["src/**/*.ts"]
+      // The runtime entry is generated (.stackra/entry/server.ts); gen reaches every module through
+      // the root module and #stackra/wiring.
+      "entry": [".stackra/entry/*.ts", ".stackra/gen/*.ts", "stackra.config.ts", "src/*.module.ts"],
+      // `.mail.tsx` bodies sit beside their notifications in resources/<model>/.
+      "project": ["src/**/*.{ts,tsx}"]
     },
     "apps/docs": {
       // Mintlify content is MDX rendered by the `mint` CLI; there is no JS entry.

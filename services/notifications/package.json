@@ -2,7 +2,7 @@
   "name": "@acme/service-notifications",
   "version": "0.1.0",
   "private": true,
-  "description": "The consumer service: delivery, notification preferences, the message log and the in-app inbox. Reaches commerce by event, call and command through the generated client, never its code.",
+  "description": "The consumer service: delivery, notification preferences, the message log and the in-app inbox as kind classes found by their group folders. Reaches commerce by an event, a call and a queued call through the generated client, never its code; stackra gen writes the entry, the wiring and the Encore app into .stackra/.",
   "license": "UNLICENSED",
   "type": "module",
   "imports": {
@@ -33,7 +33,6 @@
     ]
   },
   "exports": {
-    "./contracts": "./src/contracts/index.ts",
     "./assets/*": "./assets/*"
   },
   "scripts": {
@@ -50,7 +49,6 @@
     "@stackra/app": "catalog:stackra",
     "@stackra/clients": "catalog:stackra",
     "@stackra/config": "catalog:stackra",
-    "@stackra/connections": "catalog:stackra",
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
     "@stackra/database": "catalog:stackra",
@@ -61,14 +59,14 @@
     "@stackra/identity": "catalog:stackra",
     "@stackra/integrations": "catalog:stackra",
     "@stackra/model": "catalog:stackra",
+    "@stackra/notifications": "catalog:stackra",
     "@stackra/outbox": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
-    "@stackra/schema": "catalog:stackra",
     "@stackra/settings": "catalog:stackra",
     "@stackra/transport": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "@stackra/webhooks": "catalog:stackra",
-    "resend": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@stackra/runway": "catalog:stackra",

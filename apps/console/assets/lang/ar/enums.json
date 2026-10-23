@@ -1,0 +1,12 @@
+{
+  "$comment": "Stackra file contract — Purpose: the derived case labels of the console's own enums (namespace `enums::`, `<enum>.<code>`); Boundary: one branch per enum in src/enums/; gen fails on a case without a label in any locale; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0080",
+  "density": {
+    "comfortable": "مريحة",
+    "compact": "مضغوطة"
+  },
+  "settings_tab": {
+    "device": "هذا الجهاز",
+    "privacy": "الخصوصية",
+    "tenant": "المستأجر"
+  }
+}

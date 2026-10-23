@@ -1,0 +1,13 @@
+{
+  "$comment": "Stackra file contract — Purpose: the ar-SA overlay of the mobile app's `pages::` namespace: only the keys whose wording differs in ar-SA (Saudi users say الباركود for a barcode). Boundary: every key here also exists in `ar/pages.json`; a key missing here falls back to `ar` through i18n.config.ts `fallbacks`, so nothing is copied to make the region complete. Runtime: react-native. Governing contract: ADR 0080, ADR 0192, ADR 0234",
+  "orders": {
+    "empty_hint": "أنشئ طلبًا من الرئيسية أو امسح الباركود."
+  },
+  "create_order": {
+    "variant_hint": "اكتب معرّف المتغير أو امسح الباركود."
+  },
+  "scan": {
+    "hint": "وجّه الكاميرا نحو الباركود.",
+    "permission": "يحتاج Acme إلى الكاميرا لقراءة الباركود."
+  }
+}

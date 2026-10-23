@@ -1,47 +1,52 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: server state on the client: the persisted query cache and the offline mutation
- *          queue (ADR 0252).
- * Boundary: which actions may queue is the generated offline map (`#stackra/offline`); storage
- *           drivers per target are picked by gen. This file sets scope, age, encryption, replay and
- *           the cross-tab leader. Field names are the one set @stackra/query defines, so the
- *           console and mobile files read alike.
+ * Purpose: the console's override of @stackra/query's configuration: server state on the client,
+ *          the persisted query cache and the offline mutation queue (ADR 0252).
+ * Boundary: an override declares `override` members only and inherits the base's key (`query`). The
+ *           query context `createApp` mounts reads it, scoped to the active tenant so a switch
+ *           never shows another tenant's cache. Which actions may queue is the generated offline
+ *           map (`#stackra/offline`); storage drivers per target are picked by gen, and the
+ *           persister is the encrypted IndexedDB one on every target (on desktop its key is held by
+ *           Electron `safeStorage`, desktop.config.ts `offlineStore`). The class keeps the base's
+ *           name and imports the base as `BaseQueryConfig`; a second override of the same base
+ *           fails gen.
  * Runtime: isomorphic
- * Governing contract: ADR 0079, ADR 0252, ADR 0256
+ * Governing contract: ADR 0294 (decision 19; as amended by programming model v3.1, AGENTS.md: the
+ *                     Base alias), ADR 0295 (decision 10), ADR 0079, ADR 0252, ADR 0256
  */
-import { Config, DriverOf } from "@stackra/config";
 import type { DriverName } from "@stackra/container";
-import { QueryScope } from "@stackra/query";
-import { QueueLeader } from "@stackra/query/contracts";
-import { Bool, Int, OneOf } from "@stackra/validation";
+import { QueryConfig as BaseQueryConfig, QueryScope } from "@stackra/query";
+import type { QueueLeader } from "@stackra/query/contracts";
 
 /** Server state on the client: the persisted query cache and the offline mutation queue. */
-@Config("console.query")
-export class QueryConfig {
-  /**
-   * Key cache and queue by tenant so a switch never shows another tenant's data.
-   * @defaultValue QueryScope.Tenant
-   */
-  @OneOf(QueryScope) scope = QueryScope.Tenant;
-  /** Encrypt the persisted cache at rest. @defaultValue true */
-  @Bool() persistEncrypted = true;
-  /** How long a persisted query may be shown before it must refetch. @defaultValue 24 */
-  @Int({ min: 1 }) persistMaxAgeHours = 24;
-  /** Drain the queue as soon as the network returns, without a click. @defaultValue true */
-  @Bool() replayOnReconnect = true;
-  /**
-   * One tab drains the queue; the leader is elected through this driver.
-   * @defaultValue "broadcast_channel"
-   */
-  @DriverOf(QueueLeader) queueLeader: DriverName<QueueLeader> = "broadcast_channel";
-  /** Aggregates replayed in parallel; each aggregate stays FIFO. @defaultValue 4 */
-  @Int({ min: 1 }) maxParallelAggregates = 4;
-  /** Older entries surface as conflicts, never silently dropped. @defaultValue 7 */
-  @Int({ min: 1 }) queueRetentionDays = 7;
-  /** Seconds a fetched query counts as fresh. @defaultValue 30 */
-  @Int({ min: 0 }) staleTimeSeconds = 30;
-  /** Refetch stale queries when the window regains focus. @defaultValue true */
-  @Bool() refetchOnFocus = true;
-  /** Retries of a failed read before the error state shows. @defaultValue 2 */
-  @Int({ min: 0 }) retry = 2;
+export class QueryConfig extends BaseQueryConfig {
+  /** Key cache and queue by tenant so a switch never shows another tenant's data. */
+  override scope: QueryScope = QueryScope.Tenant;
+
+  /** Encrypt the persisted cache at rest. */
+  override persistEncrypted = true;
+
+  /** Hours a persisted query may be shown before it must refetch. */
+  override persistMaxAgeHours = 24;
+
+  /** Drain the queue as soon as the network returns, without a click. */
+  override replayOnReconnect = true;
+
+  /** One tab drains the queue; the leader is elected through this driver. */
+  override queueLeader: DriverName<QueueLeader> = "broadcast_channel";
+
+  /** Aggregates replayed in parallel; each aggregate stays FIFO. */
+  override maxParallelAggregates = 4;
+
+  /** Days after which older entries surface as conflicts, never silently dropped. */
+  override queueRetentionDays = 7;
+
+  /** Seconds a fetched query counts as fresh. */
+  override staleTimeSeconds = 30;
+
+  /** Refetch stale queries when the window regains focus. */
+  override refetchOnFocus = true;
+
+  /** Retries of a failed read before the error state shows. */
+  override retry = 2;
 }

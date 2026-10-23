@@ -1,15 +1,19 @@
 /**
  * Stackra file contract:
- * Purpose: the shape of the merchant notes JSON column on a loyalty account.
- * Boundary: a schema class used as a model cast (`@Json(AccountNotes.schema)`); node-only because
- *           only the model and the resource form read it. `schemas/` would appear with its second
- *           file; the catalogue shows the folder.
+ * Purpose: `AccountNotes`: the shape of the merchant notes jsonb column on a loyalty account.
+ * Boundary: a shape class, a nested element type of the model, so it lives in schemas; node-only
+ *           because only the model and the resource read it. Validated on write, parsed on read.
  * Runtime: node
- * Governing contract: ADR 0095 (casts validate on write)
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26)
  */
-import { Schema, z } from "@stackra/schema";
+import { Schema, Str } from "@stackra/validation";
 
-/** Free-form notes staff leave when flagging an account. */
-export class AccountNotes extends Schema(
-  z.object({ flaggedBy: z.string().optional(), reason: z.string().max(500).optional() }),
-) {}
+/** Free-form notes staff leave when flagging an account; both fields are optional. */
+export class AccountNotes extends Schema {
+  /** The staff member who flagged the account. */
+  flaggedBy?: string;
+
+  /** Why it was flagged. */
+  @Str({ max: 500 })
+  reason?: string;
+}

@@ -1,38 +1,44 @@
 /**
  * Stackra file contract:
- * Purpose: `access_log.entry.purge`: the nightly job that deletes access records older than
+ * Purpose: `access_log.entry.purge@1`: the nightly job that deletes access records older than
  *          `retentionDays`.
- * Boundary: a job is an action with the @AsJob adapter; @Cron only dispatches it, per tenant. It is
- *           the only delete of an append-only model, which `Repository.purge` makes explicit.
- *           `@AsJob` adds the job actor, so only `System` is listed.
+ * Boundary: a job is an action run from a queue; its `job` surface names the queue and the cron
+ *           schedule that dispatches it per tenant. The only actor is the system (the job adds
+ *           `ActorKind.Job` itself), so it gets no endpoint and no tool. Input and output are
+ *           schemas in `schemas/`. The key's aggregate (`entry`)
+ *           is not the model's, so the permission is named. It is the only delete of an
+ *           append-only model, which `Repository.purge` makes explicit.
  * Runtime: node
- * Governing contract: ADR 0264 decision 9 (jobs are actions), ADR 0148, ADR 0134
+ * Governing contract: ADR 0294 (decisions 2, 16, 18 and 21, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0148 (queue and scheduler), ADR 0134
  */
-import { Action, AsJob, type ActionContext } from "@stackra/actions";
-import type { Clock } from "@stackra/contracts";
-import { ActorKind } from "@stackra/contracts";
+import { Action, type ActionContext } from "@stackra/actions";
+import { ActorKind, type Clock } from "@stackra/contracts";
 import type { Repository } from "@stackra/database";
-import { Cron } from "@stackra/scheduler";
 import { Queues } from "#stackra/queues";
 import type { AccessLogConfig } from "#config/access-log.config";
+import { AccessLogEntryPermissions } from "#node/access/access-log-entry.permissions";
 import type { AccessLogEntry } from "#node/models/access-log-entry.model";
-import { AccessLogEntryPermissions } from "#node/permissions/access-log-entry.permission";
-import { PurgeAccessLogInput } from "#node/schemas/purge-access-log-input.schema";
+import type { PurgeAccessLogInput } from "#node/schemas/purge-access-log-input.schema";
 import { PurgeAccessLogOutput } from "#node/schemas/purge-access-log-output.schema";
 
 /**
  * `unique: true`: one run per tenant at a time; an overlapping tick is skipped, not queued twice.
  */
-@Action({
+export class PurgeAccessLogAction extends Action({
   key: "entry.purge",
-  input: PurgeAccessLogInput,
-  output: PurgeAccessLogOutput,
   permission: AccessLogEntryPermissions.purge,
   actors: [ActorKind.System],
-})
-@AsJob({ queue: Queues.Maintenance, unique: true, timeout: "5m" })
-@Cron("30 3 * * *", { perTenant: true })
-export class PurgeAccessLogAction {
+  job: {
+    queue: Queues.Maintenance,
+    unique: true,
+    timeout: "5m",
+    cron: {
+      schedule: "30 3 * * *",
+      perTenant: true,
+    },
+  },
+}) {
   /**
    * @param entries - the record repository, tenant-scoped by the model's trait.
    * @param config - the retention window, read at run time so an override applies on the next tick.
@@ -42,12 +48,16 @@ export class PurgeAccessLogAction {
     private readonly entries: Repository<AccessLogEntry>,
     private readonly config: AccessLogConfig,
     private readonly clock: Clock,
-  ) {}
+  ) {
+    super();
+  }
 
   /** Deletes every record whose `at` is older than `retentionDays` before now, in one statement. */
   async handle(_input: PurgeAccessLogInput, _ctx: ActionContext): Promise<PurgeAccessLogOutput> {
     const cutoff = new Date(this.clock.now());
     cutoff.setUTCDate(cutoff.getUTCDate() - this.config.retentionDays);
-    return { deleted: await this.entries.purge({ at: { $lt: cutoff } }) };
+    return PurgeAccessLogOutput.create({
+      deleted: await this.entries.purge({ at: { $lt: cutoff } }),
+    });
   }
 }

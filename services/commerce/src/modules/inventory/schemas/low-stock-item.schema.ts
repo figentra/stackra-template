@@ -1,13 +1,24 @@
 /**
  * Stackra file contract:
- * Purpose: `LowStockItem`: one row at or under the threshold.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `LowStockItem`: one stock level at or under the tenant's threshold.
+ * Boundary: a shape class; the element type of ListLowStockOutput, which the low-stock widget's
+ *           list display reads (`variantId` primary, `available` secondary). A nested element is a
+ *           named class in schemas/.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, guides/programming-model.mdx#schemas
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26)
  */
-import { Schema, z } from "@stackra/schema";
+import type { PublicId } from "@stackra/contracts";
+import { Int, Schema } from "@stackra/validation";
 
-/** One row at or under the threshold. */
-export class LowStockItem extends Schema(
-  z.object({ variantId: z.string(), locationId: z.string(), available: z.number().int() }),
-) {}
+/** A variant at one location and how many of its units are still sellable. */
+export class LowStockItem extends Schema {
+  /** Public id of the catalogue variant. */
+  variantId!: PublicId<"var">;
+
+  /** Public id of the warehouse or shop. */
+  locationId!: string;
+
+  /** Units still sellable; negative when a count fell below the reservations. */
+  @Int
+  available!: number;
+}

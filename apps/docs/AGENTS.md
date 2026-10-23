@@ -12,7 +12,10 @@ Governing contract: root AGENTS.md
   (Mintlify).
 - Pages, `docs.json` and assets live in `src/`; the API reference is generated from the services'
   `openapi.json`.
-- Secrets: forbidden; secret values come from the project's secret store at run time.
+- Deploys come from CI only, after the checks, through `runway.yaml` and the root runway's
+  `targets.mintlify` (Stackra ADR 0299); never from a push to Mintlify.
+- Secrets: forbidden; secret values come from the project's secret store at run time. The deploy job
+  alone reads `MINTLIFY_ADMIN_KEY`.
 
 ## PII
 

@@ -1,18 +1,18 @@
 /**
  * Stackra file contract:
- * Purpose: the error `useSite` throws when a component renders outside the site layout, which is a
- *          programming error, not a visitor's mistake.
- * Boundary: a typed `AppError` subclass; it never reaches a visitor because the root error boundary
- *           renders the generic error page.
+ * Purpose: the refusal `useSite` raises when a component renders outside the site layout, which is
+ *          a programming error, not a visitor's mistake.
+ * Boundary: a refusal with no details: the code is derived (`site_context_missing`), its text is
+ *           the derived key `web::errors.site_context_missing.message`, and it is built with
+ *           `SiteContextMissingError.create()`, never `new`. It never reaches a visitor, because
+ *           the root boundary `@stackra/navigation` owns renders the generic error page.
  * Runtime: isomorphic
- * Governing contract: ADR 0140 (error envelope), ADR 0232 (typed errors)
+ * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0140 (error envelope), ADR 0232
  */
-import { AppError, ErrorCategory } from "@stackra/errors";
+import { ErrorKind, Refusal } from "@stackra/errors";
 
-/** `useSite()` was called where no `SiteLayout` resolved a site. */
-export class SiteContextMissingError extends AppError {
-  /** A precondition of the hook, not a missing record. */
-  readonly category = ErrorCategory.PreconditionFailed;
-  /** Stable code for the reporter. */
-  readonly code = "site_context_missing";
-}
+/** `useSite()` was called where no `SiteLayout` resolved a site; never retried. */
+export class SiteContextMissingError extends Refusal({
+  kind: ErrorKind.FailedPrecondition,
+  retryable: false,
+}) {}

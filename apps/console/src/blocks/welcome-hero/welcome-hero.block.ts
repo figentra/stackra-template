@@ -1,21 +1,30 @@
 /**
  * Stackra file contract:
- * Purpose: registers the welcome hero as a page-builder block: a tenant may place
- *          `console.welcome_hero` in any L2 document; its props are validated against
- *          `WelcomeHeroProps` on publish and on render.
- * Boundary: a `@Block` class whose options name the component and the props schema; a component is
- *           an option, never a body member. The key is a declaration-site string; references use
- *           the class.
+ * Purpose: the page-builder block `console.welcome_hero`: a tenant may place it in any document;
+ *          its props are validated on publish and on render.
+ * Boundary: the class is the props shape (its fields), and its renderer is `welcome-hero.tsx` in
+ *           this folder, bound by name; the key is derived from the folder. Text arrives as i18n
+ *           keys, never markup; the call to action names a route key, never a URL. The icon is an
+ *           `IconName`.
  * Runtime: isomorphic
- * Governing contract: ADR 0110 (L2: registered coded components, Zod props)
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20; as amended by programming model v3.1,
+ *                     AGENTS.md: icon names), ADR 0110 (registered coded blocks)
  */
-import { Block } from "@stackra/experience";
-import { WelcomeHero } from "#src/blocks/welcome-hero/welcome-hero";
-import { WelcomeHeroProps } from "#src/schemas/welcome-hero.schema";
+import type { I18nKey } from "@stackra/i18n";
+import { Block, BlockCategory } from "@stackra/experience";
+import type { WelcomeHeroAction } from "#src/schemas/welcome-hero-action.schema";
 
-/**
- * Page-builder block `console.welcome_hero`: the welcome hero a tenant may place in any L2
- * document.
- */
-@Block({ key: "welcome_hero", component: WelcomeHero, props: WelcomeHeroProps })
-export class WelcomeHeroBlock {}
+/** Heading key, body key and one optional call to action. */
+export class WelcomeHeroBlock extends Block({
+  category: BlockCategory.Content,
+  icon: "house",
+}) {
+  /** The heading, as an i18n key the document references. */
+  titleKey!: I18nKey;
+
+  /** The line under the heading, as an i18n key. */
+  bodyKey!: I18nKey;
+
+  /** The one call to action; absent renders no button. */
+  action?: WelcomeHeroAction;
+}

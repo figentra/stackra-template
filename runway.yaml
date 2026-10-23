@@ -1,29 +1,36 @@
-# yaml-language-server: $schema=./schemas/runway-root.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/root.json
 # Stackra file contract:
-# Purpose: the ROOT runway: WHERE things run. Providers and accounts, destinations per environment
-#          (AWS account and region, Encore Cloud app, Docker host, Cloudflare zone, EAS project), the
-#          pools many members share (the one Postgres server per environment, the cache cluster, the
-#          queue provider, networking), domains, the edge, the release policy, and the DEFAULTS
-#          members inherit. It never lists deployables: gen collects them from every member's
-#          runway.yaml.
-# Boundary: no member fact (ports, domains of one app, one service's database size: member runways),
-#           no single-owner dependency (the identity provider belongs to the identity member; Valkey,
-#           object storage, mail capture and antivirus containers are declared by the driver packages
-#           that need them and start only when a member selects that driver), no package behaviour
+# Purpose: the ROOT runway: WHERE things run and HOW they are packed. Providers and accounts,
+#          destinations per environment (AWS account and region, Encore Cloud app, Docker host,
+#          Cloudflare zone, EAS project), the pools many members share (the one Postgres server per
+#          environment, the cache cluster, the queue provider, networking), domains, the edge, the
+#          release policy, the DEFAULTS members inherit, and each environment's TOPOLOGY: whether
+#          the service members run as one process (`monolith`), in named groups (`grouped`) or one
+#          process each (`split`), which members keep their own database server (`isolate`), and
+#          the members, size and worker split of every group.
+# Boundary: no member fact (a member's port, domains, store sizes, secret names, config values and
+#           the dedicated resources it `requires` are its own runway.yaml), no single-owner
+#           dependency (the identity provider belongs to the identity member; Valkey, object
+#           storage, mail capture and antivirus containers are declared by the driver packages that
+#           need them and start only when a member selects that driver), no package behaviour
 #           (src/config) and no secret value (Stackra ADR 0173). `ref:<path>` resolves from the
 #           private stacks repository's Pulumi stack config at infra and deploy time (Stackra ADR
 #           0171); a private product repository may inline the id. Read by `stackra infra`, `stackra
-#           gen` (infra config, compose, wrangler, eas.json), `stackra dev` and the runway workflows;
-#           validated by `@stackra/runway/schema/root.json` in `stackra validate`. `drivers.mail` is
-#           the per-environment layer of `MailConfig.driver`: `memory` in dev and preview,
-#           `notifications` in staging and production, so a service never declares the choice a
-#           second time. `drivers.search`, `drivers.media` and `drivers.webhooks` are the defaults of
-#           the `@stackra/search`, `@stackra/media` and `@stackra/webhooks` ports; a member runway
-#           overrides one per environment.
+#           gen` (Encore process allocation, compose, wrangler, eas.json), `stackra dev` and the
+#           runway workflows; validated by `@stackra/runway/schema/root.json` in `stackra validate`,
+#           which fails when a grouped environment does not place every service member in exactly
+#           one group. `defaults.service.config` is the config layer every service member starts
+#           from in that environment, keyed by config key: the driver choices
+#           (`notifications.driver` is `memory` in dev and preview and `notifications` in staging
+#           and production; `search.driver`, `media.disk` and `webhooks.driver` are the defaults of
+#           the `@stackra/search`, `@stackra/media` and `@stackra/webhooks` ports). A member
+#           runway's `config` overrides one key per environment.
 # Runtime: node
-# Governing contract: Stackra ADR 0168, 0169, 0170, 0171, 0173, 0175, 0179, 0180, 0184, 0238, 0254
+# Governing contract: Stackra ADR 0296 (root topology groups and defaults), Stackra ADR 0168 and
+#                     0169 (as amended by 0296), 0170, 0171, 0173, 0175, 0179, 0180, 0184, 0238,
+#                     0254, 0299 (docs runway)
 $schema: "@stackra/runway/schema/root.json"
-version: 2
+version: 3
 # Prefix for stacks (`acme-platform/staging`), images (`acme-platform-core`), Workers and tags.
 project: acme-platform
 
@@ -105,16 +112,22 @@ providers:
   apple:
     teamId: ref:apple.teamId
     ascAppId: ref:apple.ascAppId
+  # The Play developer account, and the SHA-256 of the Play app-signing certificate that the console's
+  # /.well-known/assetlinks.json publishes so Android verifies the mobile app's /m/* links.
   google:
     playDeveloperId: ref:google.playDeveloperId
+    appSigningSha256: ref:google.appSigningSha256
   # Licence keys and distribution of paid packages (Stackra ADR 0177).
   keygen:
     account: ref:keygen.account
+  # The Mintlify project the docs member deploys to (Stackra ADR 0299).
+  mintlify:
+    project: ref:mintlify.project
 
 # ── Environments: exactly these four names in every tool (Stackra ADR 0170; `local` is `dev`) ─────
 environments:
   dev:
-    # Where each kind of member runs; a member runway may override its own.
+    # Where each kind of member runs; a member runway may override its own destination.
     destinations:
       # `stackra dev` = gen --watch + `encore run` + the compose infra below.
       services: compose
@@ -160,20 +173,36 @@ environments:
     proxy:
       enabled: false
       port: 4443
+    # `encore run` serves every service member from one process; nothing is sized here.
+    topology:
+      mode: monolith
     defaults:
       service:
-        drivers:
-          queue: memory
-          cache: memory
-          events: memory
-          workflow: native
-          realtime: memory
-          scheduler: croner
-          storage: local
-          mail: memory
-          search: postgres
-          media: memory
-          webhooks: memory
+        # The config layer every service member starts from in dev; a member runway overrides a
+        # key. Memory drivers keep a fresh clone free of containers beyond the ones above.
+        config:
+          queue:
+            driver: memory
+          cache:
+            driver: memory
+          events:
+            driver: memory
+          workflow:
+            driver: native
+          realtime:
+            driver: memory
+          scheduler:
+            driver: croner
+          filesystem:
+            disk: local
+          notifications:
+            driver: memory
+          search:
+            driver: postgres
+          media:
+            disk: memory
+          webhooks:
+            driver: memory
       app:
         https: false
         open: false
@@ -199,26 +228,43 @@ environments:
         engine: none
       queues:
         provider: sns-sqs
-    defaults:
-      service:
-        resources:
+    # One small process for every service member of a preview; a new member lands in `core`
+    # without a line here.
+    topology:
+      mode: grouped
+      default: core
+      groups:
+        core:
+          members: [commerce, notifications]
           cpu: 0.25
           memory: 512Mi
           instances:
             min: 1
             max: 1
-        deployable: core
-        drivers:
-          queue: encore-pubsub
-          cache: memory
-          events: encore-pubsub
-          workflow: native
-          realtime: sse
-          storage: s3
-          mail: memory
-          search: postgres
-          media: s3
-          webhooks: native
+    defaults:
+      service:
+        config:
+          queue:
+            driver: encore-pubsub
+          cache:
+            driver: memory
+          events:
+            driver: encore-pubsub
+          workflow:
+            driver: native
+          realtime:
+            driver: sse
+          filesystem:
+            disk: s3
+          # previews never mail a real address
+          notifications:
+            driver: memory
+          search:
+            driver: postgres
+          media:
+            disk: s3
+          webhooks:
+            driver: native
     # Members get `<key>-pr-N.preview.acme.example` unless they say otherwise.
     domains:
       zone: acme.example
@@ -234,11 +280,11 @@ environments:
       web: cloudflare-workers
       mobile: eas
       desktop: electron-release
-    # Encore Cloud process allocation = the deployables gen collected.
+    # Encore Cloud process allocation = the groups of `topology` below.
     encore:
       env: staging
       account: nonprod
-      processAllocation: from-deployables
+      processAllocation: from-topology
     shared:
       # Used by aws-ecs, and by Encore Cloud's own VPC settings where it accepts them.
       network:
@@ -270,9 +316,13 @@ environments:
         versioning: true
         lifecycle:
           expireNoncurrentDays: 30
-    defaults:
-      service:
-        resources:
+    # Both services share one process allocation; staging carries a fraction of production load.
+    topology:
+      mode: grouped
+      default: core
+      groups:
+        core:
+          members: [commerce, notifications]
           cpu: 0.5
           memory: 1Gi
           instances:
@@ -281,19 +331,34 @@ environments:
           scaling:
             metric: cpu
             target: 70
-        deployable: core
-        poolBudget: 20
-        drivers:
-          queue: encore-pubsub
-          cache: valkey
-          events: encore-pubsub
-          workflow: native
-          realtime: sse
-          storage: s3
-          mail: notifications
-          search: postgres
-          media: s3
-          webhooks: native
+          workers:
+            split: false
+    defaults:
+      service:
+        # connections one member may hold on the shared server unless its runway says otherwise
+        database:
+          poolBudget: 20
+        config:
+          queue:
+            driver: encore-pubsub
+          cache:
+            driver: valkey
+          events:
+            driver: encore-pubsub
+          workflow:
+            driver: native
+          realtime:
+            driver: sse
+          filesystem:
+            disk: s3
+          notifications:
+            driver: notifications
+          search:
+            driver: postgres
+          media:
+            disk: s3
+          webhooks:
+            driver: native
       app:
         workers:
           observability:
@@ -317,10 +382,12 @@ environments:
       web: cloudflare-workers
       mobile: eas
       desktop: electron-release
+      # The docs member; it follows main, not the promotion (`targets.mintlify.deployOn`).
+      docs: mintlify
     encore:
       env: production
       account: prod
-      processAllocation: from-deployables
+      processAllocation: from-topology
     shared:
       network:
         vpc:
@@ -350,9 +417,17 @@ environments:
         dlq: true
       buckets:
         versioning: true
-    defaults:
-      service:
-        resources:
+    # Each service scales on its own. No `default`: a new service member fails `stackra validate`
+    # until it is placed in a group here, so nothing reaches production unplaced.
+    topology:
+      mode: grouped
+      # Members with their own database server and network policy. The platform's identity and
+      # payments services run from their own repositories, whose root runways isolate them; no
+      # member of this repository needs it.
+      isolate: []
+      groups:
+        commerce:
+          members: [commerce]
           cpu: 1
           memory: 2Gi
           instances:
@@ -361,22 +436,51 @@ environments:
           scaling:
             metric: cpu
             target: 60
-        deployable: core
-        poolBudget: 50
-        drivers:
-          queue: encore-pubsub
-          cache: valkey
-          events: encore-pubsub
-          workflow: native
-          realtime: sse
-          storage: s3
-          mail: notifications
-          search: postgres
-          media: s3
-          webhooks: native
-    # These services are never packed with another, and a member runway cannot undo it (Stackra ADR
-    # 0169).
-    isolate: [identity, payments]
+          # queue consumers, crons and the outbox relay scale apart from request handling
+          workers:
+            split: true
+            cpu: 0.5
+            memory: 1Gi
+            instances:
+              min: 1
+              max: 4
+        notifications:
+          members: [notifications]
+          cpu: 0.5
+          memory: 1Gi
+          instances:
+            min: 2
+            max: 6
+          scaling:
+            metric: cpu
+            target: 60
+          workers:
+            split: false
+    defaults:
+      service:
+        database:
+          poolBudget: 50
+        config:
+          queue:
+            driver: encore-pubsub
+          cache:
+            driver: valkey
+          events:
+            driver: encore-pubsub
+          workflow:
+            driver: native
+          realtime:
+            driver: sse
+          filesystem:
+            disk: s3
+          notifications:
+            driver: notifications
+          search:
+            driver: postgres
+          media:
+            disk: s3
+          webhooks:
+            driver: native
     # Tenant custom domains go through Cloudflare for SaaS; on-premises installs use the customer's
     # certificates instead.
     domains:
@@ -394,7 +498,7 @@ environments:
 
 # ── Target blocks: provider shape, selected by `environments.<env>.destinations.*` ────────────────
 targets:
-  # Managed hosting; sizes come from `shared` and member `resources`.
+  # Managed hosting; sizes come from `shared` and the groups of each environment's `topology`.
   encore-cloud:
     cloud: aws
   # Self-hosting on AWS (the @stackra-pro runtime stack, Stackra ADR 0171).
@@ -436,8 +540,9 @@ targets:
       ios: app-store-connect-api-key
       android: service-account
     # OTA (expo-updates): the channel is `environments.<env>.mobile.channel`; the runtime version is
-    # the member's `release.runtimePolicy` (fingerprint), so an update never reaches a binary whose
-    # native layer differs. A staged rollout widens by `stepHours` unless the crash-rate gate trips.
+    # the member's `stackra.config.ts` `expo.runtimeVersion` (the fingerprint policy), so an update
+    # never reaches a binary whose native layer differs. A staged rollout widens by `stepHours`
+    # unless the crash-rate gate trips.
     ota:
       rollout:
         startPercent: 10
@@ -450,6 +555,12 @@ targets:
     # above widens it, as for OTA updates (Stackra ADR 0180).
     storeRollout:
       startPercent: 10
+    # The server-side minimum-version gate: the gateway refuses a mobile binary older than the last
+    # `supportedStoreVersions` store releases, and the app asks the user to update (Stackra ADR
+    # 0180). A release policy, the same for every mobile member, so it is not a member fact.
+    minimumVersion:
+      gate: true
+      supportedStoreVersions: 2
   electron-release:
     # Members append `/<key>/<channel>/`.
     feed:
@@ -470,6 +581,19 @@ targets:
       mac: macos-15
       windows: windows-2025
       linux: ubuntu-24.04
+  # The docs site (Stackra ADR 0299). CI deploys each merge to main once `mint validate`,
+  # `mint broken-links` and `mint a11y` passed on its pull request, then smoke-tests the
+  # published site; a failed smoke test fails the deploy job. The deploy on every push through
+  # Mintlify's GitHub app is switched off, so nothing deploys twice.
+  mintlify:
+    deployOn: merge-to-main
+    checks: [validate, broken-links, a11y]
+    pushDeploy: false
+    # The admin key's NAME; only the deploy job reads it, from the `ci` path (`secrets.ci`).
+    adminKey: MINTLIFY_ADMIN_KEY
+    # Every page of docs.json's navigation must answer 200 on the published host.
+    smoke:
+      pages: navigation
 
 # ── Edge (Stackra ADR 0175, 0237 layer 1) ─────────────────────────────────────────────────────────
 edge:
@@ -517,6 +641,13 @@ secrets:
     # Signs and verifies every remote-cache artefact (turbo.jsonc `remoteCache.signature`).
     - TURBO_REMOTE_CACHE_SIGNATURE_KEY
     - ENCORE_AUTH_KEY
+    # The docs deploy job alone reads it (targets.mintlify, Stackra ADR 0299).
+    - MINTLIFY_ADMIN_KEY
+  # Runtime names the generated API gateway reads (Stackra ADR 0237); the gateway belongs to no
+  # member, so its names sit here. The web Worker signs the visitor address it forwards with the
+  # same key, which apps/web/runway.yaml names too (Stackra ADR 0297 decision 6).
+  gateway:
+    - GATEWAY_VISITOR_SIGNING_KEY
 
 # ── Release policy (Stackra ADR 0170) ─────────────────────────────────────────────────────────────
 release:
@@ -540,7 +671,7 @@ release:
   # Where every release is recorded.
   records: [github-deployments, linear-release, "slack:#deploys"]
   # Build and publish order across destinations.
-  buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm]
+  buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm, mintlify]
   # On-premises upgrades (Stackra ADR 0179).
   onPrem:
     upgrades: sequential-minor

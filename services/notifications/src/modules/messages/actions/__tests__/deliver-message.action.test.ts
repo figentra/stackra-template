@@ -3,27 +3,27 @@
  * Purpose: proves a poison message (the provider always refuses) is retried, dead-lettered after
  *          the last attempt, and marked failed on its row (ADR 0148).
  * Boundary: unit tier; the transport is replaced by a class that always throws the retryable
- *           provider error; `runJob` from @stackra/queue/testing runs every attempt without waiting
- *           for the backoff.
+ *           provider refusal; `runJob` from @stackra/queue/testing runs every attempt without
+ *           waiting for the backoff. The message comes from the factory.
  * Runtime: node
- * Governing contract: ADR 0148, ADR 0022, ADR 0130 (failed job + dead letter)
+ * Governing contract: ADR 0148, ADR 0130 (failed job and dead letter), ADR 0022
  */
-import { describe, expect, it } from "@stackra/testing";
 import { createTestingModule } from "@stackra/container/testing";
+import { ProviderUnavailableError } from "@stackra/integrations";
+import { MailTransport } from "@stackra/notifications/contracts";
 import { runJob } from "@stackra/queue/testing";
-import { NotificationsModule } from "#src/notifications.module";
-import { MailTransport } from "#modules/messages/contracts/mail-transport.port";
+import { describe, expect, it } from "@stackra/testing";
+import { NotificationsModule } from "#stackra/module";
 import { DeliverMessageAction } from "#modules/messages/actions/deliver-message.action";
-import { MailProviderUnavailableError } from "#modules/messages/errors/mail-provider-unavailable.error";
-import { Message } from "#modules/messages/models/message.model";
+import { MessageFactory } from "#modules/messages/database/factories/message.factory";
 import { MessageStatus } from "#modules/messages/enums/message-status.enum";
-import { MessageFactory } from "#modules/messages/factories/message.factory";
+import { Message } from "#modules/messages/models/message.model";
 
 /** A transport whose provider is down for good. */
 class DownMailTransport extends MailTransport {
-  /** Always refuses with the retryable provider error. */
+  /** Always refuses with the retryable refusal the managed client throws after its retries. */
   async send(): Promise<string> {
-    throw new MailProviderUnavailableError();
+    throw ProviderUnavailableError.create({ provider: "resend" });
   }
 }
 
@@ -35,7 +35,7 @@ describe(DeliverMessageAction, () => {
       .useDrivers("memory")
       .override(MailTransport, new DownMailTransport())
       .compile();
-    const message = await new MessageFactory(app.em).createOne();
+    const message = await MessageFactory.new().create();
 
     const job = await runJob(DeliverMessageAction, {
       messageId: message.id,

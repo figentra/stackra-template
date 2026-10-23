@@ -1,88 +1,9 @@
 {
-  "$comment": "Stackra file contract — Purpose: the mobile app's own strings (namespace `mobile::`). Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails; other modules' strings are overrides under src/overrides/<module>/lang/. Runtime: react-native. Governing contract: ADR 0192, ADR 0234",
-  "tabs": {
-    "home": "Home",
-    "orders": "Orders",
-    "settings": "Settings"
-  },
-  "home": {
-    "title": "Home",
-    "quick_actions": "Quick actions",
-    "new_order": "New order",
-    "scan": "Scan",
-    "announcements": "Announcements",
-    "inbox": "Inbox"
-  },
-  "orders": {
-    "title": "Orders",
-    "empty": "No orders yet",
-    "empty_hint": "Place one from Home or scan a barcode.",
-    "error": "Orders could not be loaded."
-  },
-  "order": {
-    "title": "Order",
-    "lines": "Items",
-    "total": "Total",
-    "cancel": "Cancel order",
-    "placed_at": "Placed {at}",
-    "open": "Open order"
-  },
-  "create_order": {
-    "title": "New order",
-    "variant": "Variant",
-    "variant_hint": "Type the variant id or scan its barcode.",
-    "quantity": "Quantity",
-    "points": "Loyalty points",
-    "submit": "Place order",
-    "queued": "The order will be sent when you are back online",
-    "errors": {
-      "points_min": "Points cannot be negative."
-    }
-  },
-  "scan": {
-    "title": "Scan",
-    "hint": "Point the camera at a barcode.",
-    "permission": "Acme needs the camera to read barcodes.",
-    "unavailable": "Scanning is not available on this device.",
-    "found": "Found {title}"
-  },
-  "settings": {
-    "title": "Settings",
-    "language": "Language",
-    "notifications": "Notifications",
-    "notification_preferences": "Notification preferences",
-    "inbox": "Inbox",
-    "profile": "Profile",
-    "sign_out": "Sign out",
-    "version": "Version",
-    "theme": {
-      "label": "Appearance"
-    }
-  },
-  "consent": {
-    "title": "Privacy",
-    "necessary": "Necessary",
-    "necessary_hint": "Sign-in, your session and offline orders. Always on.",
-    "analytics": "Product analytics",
-    "analytics_hint": "Anonymous usage events that help us improve the app.",
-    "crash_replay": "Crash replays",
-    "crash_replay_hint": "A recording of the screen when the app crashes, sent with the crash report."
-  },
-  "inbox": {
-    "title": "Inbox",
-    "empty": "No notifications yet",
-    "empty_hint": "Order updates and messages from your workspace appear here.",
-    "unread": "{count, plural, one {# unread notification} other {# unread notifications}}"
-  },
-  "notification_preferences": {
-    "title": "Notification preferences"
-  },
-  "profile": {
-    "title": "Profile",
-    "tenant": "Workspace",
-    "roles": "Roles",
-    "switch_tenant": "Switch tenant",
-    "switch_blocked_by_queue": "Send your waiting changes before switching workspace."
+  "$comment": "Stackra file contract — Purpose: the mobile app's shared strings: states, the offline banner, consent, the order card menu, push channels, OS usage strings, enum labels and refusal texts (namespace `mobile::`, locale `en`). Boundary: same keys in every base locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails. Derived keys sit under their kind segment and are never authored elsewhere: `enums.<enum>.<code>`, `errors.<code>.message`; every other key is authored. A regional overlay (`en-US`, `ar-SA`) holds only the keys whose wording differs there. Strings of another module are overrides under src/overrides/<owner>/, never here. Runtime: react-native. Governing contract: ADR 0294 (decision 20), ADR 0192, ADR 0234, ADR 0080",
+  "state": {
+    "loading": "Loading",
+    "error": "Something went wrong",
+    "retry": "Retry"
   },
   "offline": {
     "banner": "You are offline. Changes will be sent when the connection returns.",
@@ -90,30 +11,31 @@
     "retry": "Send now",
     "conflicts": "{count, plural, one {# change needs your review} other {# changes need your review}}"
   },
+  "consent": {
+    "title": "Privacy",
+    "necessary_hint": "Sign-in, your session and offline orders. Always on.",
+    "analytics_hint": "Anonymous usage events that help us prioritise improvements.",
+    "crash_replay_hint": "A recording of the screen when the app crashes, sent with the crash report."
+  },
+  "order_card": {
+    "open": "Open order",
+    "cancel": "Cancel order"
+  },
   "push": {
     "channel_orders": "Orders"
   },
-  "sign_in": {
-    "title": "Welcome to Acme",
-    "body": "Sign in with your workspace account.",
-    "button": "Sign in"
-  },
-  "announcements": {
-    "title": "Announcements",
-    "headline": "Welcome to your workspace",
-    "body": "Orders you place here reach the console at once, even when you were offline.",
-    "cta": "Place an order"
-  },
-  "state": {
-    "loading": "Loading",
-    "error": "Something went wrong",
-    "retry": "Retry",
-    "empty": "Nothing here yet"
-  },
-  "permissions": {
+  "usage": {
     "camera": "Acme scans product barcodes to add them to an order."
   },
-  "refusals": {
-    "session_required": "This screen needs you to be signed in."
+  "enums": {
+    "cta_verb": {
+      "navigate": "Open a screen",
+      "action": "Run an action"
+    }
+  },
+  "errors": {
+    "session_required": {
+      "message": "This screen needs you to be signed in."
+    }
   }
 }

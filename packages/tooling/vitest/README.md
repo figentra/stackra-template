@@ -1,21 +1,31 @@
 # @stackra/vitest-config
 
-Shared vitest presets, one export per member role. A member's `vitest.config.ts` calls its role and
-adds nothing else:
+Shared vitest presets, one export per member role. `stackra gen` writes each member's
+`.stackra/vitest.config.ts`, which calls its role and adds nothing else, plus a gitignored shim at
+the member root for tools that read only the root (Stackra ADR 0295 decision 5):
 
 ```ts
+// packages/commerce/loyalty-kit/.stackra/vitest.config.ts (generated)
+import { fileURLToPath } from "node:url";
 import { libraryPreset } from "@stackra/vitest-config";
 
-export default libraryPreset({ root: import.meta.dirname, react: "src/react" });
+export default libraryPreset({
+  root: fileURLToPath(new URL("..", import.meta.url)),
+  react: "src/react",
+});
 ```
 
-| Role            | Use for                                        | What it sets                                                                                        |
-| --------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `libraryPreset` | packages (`packages/<category>/<name>`)        | `servicePreset` under the coverage gate, plus a jsdom `react` project for `react: "<folder>"`       |
-| `servicePreset` | services                                       | legacy decorators; a `unit` project (`*.test.ts`) and an `int` project (`*.int.test.ts`)            |
-| `appPreset`     | web and desktop apps (`stackra gen` writes it) | jsdom and legacy decorators; a node project per `nodeFolders` entry; `exclude` for e2e files        |
-| `mobilePreset`  | the mobile app (`stackra gen` writes it)       | jsdom and legacy decorators over every `*.test.ts` and `*.test.tsx`                                 |
-| `tooling`       | the preset packages in `packages/tooling`      | plain Node, explicit `vitest` imports, no decorators and no coverage gate: `export default tooling` |
+Only the preset packages in `packages/tooling` author their own `vitest.config.ts`
+(`export default toolingPreset`), because they hold no module and run no gen (Stackra ADR 0294 rule
+R12).
+
+| Role            | Use for                                   | What it sets                                                                                              |
+| --------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `libraryPreset` | packages (`packages/<category>/<name>`)   | `servicePreset` under the coverage gate, plus a jsdom `react` project for `react: "<folder>"`             |
+| `servicePreset` | services                                  | legacy decorators; a `unit` project (`*.test.ts`) and an `int` project (`*.int.test.ts`)                  |
+| `appPreset`     | web and desktop apps                      | jsdom and legacy decorators; a node project per `nodeFolders` entry; `exclude` for e2e files              |
+| `mobilePreset`  | the mobile app                            | jsdom and legacy decorators over every `*.test.ts` and `*.test.tsx`                                       |
+| `toolingPreset` | the preset packages in `packages/tooling` | plain Node, explicit `vitest` imports, no decorators and no coverage gate: `export default toolingPreset` |
 
 The same role names appear in `@stackra/tsdown-config` (`libraryPreset`) and as the
 `@stackra/typescript-config` roles (`library`, `service`, `app`, `mobile`, `tooling`).

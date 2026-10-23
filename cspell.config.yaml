@@ -6,7 +6,8 @@
 # Boundary: dictionaries, ignores and project words only. A word goes here, never into a user's
 #           settings; a file is ignored only when it is generated, vendored or not English.
 # Runtime: node
-# Governing contract: Stackra ADR 0007 (documentation standard)
+# Governing contract: Stackra ADR 0300 decision 5 (enforced spell checking, British English with
+#                     the en fallback), Stackra ADR 0007 (documentation standard)
 version: "0.2"
 # British English (en-GB) first, US English (en) accepted: code and third-party names use US spelling.
 language: en-GB,en
@@ -41,7 +42,10 @@ ignoreRegExpList:
   - "/\\b[0-9a-f]{40}\\b/g"
   - "/sha256:[0-9a-f]{64}/g"
 words:
+  - "mintlify's"
+  - "zitadel's"
   - acme
+  - allkeys
   - applinks
   - assetlinks
   - autocapture
@@ -52,6 +56,7 @@ words:
   - changesets
   - clamav
   - cldr
+  - clickhouse
   - commitlint
   - commitlintrc
   - contentful
@@ -60,16 +65,19 @@ words:
   - cosign
   - croner
   - cyclonedx
+  - debezium
   - dedup
   - dedups
   - deeplink
   - deployable
   - deployables
+  - dmarc
   - docblock
   - docblocks
   - dtos
   - easignore
   - encore
+  - encoredev
   - endonym
   - entitlements
   - esbuild
@@ -86,9 +94,11 @@ words:
   - healthz
   - hermes
   - heroui
+  - hmac
   - hreflang
   - hsts
   - idempotency
+  - indexability
   - infisical
   - infolist
   - isbot
@@ -103,29 +113,36 @@ words:
   - lighthouseci
   - lighthouserc
   - llms
+  - lproj
   - ltree
   - maestro
+  - magento
   - mailpit
   - maxage
+  - meilisearch
   - menuitemradio
+  - metatags
   - mikro
   - mikroorm
+  - milvus
   - minidumps
   - minio
   - mintlify
-  - "mintlify's"
   - mise
   - mkcert
   - mmkv
   - modeline
   - monorepo
   - nnnn
+  - nodenv
+  - noeviction
   - noindex
   - nonprod
   - npmjs
   - nsis
   - oklch
   - opencode
+  - opensearch
   - otel
   - otlp
   - oxc
@@ -138,6 +155,7 @@ words:
   - pinnable
   - pitr
   - pkce
+  - plpgsql
   - pnpm
   - posthog
   - prebuild
@@ -147,10 +165,13 @@ words:
   - preconnects
   - prerender
   - prerendered
+  - prerendering
   - pressable
   - pulumi
   - pwa
+  - qdrant
   - realtime
+  - redpanda
   - redrive
   - redriven
   - refetches
@@ -166,9 +187,11 @@ words:
   - slos
   - sparkline
   - spatie
+  - spicedb
   - ssr
   - stackra
   - stylesheet
+  - svix
   - syft
   - tanstack
   - tenancy
@@ -185,6 +208,8 @@ words:
   - turborepo
   - typecheck
   - typegen
+  - typesense
+  - unaccent
   - ungrantable
   - uniwind
   - unlogged
@@ -194,8 +219,9 @@ words:
   - valkey
   - vite
   - vitest
+  - wcag
+  - webp
   - worklets
   - worktrees
   - zitadel
-  - "zitadel's"
   - zod

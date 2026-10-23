@@ -2,32 +2,22 @@
  * Stackra file contract:
  * Purpose: a product's sale state: `draft` is unseen by customers, `active` sells, `archived` is
  *          kept for order history.
- * Boundary: a house enum (class); transitions live in states/product.state.ts.
+ * Boundary: an `Enum.of` value plus the type of the same name. The code is the wire and column
+ *           value; the tone is what the console colours the status with. Labels are the derived
+ *           i18n keys `catalogue::enums.product_status.<code>`; transitions live in
+ *           models/product.state-machine.ts.
  * Runtime: isomorphic
- * Governing contract: guides/programming-model.mdx#enums
+ * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0161, ADR 0231 (snake_case codes)
  */
 import { Tone } from "@stackra/contracts";
-import { Enum } from "@stackra/schema";
-import { I18n } from "#stackra/i18n";
+import { Enum } from "@stackra/validation";
 
-/**
- * `ProductStatus.schema` parses the wire string to the case; `.codes` is the literal union for
- * filters.
- */
-export class ProductStatus extends Enum<ProductStatus> {
-  /** Being set up; invisible to customers. */
-  static readonly Draft = ProductStatus.case("draft", {
-    label: I18n.catalogue.status.draft,
-    color: Tone.Default,
-  });
-  /** On sale; the only status whose variants can be ordered. */
-  static readonly Active = ProductStatus.case("active", {
-    label: I18n.catalogue.status.active,
-    color: Tone.Success,
-  });
-  /** Off sale, kept for order history; terminal. */
-  static readonly Archived = ProductStatus.case("archived", {
-    label: I18n.catalogue.status.archived,
-    color: Tone.Default,
-  });
-}
+/** Only `active` sells; `archived` is terminal. Cases are plain codes, compared with `===`. */
+export const ProductStatus = Enum.of({
+  Draft: ["draft", { tone: Tone.Default }],
+  Active: ["active", { tone: Tone.Success }],
+  Archived: ["archived", { tone: Tone.Default }],
+});
+
+/** One of the codes above. */
+export type ProductStatus = Enum.Value<typeof ProductStatus>;

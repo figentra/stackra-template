@@ -1,40 +1,39 @@
 /**
  * Stackra file contract:
- * Purpose: the env CONTRACT of the mobile app, referenced by `stackra.config.ts` `env`. Every field
- *          is `@Env` with the `EXPO_PUBLIC_` prefix: the only values Expo inlines into the bundle.
- *          VALUES per environment come from `runway.yaml` `environments.<env>.vars` (gen inlines
- *          them into `.stackra/app.config.ts` and runway syncs them into the EAS environment of
- *          each profile); never a `.env`, never the EAS dashboard by hand.
- * Boundary: public values only; a server (`STACKRA_`) or secret name here is a gen error on a
- *           mobile target. `!:` marks a value every environment must set; `stackra validate` fails
- *           on a missing one, not the app at boot.
+ * Purpose: the env contract of the mobile app, named by `stackra.config.ts` `env`: every public
+ *          value the binary carries (the EAS project for the update URL, the gateway origin the
+ *          generated clients call, the console origin of universal links, and the values the
+ *          packages' contexts read: the realtime origin, the identity issuer and client, the Sentry
+ *          DSN, the push transport, the PostHog key). Values per environment come from runway.yaml
+ *          `environments.<env>.vars`; gen inlines the dev values into the Expo config and runway
+ *          syncs the others into the EAS environment of each profile. Never a `.env`, never the EAS
+ *          dashboard by hand.
+ * Boundary: a new config class (key `mobile.env`, derived): the shape is `EnvOptions` and `env`
+ *           maps each field to its variable. Only `EXPO_PUBLIC_` names: a server (`STACKRA_`) or
+ *           credential name is a gen error on a mobile target, so nothing private can reach the
+ *           binary. The package overrides in this folder read no environment themselves: a field
+ *           named after a package's config field (`identityIssuer`) feeds that field when
+ *           `createApp` layers the env over the config defaults.
  * Runtime: react-native
- * Governing contract: ADR 0231, ADR 0173
+ * Governing contract: ADR 0294 (decisions 4 and 19, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0295 (decisions 2 and 4), ADR 0231, ADR 0173
  */
-import { Config, Env } from "@stackra/config";
-import { Str, Url } from "@stackra/validation";
+import { Config } from "@stackra/config";
+import { EnvOptions } from "#src/schemas/env-options.schema";
 
-/** The public env. Components read it with `useConfig(MobileEnv)`, never through `process.env`. */
-@Config("mobile.env")
-export class MobileEnv {
-  /**
-   * EAS project id (public); the generated Expo config builds the update URL from it. Empty in a
-   * bare clone.
-   */
-  @Env("EXPO_PUBLIC_EAS_PROJECT_ID") @Str({ allowEmpty: true }) easProjectId = "";
-  /** Origin of the generated gateway the clients call. */
-  @Env("EXPO_PUBLIC_API_ORIGIN") @Url() apiOrigin!: string;
-  /** Web origin for universal links (`<origin>/m/...`) and the post-logout redirect. */
-  @Env("EXPO_PUBLIC_APP_ORIGIN") @Url() appOrigin!: string;
-  /**
-   * Origin of the realtime gateway (`ws:` or `wss:`); the realtime provider connects to it after
-   * sign-in.
-   */
-  @Env("EXPO_PUBLIC_REALTIME_ORIGIN") @Url({ protocols: ["ws", "wss"] }) realtimeOrigin!: string;
-  /** ZITADEL issuer; the PKCE flow discovers endpoints from it. */
-  @Env("EXPO_PUBLIC_ZITADEL_ISSUER") @Url() zitadelIssuer!: string;
-  /** ZITADEL native-app client id (public client, PKCE, no secret). */
-  @Env("EXPO_PUBLIC_ZITADEL_CLIENT_ID") @Str() zitadelClientId!: string;
-  /** Sentry DSN; empty disables crash reporting. Public by design. */
-  @Env("EXPO_PUBLIC_SENTRY_DSN") @Str({ allowEmpty: true }) sentryDsn = "";
-}
+/** The public env. Components read it with `useConfig(EnvConfig)`, never `process.env`. */
+export class EnvConfig extends Config({
+  schema: EnvOptions,
+  env: {
+    easProjectId: "EXPO_PUBLIC_EAS_PROJECT_ID",
+    apiOrigin: "EXPO_PUBLIC_API_ORIGIN",
+    appOrigin: "EXPO_PUBLIC_APP_ORIGIN",
+    realtimeOrigin: "EXPO_PUBLIC_REALTIME_ORIGIN",
+    identityIssuer: "EXPO_PUBLIC_IDENTITY_ISSUER",
+    identityClientId: "EXPO_PUBLIC_IDENTITY_CLIENT_ID",
+    telemetryDsn: "EXPO_PUBLIC_SENTRY_DSN",
+    pushProvider: "EXPO_PUBLIC_PUSH_PROVIDER",
+    analyticsPosthogKey: "EXPO_PUBLIC_POSTHOG_KEY",
+    featureFlagsPosthogKey: "EXPO_PUBLIC_POSTHOG_KEY",
+  },
+}) {}

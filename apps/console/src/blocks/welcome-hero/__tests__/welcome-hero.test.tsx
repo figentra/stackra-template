@@ -1,26 +1,28 @@
 /**
  * Stackra file contract:
- * Purpose: the block renders its keys and the call to action navigates through the router by route
- *          key; props that name anything but a route key are refused by the schema.
- * Boundary: unit tier, jsdom; the memory router of the testing providers.
+ * Purpose: proves the hero navigates through the router on its call to action, and that the block's
+ *          props refuse a call to action that is not one of the console's route keys.
+ * Boundary: unit tier, jsdom; the renderer under the testing router, the props through `validate`
+ *           with the schema gen compiled from the block class.
  * Runtime: browser
- * Governing contract: ADR 0022, ADR 0110
+ * Governing contract: ADR 0022, ADR 0110 d6
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
-import { WelcomeHero } from "#src/blocks/welcome-hero";
-import { WelcomeHeroProps } from "#src/schemas/welcome-hero.schema";
+import { validate } from "@stackra/validation";
 import { I18n } from "#stackra/i18n";
+import { WelcomeHero } from "#src/blocks/welcome-hero/welcome-hero";
+import { WelcomeHeroBlock } from "#src/blocks/welcome-hero/welcome-hero.block";
 
 /** Guards the welcome hero, whose action target comes from configurable data. */
 describe(WelcomeHero, () => {
   /** The call to action must move the user through the router. */
   it("navigates on the call to action", async () => {
-    const action = { labelKey: I18n.console.welcome.cta, route: "quick_order" } as const;
+    const action = { labelKey: I18n.documents.welcome.hero.cta, route: "quick_order" } as const;
     const hero = (
       <WelcomeHero
-        titleKey={I18n.console.welcome.title}
-        bodyKey={I18n.console.welcome.body}
+        titleKey={I18n.documents.welcome.hero.title}
+        bodyKey={I18n.documents.welcome.hero.body}
         action={action}
       />
     );
@@ -31,8 +33,11 @@ describe(WelcomeHero, () => {
 
   /** A URL or an unknown key is not a route key, so a document can never redirect off the app. */
   it("refuses a call to action that is not a route key", () => {
-    const keys = { titleKey: I18n.console.welcome.title, bodyKey: I18n.console.welcome.body };
-    const offApp = { labelKey: I18n.console.welcome.cta, route: "https://evil.example" };
-    expect(WelcomeHeroProps.safeParse({ ...keys, action: offApp }).success).toBe(false);
+    const keys = {
+      titleKey: I18n.documents.welcome.hero.title,
+      bodyKey: I18n.documents.welcome.hero.body,
+    };
+    const offApp = { labelKey: I18n.documents.welcome.hero.cta, route: "https://evil.example" };
+    expect(validate(WelcomeHeroBlock, { ...keys, action: offApp }).success).toBe(false);
   });
 });

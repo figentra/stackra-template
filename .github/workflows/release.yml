@@ -5,7 +5,8 @@
 #          tree. Apps and services deploy by commit SHA, not from here.
 # Boundary: triggers are every push to main and workflow_dispatch with `dry_run` for a publish dry
 #           run. Needs the `release` environment (protected, main only), contents and pull-requests
-#           write, and id-token write for npm trusted publishing; no npm token and no repository
+#           write, and id-token write for npm trusted publishing and the Infisical login that
+#           reads the HeroUI Pro licence token (HEROUI_PERSONAL_TOKEN, /ci); no npm token and no repository
 #           secret. Until the repository commits pnpm-lock.yaml (`preflight` below) every job is
 #           skipped and the run is green: `pnpm install --frozen-lockfile` cannot run without a
 #           lockfile, which is the case while `@stackra/*` is unpublished.
@@ -75,7 +76,7 @@ jobs:
     permissions:
       contents: write # push the version-PR branch and the version tags
       pull-requests: write # open and update the version PR
-      id-token: write # pnpm trusted publishing (GitHub OIDC) and the provenance statement; no npm token
+      id-token: write # pnpm trusted publishing and provenance; the Infisical login for the install
     outputs:
       published: ${{ steps.changesets.outputs.published }}
 
@@ -92,8 +93,37 @@ jobs:
         with:
           install_args: node pnpm
 
+      # HeroUI Pro (the console's @heroui-pro/react, Stackra ADR 0197 as amended): the install's
+      # postinstall downloads the licensed artifacts with HEROUI_AUTH_TOKEN. This job's GitHub OIDC
+      # token is exchanged with Infisical for HEROUI_PERSONAL_TOKEN from /ci, the licence token (the
+      # secret-name filter keeps every other /ci value out); no repository secret holds it. Needs the
+      # repository variables INFISICAL_CI_IDENTITY_ID, INFISICAL_PROJECT_ID and INFISICAL_DOMAIN.
+      - name: HeroUI Pro token (Infisical OIDC)
+        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_CI_IDENTITY_ID }}
+          domain: ${{ vars.INFISICAL_DOMAIN }}
+          project-id: ${{ vars.INFISICAL_PROJECT_ID }}
+          env-slug: prod
+          secret-path: /ci
+          secret-name: HEROUI_PERSONAL_TOKEN
+          export-type: env
+
+      # The postinstall reads only HEROUI_AUTH_TOKEN and, without it, exits 0 with an empty package;
+      # the guard fails the step before the install when the token is missing and after it when the
+      # licensed components were not downloaded.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          node .github/scripts/heroui-pro.mjs token
+          pnpm install --frozen-lockfile
+          node .github/scripts/heroui-pro.mjs installed
+        env:
+          HEROUI_AUTH_TOKEN: ${{ env.HEROUI_PERSONAL_TOKEN }}
+
+      # The token is for the install alone: blank it so no later step (build, publish, SBOM) reads it.
+      - name: Drop the HeroUI Pro token
+        run: echo "HEROUI_PERSONAL_TOKEN=" >> "$GITHUB_ENV"
 
       - name: Build
         run: pnpm build
@@ -125,7 +155,8 @@ jobs:
           NPM_CONFIG_PROVENANCE: "true"
 
   # The SBOM of what was just released. It runs only when the release job published something, and
-  # holds no id-token and no write permission: it only reads the repository.
+  # holds no write permission: it reads the repository, and its id-token serves only the Infisical
+  # login for the install.
   sbom:
     name: SBOM
     runs-on: ubuntu-24.04
@@ -133,6 +164,7 @@ jobs:
     if: needs.release.outputs.published == 'true'
     permissions:
       contents: read
+      id-token: write # the Infisical login for the install (HeroUI Pro token)
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -145,8 +177,37 @@ jobs:
         with:
           install_args: node pnpm
 
+      # HeroUI Pro (the console's @heroui-pro/react, Stackra ADR 0197 as amended): the install's
+      # postinstall downloads the licensed artifacts with HEROUI_AUTH_TOKEN. This job's GitHub OIDC
+      # token is exchanged with Infisical for HEROUI_PERSONAL_TOKEN from /ci, the licence token (the
+      # secret-name filter keeps every other /ci value out); no repository secret holds it. Needs the
+      # repository variables INFISICAL_CI_IDENTITY_ID, INFISICAL_PROJECT_ID and INFISICAL_DOMAIN.
+      - name: HeroUI Pro token (Infisical OIDC)
+        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_CI_IDENTITY_ID }}
+          domain: ${{ vars.INFISICAL_DOMAIN }}
+          project-id: ${{ vars.INFISICAL_PROJECT_ID }}
+          env-slug: prod
+          secret-path: /ci
+          secret-name: HEROUI_PERSONAL_TOKEN
+          export-type: env
+
+      # The postinstall reads only HEROUI_AUTH_TOKEN and, without it, exits 0 with an empty package;
+      # the guard fails the step before the install when the token is missing and after it when the
+      # licensed components were not downloaded.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          node .github/scripts/heroui-pro.mjs token
+          pnpm install --frozen-lockfile
+          node .github/scripts/heroui-pro.mjs installed
+        env:
+          HEROUI_AUTH_TOKEN: ${{ env.HEROUI_PERSONAL_TOKEN }}
+
+      # The token is for the install alone: blank it so no later step (build, publish, SBOM) reads it.
+      - name: Drop the HeroUI Pro token
+        run: echo "HEROUI_PERSONAL_TOKEN=" >> "$GITHUB_ENV"
 
       # `pnpm sbom` runs the CycloneDX CLI at its catalog version (catalog `release`). It reads what
       # was installed (node_modules); `--ignore-npm-errors` is needed because it shells out to

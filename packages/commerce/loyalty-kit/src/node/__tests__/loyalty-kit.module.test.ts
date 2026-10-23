@@ -1,29 +1,44 @@
 /**
  * Stackra file contract:
  * Purpose: proves the module binds the ledger named by config, lets a test put its own ledger in
- *          the port's place, and refuses to compile without a LoyaltyMembers implementer.
- * Boundary: unit tier; nothing but the container; the same checks gen runs at build time (ADR
- *           0263). A replacement is `.override(Port, instance)`, never a provider list.
+ *          the port's place, and refuses to compile without a LoyaltyMembers driver.
+ * Boundary: unit tier; nothing but the container; the same checks gen runs at build time. A
+ *           replacement is `.override(Port, instance)`, never a provider list.
  * Runtime: node
- * Governing contract: ADR 0263 decisions 9 and 12, ADR 0022
+ * Governing contract: ADR 0263 decisions 9 and 12, ADR 0294 (decisions 16 and 17), ADR 0022
  */
-import { describe, expect, it } from "@stackra/testing";
-import { refusal } from "@stackra/errors/testing";
-import { Refusals } from "#stackra/manifest";
-import { createTestingModule } from "@stackra/container/testing";
-import { LoyaltyLedger, LoyaltyMembers, type PointsEntry } from "@acme/loyalty-kit/contracts";
-import { LoyaltyKitConfig, MemoryLoyaltyLedger } from "@acme/loyalty-kit";
+import { LoyaltyKitConfig, MemoryLoyaltyLedgerDriver } from "@acme/loyalty-kit";
+import { DebitOutcome, LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake } from "@acme/loyalty-kit/testing";
+import { UnresolvedPortError } from "@stackra/container";
+import { createTestingModule } from "@stackra/container/testing";
+import { refusal } from "@stackra/errors/testing";
+import { describe, expect, it } from "@stackra/testing";
 
-/** A custom ledger of the kind a host writes: one class extending the port, no forRoot. */
+/** A ledger of the kind a host writes for a test: one class extending the port. */
 class HostLedger extends LoyaltyLedger {
+  /** Every member holds nothing. */
   async balance(): Promise<number> {
     return 0;
   }
-  async append(_entry: PointsEntry): Promise<boolean> {
+
+  /** Accepts every entry without storing it. */
+  async append(): Promise<boolean> {
     return true;
   }
+
+  /** Holds nothing, so it covers no debit. */
+  async debit(): Promise<DebitOutcome> {
+    return DebitOutcome.Uncovered;
+  }
+
+  /** Stores nothing, so it finds nothing. */
+  async find(): Promise<null> {
+    return null;
+  }
+
+  /** Has nothing to expire. */
   async expire(): Promise<number> {
     return 0;
   }
@@ -40,14 +55,14 @@ describe(LoyaltyKitModule, () => {
   it("binds the ledger named by config, or the ledger put in its place", async () => {
     const byConfig = await createTestingModule(LoyaltyKitModule)
       .withConfig(LoyaltyKitConfig, { ledger: "memory" })
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
       .compile();
-    expect(byConfig.get(LoyaltyLedger)).toBeInstanceOf(MemoryLoyaltyLedger);
+    expect(byConfig.get(LoyaltyLedger)).toBeInstanceOf(MemoryLoyaltyLedgerDriver);
 
     const byHost = await createTestingModule(LoyaltyKitModule)
       .withConfig(LoyaltyKitConfig, { ledger: "memory" })
       .override(LoyaltyLedger, new HostLedger())
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
       .compile();
     expect(byHost.get(LoyaltyLedger)).toBeInstanceOf(HostLedger);
   });
@@ -55,9 +70,9 @@ describe(LoyaltyKitModule, () => {
   /**
    * The port the kit does not implement must be a boot-time failure, never a runtime `undefined`.
    */
-  it("refuses to compile without a LoyaltyMembers implementer", async () => {
+  it("refuses to compile without a LoyaltyMembers driver", async () => {
     await expect(
       createTestingModule(LoyaltyKitModule).useDrivers("memory").compile(),
-    ).rejects.toRefuseWith(refusal(Refusals.core.unresolved_port));
+    ).rejects.toRefuseWith(refusal(UnresolvedPortError));
   });
 });

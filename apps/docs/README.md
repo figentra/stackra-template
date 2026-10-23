@@ -2,7 +2,7 @@
 
 The project's documentation site, built with Mintlify. Everything Mintlify reads lives in `src/`:
 `docs.json`, the MDX pages, and the API reference. Three things are written by hand; the rest is
-generated from the services' committed manifests (the docs app reads only `./contracts` and
+generated from the services' committed manifests (the docs app reads only committed contracts and
 generated output, never a service's source).
 
 | Path                          | Written by | Holds                                                                                   |
@@ -15,19 +15,26 @@ generated output, never a service's source).
 | `src/llms.txt`                | gen        | the agent-readable index: every page, every action key, every event                     |
 | `src/assets/`                 | hand       | favicon and logos; Mintlify's content root is `src/`, so this is the member's `assets/` |
 
-`stackra gen` runs before `build` in the turbo graph and reads the committed
-`.stackra/app-manifest.json` of every service member in the workspace (there is no `stackra` field
-in `package.json` and no `consumes` list). The generated files are gitignored in a real project and
-committed here only to be read.
+`stackra gen` runs before `build` in the turbo graph and reads the committed `stackra.manifest.json`
+at the root of every service member in the workspace (there is no `stackra` field in `package.json`
+and no `consumes` list). The docs app is the one app with no `stackra.config.ts` and no root module:
+it is a Mintlify site with no TypeScript runtime (Stackra ADR 0294 rule R12). Pages and data gen
+writes for the docs are committed, and `stackra gen --check` fails when they are stale.
 
 | Command      | Does                                       |
 | ------------ | ------------------------------------------ |
 | `pnpm dev`   | local preview on the port in `runway.yaml` |
 | `pnpm build` | `mint validate`, strict, fails on warnings |
-| `pnpm lint`  | `mint broken-links`                        |
-| `pnpm a11y`  | Mintlify's accessibility check             |
+| `pnpm lint`  | `mint broken-links`, then `mint a11y`      |
+| `pnpm a11y`  | Mintlify's accessibility check alone       |
 
-`runway.yaml` holds the one dev port; `stackra dev` records every member's port in
-`.stackra/dev/ports.json`, so no page names a port. Hosting is Mintlify's, connected to the
-repository with the monorepo path `apps/docs/src` (ADR 0002). The hosted site serves `/llms.txt` and
+`runway.yaml` holds the one dev port and the published host; `stackra dev` records every member's
+port in `.stackra/dev/ports.json`, so no page names a port. The site is hosted by Mintlify and
+deployed from CI, like every other member, by its runway (Stackra ADR 0299): `mint validate`,
+`mint broken-links` and `mint a11y` run on each pull request (`build` and `lint` in `pnpm verify`)
+and must pass before merge; the root runway's `targets.mintlify` deploys the merged change, then a
+smoke test checks every page of the navigation on the published host. The Mintlify admin key
+(`MINTLIFY_ADMIN_KEY`) sits in the `ci` path of the secret store and only the deploy job reads it.
+Mintlify reads the monorepo path `apps/docs/src`; its deploy on every push through the GitHub app is
+switched off, so a change is never deployed twice. The hosted site serves `/llms.txt` and
 `/llms-full.txt`; the generated `src/llms.txt` is the version agents read from the repository.

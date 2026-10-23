@@ -5,7 +5,8 @@
 //           come from each member's runway.yaml and shift by the worktree lane (100 per lane), so
 //           every port that can move is prompted for, with the lane-0 default filled in.
 // Runtime: node
-// Governing contract: Stackra ADR 0168 (runway.yaml owns ports)
+// Governing contract: Stackra ADR 0296 (the member runway owns its ports), Stackra ADR 0295
+//                     decision 5 (generated tool configs and their root shims)
 {
   "version": "0.2.0",
   "configurations": [
@@ -15,21 +16,9 @@
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["exec", "vitest", "run", "${file}"],
-      // Packages and services: run from the file's folder so the member's own vitest config applies.
+      // Run from the file's folder: vitest walks up to the member root, where the gitignored shim
+      // `stackra gen` writes re-exports the member's `.stackra/vitest.config.ts`.
       "cwd": "${fileDirname}",
-      "console": "integratedTerminal",
-      "autoAttachChildProcesses": true,
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
-    },
-    {
-      // Apps keep their vitest config in .stackra/ (written by `stackra gen`), which vitest never
-      // finds on its own, so this variant passes it explicitly.
-      "name": "Vitest: current app test file",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["exec", "vitest", "run", "--config", ".stackra/vitest.config.ts", "${file}"],
-      "cwd": "${workspaceFolder}/apps/${input:app}",
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
@@ -91,15 +80,9 @@
   ],
   "inputs": [
     {
-      "id": "app",
-      "type": "pickString",
-      "description": "App whose test file is open",
-      "options": ["console", "web", "mobile"]
-    },
-    {
       "id": "devPort",
       "type": "promptString",
-      "description": "Dev server port (the member's runway.yaml `dev.port`, plus 100 per worktree lane)"
+      "description": "Dev server port (the member's runway.yaml `environments.dev.port`, plus 100 per worktree lane)"
     },
     {
       "id": "inspectorPort",
@@ -110,7 +93,7 @@
     {
       "id": "metroPort",
       "type": "promptString",
-      "description": "Metro port (apps/mobile runway.yaml `dev.port`, plus 100 per worktree lane)",
+      "description": "Metro port (apps/mobile runway.yaml `environments.dev.port`, plus 100 per worktree lane)",
       "default": "8081"
     }
   ]

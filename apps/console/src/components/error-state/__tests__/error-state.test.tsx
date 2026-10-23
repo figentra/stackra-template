@@ -1,24 +1,23 @@
 /**
  * Stackra file contract:
- * Purpose: a permission envelope renders without retry; an unknown error renders generically and is
+ * Purpose: a permission refusal renders without retry; an unknown error renders generically and is
  *          reported exactly once, however often the state re-renders.
- * Boundary: unit tier, jsdom; the error reporter is the testing fake.
+ * Boundary: unit tier, jsdom; the refusal is built by `@stackra/errors/testing`, the error reporter
+ *           is the testing fake.
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0140
  */
+import { ForbiddenError } from "@stackra/errors";
+import { refusal } from "@stackra/errors/testing";
 import { describe, expect, it, vi } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
-import { AppError, ErrorCategory } from "@stackra/errors";
 import { ErrorState } from "#src/components/error-state";
 
 /** Guards the shared error view shown whenever a console query fails. */
 describe(ErrorState, () => {
   /** Retrying a permission refusal can never succeed, so offering it would mislead the user. */
   it("shows no retry for a permission refusal", () => {
-    const denied = new AppError({
-      category: ErrorCategory.Forbidden,
-      code: "order_cancel_denied",
-    });
+    const denied = refusal(ForbiddenError);
     render(<ErrorState error={denied} onRetry={vi.fn()} />, { locale: "en" });
     expect(screen.getByRole("alert")).toHaveTextContent("You do not have access");
     expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();

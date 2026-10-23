@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
-import { HeroSection } from "#src/blocks/hero-section";
+import { HeroSection } from "#src/blocks/hero-section/hero-section";
 
 /** Guards the page opener of the landing page and the `web.hero` block. */
 describe(HeroSection, () => {

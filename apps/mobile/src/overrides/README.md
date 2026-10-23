@@ -1,16 +1,15 @@
 # src/overrides
 
-One folder, one word, one review: every "I am changing someone else's thing" lives under
-`overrides/<module>/`. A module declares what may be overridden (an `@OverridePoint` class, a lang
-namespace, a public asset); gen builds `#stackra/overrides` from this folder and
-`assets/overrides/`, refuses a path or key the owner does not declare, and types component props
-from the point. Code behaviour is never overridden by file: implement the owner's hook point in a
-service, or `@Replaces` a class in DI.
+The one place this app changes files it does not own. `src/overrides/<owner>/` mirrors the owner's
+own path: `<owner>` is a package name with its scope (`@acme/loyalty-kit`) or `<service>/<module>`
+for a consumed service module. A file here shadows the file at the same path, with no keyword and no
+suffix; gen picks it up, checks that the target still exists and has the same shape, and reports a
+shadow whose target changed on an upgrade.
 
-| Path                                               | Overrides                                                 | Mechanism                               |
-| -------------------------------------------------- | --------------------------------------------------------- | --------------------------------------- |
-| `orders/components/revenue-sparkline.override.tsx` | `Commerce.overrides.RevenueSparkline` (the widget's tile) | `@Override(Point, { component })` class |
+| Path                                                            | Shadows                                                             | How           |
+| --------------------------------------------------------------- | ------------------------------------------------------------------- | ------------- |
+| `commerce/orders/assets/lang/<locale>/orders.json` (`en`, `ar`) | the commerce orders module's `orders::actions.order.cancel.confirm` | merged by key |
 
-A module's own strings live in `assets/lang/<locale>/<namespace>.json`; another module's strings
-live in `assets/overrides/<namespace>/<locale>.json` (here: `orders::order.cancel_confirm`, shorter
-on a phone), merged key by key over the owner's file, so an override looks like one in a diff.
+Lang files merge key by key over the owner's file and must name only keys the owner defines; images
+and icons replace; a component shadow exports the same name with the same Props. Configuration is
+not an override: a package's config is set in `src/config/`.

@@ -1,48 +1,60 @@
 /**
  * Stackra file contract:
- * Purpose: what the mobile app IS: its key, its `@App` root, its build targets, the API area, the
- *          env contract and the e2e tier. `stackra gen`, `stackra dev`, `stackra build` and
- *          `stackra test` read it to emit the runtime (Expo config, EAS profiles, Metro, the entry,
- *          the navigation tree, linking, Maestro) into `.stackra/`.
- * Boundary: identity and build shape only; `defineApp` is the build-config carve-out beside ADR
- *           0145. HOW the packages behave is `src/config/<fact>.config.ts`; HOW and WHERE the app
- *           runs per environment (Metro port, public var values, EAS profiles and channels) is
- *           `runway.yaml`; the OTA rollout is root `targets.eas`. `consumes` is gone: gen infers
- *           the consumed services from `#stackra/clients` imports. The compile-time module list is
- *           `modules` below: gen orders it topologically from the consumed manifests and writes
- *           `#stackra/modules`; `priority` only breaks ties between independent roots. EAS never
- *           reads it: the generated `.stackra/app.config.ts` carries what the build needs.
+ * Purpose: what the mobile app is: its targets, API area and env contract, its identity in the
+ *          stores, and the Expo, EAS, Maestro and e2e sections the build tools read. `stackra gen`
+ *          writes every tool file from it into `.stackra/` (the Expo configuration, `eas.json`,
+ *          Metro, Maestro, Vitest, the entry) and the repository-root `.easignore`.
+ * Boundary: static data that gen reads from the syntax tree without running it: enum values,
+ *           literals and the env class, never a function or an environment read. The member key
+ *           (`mobile`) comes from the package name and the root module is src/mobile.module.ts, so
+ *           neither is written here. A fact read while the app runs is a config class in
+ *           `src/config/` (chrome, theming, i18n, …); a fact that differs per environment (Metro
+ *           port, public values, EAS profiles and channels, Sentry project) is runway.yaml; an
+ *           account or vendor id (EAS project, Apple team, store ids) and the release policy are
+ *           the root runway; icons, splash, locales, permission strings, plugins, deep-link domains
+ *           and versions are derived. Each tool section is the tool's own shape minus the keys
+ *           Stackra owns, so setting an owned key is a type error; a code hatch would be
+ *           `expo.extend.ts` or `metro.extend.ts` at the member root, and none is needed.
  * Runtime: node
- * Governing contract: ADR 0061, ADR 0145, ADR 0180, ADR 0231
+ * Governing contract: ADR 0295 (decisions 1 to 6), ADR 0294 (decisions 12 and 20), ADR 0180,
+ *                     ADR 0182
  */
 import { defineApp } from "@stackra/app";
 import { ApiArea, Target } from "@stackra/contracts";
-import { MobileEnv } from "./src/config/env.config";
+import { EnvConfig } from "./src/config/env.config";
 
-/**
- * The mobile app. `env` is the config class whose `@Env` fields are the only values inlined into
- * the bundle: gen refuses any name without the `EXPO_PUBLIC_` prefix, so a secret can never reach
- * the binary. `e2e.flows` names the Maestro flows: their folder is the Maestro workspace and the
- * glob is written into `.stackra/maestro/config.yaml`; they run once per platform and once per
- * locale of `i18n.config.ts`, against the `e2e` EAS profile of `runway.yaml`. The Expo escape hatch is not a key here: it is the function file `expo.extend.ts`
- * at the member root, merged last over the generated Expo config, and it exists only when an ADR
- * names the exception.
- */
+/** Read by `stackra gen`, `stackra dev`, `stackra build` and `stackra test`. */
 export default defineApp({
-  key: "mobile",
-  module: "./src/mobile.app.ts", // the @App root; the counterpart of a service's root @Module
   targets: [Target.Ios, Target.Android],
   area: ApiArea.App,
-  /**
-   * The modules compiled into the binary. Gen writes `#stackra/modules`; a route naming
-   * another module is a type error.
-   */
-  modules: ["orders", "catalogue", "identity", "devices", "messages", "experience"],
-  priority: { identity: 0 }, // identity boots first; everything else follows the dependency graph
-  env: MobileEnv,
+  /** Its `env` map names the only environment values the bundle carries, all `EXPO_PUBLIC_`. */
+  env: EnvConfig,
+  name: "Acme",
+  /** Deep links (`acme://`) and the PKCE redirect (`acme://auth/callback`). */
+  scheme: "acme",
+  /** Frozen after the first store upload: gen refuses a change unless an ADR records it. */
+  ios: {
+    bundleId: "example.acme.mobile",
+    supportsTablet: true,
+  },
+  /** Frozen after the first store upload, like the bundle id. */
+  android: { package: "example.acme.mobile" },
+  expo: {
+    slug: "acme-mobile",
+    orientation: "portrait",
+    /** A native build is reused while its fingerprint is unchanged; one policy, never mixed. */
+    runtimeVersion: { policy: "fingerprint" },
+    /** Export compliance: the app uses only exempt encryption. */
+    ios: { config: { usesNonExemptEncryption: false } },
+    android: { predictiveBackGestureEnabled: false },
+  },
+  /** EAS owns the build number. */
+  eas: { cli: { appVersionSource: "remote" } },
+  /** The flows sit beside the routes they drive; run per platform and per locale of i18n. */
+  maestro: { flows: "src/routes/**/__tests__/*.flow.yaml" },
+  /** Seeder keys `<module>.<profile>`, run before the flows, on the runway `e2e` EAS profile. */
   e2e: {
-    flows: "src/routes/__tests__/*.flow.yaml",
-    seeds: ["orders.demo"], // seeder keys `<module>.<name>`; the flows seed nothing else
+    seeds: ["orders.demo"],
     profile: "e2e",
   },
 });

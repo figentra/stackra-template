@@ -1,40 +1,35 @@
 /**
  * Stackra file contract:
- * Purpose: the env contract of the public site, referenced by `stackra.config.ts` `env`. Public
- *          fields (`VITE_`) are inlined into the client bundle; server fields (`STACKRA_`) are read
- *          from the Worker's `env` at run time; the secret is a name runway syncs. Values per
- *          environment come from `runway.yaml`.
- * Boundary: no default URL here; a required field with no value in some environment fails `stackra
- *           validate`, not production boot. Code reads `env.siteUrl`, never the variable name.
+ * Purpose: the env contract of the public site, referenced by `stackra.config.ts` `env`: the shape
+ *          is `EnvOptions`, and `env` maps each field read from the environment to its variable.
+ *          Public fields (`VITE_`) are inlined at build time into the client bundle and the Worker
+ *          build alike, so both sides read one value; server fields (`STACKRA_`) are read from the
+ *          Worker's `env` at run time; the two secrets are named on their schema
+ *          fields and synced by runway. A field named after a package config field feeds it when
+ *          `createApp` layers the env over the config defaults (`analyticsPosthogKey` feeds
+ *          `analytics.posthogKey`, `featureFlagsPosthogKey` feeds `feature_flags.posthogKey`,
+ *          `telemetryDsn` feeds `logger.telemetry.dsn`); the generated clients read the API origin
+ *          and the visitor signing key.
+ * Boundary: the site's own config class (key `web.env`); the class is the token. Values per
+ *           environment come from `runway.yaml`. Code reads `env.siteUrl` from `#stackra/env`,
+ *           never the variable name.
  * Runtime: isomorphic
- * Governing contract: ADR 0231 d4 (prefixes), ADR 0173 (no values), ADR 0237
+ * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md), ADR 0295
+ *                     (decisions 2 and 10), ADR 0231 d4 (prefixes), ADR 0173, ADR 0237, ADR 0297
+ *                     (decision 6)
  */
-import { Config, Env, Secret } from "@stackra/config";
-import { Str, Url } from "@stackra/validation";
+import { Config } from "@stackra/config";
+import { EnvOptions } from "#src/schemas/env-options.schema";
 
-/**
- * `env` (public part) from `#stackra/env` in the browser; `serverEnv(raw)` (whole class) in the
- * Worker.
- */
-@Config("web.env")
-export class WebEnv {
-  /**
-   * PostHog project key; public by design, gated by consent. Empty disables analytics.
-   * @defaultValue ""
-   */
-  @Env("VITE_POSTHOG_KEY") @Str() posthogKey = "";
-  /**
-   * Turnstile site key rendered in the contact form; the matching secret is `TURNSTILE_SECRET_KEY`.
-   */
-  @Env("VITE_TURNSTILE_SITE_KEY") @Str() turnstileSiteKey!: string;
-  /** The gateway origin the Worker reads the public area from. */
-  @Env("STACKRA_API_URL") @Url() apiUrl!: string;
-  /** The canonical origin; absolute URLs in sitemaps, canonicals and OG tags are built from it. */
-  @Env("STACKRA_SITE_URL") @Url() siteUrl!: string;
-  /** Sentry DSN of the Worker and the browser; empty disables error reporting. @defaultValue "" */
-  @Env("STACKRA_SENTRY_DSN") @Str() sentryDsn = "";
-  /**
-   * The Turnstile secret, verified in the contact submit; a reference the Worker's `env` resolves.
-   */
-  @Secret("TURNSTILE_SECRET_KEY") turnstileSecret!: string;
-}
+/** `env` (public part) from `#stackra/env` in the browser; `serverEnv(raw)` in the Worker. */
+export class EnvConfig extends Config({
+  schema: EnvOptions,
+  env: {
+    analyticsPosthogKey: "VITE_POSTHOG_KEY",
+    featureFlagsPosthogKey: "VITE_POSTHOG_KEY",
+    turnstileSiteKey: "VITE_TURNSTILE_SITE_KEY",
+    telemetryDsn: "VITE_SENTRY_DSN",
+    apiUrl: "STACKRA_API_URL",
+    siteUrl: "STACKRA_SITE_URL",
+  },
+}) {}

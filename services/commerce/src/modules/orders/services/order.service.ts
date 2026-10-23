@@ -1,136 +1,140 @@
 /**
  * Stackra file contract:
- * Purpose: order state changes: create pending, attach payment, mark paid, cancel. The only code
- *          that moves an order's state, and the one mapping from row to OrderView.
- * Boundary: exported to sibling modules; runs inside the caller's transaction. Events are recorded
- *           on the aggregate and reach the outbox when the unit of work flushes, so a rolled-back
- *           change emits nothing. Nothing is injected to emit.
+ * Purpose: the write side of the order aggregate and its named reads: create pending, attach a
+ *          payment, mark paid, cancel or expire, the expiry read, and the one mapping from row to
+ *          OrderView.
+ * Boundary: exported to sibling modules; runs inside the caller's transaction. `CrudService<Order>`
+ *           (the model is the type argument) supplies the inherited reads and writes (`find`,
+ *           `findOneOrFail`, `count`, `create`), the table read the list query applies (`table`:
+ *           sort, filters and keyset cursor from a closed TableInput) and the aggregates the KPI
+ *           query computes (`metrics`). State moves only through OrderStateMachine; events are
+ *           recorded on the aggregate and reach the outbox when the unit of work flushes, so a
+ *           rolled-back change emits nothing. Access to an order is logged against its customer
+ *           (`@AccessLogged`).
  * Runtime: node
- * Governing contract: ADR 0105 (@Crud), 0136, 0141 (the aggregate records, the unit of work ships),
- *                     guides/programming-model.mdx#services, ADR 0212
+ * Governing contract: ADR 0294 (decisions 6, 13, 16 and 27, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0105 (as amended), ADR 0136, ADR 0141, ADR 0212,
+ *                     ADR 0220 (money)
  */
-import type { Repository } from "@stackra/database";
-import { Crud, CrudService } from "@stackra/database";
 import { AccessLogged } from "@acme/access-log";
 import { DataClassification } from "@acme/access-log/contracts";
-import { Order } from "#modules/orders/models/order.model";
-import type { OrderLine } from "#modules/orders/models/order-line.model";
-import type { OrderRepository } from "#modules/orders/repositories/order.repository";
+import { SortDirection } from "@stackra/contracts";
+import { CrudService } from "@stackra/database";
+import { Money } from "@stackra/money";
+import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
+import { OrderStatus } from "#modules/orders/enums/order-status.enum";
+import { OrderNotPayableError } from "#modules/orders/errors/order-not-payable.error";
 import { OrderPlaced } from "#modules/orders/events/order-placed.event";
-import { End, MarkPaid, PendingPayment } from "#modules/orders/states/order.state";
-import type { OrderView } from "#modules/orders/schemas/order-view.schema";
+import type { Order } from "#modules/orders/models/order.model";
+import type { OrderStateMachine } from "#modules/orders/models/order.state-machine";
 import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 import type { OrderTotals } from "#modules/orders/schemas/order-totals.schema";
-import type { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
-import { OrderNotPayableError } from "#modules/orders/errors/order-not-payable.error";
+import { OrderView } from "#modules/orders/schemas/order-view.schema";
 
 /**
- * The write side of the aggregate. `@Crud(Order)` adds the inherited reads (`find`,
- * `findOneOrFail`, `count`); with no
- * `actions` option it generates no endpoint, because `order.list` is hand-written
- * (queries/list-orders.query.ts).
+ * No resource operation is set to `true` for orders, so gen writes no standard action from this
+ * service: `order.list` and `order.get` are hand-written queries over `table` and `findOneOrFail`.
  */
-@Crud(Order)
+@AccessLogged({
+  classification: DataClassification.Pseudonymous,
+  subjects: "customerId",
+})
 export class OrderService extends CrudService<Order> {
-  /**
-   * @param orders - the custom repository (repositories/order.repository.ts); also the CrudService
-   *   base.
-   * @param lines - lines are written only here.
-   */
-  constructor(
-    protected readonly orders: OrderRepository,
-    private readonly lines: Repository<OrderLine>,
-  ) {
-    super(orders);
+  /** @param lifecycle - the only writer of `Order.status`. */
+  constructor(private readonly lifecycle: OrderStateMachine) {
+    super();
   }
 
   /**
    * Persists a pending order with its lines and records `order.placed`. Pricing happened in
-   * OrderPricingService.
+   * OrderPricingService; the line rows are created with the order.
    */
-  async createPending(draft: OrderDraft, totals: OrderTotals): Promise<Order> {
-    const order = this.orders.create({
+  createPending(draft: OrderDraft, totals: OrderTotals): Order {
+    const money = (minor: number): Money => Money.ofMinor(minor, totals.currency);
+    const order = this.create({
       customerId: draft.customerId,
-      status: new PendingPayment(),
-      currency: totals.currency,
-      subtotalMinor: totals.subtotalMinor,
+      subtotal: money(totals.subtotalMinor),
       adjustments: totals.adjustments,
-      totalMinor: totals.totalMinor,
-      paymentId: null,
-      paidAt: null,
+      total: money(totals.totalMinor),
+      lines: draft.lines.map((line) => ({
+        variant: line.variantId,
+        quantity: line.quantity,
+        unitPrice: money(line.unitPriceMinor),
+      })),
     });
-    for (const line of draft.lines) this.lines.create({ order, ...line });
     order.record(
-      new OrderPlaced({
+      OrderPlaced.create({
         orderId: order.id,
         customerId: draft.customerId,
-        totalMinor: order.totalMinor,
-        currency: order.currency,
+        totalMinor: totals.totalMinor,
+        currency: totals.currency,
         lines: draft.lines.map(({ variantId, quantity }) => ({ variantId, quantity })),
       }),
     );
     return order;
   }
 
-  /**
-   * Records the payments service's id on a pending order so a later capture event can be matched to
-   * it.
-   */
-  async attachPayment(orderId: string, paymentId: string): Promise<void> {
-    const order = await this.orders.findOneOrFail({ id: orderId });
+  /** Records the payments service's id on a pending order, so a later capture can be matched. */
+  async attachPayment(orderId: Order["id"], paymentId: string): Promise<void> {
+    const order = await this.findOneOrFail({ id: orderId });
     order.paymentId = paymentId;
   }
 
   /**
    * Idempotent on the payment id: a redelivered capture returns without changing or recording
    * anything.
-   * @param at - the capture time from the event, not the processing time, so retries keep the same
-   *   `paidAt`.
+   * @param capturedAt - the capture time from the event, not the processing time.
    * @throws OrderNotPayableError when the order is terminal or paid by a different payment.
    */
-  async markPaid(orderId: string, paymentId: string, at: Date): Promise<void> {
-    const order = await this.orders.findOneOrFail({ id: orderId });
-    if (order.status.canTransitionTo(MarkPaid)) {
-      await order.status.transition(new MarkPaid(paymentId, at));
+  async markPaid(orderId: Order["id"], paymentId: string, capturedAt: Date): Promise<void> {
+    const order = await this.findOneOrFail({ id: orderId });
+    if (this.lifecycle.can(order, "markPaid")) {
+      this.lifecycle.markPaid(order, paymentId, capturedAt);
       return;
     }
     if (order.paymentId === paymentId) return; // the same capture, delivered again
-    throw new OrderNotPayableError(orderId, order.status.value);
+    throw OrderNotPayableError.create({ orderId, status: order.status });
   }
 
   /**
-   * Ends an order by reason; silently returns when it is already terminal, so compensations may
-   * repeat.
+   * Ends an unpaid order by reason (`Expired` expires it, every other reason cancels it); returns
+   * silently when the order is already final, so compensations may repeat.
    */
-  async cancel(order: Order, reason: CancelReason): Promise<void> {
-    if (!order.status.canTransitionTo(End)) return;
-    await order.status.transition(new End(reason));
+  cancel(order: Order, reason: CancelReason): void {
+    if (reason === CancelReason.Expired) {
+      if (this.lifecycle.can(order, "expire")) this.lifecycle.expire(order);
+      return;
+    }
+    if (this.lifecycle.can(order, "cancel")) this.lifecycle.cancel(order, reason);
   }
 
-  /**
-   * The one mapping from row to OrderView (lines must be populated); access-logged because the view
-   * names the customer.
-   */
-  @AccessLogged({
-    classification: DataClassification.Pseudonymous,
-    subjects: (o: Order) => [o.customerId],
-  })
-  toView(o: Order): OrderView {
-    return {
-      id: o.id,
-      status: o.status.value,
+  /** Pending orders created before `cutoff`, oldest first, with lines; the expiry job's page. */
+  findStale(cutoff: Date, limit: number): Promise<Order[]> {
+    return this.find(
+      { status: OrderStatus.PendingPayment, createdAt: { $lt: cutoff } },
+      { limit, orderBy: { createdAt: SortDirection.Asc }, populate: ["lines"] },
+    );
+  }
+
+  /** The one mapping from row to OrderView; the lines must be populated. */
+  toView(order: Order): OrderView {
+    return OrderView.create({
+      id: order.id,
+      status: order.status,
+      customerId: order.customerId,
       totals: {
-        currency: o.currency,
-        subtotalMinor: o.subtotalMinor,
-        adjustments: o.adjustments,
-        totalMinor: o.totalMinor,
+        currency: order.total.currency,
+        subtotalMinor: order.subtotal.minor,
+        adjustments: order.adjustments,
+        totalMinor: order.total.minor,
       },
-      lines: o.lines.map(({ variantId, quantity, unitPriceMinor }) => ({
-        variantId,
-        quantity,
-        unitPriceMinor,
+      lines: order.lines.map((line) => ({
+        variantId: line.variant.id,
+        quantity: line.quantity,
+        unitPriceMinor: line.unitPrice.minor,
       })),
-      createdAt: o.createdAt.toISOString(),
-    };
+      createdAt: order.createdAt,
+      paidAt: order.paidAt,
+    });
   }
 }

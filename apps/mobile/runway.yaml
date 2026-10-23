@@ -1,29 +1,34 @@
-# yaml-language-server: $schema=../../schemas/runway-app.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/app.json
 # Stackra file contract:
-# Purpose: how and where THIS app runs, per environment. The Metro dev port (the ONLY place it is
-#          written; `stackra dev` passes it to Expo CLI as `--port` and gen writes
-#          `.stackra/dev/ports.json`), the per-environment public `EXPO_PUBLIC_*` values gen inlines
-#          into `app.config.ts` (dev) and runway syncs into the matching EAS environment on deploy,
-#          the EAS build profiles and update channels, the Sentry project.
-# Boundary: what the app is lives in `stackra.config.ts`; how its packages behave in `src/config/*`;
-#           accounts, the EAS project id, Apple/Google ids, the release policy and the OTA rollout
-#           in the ROOT runway (`providers.expo`, `targets.eas`). Origins of other members in dev
-#           are `from-member` / `from-port`, never a literal port. No secret VALUE ever (ADR 0173):
-#           a name here is synced from Infisical; mobile has no runtime secret at all.
+# Purpose: WHAT the mobile app needs per environment: the Metro dev port, the public
+#          `EXPO_PUBLIC_*` values gen inlines into the Expo configuration (dev) and runway syncs
+#          into the matching EAS environment on deploy, the EAS build profiles and update channels,
+#          the Sentry project, and the config values that set its config classes. The member is
+#          the folder that holds this file, so the file does not name it.
+# Boundary: never WHERE it runs or how it is packed, and never an account: the EAS project, the
+#           Apple team, the store ids, the release policy (including the minimum-version gate) and
+#           the OTA rollout are the root runway (`providers.expo`, `providers.apple`,
+#           `targets.eas`). What the app is lives in stackra.config.ts; how its packages behave in
+#           src/config/*. Origins of other members in dev are `from-member` / `from-port`, never a
+#           literal port; the identity provider is not a member of this repository, so its issuer
+#           is a hosted URL per environment (the non-production instance in dev, preview and
+#           staging), never a dev container. No secret value ever (Stackra ADR 0173): a native
+#           client holds no secret, so there is no `requires` block and the secret list is
+#           empty.
 # Runtime: node
-# Governing contract: ADR 0170, ADR 0173, ADR 0180, ADR 0231
+# Governing contract: Stackra ADR 0296 (member runway), ADR 0295 (decision 4: EAS profiles,
+#                     channels, public values and the Sentry project are per member), ADR 0170,
+#                     ADR 0173, ADR 0180, ADR 0294 (config keys)
 $schema: "@stackra/runway/schema/app.json"
-version: 2
-member: mobile # must equal stackra.config.ts `key`
+version: 3
 
-# ── Secrets this app names: none. A native client holds no secret (ADR 0206 d8); push, store and CI
-# credentials are EAS-managed or root `secrets.ci` (EXPO_TOKEN, the ASC key triple, the Play service
-# account).
-secrets: {}
+# No secret: push, store and CI credentials are EAS-managed or root `secrets.ci` (EXPO_TOKEN, the
+# App Store Connect key triple, the Play service account). Names only, never values.
+secrets: []
 
-# ── Release: EAS profiles (channel = profile name; `environment` = the EAS environment runway syncs
-# vars into). Gen sets `env.STACKRA_ENVIRONMENT` on each eas.json profile to the runway environment
-# that EAS environment is synced from (development → dev), and the generated Expo config fails an
+# EAS profiles (channel = profile name; `environment` = the EAS environment runway syncs vars into).
+# Gen sets `env.STACKRA_ENVIRONMENT` on each eas.json profile to the runway environment that EAS
+# environment is synced from (development → dev), and the generated Expo configuration fails an
 # EAS build without it.
 release:
   mobile:
@@ -60,19 +65,21 @@ release:
       android: true
     whiteLabel: false # Pro: per-tenant store builds (ADR 0180 d1) take a `variants:` list here
 
-# ── Telemetry destination that is per member, not per environment (org is root
-# providers.sentry.org)
+# The Sentry project is per member, not per environment (the organisation is root
+# providers.sentry.org).
 telemetry:
   sentryProject: acme-mobile
 
-# ── Environments (names fixed by ADR 0170 d5 as amended: dev | preview | staging | production)
+# Environments (names fixed by ADR 0170 d5 as amended: dev | preview | staging | production)
 environments:
   dev:
-    # Metro; lanes add N*100 per worktree (root environments.dev.lanes)
+    # Metro; lanes add N*100 per worktree (root environments.dev.lanes). `stackra dev` passes it to
+    # Expo CLI as `--port` and gen writes `.stackra/dev/ports.json`.
+    port: 8081
     mobile:
-      metroPort: 8081
       devClient: true
-    # EXPO_PUBLIC_* values for a dev client; names are MobileEnv's fields, gen checks the prefix
+    # EXPO_PUBLIC_* values for a dev client; names are the `env` map of src/config/env.config.ts
+    # (`EnvConfig`), gen checks the prefix
     vars:
       EXPO_PUBLIC_EAS_PROJECT_ID: "" # empty in a bare clone: no EAS update URL, no project binding
       # root environments.dev.infra.gateway; `stackra dev --lan` rewrites to the LAN address
@@ -86,22 +93,22 @@ environments:
         from-port: gateway
         scheme: ws
         path: /realtime
-      # the dev ZITADEL container, seeded with this app's PKCE client
-      EXPO_PUBLIC_ZITADEL_ISSUER:
-        from-port: zitadel
-      # the seeded client id (`.stackra/zitadel/seed.yaml`)
-      EXPO_PUBLIC_ZITADEL_CLIENT_ID: mobile-dev
+      # the hosted non-production identity provider (ZITADEL, ADR 0206); a dev client signs in
+      # there, so no identity container runs in dev
+      EXPO_PUBLIC_IDENTITY_ISSUER: https://id.staging.acme.example
+      # the public PKCE client registered for dev builds on that instance (no credential)
+      EXPO_PUBLIC_IDENTITY_CLIENT_ID: acme-mobile-dev
       EXPO_PUBLIC_SENTRY_DSN: "" # crash reporting off in dev
       EXPO_PUBLIC_PUSH_PROVIDER: expo
       EXPO_PUBLIC_POSTHOG_KEY: "" # no product analytics in dev
+    # the last config layer (ADR 0146), keyed by config key: an override keeps its base's key
     config:
-      # last config layer (ADR 0146)
-      mobile.telemetry:
+      logger.telemetry:
         errors:
           sampleRate: 1
-      mobile.analytics:
+      analytics:
         driver: none
-    # Maestro runs on the simulator/emulator against the dev gateway
+    # Maestro runs on the simulator or emulator against the dev gateway
     e2e:
       seeds: from-stackra-config
 
@@ -114,8 +121,8 @@ environments:
       EXPO_PUBLIC_API_ORIGIN: "https://api-pr-${pr}.preview.acme.example"
       EXPO_PUBLIC_REALTIME_ORIGIN: "wss://api-pr-${pr}.preview.acme.example/realtime"
       EXPO_PUBLIC_APP_ORIGIN: "https://console-pr-${pr}.preview.acme.example"
-      EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.nonprod
-      EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.nonprod
+      EXPO_PUBLIC_IDENTITY_ISSUER: https://id.staging.acme.example
+      EXPO_PUBLIC_IDENTITY_CLIENT_ID: ref:identity.clients.mobile.nonprod
       EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
       EXPO_PUBLIC_PUSH_PROVIDER: expo
       EXPO_PUBLIC_POSTHOG_KEY: ref:posthog.key.mobile
@@ -130,13 +137,13 @@ environments:
       EXPO_PUBLIC_API_ORIGIN: https://api.staging.acme.example
       EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.staging.acme.example/realtime
       EXPO_PUBLIC_APP_ORIGIN: https://console.staging.acme.example
-      EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.nonprod
-      EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.nonprod
+      EXPO_PUBLIC_IDENTITY_ISSUER: https://id.staging.acme.example
+      EXPO_PUBLIC_IDENTITY_CLIENT_ID: ref:identity.clients.mobile.nonprod
       EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
       EXPO_PUBLIC_PUSH_PROVIDER: expo
       EXPO_PUBLIC_POSTHOG_KEY: ref:posthog.key.mobile
     config:
-      mobile.telemetry:
+      logger.telemetry:
         errors:
           sampleRate: 1
         traces:
@@ -151,13 +158,13 @@ environments:
       EXPO_PUBLIC_API_ORIGIN: https://api.acme.example
       EXPO_PUBLIC_REALTIME_ORIGIN: wss://api.acme.example/realtime
       EXPO_PUBLIC_APP_ORIGIN: https://console.acme.example
-      EXPO_PUBLIC_ZITADEL_ISSUER: ref:zitadel.issuer.prod
-      EXPO_PUBLIC_ZITADEL_CLIENT_ID: ref:zitadel.clients.mobile.prod
+      EXPO_PUBLIC_IDENTITY_ISSUER: https://id.acme.example
+      EXPO_PUBLIC_IDENTITY_CLIENT_ID: ref:identity.clients.mobile.prod
       EXPO_PUBLIC_SENTRY_DSN: ref:sentry.dsn.mobile
       EXPO_PUBLIC_PUSH_PROVIDER: expo
       EXPO_PUBLIC_POSTHOG_KEY: ref:posthog.key.mobile
     config:
-      mobile.telemetry:
+      logger.telemetry:
         errors:
           sampleRate: 0.5
         traces:

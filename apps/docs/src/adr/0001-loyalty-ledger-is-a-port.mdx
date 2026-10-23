@@ -1,7 +1,36 @@
 ---
 title: "0001 — The loyalty ledger is a port with a postgres driver and a memory driver"
-description: "Accepted · 2026-10-21"
+description: "Accepted, amended by stackra/0294 and stackra/0305 · 2026-10-21"
 ---
+
+<Note>
+  Amended by `stackra/0294` (programming model v3). The decision stands; its forms changed.
+  `LoyaltyLedger` is `abstract class LoyaltyLedger extends Port` in the kit's
+  `src/contracts/ports/`, and each driver is `extends Driver(LoyaltyLedger)`, named by its file
+  prefix (`postgres-loyalty-ledger.driver.ts` is `postgres`), instead of `@Driver(LoyaltyLedger,
+  name)`. `LoyaltyKitConfig.ledger` is a plain field typed `DriverName<LoyaltyLedger>` (no
+  `@DriverOf`), and runway sets it per environment as `config.loyalty_kit.ledger`, not
+  `drivers.ledger`. The ledger table is `loyalty_kit.ledger_entries`, in the kit's Postgres schema.
+  Commerce extends order pricing with `RedeemPointsExtension extends Extension(OrderExtensionPoint,
+  { order: 200 })` instead of a `@Hook` on `OrderHooks.adjustTotals`, and implements
+  `LoyaltyMembers` as `CommerceLoyaltyMembersDriver`. The enforcing tests are now
+  `services/commerce/src/modules/loyalty/extensions/__tests__/redeem-points.extension.test.ts` and
+  `services/commerce/src/__tests__/stackra-manifest.contract.test.ts`; the other two paths below
+  are unchanged.
+</Note>
+
+<Note>
+  Amended again by the programming model v3.1 (`stackra/0305`, which amends `stackra/0294`; the
+  repository's `AGENTS.md` states it for this project). The decision stands; three forms changed. The
+  extension is one class per slot, `RedeemPointsExtension extends
+  Extension<OrderExtensionPoint["adjustTotals"]>({ order: 200 })` with a single `handle` method,
+  and `adjustTotals` is an `after` slot (`ExtensionPoint.after<OrderTotals, [draft: OrderDraft]>()`)
+  instead of `transform`. `ledger` is a field of the kit's options schema `LoyaltyKitOptions`, which
+  `LoyaltyKitConfig extends Config({ schema: LoyaltyKitOptions, env })` reads; commerce's override
+  keeps the base's name, `LoyaltyKitConfig extends BaseLoyaltyKitConfig`. The kit's migrations are
+  snapshots that name `loyalty_kit.ledger_entries` by literal and call the `t.hasPublicId()` and
+  `t.belongsToTenant()` macros.
+</Note>
 
 ## Context
 

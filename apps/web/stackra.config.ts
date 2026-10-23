@@ -1,33 +1,45 @@
 /**
  * Stackra file contract:
- * Purpose: what the public site is: key, root class, its targets (`web` and `pwa`) and how routes
- *          render, the public API area, the env contract, e2e projects and seeds. Read by
- *          `stackra gen`, `dev`, `build`, `test` and `validate`.
- * Boundary: identity and build shape only. Where it runs (port, domains, vars, Worker knobs, the
- *           health check) is `runway.yaml`; how its packages behave is `src/config/*`. Consumed
- *           services are inferred from `#stackra/clients` imports; `ApiArea.Public` makes a
- *           reference to any other area a gen error. The build hatch is `vite.extend.ts`.
+ * Purpose: what the public site is: its build targets, how its pages render (on a Cloudflare
+ *          Worker, React Router 7 framework mode), the public API area, the env contract, and the
+ *          e2e projects and seeds. Read by `stackra gen`, `stackra dev`, `stackra build`, `stackra
+ *          test` and `stackra validate` from the syntax tree.
+ * Boundary: static data only: enum values, literals and tokens, never a function or an environment
+ *           read. The member key (`web`) comes from the package name, and the member writes no root
+ *           module: it would say nothing gen does not derive (no exports, client imports or wrap),
+ *           so gen builds the one module `web` from the group folders. What code reads while it
+ *           runs is `src/config/*.config.ts`; where it runs (port, domains, vars, Worker knobs, the
+ *           health check) is `runway.yaml`. Consumed services are inferred from the
+ *           `#stackra/clients/<service>` imports; `ApiArea.Public` makes a reference to any other
+ *           area a gen error. The site needs no code hatch (no `vite.extend.ts`).
  * Runtime: node
- * Governing contract: ADR 0165 (RR7 framework mode), ADR 0082 (public area), ADR 0281 (targets per
- *                     app)
+ * Governing contract: ADR 0294 (decision 12, as amended by programming model v3.1, AGENTS.md), ADR
+ *                     0295 (decisions 1 to 6), ADR 0297 (decisions 1 and 2), ADR 0165 (React Router
+ *                     7 framework mode), ADR 0082 (public area)
  */
 import { defineApp } from "@stackra/app";
 import { ApiArea, Target } from "@stackra/contracts";
 import { RenderMode } from "@stackra/navigation";
-import { WebEnv } from "./src/config/env.config";
+import { EnvConfig } from "./src/config/env.config";
 
+/**
+ * `targets` and `render` pick the generated outputs: the Worker and browser entries, Wrangler. The
+ * public site is `Target.Web` only: it is a marketing site and a storefront read per request, so
+ * there is nothing to install and no offline journey (an enquiry needs the network).
+ */
 export default defineApp({
-  key: "web",
-  module: "./src/web.app.ts",
-  // Targets are where the app ships (ADR 0281); `Pwa` adds the manifest and the worker.
-  targets: [Target.Web, Target.Pwa],
-  // Rendering is how a target serves pages: server-rendered on the Worker by default; a route may
-  // still choose `RenderMode.Client` (see page.route.ts).
+  targets: [Target.Web],
+  /**
+   * Pages render on the Worker per request; a route may still choose `RenderMode.Client`
+   * (page.route.ts). Nothing is prerendered while `SiteConfig.fixedSiteId` is unset.
+   */
   render: RenderMode.Server,
   area: ApiArea.Public,
-  env: WebEnv,
+  env: EnvConfig,
   e2e: {
-    projects: ["chromium", "mobile-safari"], // + chromium-rtl, added by gen from i18n.config.ts
-    seeds: ["orders.demo", "billing.ladder", "content.marketing"],
+    // + chromium-rtl and chromium-rtl-ar-sa (one per i18n.config.ts rtl locale), by gen
+    projects: ["chromium", "mobile-safari"],
+    // seeder keys `<module>.<profile>`: the demo orders, the plan ladder and the marketing entries
+    seeds: ["orders.demo", "billing.demo", "content.demo"],
   },
 });

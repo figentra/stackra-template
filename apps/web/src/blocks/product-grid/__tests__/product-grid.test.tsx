@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
-import { ProductGrid } from "#src/blocks/product-grid";
+import { ProductGrid } from "#src/blocks/product-grid/product-grid";
 
 /** One storefront product as the listing query returns it. */
 const product = (n: number) => ({

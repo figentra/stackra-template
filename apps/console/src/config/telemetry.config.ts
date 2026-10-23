@@ -1,76 +1,56 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: what the console reports about itself: error reporting, replays, web vitals
- *          with the ADR 0183 budgets, bundle budgets, trace sampling.
- * Boundary: the DSN is env (`VITE_SENTRY_DSN`), the Sentry project is runway
- *           `telemetry.sentryProject`. No personal data: user ids only. A replay records only after
- *           the user granted the analytics consent category.
+ * Purpose: the console's override of @stackra/logger's telemetry configuration: what the console
+ *          reports about itself. Error reporting, trace sampling, a replay of errored sessions
+ *          behind consent, web vitals, and the field and bundle budgets.
+ * Boundary: an override declares `override` members only and inherits the base's key
+ *           (`logger.telemetry`, which runway's `config.logger.telemetry` layers set per
+ *           environment); its presence mounts the telemetry context and starts the reporter port of
+ *           @stackra/errors (Sentry behind it). Nested objects are replaced whole, so each merges
+ *           the base value explicitly. The DSN is the public env value `EnvConfig.telemetryDsn`
+ *           (`VITE_SENTRY_DSN`), which feeds `telemetry.dsn`; the Sentry project is runway.yaml
+ *           `telemetry.sentryProject`. No personal data is sent: user ids only, no emails, no
+ *           request bodies. Replay never starts until the user grants
+ *           `ConsentCategory.CrashReplay` on the settings page's privacy tab. The generated Vite
+ *           config fails the build over the bundle budgets. `lighthouse` keeps the base value: the
+ *           console's pages sit behind sign-in, so the Lighthouse run is the public site's.
  * Runtime: isomorphic
- * Governing contract: ADR 0232 (reporter port), ADR 0184 (telemetry), ADR 0183 (budgets)
+ * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
+ *                     alias), ADR 0295 (decision 10), ADR 0232 (reporter port), ADR 0184
+ *                     (telemetry), ADR 0183 (budgets)
  */
-import { Config } from "@stackra/config";
 import { ConsentCategory } from "@stackra/consent";
-import { Bool, Int, Nested, Num, OneOf } from "@stackra/validation";
+import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
 
-/** Error reporting and the replay around an error. */
-class ErrorsConfig {
-  /** Report errors at all. @defaultValue true */
-  @Bool() enabled = true;
-  /** Share of errors sent. @defaultValue 1 */
-  @Num({ min: 0, max: 1 }) sampleRate = 1;
+/** The dev-safe rates; runway lowers or raises them per environment. */
+export class TelemetryConfig extends BaseTelemetryConfig {
+  /** Every browser error is reported. */
+  override errors = { ...this.errors, enabled: true, sampleRate: 1 };
+
+  /** A tenth of sessions are traced (navigation, client calls); runway raises it in dev. */
+  override traces = { ...this.traces, sampleRate: 0.1 };
+
+  /** Every errored session is replayed, only once the crash-replay consent is granted. */
+  override replay = {
+    ...this.replay,
+    onErrorSampleRate: 1,
+    consent: ConsentCategory.CrashReplay,
+  };
+
+  /** Core Web Vitals are collected from real sessions. */
+  override vitals = { ...this.vitals, enabled: true };
+
   /**
-   * Keep the seconds before an error as a replay; never always-on (PII risk).
-   * @defaultValue true
+   * The ADR 0183 field budgets (LCP and INP in milliseconds, CLS a plain score) and the gzipped
+   * bundle budgets in kilobytes; a field regression is advisory, a bundle over budget fails the
+   * build.
    */
-  @Bool() replayOnError = true;
-  /**
-   * The consent category a replay needs; without it no replay is recorded.
-   * @defaultValue ConsentCategory.Analytics
-   */
-  @OneOf(ConsentCategory) replayConsent = ConsentCategory.Analytics;
-}
-
-/** The ADR 0183 field budgets. */
-class VitalsBudgets {
-  /** Largest Contentful Paint budget. @defaultValue 2500 */
-  @Int({ min: 1 }) lcpMs = 2500;
-  /** Interaction to Next Paint budget. @defaultValue 200 */
-  @Int({ min: 1 }) inpMs = 200;
-  /** Cumulative Layout Shift budget. @defaultValue 0.1 */
-  @Num({ min: 0 }) cls = 0.1;
-}
-
-/** Web vitals collection. */
-class VitalsConfig {
-  /** Collect vitals from real sessions. @defaultValue true */
-  @Bool() enabled = true;
-  /** The budgets a regression is measured against. */
-  @Nested(VitalsBudgets) budgets = new VitalsBudgets();
-}
-
-/** Gzipped kilobytes; the generated Vite config fails the build over budget. */
-class BundleBudgets {
-  /** Entry chunk budget. @defaultValue 200 */
-  @Int({ min: 1 }) entryKb = 200;
-  /** Per-route chunk budget. @defaultValue 100 */
-  @Int({ min: 1 }) routeKb = 100;
-}
-
-/** Trace sampling; runway raises it in dev and staging. */
-class TracesConfig {
-  /** Head sampling rate. @defaultValue 0.1 */
-  @Num({ min: 0, max: 1 }) sampleRate = 0.1;
-}
-
-/** What the console reports about itself: error reporting, replays and web vitals. */
-@Config("console.telemetry")
-export class TelemetryConfig {
-  /** How errors and their replays are reported. */
-  @Nested(ErrorsConfig) errors = new ErrorsConfig();
-  /** Which field vitals are collected and their budgets. */
-  @Nested(VitalsConfig) vitals = new VitalsConfig();
-  /** The gzipped size budgets the build enforces. */
-  @Nested(BundleBudgets) bundle = new BundleBudgets();
-  /** How many traces are sampled. */
-  @Nested(TracesConfig) traces = new TracesConfig();
+  override budgets = {
+    ...this.budgets,
+    lcpMs: 2500,
+    inpMs: 200,
+    cls: 0.1,
+    entryKb: 200,
+    routeKb: 100,
+  };
 }

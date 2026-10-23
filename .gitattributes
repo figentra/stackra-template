@@ -2,7 +2,8 @@
 # Purpose: line endings and diff behaviour git applies before any tool sees a file.
 # Boundary: git attributes only; ignore rules live in .gitignore.
 # Runtime: node
-# Governing contract: Stackra ADR 0158 (committed contract artefacts)
+# Governing contract: Stackra ADR 0158 (committed contract artefacts), Stackra ADR 0294 decision 10
+#                     (the contracts sit at the member root; .stackra/ is generated)
 
 # Text files are stored and checked out with LF on every platform.
 * text=auto eol=lf
@@ -11,12 +12,14 @@
 pnpm-lock.yaml -diff
 # Changesets appends to changelogs; a union merge keeps both sides of a concurrent release.
 **/CHANGELOG.md merge=union
-# stackra gen output. The committed manifest and OpenAPI file are the contracts consumers build
-# from; GitHub folds them in diffs and language statistics. The `.stackra/gen` samples are committed
-# while the CLI is unpublished (.gitignore) and are folded the same way.
-**/.stackra/gen/** -diff linguist-generated
-**/.stackra/app-manifest.json linguist-generated
-**/.stackra/openapi.json linguist-generated
+# stackra gen output. The committed manifest and OpenAPI file at each member root are the contracts
+# consumers build from; GitHub folds them in language statistics. The `.stackra/` samples (entries,
+# tool configs, gen modules) are committed while the CLI is unpublished (.gitignore) and are folded
+# the same way; the gen modules are also left out of text diffs.
+**/.stackra/** linguist-generated
+**/.stackra/gen/** -diff
+**/stackra.manifest.json linguist-generated
+**/openapi.json linguist-generated
 
 # Binary assets: never normalised, never diffed as text.
 *.png binary

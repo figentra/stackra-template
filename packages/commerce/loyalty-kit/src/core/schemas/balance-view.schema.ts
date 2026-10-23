@@ -1,21 +1,30 @@
 /**
  * Stackra file contract:
- * Purpose: the read shape of `loyalty_kit.points.balance`, also the props of the balance tile.
- * Boundary: a schema class only; the query maps rows to the view. Never the database row.
+ * Purpose: `BalanceView`: the output of `loyalty_kit.points.balance@1`, also the data of the
+ *          points-balance widget's renderer.
+ * Boundary: a shape class (an output view, so `<X>View`), shared by the query (node) and the
+ *           renderer (react), so it lives in core; never the database row. `nextExpiryAt` is a
+ *           `Date` in code and ISO 8601 with an offset on the wire.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0128
+ * Governing contract: ADR 0294 (decisions 4, 15 and 26)
  */
-import { Schema, z } from "@stackra/schema";
-import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
+import { Int, Schema } from "@stackra/validation";
+import type { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 
 /**
  * A balance snapshot with the date the oldest live points expire, so a client can warn the member.
  */
-export class BalanceView extends Schema(
-  z.object({
-    memberId: z.string(),
-    tier: LoyaltyTier.schema,
-    balance: z.number().int().nonnegative(),
-    nextExpiryAt: z.iso.datetime().nullable(),
-  }),
-) {}
+export class BalanceView extends Schema {
+  /** The member the balance belongs to. */
+  memberId!: string;
+
+  /** The account's tier. */
+  tier!: LoyaltyTier;
+
+  /** Whole points the member holds. */
+  @Int({ min: 0 })
+  balance!: number;
+
+  /** When the oldest live earned points expire; null when nothing is earned. */
+  nextExpiryAt!: Date | null;
+}

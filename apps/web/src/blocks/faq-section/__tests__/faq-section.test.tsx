@@ -8,7 +8,7 @@
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
-import { FaqSection } from "#src/blocks/faq-section";
+import { FaqSection } from "#src/blocks/faq-section/faq-section";
 
 const data = {
   entries: [{ id: "f1", fields: { question: "Is there a trial?", answer: "Yes, 14 days." } }],

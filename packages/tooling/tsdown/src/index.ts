@@ -1,12 +1,19 @@
 /**
  * Stackra file contract:
- * Purpose: the one tsdown preset every library's `tsdown.config.ts` calls: `export default libraryPreset()`.
- *          ESM only as `dist/*.mjs` + `.d.mts` (Stackra ADR 0025), maps, sourcemaps, clean dist,
- *          tree-shaking. The optional decorators flag turns on the legacy-decorator transform.
- * Boundary: builds the configuration object; it does not run the build. The name follows the tooling
- *           role vocabulary (`libraryPreset`, as in @stackra/vitest-config).
+ * Purpose: the one tsdown preset of every library. `stackra gen` writes the package's
+ *          `.stackra/tsdown.config.ts` (with a gitignored shim at the member root), which calls
+ *          `libraryPreset(entries)` with one entry per package.json export, each pointing at the
+ *          entry barrel gen writes. ESM only as `dist/*.mjs` + `.d.mts` (Stackra ADR 0025), maps,
+ *          sourcemaps, clean dist, tree-shaking. The decorators flag turns on the legacy-decorator
+ *          transform.
+ * Boundary: builds the configuration object; it does not run the build. The name follows the
+ *           tooling role vocabulary (`libraryPreset`, as in @stackra/vitest-config). Declarations
+ *           come from tsdown's default tsc path, never isolated declarations, which refuse a called
+ *           kind base (Stackra ADR 0300 decision 6).
  * Runtime: node
- * Governing contract: Stackra ADR 0025 (build output), Stackra ADR 0005 (legacy decorators)
+ * Governing contract: Stackra ADR 0025 (build output), Stackra ADR 0294 decision 15 (generated
+ *                     entry barrels), Stackra ADR 0295 decision 5 (generated tool configs), Stackra
+ *                     ADR 0005 (legacy decorators)
  */
 import { defineConfig, type UserConfig } from "tsdown";
 
@@ -62,23 +69,19 @@ const withDecorators: InputOptionsFn = (input) => ({
  * Build configuration for a TypeScript library using tsdown + rolldown.
  *
  * Produces ESM output with declaration files, sourcemaps, clean dist, and tree-shaking enabled.
- * By default, builds a single `src/index.ts` barrel; pass `entries` to build subpath exports.
+ * There is no default entry: the entry barrels are generated, never authored (ADR 0294 decision
+ * 15), so the caller (the generated `.stackra/tsdown.config.ts`) names each one.
  *
- * @param entries - Map of output names to source entry points. Default: `{ index: "src/index.ts" }`.
- *        Example: `{ index: "src/index.ts", react: "src/react/index.ts" }`.
+ * @param entries - Output name → entry barrel, one per package.json export (`.` is `index`).
  * @param options - Build options (decorator support, external packages).
- * @returns the tsdown configuration object, ready to be the default export of `tsdown.config.ts`.
+ * @returns the tsdown configuration object, ready to be the default export of a tsdown config.
  * @example
- * export default libraryPreset(); // src/index.ts → dist/index.mjs + index.d.mts
- * @example
- * export default libraryPreset({ index: "src/index.ts", react: "src/react/index.ts" }); // subpath exports
- * @example
- * export default libraryPreset(undefined, { decorators: true }); // legacy decorators, no metadata
+ * export default libraryPreset(
+ *   { index: ".stackra/entry/index.ts", node: ".stackra/entry/node.ts" },
+ *   { decorators: true },
+ * );
  */
-export function libraryPreset(
-  entries: Record<string, string> = { index: "src/index.ts" },
-  options: LibraryPresetOptions = {},
-) {
+export function libraryPreset(entries: Record<string, string>, options: LibraryPresetOptions = {}) {
   return defineConfig({
     entry: entries,
     format: ["esm"],

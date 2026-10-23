@@ -1,27 +1,35 @@
 /**
  * Stackra file contract:
  * Purpose: one product line of an order, with the unit price captured when the order was placed.
- * Boundary: references a catalogue variant by public id only; the cross-module relation is the
- *           @Link in links/. Immutable after placement: a changed quantity is a new order.
+ * Boundary: key `orders.order_line`, table `orders.order_lines`, public ids `oln_…`. The order is a
+ *           same-module relation (`Ref<Order>`, foreign key, cascade). The variant belongs to
+ *           catalogue, so it is a link (`Link<Variant>`): an indexed `variant_id` column holding
+ *           the `var_…` id, no foreign key and no join. Immutable after placement: a changed
+ *           quantity is a new order.
  * Runtime: node
- * Governing contract: ADR 0097, 0104, guides/programming-model.mdx#models
+ * Governing contract: ADR 0294 (decisions 11, 20, 27 and 28), ADR 0104 (as amended), ADR 0220
  */
-import { BelongsTo, Int, Model, MoneyColumn, Str } from "@stackra/model";
+import { type Link, ManyToOne, Model, OnDelete, type Ref } from "@stackra/model";
 import { BelongsToTenant, HasPublicId } from "@stackra/model/traits";
+import type { Money } from "@stackra/money";
+import { Int } from "@stackra/validation";
+import { Variant } from "#modules/catalogue/models/variant.model";
 import { Order } from "#modules/orders/models/order.model";
 
-/** Key `orders.order_line`, table `order_lines` (derived); public ids are `oln_…`. */
-@Model()
+/** `line.variant.id` needs no load; `line.variant.load()` runs catalogue's generated read. */
 export class OrderLine extends Model.with(HasPublicId("oln"), BelongsToTenant) {
-  /** The owning order; the line is deleted with it. */
-  @BelongsTo(() => Order) order!: Order;
-  /**
-   * Public id (`var_…`) of the catalogue variant sold; not a foreign key, catalogue owns that
-   * table.
-   */
-  @Str({ max: 64 }) variantId!: string;
+  /** The owning order; foreign key `fk_order_lines_order_id`, deleted with the order. */
+  @ManyToOne(() => Order, { onDelete: OnDelete.Cascade })
+  order!: Ref<Order>;
+
+  /** The catalogue variant sold. */
+  @ManyToOne(() => Variant)
+  variant!: Link<Variant>;
+
   /** Units ordered; at least one. */
-  @Int({ min: 1 }) quantity!: number;
-  /** Price of one unit at placement, in minor units of the order's currency. */
-  @MoneyColumn({ currencyField: "order.currency" }) unitPriceMinor!: number;
+  @Int({ min: 1 })
+  quantity!: number;
+
+  /** Price of one unit at placement; columns `unit_price_minor` and `unit_price_currency`. */
+  unitPrice!: Money;
 }

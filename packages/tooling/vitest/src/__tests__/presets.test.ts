@@ -4,13 +4,20 @@
  * member factory lays out the projects its docblock promises.
  */
 import { describe, expect, it } from "vitest";
-import { appPreset, libraryPreset, mobilePreset, servicePreset, tooling } from "../factories.ts";
+import {
+  appPreset,
+  libraryPreset,
+  mobilePreset,
+  servicePreset,
+  toolingPreset,
+} from "../factories.ts";
 import { stackraVitest } from "../preset.ts";
 import { stackraVitestDecorators } from "../preset-decorators.ts";
 import { stackraVitestReact } from "../preset-react.ts";
 
 interface Project {
   extends?: boolean;
+  resolve?: { alias?: Record<string, string> };
   test: { name: string; environment?: string; include: string[]; exclude?: string[] };
 }
 
@@ -54,6 +61,14 @@ describe("@stackra/vitest-config", () => {
     expect(react?.test.include).toEqual(["src/react/**/__tests__/**/*.test.tsx"]);
   });
 
+  it("libraryPreset adds a jsdom project for the native folder beside the react one", () => {
+    const all = projects(libraryPreset({ root: "/lib", react: "src/react", native: "src/native" }));
+    expect(all.map((project) => project.test.name)).toEqual(["unit", "int", "react", "native"]);
+    expect(all.at(-1)?.test).toMatchObject({ name: "native", environment: "jsdom" });
+    expect(all.at(-1)?.test.include).toEqual(["src/native/**/__tests__/**/*.test.tsx"]);
+    expect(all.at(-1)?.resolve?.alias).toEqual({ "react-native": "react-native-web" });
+  });
+
   it("appPreset runs jsdom except in the node folders, and honours exclude", () => {
     const config = appPreset({
       root: "/app",
@@ -76,13 +91,13 @@ describe("@stackra/vitest-config", () => {
     expect(decorator(config)?.legacy).toBe(true);
   });
 
-  it("tooling runs the preset packages' own tests in plain Node and refuses an empty suite", () => {
-    expect(tooling.test).toMatchObject({
+  it("toolingPreset runs the preset packages' own tests in plain Node and refuses an empty suite", () => {
+    expect(toolingPreset.test).toMatchObject({
       environment: "node",
       include: ["src/**/__tests__/**/*.test.ts"],
       passWithNoTests: false,
     });
-    expect(decorator(tooling)).toBeUndefined();
-    expect(tooling.test?.coverage).toBeUndefined();
+    expect(decorator(toolingPreset)).toBeUndefined();
+    expect(toolingPreset.test?.coverage).toBeUndefined();
   });
 });

@@ -4,11 +4,12 @@
 #          version any member references is pinned here; a member's package.json names a catalog
 #          (`catalog:<name>`) or `workspace:*`, never a literal version.
 # Boundary: versions and install policy only; no scripts and no secret. Exact pins, no ranges.
-#           Workspace members (@acme/loyalty-kit, @acme/access-log, @acme/brand and the
+#           Workspace members (@acme/loyalty-kit, @acme/access-log, @acme/theme and the
 #           packages/tooling presets) are `workspace:*`, never catalog entries.
 # Runtime: node
 # Governing contract: Stackra ADR 0013 (versions come only from catalogs and workspace references),
-#                     Stackra ADR 0019 (supply-chain hardening)
+#                     Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0294 (decisions 23 and
+#                     26: package names, the zod pin)
 packages:
   - apps/*
   - packages/*/*
@@ -39,7 +40,6 @@ catalogs:
     "@stackra/cli": 1.0.0
     "@stackra/clients": 1.0.0
     "@stackra/config": 1.0.0
-    "@stackra/connections": 1.0.0
     "@stackra/consent": 1.0.0
     "@stackra/container": 1.0.0
     "@stackra/content": 1.0.0
@@ -55,18 +55,18 @@ catalogs:
     "@stackra/filesystem": 1.0.0
     "@stackra/gen": 1.0.0
     "@stackra/i18n": 1.0.0
+    "@stackra/icons": 1.0.0
     "@stackra/iam": 1.0.0
     "@stackra/identity": 1.0.0
     "@stackra/integrations": 1.0.0
-    "@stackra/kbd": 1.0.0
     "@stackra/ledger": 1.0.0
     "@stackra/locking": 1.0.0
     "@stackra/logger": 1.0.0
-    "@stackra/mail": 1.0.0
     "@stackra/media": 1.0.0
     "@stackra/model": 1.0.0
     "@stackra/money": 1.0.0
     "@stackra/navigation": 1.0.0
+    "@stackra/notifications": 1.0.0
     "@stackra/outbox": 1.0.0
     "@stackra/panel": 1.0.0
     "@stackra/peripherals": 1.0.0
@@ -76,10 +76,10 @@ catalogs:
     "@stackra/realtime": 1.0.0
     "@stackra/runway": 1.0.0
     "@stackra/scheduler": 1.0.0
-    "@stackra/schema": 1.0.0
     "@stackra/search": 1.0.0
     "@stackra/seo": 1.0.0
     "@stackra/settings": 1.0.0
+    "@stackra/shortcuts": 1.0.0
     "@stackra/state": 1.0.0
     "@stackra/state-machine": 1.0.0
     "@stackra/storage": 1.0.0
@@ -87,6 +87,7 @@ catalogs:
     "@stackra/tenancy": 1.0.0
     "@stackra/testing": 1.0.0
     "@stackra/theming": 1.0.0
+    "@stackra/tokens": 1.0.0
     "@stackra/transport": 1.0.0
     "@stackra/ui": 1.0.0
     "@stackra/validation": 1.0.0
@@ -94,7 +95,6 @@ catalogs:
     "@stackra/vite-plugin": 1.0.0
     "@stackra/webhooks": 1.0.0
     "@stackra/workflow": 1.0.0
-    "@stackra-pro/ui": 1.0.0
   # Shared by web, desktop and mobile members (`catalog:`). react and react-dom stay on the exact
   # renderer version react-native 0.86 (Expo SDK 57) ships with, so every member and every package
   # with a React entry resolves one React.
@@ -102,14 +102,20 @@ catalogs:
     react: 19.2.3
     react-dom: 19.2.3
     react-router: 7.9.4
-    resend: 6.1.2
     isbot: 5.1.31
     "@react-email/components": 0.5.2
+    # HeroUI Pro for the console (Stackra ADR 0197 as amended): the vendor's current release line is
+    # still beta; its postinstall downloads the licensed components (allowBuilds below).
+    "@heroui-pro/react": 1.0.0-beta.10
     # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.
     "@types/node": 24.19.2
     # React's types follow the React 19.2 line above, for web, desktop and mobile alike.
     "@types/react": 19.2.18
     "@types/react-dom": 19.2.7
+    # The schemas `stackra gen` compiles from shape classes import zod, so every member that authors
+    # shapes depends on it; authored code never imports it, except through the `@Field(zod)` hatch.
+    # 4.1 or later is needed for codecs and `.exactOptional()` (Stackra ADR 0294 decision 26).
+    zod: 4.6.7
   # HeroUI's design-system stylesheet (web and desktop).
   ui:
     "@heroui/styles": 3.2.6
@@ -129,6 +135,8 @@ catalogs:
   mobile:
     expo: 57.0.31
     react-native: 0.86.3
+    # jsdom tests of React Native components (a package's src/native) render through it.
+    react-native-web: 0.21.2
     "@react-navigation/native": 7.5.1
     "@react-navigation/native-stack": 7.21.0
     react-native-bottom-tabs: 1.4.0
@@ -218,3 +226,9 @@ allowBuilds:
   # Downloads the Sentry CLI that uploads native and JavaScript source maps (pulled in by
   # @sentry/react-native).
   "@sentry/cli": true
+  # HeroUI Pro (the console's @heroui-pro/react, Stackra ADR 0197 as amended): its postinstall
+  # downloads the licensed components with HEROUI_AUTH_TOKEN, which `pnpm install:pro` (locally) and
+  # release.yml's OIDC step (CI) fill from Infisical's HEROUI_PERSONAL_TOKEN; without it the
+  # install fails.
+  heroui-pro: true
+  "@heroui-pro/react": true

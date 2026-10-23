@@ -5,8 +5,8 @@
   // Boundary: `#src/*`, `#stackra/*` and `#stackra-desktop/*` resolve through package.json imports.
   //           The preset's include covers `src`, `stackra.config.ts` and the generated `.stackra/`.
   //           The renderer program has the DOM lib only: the service worker (`.stackra/sw.ts`) and
-  //           the Electron main process (`.stackra/desktop/`) are checked by their own presets'
-  //           programs, never by this one.
+  //           the Electron main process (`.stackra/entry/electron.ts`, `.stackra/desktop/`) are
+  //           checked by their own presets' programs, never by this one.
   // Runtime: node
   // Governing contract: ADR 0003 (one preset per member), ADR 0165, ADR 0005 (legacy decorators)
   "extends": "@stackra/typescript-config/app"

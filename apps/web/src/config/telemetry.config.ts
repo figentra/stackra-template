@@ -1,93 +1,56 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: what the site reports about itself (client and Worker): error reporting, web
- *          vitals with the ADR 0183 budgets, bundle budgets, the Lighthouse paths and minimum
- *          scores, trace sampling.
- * Boundary: no DSN here (env `STACKRA_SENTRY_DSN`); the Sentry project is runway
- *           `telemetry.sentryProject`. The public site has no user, so nothing personal is sent; a
- *           replay would need the analytics consent category.
+ * Purpose: the site's override of @stackra/logger's telemetry configuration: what the site reports
+ *          about itself, in the browser and on the Worker. Error reporting, trace sampling, web
+ *          vitals with the ADR 0183 field budgets, the bundle budgets, and the Lighthouse paths
+ *          and minimum scores of the e2e tier.
+ * Boundary: an override declares `override` members only and inherits the base's key
+ *           (`logger.telemetry`), which runway's `config.logger.telemetry` layers set per
+ *           environment; its presence mounts the telemetry context and starts the reporter port of
+ *           @stackra/errors. Nested objects are replaced whole, so each merges the base value
+ *           explicitly. The DSN is the public env value `EnvConfig.telemetryDsn`
+ *           (`VITE_SENTRY_DSN`), which the browser and the Worker read from the same build; the
+ *           Sentry project is runway.yaml `telemetry.sentryProject`. No replay on the public site,
+ *           and no identity is attached.
  * Runtime: isomorphic
- * Governing contract: ADR 0232 (reporter port), ADR 0184, ADR 0183 (budgets)
+ * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
+ *                     alias), ADR 0232 (reporter port), ADR 0184, ADR 0183 (budgets)
  */
-import { Config } from "@stackra/config";
-import { ConsentCategory } from "@stackra/consent";
-import { Bool, Int, List, Nested, Num, OneOf, Str } from "@stackra/validation";
+import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
 
-/** Error reporting and the replay around an error. */
-class ErrorsConfig {
-  /** Report errors at all. @defaultValue true */
-  @Bool() enabled = true;
-  /** Share of errors sent. @defaultValue 1 */
-  @Num({ min: 0, max: 1 }) sampleRate = 1;
-  /** Keep the seconds before an error as a replay; off on the public site. @defaultValue false */
-  @Bool() replayOnError = false;
-  /** The consent category a replay needs. @defaultValue ConsentCategory.Analytics */
-  @OneOf(ConsentCategory) replayConsent = ConsentCategory.Analytics;
-}
+/** The dev-safe rates; runway raises or lowers them per environment. */
+export class TelemetryConfig extends BaseTelemetryConfig {
+  /** Every error, browser and Worker, is reported. */
+  override errors = { ...this.errors, enabled: true, sampleRate: 1 };
 
-/** The ADR 0183 field budgets. */
-class VitalsBudgets {
-  /** Largest Contentful Paint budget. @defaultValue 2500 */
-  @Int({ min: 1 }) lcpMs = 2500;
-  /** Interaction to Next Paint budget. @defaultValue 200 */
-  @Int({ min: 1 }) inpMs = 200;
-  /** Cumulative Layout Shift budget. @defaultValue 0.1 */
-  @Num({ min: 0 }) cls = 0.1;
-}
+  /** One trace in ten is sampled; runway raises it in dev and staging. */
+  override traces = { ...this.traces, sampleRate: 0.1 };
 
-/** Web vitals collection. */
-class VitalsConfig {
-  /** Collect vitals from real sessions. @defaultValue true */
-  @Bool() enabled = true;
-  /** The budgets a regression is measured against. */
-  @Nested(VitalsBudgets) budgets = new VitalsBudgets();
-}
+  /** No session replay on the public site, not even around an error. */
+  override replay = { ...this.replay, onErrorSampleRate: 0 };
 
-/** Gzipped kilobytes; the generated Vite config fails the build over budget. */
-class BundleBudgets {
-  /** Entry chunk budget. @defaultValue 200 */
-  @Int({ min: 1 }) entryKb = 200;
-  /** Per-route chunk budget. @defaultValue 100 */
-  @Int({ min: 1 }) routeKb = 100;
-}
+  /** Core Web Vitals are collected from real sessions. */
+  override vitals = { ...this.vitals, enabled: true };
 
-/** Minimum Lighthouse category scores. */
-class LighthouseScores {
-  /** Performance. @defaultValue 0.9 */
-  @Num({ min: 0, max: 1 }) performance = 0.9;
-  /** Accessibility. @defaultValue 1 */
-  @Num({ min: 0, max: 1 }) accessibility = 1;
-  /** SEO. @defaultValue 1 */
-  @Num({ min: 0, max: 1 }) seo = 1;
-}
+  /**
+   * The ADR 0183 field budgets (LCP and INP in milliseconds, CLS a plain score) and the gzipped
+   * bundle budgets in kilobytes; a field regression is advisory, a bundle over budget fails the
+   * build.
+   */
+  override budgets = {
+    ...this.budgets,
+    lcpMs: 2500,
+    inpMs: 200,
+    cls: 0.1,
+    entryKb: 200,
+    routeKb: 100,
+  };
 
-/** What Lighthouse measures in the e2e tier. */
-class LighthouseConfig {
-  /** Paths measured per locale; the product page is the seeded `demo-tee`. */
-  @List(Str) paths: string[] = ["/", "/pricing", "/store", "/store/demo-tee"];
-  /** Runs per path; the median is asserted. @defaultValue 3 */
-  @Int({ min: 1 }) runs = 3;
-  /** The scores a run must reach. */
-  @Nested(LighthouseScores) minScores = new LighthouseScores();
-}
-
-/** Trace sampling; runway raises it in dev and staging. */
-class TracesConfig {
-  /** Head sampling rate. @defaultValue 0.1 */
-  @Num({ min: 0, max: 1 }) sampleRate = 0.1;
-}
-
-/** What the site reports about itself: error reporting and web vitals, for client and Worker. */
-@Config("web.telemetry")
-export class TelemetryConfig {
-  /** How errors are reported. */
-  @Nested(ErrorsConfig) errors = new ErrorsConfig();
-  /** Which field vitals are collected and their budgets. */
-  @Nested(VitalsConfig) vitals = new VitalsConfig();
-  /** The gzipped size budgets the build enforces. */
-  @Nested(BundleBudgets) bundle = new BundleBudgets();
-  /** What the e2e tier measures with Lighthouse. */
-  @Nested(LighthouseConfig) lighthouse = new LighthouseConfig();
-  /** How many traces are sampled. */
-  @Nested(TracesConfig) traces = new TracesConfig();
+  /** What the e2e tier measures per locale; the product page is the seeded `demo-tee`. */
+  override lighthouse = {
+    ...this.lighthouse,
+    paths: ["/", "/pricing", "/store", "/store/demo-tee"],
+    runs: 3,
+    minScores: { performance: 0.9, accessibility: 1, seo: 1 },
+  };
 }

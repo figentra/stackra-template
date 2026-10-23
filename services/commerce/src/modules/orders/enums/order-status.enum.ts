@@ -1,46 +1,30 @@
 /**
  * Stackra file contract:
  * Purpose: the order lifecycle codes; `cancelled` and `expired` are terminal.
- * Boundary: a house enum (a class): one case per static member; `value` is
- *           the wire and column value, `label` an i18n key, `meta` what the console needs.
- *           Transitions live in states/order.state.ts.
+ * Boundary: an `Enum.of` value plus the type of the same name. The code is the wire and column
+ *           value; the tone is what the console colours the status with. Labels are the derived
+ *           i18n keys `orders::enums.order_status.<code>`; transitions live in
+ *           models/order.state-machine.ts.
  * Runtime: isomorphic
- * Governing contract: ADR 0231 (snake_case codes), guides/programming-model.mdx#enums
+ * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0161, ADR 0231 (snake_case codes)
  */
 import { Tone } from "@stackra/contracts";
-import { Enum } from "@stackra/schema";
-import { I18n } from "#stackra/i18n";
+import { Enum } from "@stackra/validation";
 
 /**
- * One case per status. `OrderStatus.from("paid")` returns the singleton `OrderStatus.Paid`, so
- * cases compare by
- * identity. `OrderStatus.schema` is a Zod codec: wire string ↔ case; `OrderStatus.codes` the
- * literal union.
+ * One case per status; cases are plain codes, so they compare with `===`.
  *
  * @example
- * OrderStatus.values();        // [PendingPayment, Paid, Cancelled, Expired]
- * OrderStatus.tryFrom("nope"); // undefined
- * OrderStatus.Paid.label;      // "orders::status.paid"
+ * OrderStatus.PendingPayment;          // "pending_payment"
+ * Enum.values(OrderStatus);            // ["pending_payment", "paid", "cancelled", "expired"]
+ * Enum.meta(OrderStatus, "paid").tone; // Tone.Success
  */
-export class OrderStatus extends Enum<OrderStatus> {
-  /** Placed, stock reserved, payment not yet captured. */
-  static readonly PendingPayment = OrderStatus.case("pending_payment", {
-    label: I18n.orders.status.pending_payment,
-    color: Tone.Warning,
-  });
-  /** Payment captured; the order is final. */
-  static readonly Paid = OrderStatus.case("paid", {
-    label: I18n.orders.status.paid,
-    color: Tone.Success,
-  });
-  /** Ended by a customer, staff or a failed payment; terminal. */
-  static readonly Cancelled = OrderStatus.case("cancelled", {
-    label: I18n.orders.status.cancelled,
-    color: Tone.Default,
-  });
-  /** Ended by the expiry job; terminal. */
-  static readonly Expired = OrderStatus.case("expired", {
-    label: I18n.orders.status.expired,
-    color: Tone.Default,
-  });
-}
+export const OrderStatus = Enum.of({
+  PendingPayment: ["pending_payment", { tone: Tone.Warning }],
+  Paid: ["paid", { tone: Tone.Success }],
+  Cancelled: ["cancelled", { tone: Tone.Default }],
+  Expired: ["expired", { tone: Tone.Default }],
+});
+
+/** One of the codes above. */
+export type OrderStatus = Enum.Value<typeof OrderStatus>;

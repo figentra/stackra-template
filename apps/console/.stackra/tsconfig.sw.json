@@ -3,6 +3,8 @@
 // Boundary: `stackra typecheck` runs it beside the renderer program (the member tsconfig.json),
 //           which leaves sw.ts out.
 // Runtime: node
+// Governing contract: ADR 0295 (decision 5: generated tool configs), ADR 0255 (service worker),
+//                     ADR 0003 (one preset per program)
 {
   "extends": "@stackra/typescript-config/service-worker"
 }

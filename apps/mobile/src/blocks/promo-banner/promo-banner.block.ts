@@ -1,28 +1,38 @@
 /**
  * Stackra file contract:
- * Purpose: the `promo-banner` L2 block this app contributes: a block tenants place in documents,
- *          with a headline, body text and one call to action that is a closed UI verb or an action
- *          key.
- * Boundary: a declaration (blocks are `@Block` classes in `blocks/`). `key` is the one string, at
- *           the declaration site; no version until `@Version` says otherwise (ADR 0131); `props` is
- *           the schema class the service validates on publish and the renderer re-validates on
- *           render; `component` is the function beside it.
+ * Purpose: the promo banner block this app contributes to the page builder: a headline, body text
+ *          and one call to action that is a closed verb (navigate to a route of this app, or run an
+ *          action by key).
+ * Boundary: a block declaration: its fields are the props, which the experience service validates
+ *           on publish and the renderer re-validates on render, refusing a key nobody registers
+ *           (ADR 0110 decision 6). The key is derived from the folder (`mobile.promo_banner`); the
+ *           renderer is the class component `promo-banner.tsx` beside it, bound by name; the icon
+ *           is an `IconName` string; the targets are the app's. Strings are tenant-authored,
+ *           already translated per locale by the service. A breaking change to the props is a new
+ *           version.
  * Runtime: isomorphic
- * Governing contract: ADR 0110, ADR 0112
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110, ADR 0112
  */
-import { Target } from "@stackra/contracts";
-import { Block } from "@stackra/experience";
-import { PromoBanner } from "#src/blocks/promo-banner/promo-banner";
-import { PromoBannerProps } from "#src/schemas/promo-banner.schema";
+import { Block, BlockCategory } from "@stackra/experience";
+import { Str } from "@stackra/validation";
+import type { PromoBannerCta } from "#src/schemas/promo-banner-cta.schema";
 
-/**
- * Registered as `mobile.promo_banner`; documents reference it by class
- * (`Blocks.custom(PromoBannerBlock, …)`).
- */
-@Block({
-  key: "promo_banner",
-  props: PromoBannerProps,
-  component: PromoBanner,
-  targets: [Target.Ios, Target.Android],
-})
-export class PromoBannerBlock {}
+/** Documents place it by class: `Blocks.custom(PromoBannerBlock, { headline, … })`. */
+export class PromoBannerBlock extends Block({
+  category: BlockCategory.Marketing,
+  icon: "megaphone",
+}) {
+  /** At most 60 characters so it fits one line on a phone. */
+  @Str({
+    min: 1,
+    max: 60,
+  })
+  headline!: string;
+
+  /** Optional supporting text, at most 200 characters. */
+  @Str({ max: 200 })
+  body?: string;
+
+  /** The button: a label plus a navigate or an action verb; absent renders no button. */
+  cta?: PromoBannerCta;
+}

@@ -1,26 +1,23 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: local client state persistence: where `@Store({ persist })` state goes, how it
- *          hydrates, and the devtools.
- * Boundary: the stores themselves are `src/stores/`; this names the storage area they persist into
- *           (`Prefs`, the mmkv driver on native) and whether first render waits for hydration.
+ * Purpose: this app's override of @stackra/state's configuration: where persisted stores write and
+ *          whether first render waits for them.
+ * Boundary: an override declares `override` members only and inherits the base's key (`state`). The
+ *           stores are `src/stores/`; this names the storage area they persist into (`Prefs`, the
+ *           mmkv driver on native). Devtools follow the build mode, so they are not set here. A
+ *           field typed by an enum restates its type.
  * Runtime: isomorphic
- * Governing contract: ADR 0079, ADR 0256
+ * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
+ *                     alias), ADR 0079, ADR 0256
  */
-import { Config } from "@stackra/config";
+import { StateConfig as BaseStateConfig } from "@stackra/state";
 import { StorageArea } from "@stackra/storage";
-import { Bool, OneOf } from "@stackra/validation";
 
-/** Persisted stores land in `Prefs` (per install); devtools follow the build mode unless set. */
-@Config("mobile.state")
-export class StateConfig {
-  /** The storage area persisted stores write to. @defaultValue StorageArea.Prefs */
-  @OneOf(StorageArea) persistStore = StorageArea.Prefs;
-  /** Force the state devtools on or off; unset follows the build mode. */
-  @Bool() devtools?: boolean;
-  /**
-   * Keep the splash until persisted stores are read (mmkv is synchronous, so this costs nothing).
-   * @defaultValue true
-   */
-  @Bool() blockingHydration = true;
+/** Persisted stores land in `Prefs` (per install) and are read before the first frame. */
+export class StateConfig extends BaseStateConfig {
+  /** The storage area persisted stores write to. */
+  override persistStore: StorageArea = StorageArea.Prefs;
+
+  /** Keep the splash until persisted stores are read; mmkv is synchronous, so it costs nothing. */
+  override blockingHydration = true;
 }

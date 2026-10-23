@@ -2,42 +2,23 @@
  * Stackra file contract:
  * Purpose: deploy-time configuration of the commerce service; read by operators, applied by a
  *          restart.
- * Boundary: a config class: types come from the property declarations, validation from the field
- *           decorators (Zod is the engine inside @stackra/validation and never visible here). Never
- *           per tenant (that is settings). Secrets are references resolved blind by the runtime
- *           secret store. No driver choice here: the mail driver is `MailConfig.driver`, set per
- *           environment by runway `drivers.mail` (ADR 0266).
+ * Boundary: `Config({ schema, env })`: the shape is CommerceOptions (src/schemas/), `env` maps a
+ *           field to the environment variable that sets it, and the class is the DI token. The key
+ *           is derived from the file (`commerce`, the member key); a second class deriving the same
+ *           key fails gen. Never per tenant (that is settings). Layers, lowest first: the schema's
+ *           defaults, the `env` variables, then runway.yaml `environments.<env>.config.commerce`. A
+ *           required field with no value in some environment fails `stackra validate`; a missing
+ *           secret fails the boot.
  * Runtime: node
- * Governing contract: ADR 0146 (config layers), ADR 0173 (secrets), ADR 0095 (field rules), v2
- *                     guides/programming-model.mdx#config-files, ADR 0266
+ * Governing contract: ADR 0294 (decisions 4, 6, 19 and 20, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0146 (config layers), ADR 0173 (secrets), ADR 0296
+ *                     (runway config values)
  */
-import { Config, Env, Secret } from "@stackra/config";
-import { Int, Str, Url } from "@stackra/validation";
+import { Config } from "@stackra/config";
+import { CommerceOptions } from "#src/schemas/commerce-options.schema";
 
-/**
- * Injected by type (no `@Inject`): `constructor(private readonly config: CommerceConfig)`. Layers,
- * lowest first: these defaults → environment (`@Env`) → runway.yaml
- * `environments.<env>.config["commerce.service"]`. Validated at gen and at boot; a required field
- * with no value in some environment fails `stackra validate`, a missing secret fails the boot.
- */
-@Config("commerce.service")
-export class CommerceConfig {
-  /**
-   * Minutes an order may stay pending before expiry; tenants may lower it in settings, never
-   * raise it.
-   * @defaultValue 60
-   */
-  @Int({ min: 5 }) maxPendingMinutes = 60;
-  /**
-   * ISO 4217 code used when a market does not name one.
-   * @defaultValue "USD"
-   */
-  @Str({ length: 3 }) defaultCurrency = "USD";
-  /**
-   * Base URL the confirmation mail links to (`<base>/orders/<id>`). Required, no default: the
-   * value is set per environment in runway.yaml.
-   */
-  @Url() @Env("STACKRA_STOREFRONT_BASE_URL") storefrontBaseUrl!: string;
-  /** API key the pricing client's RPC driver presents; a reference, resolved blind. Required. */
-  @Secret("PRICING_API_KEY") pricingApiKey!: string;
-}
+/** Injected by type: `constructor(private readonly config: CommerceConfig)`. */
+export class CommerceConfig extends Config({
+  schema: CommerceOptions,
+  env: { storefrontBaseUrl: "STACKRA_STOREFRONT_BASE_URL" },
+}) {}

@@ -1,15 +1,20 @@
 /**
  * Stackra file contract:
- * Purpose: the fact that a product stopped selling; carries the variant ids so search and
- *          storefront can drop them without a lookup. Public: `catalogue.product.archived.v1`.
- * Boundary: one event per class; recorded by the Archive transition only.
+ * Purpose: the fact that a product stopped selling. Leaves through the outbox as
+ *          `catalogue.product.archived.v1`, so search and the storefront drop its variants.
+ * Boundary: an integration event recorded by ProductStateMachine#archive only. It carries the
+ *           variant ids, so no consumer needs a lookup.
  * Runtime: isomorphic
- * Governing contract: ADR 0141, ADR 0078, guides/programming-model.mdx#events
+ * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078
  */
-import { Event, IntegrationEvent, z } from "@stackra/events";
+import type { PublicId } from "@stackra/contracts";
+import { IntegrationEvent } from "@stackra/events";
 
 /** Consumed by search and the storefront. */
-@Event({ name: "product.archived", public: true })
-export class ProductArchived extends IntegrationEvent(
-  z.object({ productId: z.string(), variantIds: z.array(z.string()) }),
-) {}
+export class ProductArchived extends IntegrationEvent({ name: "product.archived" }) {
+  /** The archived product. */
+  productId!: PublicId<"prd">;
+
+  /** Its variants at the time of archiving. */
+  variantIds!: PublicId<"var">[];
+}

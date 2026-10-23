@@ -1,46 +1,46 @@
 /**
  * Stackra file contract:
- * Purpose: `catalogue.product.archive`: take a product off sale; an idempotent state transition
- *          (PUT).
- * Boundary: one transaction; the public event is recorded by the transition and leaves through the
- *           outbox at flush; the cache entry is evicted after commit so a concurrent read never
- *           re-caches the pre-archive view.
+ * Purpose: `catalogue.product.archive@1`: take a product off sale; an idempotent state transition.
+ * Boundary: one aggregate, so it runs inline in one transaction. The permission is derived from the
+ *           key (`ProductPermissions.archive`, L2) and ProductPolicy#archive refines it through
+ *           `ctx.authorize(product)`. Surfaces: the endpoint is derived
+ *           (`PUT /products/:productId/archive`); `tool: true` exposes the MCP tool
+ *           `catalogue_product_archive` (L2, so an agent's call waits for a person's approval);
+ *           `intent: true` takes its phrases from `catalogue.json`
+ *           (`actions.product.archive.intents`). The transition records `product.archived`, which
+ *           leaves through the outbox at flush. The cached view is forgotten after commit, so a
+ *           concurrent read never caches the view from before the archive again.
  * Runtime: node
- * Governing contract: ADR 0098, 0136, 0139, http conventions (PUT for idempotent transitions), v2
- *                     guides/programming-model.mdx#actions
+ * Governing contract: ADR 0294 (decisions 2, 3, 16, 17 and 21, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0098, ADR 0136, ADR 0137 (cache), ADR 0139
  */
 import {
   Action,
   type ActionContext,
-  AsEndpoint,
-  AsTool,
   ConflictResolution,
   IdMinting,
   OfflineMode,
   OfflinePrecondition,
-  UxAfter,
 } from "@stackra/actions";
-import { CacheEvict } from "@stackra/cache";
-import { I18n } from "#stackra/i18n";
-import type { ProductService } from "#modules/catalogue/services/product.service";
-import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
-import { ArchiveProductInput } from "#modules/catalogue/schemas/archive-product-input.schema";
-import { ProductView } from "#modules/catalogue/schemas/product-view.schema";
-import { Archive } from "#modules/catalogue/states/product.state";
+import { type Cache, CacheKey } from "@stackra/cache";
+import { ActorKind } from "@stackra/contracts";
 import { Product } from "#modules/catalogue/models/product.model";
-import { ActorKind, HttpMethod, Tone } from "@stackra/contracts";
+import type { ProductStateMachine } from "#modules/catalogue/models/product.state-machine";
+import type { ArchiveProductInput } from "#modules/catalogue/schemas/archive-product-input.schema";
+import type { ProductView } from "#modules/catalogue/schemas/product-view.schema";
+import type { ProductService } from "#modules/catalogue/services/product.service";
 
 /**
- * Moves a product to Archived. Repeating the call on an archived product returns the same view and
- * records nothing, which is what makes PUT the right method.
+ * Moves an active product to archived. Repeating the call on an archived product returns the same
+ * view and records nothing, which is what makes PUT the right method. Offline clients may queue it
+ * for 24 hours; the version check decides a conflict on replay. The console asks for confirmation
+ * first, because the permission is L2.
  */
-@Action({
+export class ArchiveProductAction extends Action({
   key: "product.archive",
-  input: ArchiveProductInput,
-  output: ProductView,
-  permission: ProductPermissions.archive,
   actors: [ActorKind.User, ActorKind.Agent],
-  intents: ["archive the summer dress", "stop selling this product"],
+  tool: true,
+  intent: true,
   offline: {
     mode: OfflineMode.Queue,
     idMinting: IdMinting.Server,
@@ -52,30 +52,32 @@ import { ActorKind, HttpMethod, Tone } from "@stackra/contracts";
       ConflictResolution.Manual,
     ],
   },
-  ux: {
-    requiresConfirmation: { text: I18n.catalogue.product.archive_confirm, color: Tone.Warning },
-    success: I18n.catalogue.product.archived,
-    after: [UxAfter.Refresh],
-  },
-})
-@AsEndpoint({ method: HttpMethod.Put, path: "/products/:productId/archive" })
-@AsTool()
-export class ArchiveProductAction {
-  constructor(private readonly products: ProductService) {}
+}) {
+  /**
+   * @param lifecycle - the only writer of `Product.status`.
+   * @param cache - holds ProductService's cached views; this product's are forgotten after commit.
+   */
+  constructor(
+    private readonly products: ProductService,
+    private readonly lifecycle: ProductStateMachine,
+    private readonly cache: Cache,
+  ) {
+    super();
+  }
 
   /**
-   * The evict runs after commit, keyed like the cached `view` (model tag + the id in the input).
-   * @throws AppError `not_found` when the id is unknown in this tenant; `forbidden` when
-   *   ProductPolicy.archive denies.
+   * Archives when the state allows it, then returns the view in the request locale.
+   * @throws Refusal `not_found` for an unknown id in this tenant; `forbidden` when
+   *         ProductPolicy#archive denies.
    */
-  @CacheEvict({ tags: [Product], key: (input: ArchiveProductInput) => input.productId })
   async handle(input: ArchiveProductInput, ctx: ActionContext): Promise<ProductView> {
     const product = await this.products.findOneOrFail(
       { id: input.productId },
       { populate: ["variants"] },
     );
-    await ctx.authorize(ProductPermissions.archive, product);
-    if (product.status.canTransitionTo(Archive)) await product.status.transition(new Archive());
+    await ctx.authorize(product);
+    if (this.lifecycle.can(product, "archive")) this.lifecycle.archive(product);
+    ctx.afterCommit(() => this.cache.forget(CacheKey.of(Product, product.id)));
     return this.products.toView(product, ctx.locale);
   }
 }

@@ -1,0 +1,22 @@
+# Stackra file contract:
+# Purpose: the hosted sign-in round trip (the e2e identity stub answers the PKCE redirect), then the
+#          tab bar and the home page are visible. The e2e test login is the demo customer, the
+#          loyalty kit's `LoyaltyKitDemoSeeder.ids.bronze` (1 000 demo points from
+#          `loyalty_kit.demo`). Other flows `runFlow` this one first.
+# Boundary: one journey; no assertions about internals. `stackra test` passes `MAESTRO_LOCALE`
+#           (each locale of i18n.config.ts) and `APP_ID` (stackra.config.ts `ios.bundleId`) with
+#           `--env`; `name` is the key of the workspace config's `flowsOrder`. The tab's test id is
+#           `tab-<route key>`.
+# Runtime: node
+# Governing contract: ADR 0182, ADR 0206, ADR 0022, ADR 0294 (decision 14)
+appId: ${APP_ID}
+name: sign-in-and-home
+tags: [gate]
+---
+- launchApp:
+    clearState: true
+    arguments: { locale: "${MAESTRO_LOCALE}" }
+- assertVisible: { id: "sign-in-page" }
+- tapOn: { id: "sign-in-button" }
+- assertVisible: { id: "home-page", timeout: 15000 }
+- assertVisible: { id: "tab-orders" }

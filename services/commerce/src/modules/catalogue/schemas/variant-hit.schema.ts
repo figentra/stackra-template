@@ -1,19 +1,28 @@
 /**
  * Stackra file contract:
  * Purpose: `VariantHit`: one sellable variant with enough of its product for a POS line.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Boundary: a shape class in schemas/ because the barcode lookup returns it and the variant search
+ *           lists it.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, guides/programming-model.mdx#schemas
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26)
  */
-import { Schema, z } from "@stackra/schema";
+import type { PublicId } from "@stackra/contracts";
+import { Schema } from "@stackra/validation";
 
-/** One sellable variant with enough of its product for a POS line. */
-export class VariantHit extends Schema(
-  z.object({
-    variantId: z.string(),
-    productId: z.string(),
-    sku: z.string(),
-    title: z.string(),
-    trackInventory: z.boolean(),
-  }),
-) {}
+/** What the mobile POS adds to a sale. */
+export class VariantHit extends Schema {
+  /** The variant's public id. */
+  variantId!: PublicId<"var">;
+
+  /** Its product's public id. */
+  productId!: PublicId<"prd">;
+
+  /** The merchant's stock-keeping unit. */
+  sku!: string;
+
+  /** The product title in the request locale. */
+  title!: string;
+
+  /** Whether inventory tracks stock for the variant. */
+  trackInventory!: boolean;
+}

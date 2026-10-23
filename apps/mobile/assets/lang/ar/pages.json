@@ -1,0 +1,78 @@
+{
+  "$comment": "Stackra file contract — Purpose: the mobile app's page strings, one object per route key (namespace `pages::`, locale `ar`). Boundary: same keys in every base locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails. Each route key's `title` is the route's derived title (also the tab label and the native header) and is never authored elsewhere; every other key is authored. A regional overlay (`en-US`, `ar-SA`) holds only the keys whose wording differs there. Strings of another module are overrides under src/overrides/<owner>/, never here. Runtime: react-native. Governing contract: ADR 0294 (decision 20), ADR 0192, ADR 0234, ADR 0080",
+  "home": {
+    "title": "الرئيسية",
+    "quick_actions": "إجراءات سريعة",
+    "new_order": "طلب جديد",
+    "scan": "مسح",
+    "announcements": "الإعلانات",
+    "inbox": "صندوق الوارد"
+  },
+  "orders": {
+    "title": "الطلبات",
+    "empty": "لا توجد طلبات بعد",
+    "empty_hint": "أنشئ طلبًا من الرئيسية أو امسح رمزًا شريطيًا."
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "color_scheme": "نمط الألوان",
+    "notifications": "الإشعارات",
+    "notification_preferences": "تفضيلات الإشعارات",
+    "inbox": "صندوق الوارد",
+    "profile": "الملف الشخصي",
+    "sign_out": "تسجيل الخروج",
+    "version": "الإصدار"
+  },
+  "order_detail": {
+    "title": "الطلب",
+    "lines": "العناصر",
+    "total": "الإجمالي",
+    "placed_at": "أُنشئ {at}",
+    "cancel": "إلغاء الطلب"
+  },
+  "create_order": {
+    "title": "طلب جديد",
+    "variant": "المتغير",
+    "variant_hint": "اكتب معرّف المتغير أو امسح رمزه الشريطي.",
+    "quantity": "الكمية",
+    "points": "نقاط الولاء",
+    "submit": "إنشاء الطلب",
+    "queued": "سيُرسل الطلب عند عودة الاتصال",
+    "scan": "مسح",
+    "errors": {
+      "points_min": "لا يمكن أن تكون النقاط سالبة."
+    }
+  },
+  "scan": {
+    "title": "مسح",
+    "hint": "وجّه الكاميرا نحو الرمز الشريطي.",
+    "permission": "يحتاج Acme إلى الكاميرا لقراءة الرموز الشريطية.",
+    "unavailable": "المسح غير متاح على هذا الجهاز."
+  },
+  "announcements": {
+    "title": "الإعلانات"
+  },
+  "inbox": {
+    "title": "صندوق الوارد",
+    "empty": "لا توجد إشعارات بعد",
+    "empty_hint": "تظهر هنا تحديثات الطلبات ورسائل مساحة عملك.",
+    "unread": "{count, plural, zero {لا توجد إشعارات غير مقروءة} one {إشعار واحد غير مقروء} two {إشعاران غير مقروءين} few {# إشعارات غير مقروءة} many {# إشعارًا غير مقروء} other {# إشعار غير مقروء}}"
+  },
+  "notification_preferences": {
+    "title": "تفضيلات الإشعارات"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "tenant": "مساحة العمل",
+    "roles": "الأدوار",
+    "switch_tenant": "تبديل مساحة العمل",
+    "switch_blocked_by_queue": "أرسل تغييراتك المنتظرة قبل تبديل مساحة العمل."
+  },
+  "sign_in": {
+    "title": "تسجيل الدخول",
+    "heading": "مرحبًا بك في Acme",
+    "body": "سجّل الدخول بحساب مساحة عملك.",
+    "button": "تسجيل الدخول"
+  }
+}

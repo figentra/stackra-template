@@ -1,11 +1,17 @@
 /**
  * Stackra file contract:
- * Purpose: `ExpireUnpaidOrdersOutput`: how many orders this run expired; zero is normal.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `ExpireUnpaidOrdersOutput`: how many orders one run of `orders.order.expire_unpaid@1`
+ *          expired.
+ * Boundary: a shape class in schemas/, one declaration per file; zero is a normal result.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, guides/programming-model.mdx#schemas
+ * Governing contract: ADR 0294 (decisions 4 and 26, as amended by programming model
+ *                     v3.1, AGENTS.md)
  */
-import { Schema, z } from "@stackra/schema";
+import { Int, Schema } from "@stackra/validation";
 
 /** How many orders this run expired; zero is normal. */
-export class ExpireUnpaidOrdersOutput extends Schema(z.object({ expired: z.number().int() })) {}
+export class ExpireUnpaidOrdersOutput extends Schema {
+  /** Orders moved to `expired`. */
+  @Int({ min: 0 })
+  expired!: number;
+}

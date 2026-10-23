@@ -1,14 +1,13 @@
 /**
  * Stackra file contract:
- * Purpose: the input of the `access_log.entry.purge` job: none.
- * Boundary: a schema class only; the cutoff is computed from `AccessLogConfig.retentionDays`, never
- *           from the caller.
+ * Purpose: `PurgeAccessLogInput`: the input of the `access_log.entry.purge@1` job.
+ * Boundary: a shape class in its own file with no fields: the cutoff comes from
+ *           `AccessLogConfig.retentionDays`, never from the caller.
  * Runtime: node
- * Governing contract: ADR 0095, ADR 0128 (one declaration per file)
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26, as amended by programming model v3.1,
+ *                     AGENTS.md)
  */
-import { Schema, z } from "@stackra/schema";
+import { Schema } from "@stackra/validation";
 
-/**
- * No fields; kept as a class so the job declares an input like every other and gen can describe it.
- */
-export class PurgeAccessLogInput extends Schema(z.object({})) {}
+/** No fields. */
+export class PurgeAccessLogInput extends Schema {}

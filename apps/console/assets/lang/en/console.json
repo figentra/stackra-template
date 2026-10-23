@@ -1,30 +1,16 @@
 {
-  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the console's chrome strings (namespace `console::`): the shell, the palette, the switchers, the offline banner, the queue, the inbox, the realtime chip, errors and risk labels; Boundary: keys this app's components reference; page copy is `pages::`, document copy `documents::`, derived shortcut, enum and menu labels have their own namespaces; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
   "shell": {
     "brand": "Acme Console",
-    "short_name": "Console",
     "top_bar": "Top bar",
     "menu": "Menu",
     "sidebar": "Toggle sidebar",
     "navigation": "Main navigation",
     "account": "Account",
-    "loading_session": "Loading your session"
+    "loading_session": "Loading your session",
+    "close": "Close"
   },
-  "shortcuts": {
-    "quick_order": "Quick order",
-    "quick_order_short": "Order",
-    "quick_order_description": "Place an order for a customer in a few taps."
-  },
-  "manifest": {
-    "description": "Orders, catalogue and stock for your store, online or offline."
-  },
-  "pages": {
-    "dashboard": "Dashboard",
-    "welcome": "Welcome",
-    "settings": "Settings"
-  },
-  "commands": {
-    "palette": "Command palette",
+  "palette": {
     "placeholder": "Type a command, a page, or what you want to do…",
     "clear": "Clear",
     "no_match": "No matching command",
@@ -32,11 +18,6 @@
     "group_app": "Console",
     "group_account": "Account",
     "group_intent": "Suggested action",
-    "sidebar": "Toggle sidebar",
-    "theme": "Switch theme",
-    "locale": "Switch language",
-    "pending_changes": "Pending changes",
-    "logout": "Sign out",
     "navigate": "Navigate",
     "select": "Select",
     "escape": "Escape"
@@ -54,7 +35,6 @@
     "member": "Member"
   },
   "locale": {
-    "switch": "Switch language",
     "current": "Language: {name}"
   },
   "theme": {
@@ -65,10 +45,7 @@
   },
   "offline": {
     "title": "You are offline",
-    "body": "{count, plural, =0 {Changes you make will sync when you are back online.} one {# change is waiting to sync.} other {# changes are waiting to sync.}}",
-    "page_title": "You are offline",
-    "page_body": "This page was not saved for offline use. Reconnect and try again.",
-    "retry": "Try again"
+    "body": "{count, plural, =0 {Changes you make will sync when you are back online.} one {# change is waiting to sync.} other {# changes are waiting to sync.}}"
   },
   "queue": {
     "title": "Pending changes",
@@ -93,69 +70,31 @@
     "discard_confirm_body": "The change you made offline is deleted and never reaches the server.",
     "discard_keep": "Keep it"
   },
-  "dashboard": {
-    "today": "Today",
-    "orders_today": "Orders today",
-    "loading": "Loading today's numbers"
+  "attach": {
+    "images": "{count, plural, one {# image to attach} other {# images to attach}}",
+    "product": "Product",
+    "product_hint": "Search by SKU or name; the images go to the product of the variant you pick.",
+    "alt": "Description for screen readers",
+    "submit": "Attach to product",
+    "done": "{count, plural, one {# image attached} other {# images attached}}",
+    "failed": "{name} could not be attached. The other images were kept.",
+    "unsupported": "{name} is not an image the console accepts."
   },
-  "welcome": {
-    "title": "Welcome to your console",
-    "body": "Everything your services declared is already here: products, orders, stock. Start with a quick order.",
-    "cta": "Place your first order",
-    "loading": "Loading the welcome page",
-    "empty_title": "No welcome page published yet",
-    "empty_body": "A tenant admin can build one in the page builder.",
-    "open_builder": "Open the page builder"
-  },
-  "login": {
-    "title": "Signing you in",
-    "body": "You are being taken to the sign-in page.",
-    "redirecting": "Redirecting",
-    "continue": "Continue to sign in"
-  },
-  "settings": {
-    "tabs": "Settings sections",
-    "device": "This device",
-    "tenant": "Tenant",
-    "scheme": "Theme",
-    "locale": "Language",
-    "density": "Table density",
-    "density_comfortable": "Comfortable",
-    "density_compact": "Compact",
-    "local_notifications": "Desktop notifications",
-    "local_notifications_hint": "Shown while the console is open.",
-    "save": "Save",
-    "saved_device": "Device settings saved",
-    "privacy": "Privacy",
-    "analytics_consent": "Share usage analytics",
-    "analytics_consent_hint": "Helps us see which screens matter. Nothing is sent until you turn this on.",
-    "notification_preferences": "Notification preferences"
+  "loyalty": {
+    "title": "Loyalty balance",
+    "points": "{count, plural, one {# point} other {# points}}",
+    "next_expiry": "Oldest points expire on {date}",
+    "no_expiry": "No points are waiting to expire"
   },
   "capabilities": {
     "permission_denied": "Notifications were not allowed by the browser.",
     "unavailable": "This device cannot show notifications."
-  },
-  "quick_order": {
-    "variant_required": "Choose a variant"
   },
   "risk": {
     "l0": "Safe",
     "l1": "Low",
     "l2": "Medium",
     "l3": "High"
-  },
-  "export": {
-    "pick_folder": "Choose an export folder"
-  },
-  "menu": {
-    "file": "File",
-    "view": "View",
-    "go": "Go",
-    "help": "Help",
-    "docs": "Documentation"
-  },
-  "tray": {
-    "show": "Show console"
   },
   "errors": {
     "retry": "Try again",

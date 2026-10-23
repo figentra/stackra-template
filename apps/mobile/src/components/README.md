@@ -1,45 +1,24 @@
 # src/components
 
-Two kinds of folder, both in the shape of ADR 0128 d2 (`x/{x.tsx, index.ts, __tests__/x.test.tsx}`,
-a single-use hook as `use-*.ts` beside its component). Components are functions referenced from
-decorator options; they never carry a decorator themselves. Every string is a typed `I18n` key;
-every UI primitive comes from `@stackra/ui/native` (never the kit underneath); every colour is a
-semantic class fed by the brand tokens; layout uses logical classes (`ps-`, `pe-`), never
-left/right.
+Shared presentational components, one flat folder each (ADR 0294 decision 14):
+`<name>/{<name>.tsx, <name>.props.ts?, use-<name>.ts?, index.ts, __tests__/}`, where `index.ts`
+exports the component and its Props only. A component is a class, `extends Component<Props>` from
+`@stackra/ui/native`: fields are state, a field that calls a hook is a hook field, methods are
+handlers, getters derived values, `render()` the body; gen compiles it to a function component. A
+hook stays a function and its result type lives in `src/types/`. A page is not here: it is
+`<name>.tsx` in its route folder. Every string is a typed `I18n` key; every UI primitive comes from
+`@stackra/ui/native` (never the kit underneath); every colour is a semantic class fed by the `acme`
+theme; layout uses logical classes (`ps-`, `pe-`), never left and right.
 
-## `ui/` — shared presentational components
+| Folder             | Renders                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `screen/`          | the scroll container every page uses (insets under the glass header and the tab bar)                     |
+| `glass/`           | a Liquid Glass panel with a plain-surface fallback                                                       |
+| `screen-state/`    | loading, empty and error states, one component with a `kind`                                             |
+| `offline-banner/`  | the offline strip with the pending-mutation count and a retry; `use-offline-banner.ts` beside it         |
+| `order-card/`      | one order in the list: id, status chip from the producer's enum, total; long press opens `OrderCardMenu` |
+| `consent-section/` | the settings page's privacy switches, one per consent category                                           |
 
-| Folder               | Renders                                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `screen/`            | the scroll container every page uses (insets under the glass header and tab bar)                                    |
-| `glass/`             | a Liquid Glass panel with a plain-surface fallback                                                                  |
-| `screen-state/`      | loading, empty and error states, one component with a `kind`                                                        |
-| `offline-banner/`    | the offline strip with the pending-mutation count and a retry; `use-offline-queue.ts` beside it                     |
-| `order-card/`        | one order in the list: id, status chip from the producer's enum, total; long press opens `menus/order-card.menu.ts` |
-| `revenue-sparkline/` | the native tile bound to the orders module's `RevenueSparkline` override point (`overrides/orders/components/`)     |
-
-## `pages/` — page-level components
-
-One per route, `<name>.tsx` exporting `<Name>Page: RouteComponent<typeof <Name>Route>` (props
-`data`, `params`, `search` typed from the route's document, loader and params; the route is imported
-as a type only, so there is no runtime cycle). The hook a page owns is `use-<name>.ts` beside it; a
-hook two pages share moves to `src/hooks/`. "Page" is never a kind folder: the word names the
-component kind under `components/`.
-
-| Folder                      | Route                          | Own hook                            |
-| --------------------------- | ------------------------------ | ----------------------------------- |
-| `home/`                     | `HomeRoute`                    | —                                   |
-| `orders/`                   | `OrdersRoute`                  | `use-orders.ts`                     |
-| `order-detail/`             | `OrderDetailRoute`             | `use-order-detail.ts`               |
-| `create-order/`             | `CreateOrderRoute`             | `use-create-order.ts`               |
-| `scan/`                     | `ScanRoute`                    | `use-barcode-scan.ts`               |
-| `document/`                 | `AnnouncementsRoute`           | —                                   |
-| `inbox/`                    | `InboxRoute`                   | `use-inbox.ts`                      |
-| `notification-preferences/` | `NotificationPreferencesRoute` | —                                   |
-| `settings/`                 | `SettingsRoute`                | — (`consent-section.tsx` beside it) |
-| `profile/`                  | `ProfileRoute`                 | —                                   |
-| `sign-in/`                  | `SignInRoute`                  | —                                   |
-
-Tests: `__tests__/<name>.test.tsx` with `renderRoute(Routes.<key>, options)` (`#stackra/routes`)
-from `@stackra/testing/native`, which mounts the route (guards, params, prefetch and document
-against faked clients) and its page under the testing providers.
+The revenue tile of the dashboard is not here: the orders module's widget renders through the
+panel's built-in KPI display. Tests: `__tests__/<name>.test.tsx` with `render` from
+`@stackra/testing/native`.

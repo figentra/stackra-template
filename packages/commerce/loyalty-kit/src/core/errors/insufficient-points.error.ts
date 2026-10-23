@@ -1,30 +1,29 @@
 /**
  * Stackra file contract:
  * Purpose: the refusal when a member asks for more points than they hold.
- * Boundary: a typed AppError with one category and one snake_case code; the transport mapping (412
- *           here) is generated from the category, never written here. `details` carries numbers
- *           only, never personal data.
+ * Boundary: a refusal class: kind `FailedPrecondition` (category `precondition_failed`), code
+ *           derived from the class name (`insufficient_points`); the fields are numbers only,
+ *           never personal data. The transport status is generated from the kind. The text is
+ *           `loyalty_kit::errors.insufficient_points.message`. `Refusal(...)` is called because a
+ *           refusal needs its kind, while a shape (`extends Schema`) takes no options and is
+ *           written bare: one rule, a kind with options is called and a kind without is bare.
  * Runtime: isomorphic
- * Governing contract: ADR 0140 (envelope, categories), ADR 0232 (every error extends AppError), ADR
- *                     0231 (codes)
+ * Governing contract: ADR 0294 (decisions 16 and 20, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0140 (envelope and kinds), ADR 0232
  */
-import { AppError, ErrorCategory } from "@stackra/errors";
+import { ErrorKind, Refusal } from "@stackra/errors";
+import { Int } from "@stackra/validation";
 
-/**
- * `PreconditionFailed` / `insufficient_points`; shown to the member as
- * `loyalty_kit::refusals.insufficient_points`.
- */
-export class InsufficientPointsError extends AppError {
-  /**
-   * @param balance - points the member holds now.
-   * @param requested - points the caller asked for.
-   */
-  constructor(balance: number, requested: number) {
-    super({
-      category: ErrorCategory.PreconditionFailed,
-      code: "insufficient_points",
-      retryable: false,
-      details: { balance, requested },
-    });
-  }
+/** Not retryable: the balance changes only by an earn or an adjustment. */
+export class InsufficientPointsError extends Refusal({
+  kind: ErrorKind.FailedPrecondition,
+  retryable: false,
+}) {
+  /** Points the member holds now. */
+  @Int
+  balance!: number;
+
+  /** Points the caller asked for. */
+  @Int
+  requested!: number;
 }

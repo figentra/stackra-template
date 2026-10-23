@@ -1,51 +1,55 @@
 # src/routes
 
-One term for web, console and mobile: a mobile screen is a `@Route` class with native presentation
-options. Options are the static declaration gen reads from the AST; the class body is behaviour
-(`guard`, or a `loader` for composite logic, never beside `prefetch`). The component is always an
-option, never a body member, and lives under `components/pages/<name>/`. Gen collects the classes
-into `#stackra/navigation` (the React Navigation 7 tree: the signed-in root native stack, the native
-tabs with one stack per tab, the signed-out stack), `#stackra/routes` (typed keys, params and the
-linking map) and reports a path declared twice. A hand-written navigator or route config is banned.
+One term for web, console and mobile: a mobile screen is a route with native presentation options
+(ADR 0294 decisions 14 and 16). Each route is a folder `routes/<name>/` holding `<name>.route.ts`
+(`extends Route({...})`, or `<name>.layout.ts` with `extends Layout`), the page `<name>.tsx` bound
+by name, at most one hook `use-<name>.ts`, and `__tests__/`. The class is static options plus
+behaviour (`loader`, `submit`, `meta`); the page is a class component typed
+`extends Component<RouteProps<typeof X>>` that imports its route as a type only. Gen collects the
+classes into `#stackra/navigation` (the React Navigation tree: the signed-in root native stack, the
+native tab bar with one stack per tab, the signed-out stack), `#stackra/routes` (typed keys, params
+and the linking map) and reports a path declared twice. A hand-written navigator or route config is
+banned.
 
-| File                                | Class                          | Where                                      | Shows                                                          |
-| ----------------------------------- | ------------------------------ | ------------------------------------------ | -------------------------------------------------------------- |
-| `tabs.layout.ts`                    | `TabsLayout`                   | the signed-in shell (native tabs, `guard`) | three tabs; redirects to `SignInRoute` without a session       |
-| `home.route.ts`                     | `HomeRoute`                    | tab root, `/` with `index: true`           | widgets, quick actions, announcements and inbox links          |
-| `orders.route.ts`                   | `OrdersRoute`                  | tab root, `/orders`                        | cursor list refreshed by the realtime `OrderPaid` event        |
-| `settings.route.ts`                 | `SettingsRoute`                | tab root, `/settings`                      | language, appearance, notifications, privacy, profile          |
-| `order-detail.route.ts`             | `OrderDetailRoute`             | card, `/orders/:orderId`                   | `prefetch: [GetOrder]`; permission derived from it             |
-| `create-order.route.ts`             | `CreateOrderRoute`             | form sheet, `/orders/new`                  | the derived form; queued offline; toast on success             |
-| `scan.route.ts`                     | `ScanRoute`                    | full-screen modal, `/scan`                 | the `scanner` capability; behind `Flags.orders.quick_order`    |
-| `announcements.route.ts`            | `AnnouncementsRoute`           | card, `/announcements`                     | `document: AnnouncementsDocument` through the route adapter    |
-| `inbox.route.ts`                    | `InboxRoute`                   | card, `/inbox`                             | the notifications service's inbox with the plural unread count |
-| `notification-preferences.route.ts` | `NotificationPreferencesRoute` | card, `/settings/notifications`            | the generated user-scope settings form                         |
-| `profile.route.ts`                  | `ProfileRoute`                 | card, `/profile`                           | the user, tenant memberships and the switcher                  |
-| `sign-in.route.ts`                  | `SignInRoute`                  | signed-out stack                           | one button that opens ZITADEL's hosted sign-in                 |
+| Folder                      | Class                          | Where                             | Shows                                                          |
+| --------------------------- | ------------------------------ | --------------------------------- | -------------------------------------------------------------- |
+| `tabs/`                     | `TabsLayout`                   | the signed-in shell (`loader`)    | redirects to sign-in without a session; selects the tenant     |
+| `home/`                     | `HomeRoute`                    | tab root, `/`                     | widgets, quick actions, announcements and inbox links          |
+| `orders/`                   | `OrdersRoute`                  | tab root, `/orders`               | cursor list refreshed by the realtime `OrderPaid` event        |
+| `settings/`                 | `SettingsRoute`                | tab root, `/settings`             | language, colour scheme, notifications, privacy, profile       |
+| `order-detail/`             | `OrderDetailRoute`             | screen, `/orders/:orderId`        | `loader` reads `GetOrderQuery`; permission derived from it     |
+| `create-order/`             | `CreateOrderRoute`             | sheet, `/orders/new`              | the derived form; queued offline; toast on success             |
+| `scan/`                     | `ScanRoute`                    | full screen, `/scan`              | the `scanner` capability; behind `Flags.orders.quick_order`    |
+| `announcements/`            | `AnnouncementsRoute`           | screen, `/announcements`          | `document: AnnouncementsDocument` through the route adapter    |
+| `inbox/`                    | `InboxRoute`                   | screen, `/inbox`                  | the notifications service's inbox with the plural unread count |
+| `notification-preferences/` | `NotificationPreferencesRoute` | screen, `/settings/notifications` | the generated user-scope settings form                         |
+| `profile/`                  | `ProfileRoute`                 | screen, `/profile`                | the user, tenant memberships and the switcher                  |
+| `sign-in/`                  | `SignInRoute`                  | signed-out stack (`auth: false`)  | one button that opens the identity provider's hosted sign-in   |
 
 | Option         | Meaning                                                                                                  |
 | -------------- | -------------------------------------------------------------------------------------------------------- |
-| `path`         | absolute, with a leading slash; an index route is `index: true` with `path: "/"`                         |
-| `layout`       | the layout class the route mounts under; a `NativeTabs` layout makes it a tab root (with `tab`)          |
-| `presentation` | `Presentation.Card` (push), `FormSheet` (iOS 26 sheet with detents, modal on Android), `FullScreenModal` |
-| `params`       | a schema class from `schemas/`; gen types the page's `params` prop and validates deep links before mount |
-| `auth`         | `true` mounts only in the signed-in tree; `false` only in the signed-out tree                            |
-| `prefetch`     | queries warmed from the params before mount; the route's permission is derived from them                 |
-| `document`     | a `@Document` class the route adapter resolves to the tenant's published version or the class itself     |
-| `permission`   | only on a route that neither prefetches nor submits (its page's hook calls the client)                   |
+| `path`         | absolute, with a leading slash; `/` is the landing route of the scheme and of universal links            |
+| `layout`       | the layout class the route mounts under; with `tab` it makes the route a tab root                        |
+| `tab`          | `{ order, icon }`: the tab bar entry; `icon` is an `IconName`, the label is the route's title            |
+| `presentation` | `Presentation.Sheet` (iOS 26 sheet with detents, modal on Android), `FullScreen`; a pushed page if unset |
+| `chrome`       | this screen's chrome over `chrome.config.ts`: `{ header: HeaderStyle.Large }` on tab roots, `Hidden`     |
+| `params`       | a schema class from `schemas/`; gen types the page's `params` and validates deep links before mount      |
+| `auth`         | every route needs a session by default; `false` mounts it only in the signed-out tree                    |
+| `permission`   | only on a route with no `loader` (its page's hook calls the client); otherwise derived from the loader   |
+| `document`     | a document class the route adapter resolves to the tenant's published version or the class itself        |
 | `flag`         | a `Flags.*` constant; the route and its entry points hide while the flag is off for the tenant           |
 | `capability`   | `{ port: Capability.Required }` fails gen for a target without it; `Optional` degrades                   |
-| `header`       | `title` (typed i18n key)                                                                                 |
 | `cache`        | `{ ttl }`: how long the persisted query cache serves the route offline                                   |
 
-Route keys are the snake_case of the class name minus `Route` (`order_detail`); `#stackra/routes`
-exports `Routes` under those keys and the `RouteKey` union. Links point down (app shell ← layout ←
-route → page): pages, menus, layouts and data navigate with
+The title is never written: it is the derived key `pages::<route key>.title`, in the `pages` lang
+namespace beside the page's own strings. Route keys are the snake_case of the folder
+(`order_detail`); `#stackra/routes` exports `Routes` under those keys and the `RouteKey` enum. Links
+point down (layout ← route → page): pages, menus, layouts and data navigate with
 `navigate.to(Routes.order_detail, params)` and never import a route class; a document's navigate
-verb holds a `RouteKey` resolved with `Routes[key]`. Tabs are the routes that declare
-`tab: { order, icon, label }`; the layout lists none.
+verb holds a `RouteKey` resolved with `Routes[key]`.
 
-Tests: `__tests__/<name>.layout.test.ts` for guards (`runGuard` from `@stackra/navigation/testing`);
-`__tests__/*.flow.yaml` are the Maestro journeys, run on iOS and Android in every locale
-(`stackra.config.ts` `e2e.flows`). Page rendering is tested beside the page, under
-`components/pages/<name>/__tests__/`.
+Tests sit in each folder's `__tests__/`: `<name>.test.tsx` with `renderRoute(Routes.<key>)` from
+`@stackra/testing/native` (the route's params, loader and document against faked clients, under the
+testing providers), `<name>.layout.test.ts` with `runLoader` from `@stackra/navigation/testing`, and
+the Maestro journeys `*.flow.yaml` (`stackra.config.ts` `maestro.flows`), run on iOS and Android in
+every locale.

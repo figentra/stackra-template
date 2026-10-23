@@ -5,7 +5,9 @@
 // Boundary: compiler options shared by every role; a role preset adds only what differs.
 // Runtime: node
 // Governing contract: Stackra ADR 0005 (legacy decorators, no metadata), Stackra ADR 0025 (source
-//                     condition). A compiler-option change is a toolchain change and needs an ADR.
+//                     condition), Stackra ADR 0300 decision 6 and ADR 0294 decision 25 (class field
+//                     semantics, no isolated declarations). A compiler-option change is a toolchain
+//                     change and needs an ADR.
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "@stackra/typescript-config — base",
@@ -25,6 +27,8 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "exactOptionalPropertyTypes": true,
+    // A member that replaces a kind base's default (`override table(t)`, `override meta`) says so;
+    // only an abstract member (`handle`, `definition`, `check`) goes without it (ADR 0294 rule R3).
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
@@ -32,6 +36,14 @@
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
     "allowUnreachableCode": false,
+    // Class fields are defined on the instance, the same in tsc, tsgo, oxc and esbuild, whatever
+    // the target. Written out because the default follows `target` (true from ES2022 only). Under
+    // it a subclass field declaration resets what a base constructor assigned, which is why kind
+    // bases assign nothing in their constructor and models hold no constructor-made state (ADR 0294
+    // decisions 25 and 27). `isolatedDeclarations` is never turned on: a called kind base (`extends
+    // Action({ key })`) is an expression in an `extends` clause, which it refuses, so declarations
+    // come from tsc or tsgo, tsdown's default path.
+    "useDefineForClassFields": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

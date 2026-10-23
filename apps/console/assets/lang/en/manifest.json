@@ -1,0 +1,32 @@
+{
+  "$comment": "Stackra file contract — Purpose: the web app manifest's words per locale (namespace `manifest::`): the app's name and description, each shortcut's names by its route key and each screenshot's label; Boundary: read by gen only, when it writes `manifest.<locale>.webmanifest`; never loaded by the running app; Runtime: node; Governing contract: ADR 0255 (PWA manifest), ADR 0234 d9, ADR 0080",
+  "name": "Acme Console",
+  "short_name": "Console",
+  "description": "Orders, catalogue and stock for your store, online or offline.",
+  "shortcuts": {
+    "dashboard": {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "description": "Today's revenue, orders and stock alerts."
+    },
+    "orders": {
+      "name": "Orders",
+      "short_name": "Orders",
+      "description": "Find, check and cancel orders."
+    },
+    "quick_order": {
+      "name": "Quick order",
+      "short_name": "Order",
+      "description": "Place an order for a customer in a few taps."
+    },
+    "settings": {
+      "name": "Settings",
+      "short_name": "Settings",
+      "description": "Theme, language, notifications and pending changes."
+    }
+  },
+  "screenshots": {
+    "dashboard": "The dashboard with today's revenue, orders and stock alerts",
+    "quick_order": "Placing a quick order with loyalty points on a phone"
+  }
+}

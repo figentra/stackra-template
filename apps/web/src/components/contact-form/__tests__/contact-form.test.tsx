@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: the adapter shows the schema's translated message before any request, a server field
- *          error shows at once (in Arabic too), and a valid submission posts the plan with the
- *          form while recording no analytics (the page records the lead once the server accepts).
+ *          error shows at once (in Arabic too), a product enquiry prefills the message, and a valid
+ *          submission posts the plan with the form while recording no analytics (the page records
+ *          the lead once the server accepts).
  * Boundary: unit tier, jsdom; the router stub catches the submit so nothing posts; analytics is the
  *           fake of `@stackra/analytics/testing`.
  * Runtime: browser
@@ -59,5 +60,21 @@ describe(ContactForm, () => {
     await userEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(action).toHaveBeenCalledOnce();
     expect(analytics.events()).toEqual([]);
+  });
+
+  /** An enquiry from a product page arrives with the message written, naming the variant. */
+  it("prefills the message with the product and SKU of an enquiry", () => {
+    mount("en", { product: "Demo tee", sku: "TEE-M" });
+    expect(screen.getByLabelText("How can we help?")).toHaveValue(
+      "I would like to know more about Demo tee (SKU TEE-M).",
+    );
+  });
+
+  /** Without a SKU the message still names the product, in the visitor's language. */
+  it("prefills the product alone, in Arabic", () => {
+    mount("ar", { product: "Demo tee" });
+    expect(screen.getByLabelText("كيف يمكننا المساعدة؟")).toHaveValue(
+      "أرغب في معرفة المزيد عن Demo tee.",
+    );
   });
 });

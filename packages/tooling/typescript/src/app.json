@@ -1,16 +1,19 @@
 // Stackra file contract:
-// Purpose: the `app` role: a Vite or React Router app (apps/console, apps/web) that declares its
-//          routes, providers and config with legacy decorators. The vite building block (DOM lib,
-//          vite/client types) plus the decorator flags, set here explicitly because a multi-extends
-//          chain lets the last preset's `lib`/`types`/`include` win and would drop the DOM lib.
-// Boundary: a member's tsconfig.json is exactly `{ "extends": "@stackra/typescript-config/app" }`; it
-//           covers the app's source, its stackra.config.ts, its `*.extend.ts` hatches and the
-//           generated `.stackra/` entries and configs. The Electron main process
-//           (`.stackra/desktop/`) and the service worker (`.stackra/sw.ts`) are left out: they run
-//           without the DOM, so gen gives each its own program (the `desktop` and `service-worker`
-//           presets) and `stackra typecheck` runs all three.
+// Purpose: the `app` role: a Vite or React Router app (apps/console, apps/web) whose routes,
+//          layouts, menus, stores and config are kind classes with field decorators. The vite
+//          building block (DOM lib, vite/client types) plus the decorator flags, set here
+//          explicitly because a multi-extends chain lets the last preset's `lib`/`types`/`include`
+//          win and would drop the DOM lib.
+// Boundary: a member's tsconfig.json is exactly `{ "extends": "@stackra/typescript-config/app" }`;
+//           it covers the app's source, its stackra.config.ts, its `*.extend.ts` hatches and the
+//           generated `.stackra/` (the runtime entries in `.stackra/entry/`, the tool configs and
+//           `.stackra/gen`). The Electron main process (`.stackra/desktop/`) and the service worker
+//           (`.stackra/sw.ts`) are left out: they run without the DOM, so gen gives each its own
+//           program (the `desktop` and `service-worker` presets) and `stackra typecheck` runs all
+//           three.
 // Runtime: node
-// Governing contract: Stackra ADR 0005 (legacy decorators, no metadata), Stackra ADR 0261 (generated
+// Governing contract: Stackra ADR 0005 (legacy decorators, no metadata), Stackra ADR 0295
+//                     (generated entries and tool configs), Stackra ADR 0261 (generated
 //                     `.stackra/`)
 {
   "display": "@stackra/typescript-config — app",

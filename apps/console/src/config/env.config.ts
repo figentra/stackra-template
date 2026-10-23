@@ -2,45 +2,35 @@
  * Stackra file contract:
  * Purpose: the env contract of the console, referenced by `stackra.config.ts` `env`. Every field is
  *          public and inlined into the bundle (`VITE_`); values per environment come from
- *          `runway.yaml` `environments.<env>.vars`.
- * Boundary: no secret (a browser client holds none), no `.env`, no default URL. The desktop update
- *           feed is not env: gen derives it from the root feed origin, the member's feed path and
- *           the environment's channel.
+ *          `runway.yaml` `environments.<env>.vars`. It is the one place the console reads the
+ *          environment: a field named after a package config field feeds that field
+ *          (`realtimeOrigin` → `realtime.origin`, `telemetryDsn` → `telemetry.dsn`,
+ *          `pushVapidPublicKey` → `platform.push.vapidPublicKey`, `analyticsPosthogKey` →
+ *          `analytics.posthogKey`, `featureFlagsPosthogKey` → `feature_flags.posthogKey`); the
+ *          generated clients and the session read `apiOrigin`. Config overrides carry no `env`.
+ * Boundary: the console's own config class (key `console.env`, derived from the class). `schema` is
+ *           the shape (`EnvOptions`), `env` maps each field to its environment variable; gen checks
+ *           every name against the `VITE_` prefix and the runway vars. No secret (a browser client
+ *           holds none), no `.env`, no default URL. The desktop update feed is not env: gen derives
+ *           it from the root feed origin, the member's feed path and the channel.
  * Runtime: isomorphic
- * Governing contract: ADR 0231 d4 (prefixes), ADR 0173 (no values in files)
+ * Governing contract: ADR 0294 (decisions 19 and 20; as amended by programming model v3.1,
+ *                     AGENTS.md: `Config({ schema, env })`), ADR 0295 (decisions 2 and 10), ADR
+ *                     0231 d4 (prefixes), ADR 0173 (no values in files)
  */
-import { Config, Env } from "@stackra/config";
-import { Target } from "@stackra/contracts";
-import { OneOf, Str, Url } from "@stackra/validation";
+import { Config } from "@stackra/config";
+import { EnvOptions } from "#src/schemas/env-options.schema";
 
 /** Read as `env` from `#stackra/env`, validated once at boot. */
-@Config("console.env")
-export class ConsoleEnv {
-  /**
-   * Which target is being built; set by `stackra build --target`, never by hand.
-   * @defaultValue Target.Web
-   */
-  @Env("VITE_TARGET") @OneOf(Target) target = Target.Web;
-  /**
-   * Origin of the gateway and the BFF; empty means same origin. On-prem changes this one value.
-   * @defaultValue ""
-   */
-  @Env("VITE_API_ORIGIN") @Url({ allowEmpty: true }) apiOrigin = "";
-  /** Realtime origin; empty means the API origin. @defaultValue "" */
-  @Env("VITE_REALTIME_ORIGIN") @Url({ allowEmpty: true }) realtimeOrigin = "";
-  /**
-   * Sentry DSN of the console; empty disables browser error reporting. Public by design.
-   * @defaultValue ""
-   */
-  @Env("VITE_SENTRY_DSN") @Str() sentryDsn = "";
-  /**
-   * VAPID public key for Web Push; empty disables push. The private half is a runway secret.
-   * @defaultValue ""
-   */
-  @Env("VITE_WEB_PUSH_VAPID_PUBLIC_KEY") @Str() vapidPublicKey = "";
-  /**
-   * PostHog project key for flags and analytics; empty keeps both on their local drivers.
-   * @defaultValue ""
-   */
-  @Env("VITE_POSTHOG_KEY") @Str() posthogKey = "";
-}
+export class EnvConfig extends Config({
+  schema: EnvOptions,
+  env: {
+    target: "VITE_TARGET",
+    apiOrigin: "VITE_API_ORIGIN",
+    realtimeOrigin: "VITE_REALTIME_ORIGIN",
+    telemetryDsn: "VITE_SENTRY_DSN",
+    pushVapidPublicKey: "VITE_WEB_PUSH_VAPID_PUBLIC_KEY",
+    analyticsPosthogKey: "VITE_POSTHOG_KEY",
+    featureFlagsPosthogKey: "VITE_POSTHOG_KEY",
+  },
+}) {}

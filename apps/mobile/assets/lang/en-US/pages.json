@@ -1,0 +1,6 @@
+{
+  "$comment": "Stackra file contract — Purpose: the en-US overlay of the mobile app's `pages::` namespace: only the keys whose wording differs in en-US (US spelling). Boundary: every key here also exists in `en/pages.json`; a key missing here falls back to `en` through i18n.config.ts `fallbacks`, so nothing is copied to make the region complete. Runtime: react-native. Governing contract: ADR 0080, ADR 0192, ADR 0234",
+  "settings": {
+    "color_scheme": "Color scheme"
+  }
+}

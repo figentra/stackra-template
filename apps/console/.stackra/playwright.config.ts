@@ -5,7 +5,9 @@
  *          declared seeds, axe on every journey, one project per runner plus one RTL project per
  *          RTL locale, and the pwa and desktop projects.
  * Boundary: `baseURL` is read from `.stackra/dev/ports.json` (runway.yaml environments.dev); no
- *           literal URL here.
+ *           literal URL here. Journeys sit in the route folder they drive
+ *           (`src/routes/<name>/__tests__/*.e2e.test.ts`). The gitignored `playwright.config.ts`
+ *           at the member root re-exports this file.
  * Runtime: node
  */
 import { fileURLToPath } from "node:url";
@@ -22,12 +24,14 @@ export default e2ePreset({
     "experience",
     "platform",
     "identity",
-  ], // from #stackra/clients imports
+  ], // from the #stackra/clients/<service> imports
   seeds: ["orders.demo"],
   projects: [
     "chromium",
     "mobile-safari",
-    { name: "chromium-rtl", base: "chromium", locale: "ar" }, // from i18n.config.ts rtl: [ar]
+    // one RTL project per i18n.config.ts rtl entry: ar, ar-SA
+    { name: "chromium-rtl", base: "chromium", locale: "ar" },
+    { name: "chromium-rtl-sa", base: "chromium", locale: "ar-SA" },
     { name: "pwa", target: "pwa", serviceWorkers: "allow", match: /\.offline\.e2e\.test\.ts$/ },
     { name: "desktop", target: "desktop", match: /\.desktop\.e2e\.test\.ts$/ },
   ],

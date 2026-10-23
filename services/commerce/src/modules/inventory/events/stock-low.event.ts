@@ -1,25 +1,38 @@
 /**
  * Stackra file contract:
- * Purpose: available units at a location fell to or below the tenant's threshold.
- * Boundary: a private event (`DomainEvent`): other services learn stock through queries, not
- *           events. `broadcast` pushes it to every console session of the tenant holding stock
- *           read, so the low-stock tile updates live.
+ * Purpose: the fact that available units at a location fell to or below the tenant's threshold.
+ *          Leaves through the outbox as `inventory.stock.low.v1`.
+ * Boundary: an integration event recorded by StockService#reserve only. It is an integration event
+ *           because only those may broadcast: the broadcast declares `inventory.stock.read` as the
+ *           permission a session needs to receive the data-free refresh on
+ *           `tenant.{tenantId}.inventory`, so the console's low-stock widget updates without
+ *           polling; @stackra/realtime enforces it at delivery. The audience is the tenant (the
+ *           default is the principal): stock is about a variant, never about one person. Version 1
+ *           until a breaking change.
  * Runtime: isomorphic
- * Governing contract: ADR 0141, ADR 0078 decision 3 (domain events are not versioned: the wire
- *                     name is `inventory.stock.low`), ADR 0225 (realtime),
- *                     guides/programming-model.mdx#events
+ * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078, ADR 0225 (broadcast)
  */
-import { DomainEvent, Event, z } from "@stackra/events";
-import { StockPermissions } from "#modules/inventory/permissions/stock.permission";
+import type { PublicId } from "@stackra/contracts";
+import { BroadcastAudience, IntegrationEvent } from "@stackra/events";
+import { Int, Str } from "@stackra/validation";
+import { StockPermissions } from "#modules/inventory/access/stock.permissions";
 
-/** Recorded on the StockLevel by `StockService.reserve`. */
-@Event({
+/** Recorded on the StockLevel when a reservation crosses the threshold. */
+export class StockLow extends IntegrationEvent({
   name: "stock.low",
   broadcast: {
-    channel: (e) => `tenant.${e.meta.tenantId}.inventory`,
     permission: StockPermissions.read,
+    audience: BroadcastAudience.Tenant,
   },
-})
-export class StockLow extends DomainEvent(
-  z.object({ variantId: z.string(), locationId: z.string(), available: z.number().int() }),
-) {}
+}) {
+  /** The variant running low. */
+  variantId!: PublicId<"var">;
+
+  /** The location the count is for. */
+  @Str({ max: 64 })
+  locationId!: string;
+
+  /** Units still sellable after the reservation. */
+  @Int
+  available!: number;
+}

@@ -1,18 +1,25 @@
-# yaml-language-server: $schema=../../schemas/runway-app.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/app.json
 # Stackra file contract:
-# Purpose: how and where the docs site runs: the one dev port, written only here.
-# Boundary: a minimal app runway; Mintlify hosts the built site (connected to `apps/docs/src`), so
-#           there is no deploy target, no var and no secret here yet. `stackra dev` reads the port
-#           and records it in `.stackra/dev/ports.json`; nothing else in the docs names a port.
+# Purpose: WHAT the docs site needs per environment: the one dev port (written only here) and the
+#          public host of the published site. The member is the folder that holds this file, so it
+#          does not name itself.
+# Boundary: a member runway. WHERE the site runs is the root runway: `destinations.docs` places it
+#           on Mintlify in production, and `targets.mintlify` says how CI deploys it (after
+#           `mint validate`, `mint broken-links` and `mint a11y` pass on the pull request, then a
+#           smoke test of the published pages) and which CI secret the deploy job reads. The DNS
+#           record of the host is written by `stackra infra`, never by hand. The site holds no var
+#           and no runtime secret: it is static documentation. `stackra dev` reads the port and
+#           records it in `.stackra/dev/ports.json`; nothing else in the docs names a port.
 # Runtime: node
-# Governing contract: ADR 0002, ADR 0170
+# Governing contract: ADR 0299 (docs runway), ADR 0296 (member runway), ADR 0002 (docs on
+#                     Mintlify), ADR 0175 (domains), ADR 0170
 $schema: "@stackra/runway/schema/app.json"
-version: 2
-# = the member folder name; the docs app has no stackra.config.ts
-member: docs
-# the site holds no secret: Mintlify builds it from the repository
-secrets: {}
+version: 3
 environments:
   dev:
     # `mint dev` on this port, through `stackra dev`
     port: 3333
+  # The one published site: CI deploys each merge to main once the checks pass. `acme.example` is a
+  # reserved example domain; put a host under your own zone (root `providers.cloudflare.zones`).
+  production:
+    domain: docs.acme.example

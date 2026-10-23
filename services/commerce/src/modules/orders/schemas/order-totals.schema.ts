@@ -3,24 +3,28 @@
  * Purpose: `OrderTotals`: the money summary of an order in one currency: subtotal, the adjustments
  *          in the order they were applied, and the total the customer pays (subtotal plus
  *          adjustments, clamped at zero by OrderPricingService).
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Boundary: a shape class; the wire carries integer minor units and the currency code (ADR 0220),
+ *           while the model stores each amount as `Money`.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0220 (integer minor units),
- *                     guides/programming-model.mdx#schemas
+ * Governing contract: ADR 0294 (decisions 4 and 26), ADR 0220 (integer minor units)
  */
-import { Schema, z } from "@stackra/schema";
-import { OrderAdjustment } from "#modules/orders/schemas/order-adjustment.schema";
+import type { CurrencyCode } from "@stackra/money";
+import { Int, Schema } from "@stackra/validation";
+import type { OrderAdjustment } from "#modules/orders/schemas/order-adjustment.schema";
 
-/**
- * The money summary of an order in one currency: subtotal, the adjustments in the order they were
- * applied, and the
- * total the customer pays (subtotal plus adjustments, clamped at zero by OrderPricingService).
- */
-export class OrderTotals extends Schema(
-  z.object({
-    currency: z.string().length(3),
-    subtotalMinor: z.number().int().nonnegative(),
-    adjustments: OrderAdjustment.schema.array(),
-    totalMinor: z.number().int().nonnegative(),
-  }),
-) {}
+/** Every amount is in `currency`. */
+export class OrderTotals extends Schema {
+  /** ISO 4217 code of every amount below. */
+  currency!: CurrencyCode;
+
+  /** Sum of line prices before adjustments, in minor units. */
+  @Int({ min: 0 })
+  subtotalMinor!: number;
+
+  /** What the `adjustTotals` extensions applied, in the order they ran. */
+  adjustments!: OrderAdjustment[];
+
+  /** Amount charged, in minor units; never below zero. */
+  @Int({ min: 0 })
+  totalMinor!: number;
+}

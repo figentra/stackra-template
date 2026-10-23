@@ -1,0 +1,73 @@
+{
+  "$comment": "Stackra file contract — Purpose: the copy of the console's own route pages (namespace `pages::`, one branch per route key): titles, headings, form labels, empty states and the offline page gen renders per locale at build time; Boundary: keys the pages in src/routes/ reference; the chrome around them is `console::`; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals), ADR 0255 (offline page)",
+  "dashboard": {
+    "title": "Dashboard",
+    "today": "Today",
+    "orders": "Orders today",
+    "revenue": "Revenue today",
+    "change": "{change} compared with yesterday",
+    "revenue_note": "Revenue includes VAT where your store charges it.",
+    "loading": "Loading today's numbers"
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": "Settings sections",
+    "scheme": "Theme",
+    "locale": "Language",
+    "density": "Table density",
+    "local_notifications": "Desktop notifications",
+    "local_notifications_hint": "Shown while the console is open.",
+    "analytics_consent": "Share usage analytics",
+    "analytics_consent_hint": "Helps us see which screens matter. Nothing is sent until you turn this on.",
+    "crash_replay_consent": "Replay my session when something breaks",
+    "crash_replay_consent_hint": "Records the moments before an error so we can fix it. Off until you turn it on; text you type is masked.",
+    "necessary_consent_hint": "Keeps you signed in and remembers this device's choices. Always on.",
+    "notification_preferences": "Notification preferences",
+    "save": "Save",
+    "saved_device": "Device settings saved"
+  },
+  "login": {
+    "title": "Signing you in",
+    "body": "You are being taken to the sign-in page.",
+    "redirecting": "Redirecting",
+    "continue": "Continue to sign in"
+  },
+  "offline": {
+    "title": "You are offline",
+    "body": "This page was not saved on this device, so it cannot open without a connection.",
+    "status_offline": "No connection",
+    "status_online": "Connection restored",
+    "retry": "Try again",
+    "retrying": "Checking the connection",
+    "works_title": "What still works offline",
+    "works": {
+      "orders": "Placing orders: each one waits on this device and is sent once when you reconnect.",
+      "recent": "Pages you opened recently, from the copy kept on this device.",
+      "catalogue": "Searching the part of the product catalogue you already loaded.",
+      "queue": "Reviewing and resolving your pending changes.",
+      "preferences": "Changing the theme, the language and the table density."
+    }
+  },
+  "share": {
+    "title": "Shared to the console",
+    "body": "Attach the shared images to a product, or search the catalogue for the shared text.",
+    "text": "Shared text",
+    "link": "Shared link",
+    "search": "Search the catalogue for this text",
+    "empty_title": "Nothing was shared",
+    "empty_body": "Share images, text or a link from another app to Acme Console to see them here."
+  },
+  "open_file": {
+    "title": "Opened images",
+    "body": "Attach the images you opened with the console to a product.",
+    "empty_title": "No image was opened",
+    "empty_body": "Open a PNG, JPEG or WebP image with Acme Console to attach it to a product."
+  },
+  "mobile_link": {
+    "title": "Open in the Acme app",
+    "heading": "This screen is in the Acme app",
+    "body": "The link opens a screen of the Acme mobile app that the console does not have. Open it on a phone with the app installed, or carry on in the console.",
+    "dashboard": "Go to the dashboard",
+    "link": "Link:"
+  }
+}

@@ -3,13 +3,16 @@
 //          imports #stackra/*. Every member's turbo.jsonc extends this file with exactly one tier
 //          tag; `boundaries` enforces the tier direction.
 // Boundary: task order, inputs, outputs and the environment each task may see. A member's own
-//           committed manifest and OpenAPI file are outputs of its `gen`, never its inputs; an
-//           app's `gen` reads the services' committed manifests as inputs, so a service change
-//           re-runs the apps' gen. TURBO_TOKEN, TURBO_TEAM and TURBO_REMOTE_CACHE_SIGNATURE_KEY come
-//           from the environment (CI: Infisical; local: optional), never this file.
+//           committed stackra.manifest.json and openapi.json (at its member root) are outputs of
+//           its `gen`, never its inputs; an app's `gen` reads the services' committed manifests as
+//           inputs, so a service change re-runs the apps' gen. TURBO_TOKEN, TURBO_TEAM and
+//           TURBO_REMOTE_CACHE_SIGNATURE_KEY come from the environment (CI: Infisical; local:
+//           optional), never this file.
 // Runtime: node
 // Governing contract: Stackra ADR 0261 (gen before build), Stackra ADR 0003 (tier direction),
-//                     Stackra ADR 0158 (committed manifest)
+//                     Stackra ADR 0158 (committed manifest), Stackra ADR 0294 decision 10
+//                     (contracts at the member root), Stackra ADR 0295 (generated entries and tool
+//                     configs)
 {
   "$schema": "https://turborepo.dev/schema.json",
 
@@ -47,19 +50,38 @@
   },
   "tasks": {
     "gen": {
-      "description": "stackra gen: .stackra/gen (#stackra/*), the generated entries, and the committed app-manifest.json and openapi.json.",
+      "description": "stackra gen: .stackra/ (gen modules, runtime entries, tool configs) and the committed stackra.manifest.json and openapi.json at the member root.",
       "dependsOn": ["^gen"],
       // An app's clients come from the in-repo service manifests (committed outputs of their own
-      // `gen`) plus the external manifests pinned in stackra.lock.yaml.
+      // `gen`) plus the external manifests pinned in stackra.lock.yaml. The `*.extend.ts` hatches
+      // change the tool configs gen writes.
       "inputs": [
         "src/**",
         "assets/**",
         "package.json",
         "stackra.config.ts",
+        "*.extend.ts",
         "runway.yaml",
-        "$TURBO_ROOT$/services/*/.stackra/app-manifest.json"
+        "$TURBO_ROOT$/services/*/stackra.manifest.json"
       ],
-      "outputs": [".stackra/**", "css/**"]
+      // The root shims are gen outputs too (gitignored, Stackra ADR 0295 decision 5): a cache hit
+      // must restore them, or a tool that reads only the member root finds no config.
+      "outputs": [
+        ".stackra/**",
+        "stackra.manifest.json",
+        "openapi.json",
+        "css/**",
+        "vitest.config.ts",
+        "tsdown.config.ts",
+        "vite.config.ts",
+        "react-router.config.ts",
+        "playwright.config.ts",
+        "wrangler.jsonc",
+        "app.config.ts",
+        "eas.json",
+        "metro.config.js",
+        "babel.config.js"
+      ]
     },
     "typecheck": {
       "description": "tsc --noEmit.",
@@ -122,7 +144,7 @@
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxfmtrc.jsonc"]
     },
     "validate": {
-      "description": "stackra validate: a member's config files against their schemas and the placement rules (tier tags, catalogs, kind folders).",
+      "description": "stackra validate: a member's config files against their schemas (runway format 3) and the placement rules (tier tags, catalogs, group folders and kind suffixes, topology placement).",
       "dependsOn": ["gen"]
     },
     "clean": { "description": "Remove a member's build output and local caches.", "cache": false },

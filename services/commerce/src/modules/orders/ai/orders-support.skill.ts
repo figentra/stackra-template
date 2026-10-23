@@ -2,26 +2,24 @@
  * Stackra file contract:
  * Purpose: the "order support" skill: instructions loaded on demand plus the tools an agent may
  *          use.
- * Boundary: tools are referenced by class; gen fails on a class that is not an exposed tool
- *           (`@AsTool` or an L0/L1 query).
+ * Boundary: the instructions are the module asset bound by name (`orders::ai/orders-support.md`).
+ *           Tools are referenced by class; gen fails on a class that is not an exposed tool (an
+ *           action with `tool: true`, or an L0 or L1 query).
  * Runtime: isomorphic
- * Governing contract: ADR 0245 (skills, progressive disclosure), ADR 0155,
- *                     guides/programming-model.mdx#ai
+ * Governing contract: ADR 0294 (decisions 13 and 16), ADR 0245 (skills, progressive disclosure),
+ *                     ADR 0155
  */
 import { Skill } from "@stackra/ai";
-import { Assets } from "#stackra/assets";
+import { CancelOrderAction } from "#modules/orders/actions/cancel-order.action";
 import { GetOrderQuery } from "#modules/orders/queries/get-order.query";
 import { ListOrdersQuery } from "#modules/orders/queries/list-orders.query";
-import { CancelOrderAction } from "#modules/orders/actions/cancel-order.action";
 
-/** Loaded when the intent router matches an order question; the instructions are a module asset. */
-@Skill({
-  instructions: Assets.orders.ai.orders_support_md,
+/** Loaded when the intent router matches an order question. */
+export class OrdersSupportSkill extends Skill({
   tools: [GetOrderQuery, ListOrdersQuery, CancelOrderAction],
-})
-export class OrdersSupportSkill {
+}) {
   /** Few-shot examples; `calls` reference tool classes, so a renamed action breaks the build. */
-  examples = [
+  readonly examples = [
     {
       input: "cancel my last order",
       calls: [

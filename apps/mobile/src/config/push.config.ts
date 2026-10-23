@@ -1,70 +1,61 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: push notifications. The provider, how a notification shows while the app is
- *          open, the Android channels, and the moment the OS prompt is first shown.
- * Boundary: values only. The device is registered by the push provider through
- *           `Devices.actions.RegisterDevice`, which the provider names itself: a config field never
- *           holds a generated descriptor. The OS prompt is the platform driver's. Push is optional:
- *           a refusal never blocks the app.
+ * Purpose: this app's override of @stackra/platform's push configuration: the transport, how a
+ *          notification shows while the app is open, the Android channels, and the moment the OS
+ *          prompt is first shown.
+ * Boundary: an override declares `override` members only and inherits the base's key; its presence
+ *           mounts the push context, so the app writes no push provider. Before the first frame the
+ *           package applies the foreground rule and creates the channels; once a session and a
+ *           tenant exist it registers the device with the devices module (ADR 0235), queued offline
+ *           by the generated offline map, and re-registers on a tenant switch or a locale change; a
+ *           tapped notification's deep link opens through the generated linking. Push is optional:
+ *           a refusal never blocks the app, and the settings switch offers the prompt again. A
+ *           field typed by an enum or a driver name restates its type. `EnvConfig.pushProvider`
+ *           (`EXPO_PUBLIC_PUSH_PROVIDER`) feeds `provider` per environment over the default below.
  * Runtime: react-native
- * Governing contract: ADR 0062, ADR 0180, ADR 0235, ADR 0250
+ * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
+ *                     alias), ADR 0295 (decision 10), ADR 0062, ADR 0180, ADR 0235, ADR 0250
  */
-import { Config, DriverOf, Env } from "@stackra/config";
 import type { DriverName } from "@stackra/container";
-import { PushTransport } from "@stackra/platform/contracts";
-import { PromptMoment } from "@stackra/platform";
-import { Bool, Int, List, Nested, OneOf, Str, Url } from "@stackra/validation";
+import {
+  NotificationImportance,
+  PromptMoment,
+  PushConfig as BasePushConfig,
+} from "@stackra/platform";
+import type { PushTransport } from "@stackra/platform/contracts";
 import { I18n } from "#stackra/i18n";
 
-/** One Android notification channel; `nameKey` is translated at channel creation. */
-class AndroidChannel {
-  /** The channel id the service's payload names. */
-  @Str() id!: string;
-  /** The channel name shown in the OS settings, as a typed key. */
-  @Str() nameKey!: string;
-  /**
-   * Tool-owned: expo-notifications' `AndroidImportance` names, typed by that union. @defaultValue
-   * "default"
-   */
-  @OneOf(["min", "low", "default", "high", "max"]) importance = "default";
-  /** Vibrate on arrival. @defaultValue true */
-  @Bool() vibrate = true;
-  /** Tool-owned: the sound file name, or the platform's `default`. @defaultValue "default" */
-  @Str() sound = "default";
-}
+/** Expo push, a quiet foreground banner, one orders channel, asked in the first session. */
+export class PushConfig extends BasePushConfig {
+  /** The registered push transport; the env value replaces it per environment. */
+  override provider: DriverName<PushTransport> = "expo";
 
-/** The push transport, foreground presentation, channels and prompt timing. */
-@Config("mobile.push")
-export class PushConfig {
-  /**
-   * Which registered push transport runs; set per environment by `EXPO_PUBLIC_PUSH_PROVIDER`.
-   * @defaultValue "expo"
-   */
-  @Env("EXPO_PUBLIC_PUSH_PROVIDER")
-  @DriverOf(PushTransport)
-  provider: DriverName<PushTransport> = "expo";
-  /** Endpoint of a self-hosted relay; absent for Expo. */
-  @Url() endpoint?: string;
-  /** Registration retries before the app gives up for this launch. @defaultValue 3 */
-  @Int({ min: 1 }) retries = 3;
-  /** Show a banner for a notification that arrives while the app is open. @defaultValue true */
-  @Bool() foregroundBanner = true;
-  /** Play the sound for a foreground notification. @defaultValue false */
-  @Bool() foregroundSound = false;
-  /** Update the badge for a foreground notification. @defaultValue true */
-  @Bool() foregroundBadge = true;
-  /** The Android channels created at first launch. */
-  @List(Nested(AndroidChannel)) androidChannels: AndroidChannel[] = [
+  /** Registration retries before the app gives up for this launch. */
+  override retries = 3;
+
+  /** Show a banner for a notification that arrives while the app is open. */
+  override foregroundBanner = true;
+
+  /** Play the sound for a foreground notification. */
+  override foregroundSound = false;
+
+  /** Update the badge for a foreground notification. */
+  override foregroundBadge = true;
+
+  /** The Android channels created at first launch; the name is translated at creation. */
+  override androidChannels = [
     {
       id: "orders",
       nameKey: I18n.mobile.push.channel_orders,
-      importance: "high",
+      importance: NotificationImportance.High,
       vibrate: true,
       sound: "default",
     },
   ];
-  /** When the OS prompt is first shown. @defaultValue PromptMoment.FirstSession */
-  @OneOf(PromptMoment) askOn = PromptMoment.FirstSession;
-  /** iOS: ask for provisional (quiet) authorization first. @defaultValue false */
-  @Bool() iosProvisional = false;
+
+  /** When the OS prompt is first shown. */
+  override askOn: PromptMoment = PromptMoment.FirstSession;
+
+  /** iOS: ask for provisional (quiet) authorization first. */
+  override iosProvisional = false;
 }

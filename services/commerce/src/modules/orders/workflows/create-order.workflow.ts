@@ -1,130 +1,124 @@
 /**
  * Stackra file contract:
  * Purpose: the steps behind `orders.order.create`: price, reserve stock, create the pending order,
- *          authorize payment. A later failure undoes earlier steps through their compensations, in
- *          reverse.
- * Boundary: a declarative graph (ADR 0094). Steps run in declaration order unless `after` says
- *           otherwise; each step is its own transaction and is idempotent on the run id. Never
- *           exposed directly (ADR 0101).
+ *          authorize the payment. A later failure undoes the earlier steps in reverse.
+ * Boundary: every public async method is a step, run in declaration order, whether or not it
+ *           carries `@Step`; the decorator is written only to give a step options (here the payment
+ *           call's retries), never to make it a step. `undo<Step>` compensates its step; `output`
+ *           maps the results to the action's output. Each step is its own transaction, is
+ *           idempotent on the run id and stores its result with the run, so a resume skips what is
+ *           done. Started only by CreateOrderAction through `ctx.run`, never exposed directly;
+ *           another module that needs to change a step's result uses the orders extension point,
+ *           never a step of its own here.
  * Runtime: node
- * Governing contract: ADR 0094, 0101, 0151, 0152, guides/programming-model.mdx#workflows
+ * Governing contract: ADR 0294 (decisions 6, 16 and 18, as amended by programming model
+ *                     v3.1, AGENTS.md), ADR 0101, ADR 0151, ADR 0152, ADR 0265 (extension
+ *                     points)
  */
+import type { PublicId } from "@stackra/contracts";
 import { Backoff } from "@stackra/queue";
-import { Step, Workflow, WorkflowBase, type StepContext } from "@stackra/workflow";
-import type { PaymentsClient } from "#stackra/clients";
+import { type Run, Step, type StepContext, Workflow } from "@stackra/workflow";
+import type { AuthorizePaymentOutput, PaymentsClient } from "#stackra/clients/payments";
 import type { StockService } from "#modules/inventory/services/stock.service";
-import type { OrderService } from "#modules/orders/services/order.service";
-import type { OrderPricingService } from "#modules/orders/services/order-pricing.service";
-import type { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
-import type { CreateOrderOutput } from "#modules/orders/schemas/create-order-output.schema";
-import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
-import type { OrderTotals } from "#modules/orders/schemas/order-totals.schema";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
+import type { OrderExtensionPoint } from "#modules/orders/extensions/order.extension-point";
+import type { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
+import { CreateOrderOutput } from "#modules/orders/schemas/create-order-output.schema";
+import { PricedOrder } from "#modules/orders/schemas/priced-order.schema";
+import type { OrderPricingService } from "#modules/orders/services/order-pricing.service";
+import type { OrderService } from "#modules/orders/services/order.service";
 
-/** Output of `price`; later steps read it as `s.price`. */
-interface Priced {
-  readonly draft: OrderDraft;
-  readonly totals: OrderTotals;
-}
-
-/**
- * `output` maps step results to the action's declared output, so the workflow stays private to the
- * module.
- */
-@Workflow({ timeout: "2m" })
-export class CreateOrderWorkflow extends WorkflowBase<CreateOrderInput, CreateOrderOutput> {
+/** Runs at most two minutes; the payment provider's retries fit inside it. */
+export class CreateOrderWorkflow extends Workflow<CreateOrderInput>({ timeout: "2m" }) {
+  /** Each step's collaborator; the payments client is the only remote call. */
   constructor(
     private readonly pricing: OrderPricingService,
     private readonly stock: StockService,
     private readonly orders: OrderService,
     private readonly payments: PaymentsClient,
+    private readonly extensions: OrderExtensionPoint,
   ) {
     super();
   }
 
-  /** Draft, totals and the hook chains; no side effects, so no compensation. */
-  @Step()
-  async price(input: CreateOrderInput, ctx: StepContext): Promise<Priced> {
-    const draft = await this.pricing.draft(input, ctx);
-    await this.pricing.verify(draft, ctx);
-    return { draft, totals: await this.pricing.price(draft, ctx) };
+  /** Draft, then both extension slots (verify before, totals after); no side effects, no undo. */
+  async price(run: Run<this>, ctx: StepContext): Promise<PricedOrder> {
+    const draft = await this.pricing.verify(await this.pricing.draft(run.input, ctx), ctx);
+    return PricedOrder.create({ draft, totals: await this.pricing.price(draft, ctx) });
   }
 
   /**
-   * Holds the stock before the row exists so two customers cannot both buy the last unit.
-   * @throws InsufficientStockError, which ends the run before anything needs compensating.
+   * Holds the stock before the row exists, so two customers cannot both buy the last unit.
+   * @throws InsufficientStockError, which ends the run before anything needs undoing.
    */
-  @Step<CreateOrderWorkflow>({ input: (s) => s.price.draft.lines, compensate: "releaseStock" })
-  async reserveStock(lines: OrderDraft["lines"]): Promise<OrderDraft["lines"]> {
-    await this.stock.reserve(lines);
-    return lines;
+  async reserveStock(run: Run<this>): Promise<void> {
+    await this.stock.reserve(run.results.price.draft.lines);
   }
 
-  /** Compensation of `reserveStock`; safe to repeat (release never goes negative). */
-  async releaseStock(lines: OrderDraft["lines"]): Promise<void> {
-    await this.stock.release(lines);
-  }
-
-  /** Writes the pending order; `order.placed` leaves through the outbox when this step commits. */
-  @Step<CreateOrderWorkflow>({ input: (s) => s.price, compensate: "cancelOrder" })
-  async createOrder({ draft, totals }: Priced): Promise<{ id: string }> {
-    return { id: (await this.orders.createPending(draft, totals)).id };
+  /** Undoes `reserveStock`; safe to repeat, because a release never goes below zero. */
+  async undoReserveStock(run: Run<this>): Promise<void> {
+    await this.stock.release(run.results.price.draft.lines);
   }
 
   /**
-   * Compensation of `createOrder`: the order stays as a cancelled row with reason `payment_failed`,
-   * for support.
+   * Writes the pending order and runs `reservePlacement` in the same transaction, so what an
+   * extension holds commits with the order or not at all; `order.placed` leaves through the outbox
+   * when this step commits.
+   * @throws Refusal an extension's (`insufficient_points`), which rolls the order back and starts
+   *         the undo chain.
    */
-  async cancelOrder(created: { id: string }): Promise<void> {
-    await this.orders.cancel(
-      await this.orders.findOneOrFail({ id: created.id }),
-      CancelReason.PaymentFailed,
-    );
+  async createOrder(run: Run<this>, ctx: StepContext): Promise<PublicId<"ord">> {
+    const { draft, totals } = run.results.price;
+    const order = this.orders.createPending(draft, totals);
+    await this.extensions.reservePlacement(order.id, run.results.price, ctx);
+    return order.id;
   }
 
   /**
-   * The external call runs last; `ctx.stepKey` is the idempotency key, so a retry never authorizes
-   * twice.
-   * @throws AppError the payments service's refusal (e.g. `card_declined`) after the last attempt,
-   *   which triggers compensation.
+   * Undoes `createOrder`: the order stays as a cancelled row with reason `payment_failed`, whose
+   * `order.cancelled` lets each extension release what it reserved.
    */
-  @Step<CreateOrderWorkflow>({
-    input: (s) => ({
-      orderId: s.createOrder.id,
-      amountMinor: s.price.totals.totalMinor,
-      currency: s.price.totals.currency,
-    }),
-    retry: { attempts: 3, backoff: Backoff.Exponential },
-    compensate: "voidPayment",
+  async undoCreateOrder(run: Run<this>): Promise<void> {
+    const order = await this.orders.findOneOrFail({ id: run.results.createOrder });
+    this.orders.cancel(order, CancelReason.PaymentFailed);
+  }
+
+  /**
+   * The external call runs last; `ctx.stepKey` is the idempotency key, so a retry never
+   * authorizes twice.
+   * @throws Refusal the payments service's refusal (`card_declined`) after the last attempt, which
+   *         starts the undo chain.
+   */
+  @Step({
+    retry: {
+      attempts: 3,
+      backoff: Backoff.Exponential,
+    },
   })
-  async authorizePayment(
-    req: { orderId: string; amountMinor: number; currency: string },
-    ctx: StepContext,
-  ): Promise<{ paymentId: string; clientSecret: string }> {
-    const intent = await this.payments.payment.authorize.call(
-      { reference: req.orderId, amountMinor: req.amountMinor, currency: req.currency },
+  async authorizePayment(run: Run<this>, ctx: StepContext): Promise<AuthorizePaymentOutput> {
+    const orderId = run.results.createOrder;
+    const { totals } = run.results.price;
+    const authorization = await this.payments.payment.authorize.call(
+      { reference: orderId, amountMinor: totals.totalMinor, currency: totals.currency },
       { idempotencyKey: ctx.stepKey },
     );
-    await this.orders.attachPayment(req.orderId, intent.paymentId);
-    return intent;
+    await this.orders.attachPayment(orderId, authorization.paymentId);
+    return authorization;
   }
 
-  /**
-   * Compensation of `authorizePayment`, only reached if a later step is added after it; a command,
-   * retried until done.
-   */
-  async voidPayment(auth: { paymentId: string }): Promise<void> {
-    await this.payments.payment.void.queue({ paymentId: auth.paymentId });
+  /** Undoes `authorizePayment` once a later step exists; a queued call, retried until done. */
+  async undoAuthorizePayment(run: Run<this>): Promise<void> {
+    await this.payments.payment.void.queue({ paymentId: run.results.authorizePayment.paymentId });
   }
 
-  /** The action's output, typed against CreateOrderOutput. */
-  output(s: this["results"]): CreateOrderOutput {
-    return {
-      orderId: s.createOrder.id,
+  /** The action's output, built from the step results. */
+  output(run: Run<this>): CreateOrderOutput {
+    return CreateOrderOutput.create({
+      orderId: run.results.createOrder,
       status: OrderStatus.PendingPayment,
-      totals: s.price.totals,
-      paymentClientSecret: s.authorizePayment.clientSecret,
-    };
+      totals: run.results.price.totals,
+      paymentClientSecret: run.results.authorizePayment.clientSecret,
+    });
   }
 }

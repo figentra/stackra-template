@@ -1,59 +1,39 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: what the app reports about itself (the client variant of telemetry config).
- *          Error and native-crash reporting, trace sampling, session replay behind consent, and the
- *          cold-start budget.
- * Boundary: the DSN is the public env (`MobileEnv.sentryDsn`), the Sentry project is `runway.yaml`
- *           `telemetry`, the org is the root runway; none of them is here. No personal data is
- *           sent: user ids only, no emails, no request bodies. Replay never starts until the user
- *           grants `ConsentCategory.CrashReplay`. Sampling per environment is `runway.yaml`
+ * Purpose: this app's override of @stackra/logger's telemetry configuration: what the app reports
+ *          about itself. Error and native-crash reporting, trace sampling, session replay behind
+ *          consent, and the cold-start budget.
+ * Boundary: an override declares `override` members only and inherits the base's key
+ *           (`logger.telemetry`); its presence mounts the telemetry context and starts the reporter
+ *           port of @stackra/errors (Sentry behind it). Nested objects are replaced whole, so each
+ *           merges the base value explicitly. The DSN is the public env value
+ *           `EnvConfig.telemetryDsn` (`EXPO_PUBLIC_SENTRY_DSN`); the Sentry project is runway.yaml
+ *           `telemetry`, the organisation the root runway. No personal data is sent: user ids only,
+ *           no emails, no request bodies. Replay never starts until the user grants
+ *           `ConsentCategory.CrashReplay`. Sampling per environment is runway.yaml
  *           `environments.<env>.config`.
  * Runtime: isomorphic
- * Governing contract: ADR 0071, ADR 0180, ADR 0184, ADR 0232
+ * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
+ *                     alias), ADR 0295 (decision 10), ADR 0071, ADR 0180, ADR 0184, ADR 0232
  */
-import { Config } from "@stackra/config";
-import { Bool, Int, Nested, Num, OneOf } from "@stackra/validation";
-import { ConsentCategory } from "#src/enums/consent-category.enum";
+import { ConsentCategory } from "@stackra/consent";
+import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
 
-/** Crash and error reporting through the reporter port (Sentry behind it). */
-class ErrorsConfig {
-  /** Report errors at all. @defaultValue true */
-  @Bool() enabled = true;
-  /** Share of errors sent. @defaultValue 1 */
-  @Num({ min: 0, max: 1 }) sampleRate = 1;
-  /** Report native crashes, not only JavaScript errors. @defaultValue true */
-  @Bool() nativeCrashes = true;
-}
+/** The dev-safe rates; runway lowers them per environment. */
+export class TelemetryConfig extends BaseTelemetryConfig {
+  /** Every error and native crash is reported. */
+  override errors = { ...this.errors, enabled: true, sampleRate: 1, nativeCrashes: true };
 
-/** Head sampling of app traces (cold start, navigation, client calls). */
-class TracesConfig {
-  /** Share of sessions traced. @defaultValue 0.1 */
-  @Num({ min: 0, max: 1 }) sampleRate = 0.1;
-}
+  /** A tenth of sessions are traced (cold start, navigation, client calls). */
+  override traces = { ...this.traces, sampleRate: 0.1 };
 
-/** Session replay attached to an error, only with consent. */
-class ReplayConfig {
-  /** Share of errored sessions replayed once consent is granted. @defaultValue 1 */
-  @Num({ min: 0, max: 1 }) onErrorSampleRate = 1;
-  /** The consent category that gates replay; gen checks it is in consent.config.ts. */
-  @OneOf(ConsentCategory) consent = ConsentCategory.CrashReplay;
-}
+  /** Every errored session is replayed, only once the crash-replay consent is granted. */
+  override replay = {
+    ...this.replay,
+    onErrorSampleRate: 1,
+    consent: ConsentCategory.CrashReplay,
+  };
 
-/** Budgets the performance reviewer reads; a regression is advisory, not a gate. */
-class BudgetsConfig {
-  /** Cold start to first route, in milliseconds. @defaultValue 1500 */
-  @Int({ min: 1 }) coldStartMs = 1500;
-}
-
-/** The dev-safe defaults; runway lowers the rates per environment. */
-@Config("mobile.telemetry")
-export class TelemetryConfig {
-  /** How crashes and errors are reported to Sentry. */
-  @Nested(ErrorsConfig) errors = new ErrorsConfig();
-  /** How many traces are sampled and sent. */
-  @Nested(TracesConfig) traces = new TracesConfig();
-  /** Session replay, recorded only after consent. */
-  @Nested(ReplayConfig) replay = new ReplayConfig();
-  /** The cold-start and frame budgets the app is measured against. */
-  @Nested(BudgetsConfig) budgets = new BudgetsConfig();
+  /** Cold start to first route, in milliseconds; a regression is advisory, not a gate. */
+  override budgets = { ...this.budgets, coldStartMs: 1500 };
 }

@@ -1,16 +1,28 @@
 /**
  * Stackra file contract:
- * Purpose: registers `CtaBanner` as the page-builder block `web.cta_banner`: a closing
- *          call-to-action banner for tenant pages.
- * Boundary: a `@Block` class: the component and the props schema are options; the key is declared
- *           short and snake_case and gen prefixes the member key on the wire.
+ * Purpose: the page-builder block `web.cta_banner`: a closing call-to-action banner for tenant
+ *          pages.
+ * Boundary: the class is the props shape a document may pass, validated on publish and on render;
+ *           its renderer is `cta-banner.tsx` in this folder, bound by name, and the key is derived
+ *           from the folder. Text is `LocalizedText`, the button a route key.
  * Runtime: isomorphic
- * Governing contract: ADR 0110 (L2: registered coded components, validated props), ADR 0231
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20, as amended by programming model v3.1,
+ *                     AGENTS.md: icon names and client classes), ADR 0110 (registered coded blocks)
  */
-import { Block } from "@stackra/experience";
-import { CtaBanner } from "#src/blocks/cta-banner/cta-banner";
-import { CtaProps } from "#src/schemas/cta-props.schema";
+import { Block, BlockCategory, type LocalizedText } from "@stackra/experience";
+import type { CallToAction } from "#src/schemas/call-to-action.schema";
 
-/** Page-builder block `web.cta_banner`: a closing call-to-action banner for tenant pages. */
-@Block({ key: "cta_banner", component: CtaBanner, props: CtaProps })
-export class CtaBannerBlock {}
+/** A title, a line and the one button. */
+export class CtaBannerBlock extends Block({
+  category: BlockCategory.Marketing,
+  icon: "megaphone",
+}) {
+  /** The section heading. */
+  title!: LocalizedText;
+
+  /** One sentence under the heading. */
+  body!: LocalizedText;
+
+  /** The button's label and the route it opens. */
+  button!: CallToAction;
+}

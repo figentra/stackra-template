@@ -1,16 +1,25 @@
 /**
  * Stackra file contract:
- * Purpose: `SearchProductsInput`: the storefront search phrase (2 to 64 characters), an optional
- *          collection slug, cursor and limit.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `SearchProductsInput`: the input of `catalogue.product.search@1`: the storefront search
+ *          phrase, collection, cursor and page size.
+ * Boundary: a shape class in schemas/, one declaration per file; gen compiles it to the action's or
+ *           query's schema in `#stackra/schemas` and into openapi.json.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0082 (public area), ADR 0221 (hybrid search),
- *                     guides/programming-model.mdx#schemas; apps/web store route
+ * Governing contract: ADR 0294 (decisions 4 and 26, as amended by programming model
+ *                     v3.1, AGENTS.md)
  */
-import { PageFilter, z } from "@stackra/schema";
+import { CursorInput, Str } from "@stackra/validation";
 
-/** The storefront search phrase (2 to 64 characters), an optional collection slug, cursor and limit. */
-export class SearchProductsInput extends PageFilter({
-  q: z.string().min(2).max(64),
-  collection: z.string().max(200).optional(),
-}) {}
+/** `cursor` and `limit` (1–100, default 20) come from CursorInput. */
+export class SearchProductsInput extends CursorInput {
+  /** The search phrase, 2 to 64 characters. */
+  @Str({
+    min: 2,
+    max: 64,
+  })
+  q!: string;
+
+  /** A collection slug to search within. */
+  @Str({ max: 200 })
+  collection?: string;
+}
