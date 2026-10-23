@@ -5,7 +5,9 @@
  *          declared seeds, axe on every journey, one project per runner plus one RTL project per
  *          RTL locale, and the pwa and desktop projects.
  * Boundary: `baseURL` is read from `.stackra/dev/ports.json` (runway.yaml environments.dev); no
- *           literal URL here.
+ *           literal URL here. Journeys sit in the route folder they drive
+ *           (`src/routes/<name>/__tests__/*.e2e.test.ts`). The gitignored `playwright.config.ts`
+ *           at the member root re-exports this file.
  * Runtime: node
  */
 import { fileURLToPath } from "node:url";

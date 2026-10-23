@@ -11,13 +11,12 @@
  */
 import { useAction, useInfiniteQuery } from "@stackra/clients/react";
 import { useSubscription } from "@stackra/realtime/react";
-import type { z } from "@stackra/schema";
 import { Notifications, type NotificationView } from "#stackra/clients";
 
 /** What the hook returns. */
 export interface NotificationInboxState {
   /** The newest notifications first, across every page loaded; empty before the first answer. */
-  readonly items: ReadonlyArray<z.infer<typeof NotificationView>>;
+  readonly items: readonly NotificationView[];
   /** The actor's unread count across the whole inbox, as the service counts it. */
   readonly unread: number;
   /** True until the first answer arrives. */

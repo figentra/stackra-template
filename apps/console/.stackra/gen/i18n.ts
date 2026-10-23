@@ -6,10 +6,12 @@
  * Purpose: the complete typed key tree of every namespace this app or its generated files
  *          reference, the lazy loaders per namespace and locale, and the overrides gen applied. A
  *          leaf is a branded `I18nKey`, so `t()` refuses a raw string and a typo is a type error.
- * Boundary: keys are `<namespace>::<path>` (ADR 0231). Consumed namespaces are copied by gen into
- *           `.stackra/lang/` from the producers' committed manifests, so the app never imports a
- *           service. Gen fails on a key present in one locale only and on an `ar` plural missing
- *           any of `zero one two few many other`.
+ * Boundary: keys are `<namespace>::<path>` (ADR 0231); the derived keys of a declaration sit under
+ *           its kind segment (`orders::actions.order.cancel.confirm`,
+ *           `console::shortcuts.open_palette.label`, ADR 0294 d20). Consumed namespaces are copied
+ *           by gen into `.stackra/lang/` from the producers' committed manifests, so the app never
+ *           imports a service. Gen fails on a derived key missing in any locale, on a key present
+ *           in one locale only and on an `ar` plural missing any of `zero one two few many other`.
  * Runtime: browser
  */
 import { keys, type I18nKey } from "@stackra/i18n";
@@ -19,53 +21,41 @@ export type { I18nKey };
 /** `I18n.<namespace>.<path>`; `_` holds the leaves of a branch that also has children. */
 export const I18n = keys({
   console: {
-    shell: [
-      "brand",
-      "short_name",
-      "top_bar",
-      "menu",
-      "sidebar",
-      "navigation",
-      "account",
-      "loading_session",
-    ],
-    shortcuts: ["quick_order", "quick_order_short", "quick_order_description"],
-    manifest: ["description"],
-    pages: ["dashboard", "welcome", "settings"],
-    commands: [
-      "palette",
+    shell: ["brand", "top_bar", "menu", "sidebar", "navigation", "account", "loading_session"],
+    shortcuts: {
+      open_palette: ["label"],
+      toggle_sidebar: ["label"],
+      cycle_theme: ["label"],
+      open_pending_changes: ["label"],
+      sign_out: ["label"],
+    },
+    manifest: {
+      _: ["name", "short_name", "description"],
+      shortcuts: {
+        quick_order: ["name", "short_name", "description"],
+      },
+    },
+    pages: ["dashboard", "settings"],
+    documents: {
+      welcome: ["title"],
+    },
+    palette: [
       "placeholder",
       "clear",
-      "escape",
       "no_match",
       "no_match_hint",
       "group_app",
       "group_account",
       "group_intent",
-      "sidebar",
-      "theme",
-      "locale",
-      "pending_changes",
-      "logout",
       "navigate",
       "select",
+      "escape",
     ],
     tenant: ["switch", "none_title", "none_body", "switch_blocked_by_queue"],
     roles: ["admin", "staff", "viewer", "member"],
     locale: ["switch", "current"],
     theme: ["light", "dark", "system", "toggle"],
     offline: ["title", "body", "page_title", "page_body", "retry"],
-    realtime: ["connected", "connecting", "disconnected"],
-    inbox: [
-      "title",
-      "open",
-      "empty_title",
-      "empty_body",
-      "mark_read",
-      "loading",
-      "load_more",
-      "mark_read_failed",
-    ],
     queue: {
       _: [
         "title",
@@ -89,24 +79,24 @@ export const I18n = keys({
       "tabs",
       "device",
       "tenant",
-      "privacy",
       "scheme",
       "locale",
       "density",
-      "density_comfortable",
-      "density_compact",
       "local_notifications",
       "local_notifications_hint",
+      "save",
+      "saved_device",
+      "privacy",
       "analytics_consent",
       "analytics_consent_hint",
       "notification_preferences",
-      "save",
-      "saved_device",
     ],
+    enums: {
+      density: ["comfortable", "compact"],
+    },
     capabilities: ["permission_denied", "unavailable"],
     quick_order: ["variant_required"],
     risk: ["l0", "l1", "l2", "l3"],
-    export: ["pick_folder"],
     menu: ["file", "view", "go", "help", "docs"],
     tray: ["show"],
     errors: {
@@ -118,39 +108,86 @@ export const I18n = keys({
       validation: ["title", "body"],
       entitlement_required: ["title", "body"],
     },
+    realtime: ["connected", "connecting", "disconnected"],
+    inbox: [
+      "title",
+      "open",
+      "empty_title",
+      "empty_body",
+      "mark_read",
+      "loading",
+      "load_more",
+      "mark_read_failed",
+    ],
   },
   catalogue: {
     nav: ["catalogue"],
-    resource: ["products"],
-    status: ["draft", "active", "archived"],
-    product: ["archive_confirm", "archived", "images"],
-    refusals: ["variant_unavailable", "variant_not_found", "product_not_found"],
+    resources: { product: ["title"] },
+    enums: { product_status: ["draft", "active", "archived"] },
+    actions: { product: { archive: ["confirm", "success"], attach_image: ["success"] } },
+    product: ["images"],
+    errors: {
+      variant_unavailable: ["message"],
+      variant_not_found: ["message"],
+      product_not_found: ["message"],
+    },
   },
   inventory: {
-    settings: ["title", "low_stock_threshold", "allow_backorders"],
-    widgets: ["low_stock"],
-    adjust_reason: ["count", "delivery", "damage"],
-    refusals: ["insufficient_stock"],
+    settings: { inventory: ["title", "low_stock_threshold", "allow_backorders"] },
+    widgets: { low_stock: ["title"] },
+    enums: { stock_adjust_reason: ["count", "delivery", "damage"] },
+    errors: { insufficient_stock: ["message"] },
   },
   orders: {
     nav: ["sales"],
-    resource: ["orders"],
-    status: ["pending_payment", "paid", "cancelled", "expired"],
-    cancel_reason: ["customer", "staff", "expired", "payment_failed"],
-    settings: ["title", "auto_cancel_after_minutes", "customers_may_cancel", "accepting_orders"],
-    order: ["placed", "queued", "cancel_confirm", "cancelled", "lines_count"],
-    widgets: ["revenue_today"],
-    documents: ["sales_today"],
+    resources: { order: ["title"] },
+    enums: {
+      order_status: ["pending_payment", "paid", "cancelled", "expired"],
+      cancel_reason: ["customer", "staff", "expired", "payment_failed"],
+    },
+    settings: {
+      orders: ["title", "auto_cancel_after_minutes", "customers_may_cancel", "accepting_orders"],
+    },
+    actions: { order: { create: ["success", "queued"], cancel: ["confirm", "success"] } },
+    order: ["lines_count"],
+    widgets: { revenue_today: ["title"] },
+    documents: { sales_today: ["title"] },
     quick_order: ["title", "variant", "quantity", "submit"],
-    flags: ["quick_order"],
-    refusals: ["order_not_payable"],
+    flags: { quick_order: ["label"] },
+    errors: { order_not_payable: ["message"], orders_paused: ["message"] },
   },
-  loyalty_kit: { adjustment: ["points"], refusals: ["insufficient_points"] },
-  access_log: { nav: ["audit", "access_log"], resource: ["entries"] },
+  loyalty_kit: {
+    nav: ["loyalty"],
+    enums: {
+      loyalty_tier: ["bronze", "silver", "gold"],
+      entry_kind: ["earn", "redeem", "expire", "adjust"],
+    },
+    resources: { loyalty_account: ["title"] },
+    widgets: { points_issued: ["title"], points_balance: ["title"] },
+    documents: { loyalty_overview: ["title"] },
+    overview: ["redeem_title", "expiry_note"],
+    settings: { loyalty_kit: ["title", "expiry_months", "silver_from", "gold_from"] },
+    permissions: { loyalty_account: ["read", "enroll", "freeze", "redeem", "expire"] },
+    actions: { account: { enroll: ["success"], freeze: ["confirm", "success"] } },
+    account: ["frozen_badge"],
+    adjustment: ["points"],
+    errors: {
+      insufficient_points: ["message"],
+      not_a_member: ["message"],
+      not_own_principal: ["message"],
+    },
+  },
+  access_log: {
+    nav: ["audit", "access_log"],
+    resources: { access_log_entry: ["title"] },
+    enums: { data_classification: ["personal", "financial", "health", "pseudonymous"] },
+  },
   messages: {
-    notification_kind: ["order_paid"],
-    refusals: ["notification_not_found"],
-    settings: ["title", "order_updates", "order_receipts", "product_updates", "marketing"],
+    enums: { notification_kind: ["order_paid"] },
+    errors: { notification_not_found: ["message"] },
+    settings: {
+      messages: ["title", "order_updates", "order_receipts", "product_updates", "marketing"],
+    },
   },
   queue: { nav: ["failed_jobs"], resource: ["failed_jobs"] },
   settings: { refusals: ["settings_locked"] },

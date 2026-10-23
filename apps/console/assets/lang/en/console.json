@@ -1,8 +1,7 @@
 {
-  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; the derived keys of its own declarations (shortcuts, enums, documents) sit under their kind segment and authored keys never do; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
   "shell": {
     "brand": "Acme Console",
-    "short_name": "Console",
     "top_bar": "Top bar",
     "menu": "Menu",
     "sidebar": "Toggle sidebar",
@@ -11,20 +10,44 @@
     "loading_session": "Loading your session"
   },
   "shortcuts": {
-    "quick_order": "Quick order",
-    "quick_order_short": "Order",
-    "quick_order_description": "Place an order for a customer in a few taps."
+    "open_palette": {
+      "label": "Command palette"
+    },
+    "toggle_sidebar": {
+      "label": "Toggle sidebar"
+    },
+    "cycle_theme": {
+      "label": "Switch theme"
+    },
+    "open_pending_changes": {
+      "label": "Pending changes"
+    },
+    "sign_out": {
+      "label": "Sign out"
+    }
   },
   "manifest": {
-    "description": "Orders, catalogue and stock for your store, online or offline."
+    "name": "Acme Console",
+    "short_name": "Console",
+    "description": "Orders, catalogue and stock for your store, online or offline.",
+    "shortcuts": {
+      "quick_order": {
+        "name": "Quick order",
+        "short_name": "Order",
+        "description": "Place an order for a customer in a few taps."
+      }
+    }
   },
   "pages": {
     "dashboard": "Dashboard",
-    "welcome": "Welcome",
     "settings": "Settings"
   },
-  "commands": {
-    "palette": "Command palette",
+  "documents": {
+    "welcome": {
+      "title": "Welcome"
+    }
+  },
+  "palette": {
     "placeholder": "Type a command, a page, or what you want to do…",
     "clear": "Clear",
     "no_match": "No matching command",
@@ -32,11 +55,6 @@
     "group_app": "Console",
     "group_account": "Account",
     "group_intent": "Suggested action",
-    "sidebar": "Toggle sidebar",
-    "theme": "Switch theme",
-    "locale": "Switch language",
-    "pending_changes": "Pending changes",
-    "logout": "Sign out",
     "navigate": "Navigate",
     "select": "Select",
     "escape": "Escape"
@@ -120,8 +138,6 @@
     "scheme": "Theme",
     "locale": "Language",
     "density": "Table density",
-    "density_comfortable": "Comfortable",
-    "density_compact": "Compact",
     "local_notifications": "Desktop notifications",
     "local_notifications_hint": "Shown while the console is open.",
     "save": "Save",
@@ -130,6 +146,12 @@
     "analytics_consent": "Share usage analytics",
     "analytics_consent_hint": "Helps us see which screens matter. Nothing is sent until you turn this on.",
     "notification_preferences": "Notification preferences"
+  },
+  "enums": {
+    "density": {
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    }
   },
   "capabilities": {
     "permission_denied": "Notifications were not allowed by the browser.",
@@ -143,9 +165,6 @@
     "l1": "Low",
     "l2": "Medium",
     "l3": "High"
-  },
-  "export": {
-    "pick_folder": "Choose an export folder"
   },
   "menu": {
     "file": "File",

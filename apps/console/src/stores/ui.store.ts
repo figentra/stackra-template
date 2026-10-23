@@ -2,31 +2,29 @@
  * Stackra file contract:
  * Purpose: the console's app-wide UI state: sidebar collapsed and table density, persisted per
  *          device.
- * Boundary: a `@Store` class on @stackra/state (ADR 0079): methods are the only writers, getters
- *           the derived values. Nothing server-owned is copied here; a preference that must follow
- *           the user across devices is a setting.
+ * Boundary: a store class on @stackra/state (ADR 0079): the fields are the state, `set` the only
+ *           writer, methods the only callers of `set`, getters the derived values. Nothing
+ *           server-owned is copied here; a preference that must follow the user across devices is
+ *           a setting. Persisted in the prefs store under the derived key `console.ui`.
  * Runtime: browser
- * Governing contract: ADR 0079, ADR 0256 (prefs store)
+ * Governing contract: ADR 0294 (decisions 14 and 16), ADR 0079, ADR 0256 (prefs store)
  */
-import { Store, StoreBase } from "@stackra/state";
+import { Store } from "@stackra/state";
 import { StorageArea } from "@stackra/storage";
+import { Enum } from "@stackra/validation";
 import { Density } from "#src/enums/density.enum";
 
-/** The persisted shape; `density` is stored as its code and rebuilt as the case on read. */
-interface UiState {
-  readonly sidebarCollapsed: boolean;
-  readonly density: Density;
-}
-
 /** App-wide console UI state: sidebar collapsed and table density, persisted per device. */
-@Store({ key: "ui", persist: StorageArea.Prefs })
-export class UiStore extends StoreBase<UiState> {
-  /** Expanded sidebar, comfortable rows: what a first visit on a device shows. */
-  initial: UiState = { sidebarCollapsed: false, density: Density.Comfortable };
+export class UiStore extends Store({ persist: StorageArea.Prefs }) {
+  /** Expanded on a first visit on a device. */
+  sidebarCollapsed = false;
+
+  /** Comfortable rows on a first visit on a device. */
+  density: Density = Density.Comfortable;
 
   /** The shell's keyboard shortcut, the rail button and the desktop menu all call this. */
   toggleSidebar(): void {
-    this.set((s) => ({ ...s, sidebarCollapsed: !s.sidebarCollapsed }));
+    this.set({ sidebarCollapsed: !this.sidebarCollapsed });
   }
 
   /**
@@ -34,12 +32,12 @@ export class UiStore extends StoreBase<UiState> {
    * disagree.
    */
   setSidebarCollapsed(collapsed: boolean): void {
-    this.set((s) => ({ ...s, sidebarCollapsed: collapsed }));
+    this.set({ sidebarCollapsed: collapsed });
   }
 
   /** Applied at once by the settings page; the tables re-read the class on the next render. */
   setDensity(density: Density): void {
-    this.set((s) => ({ ...s, density }));
+    this.set({ density });
   }
 
   /**
@@ -47,6 +45,6 @@ export class UiStore extends StoreBase<UiState> {
    * props.
    */
   get densityClass(): string {
-    return this.state.density.meta.className;
+    return Enum.meta(Density, this.density).className;
   }
 }

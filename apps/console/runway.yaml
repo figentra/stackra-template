@@ -1,24 +1,27 @@
 # yaml-language-server: $schema=../../schemas/runway-app.schema.json
 # Stackra file contract:
-# Purpose: how and where the console runs, per environment: the dev port and host (the only place
-#          a port is written; gen puts it into the generated Vite server and Electron dev config),
-#          domains, the public vars of the env class, secret names, release channels (PWA updates,
-#          Electron feed path and signing switches), Workers knobs.
-# Boundary: identity is stackra.config.ts; behaviour is src/config/*; accounts, zones, the feed
-#           bucket and signing tooling are the root runway. A value here may override a root
-#           default, never the reverse. Validated by `@stackra/runway/schema/app.json`. The update
-#           feed URL is derived by gen, never a var here. No secret: the console is a browser and
-#           desktop client, so every value it holds is public; the Web Push private key belongs to
-#           the notifications service, which signs the pushes.
+# Purpose: WHAT the console needs and its values per environment: the dev port and host (the only
+#          place a port is written; gen puts it into the generated Vite server and Electron dev
+#          config), domains, the public vars of the env class, secret names, release channels (PWA
+#          updates, Electron feed path and signing switches), Workers knobs and the config values
+#          that set its config classes. The member is the folder that holds this file, so the file
+#          does not name it.
+# Boundary: identity and build-only facts are stackra.config.ts; behaviour is src/config/*;
+#           accounts, zones, the feed bucket, signing tooling and placement are the root runway. A
+#           value here may override a root default, never the reverse. Validated by
+#           `@stackra/runway/schema/app.json`. The update feed URL is derived by gen, never a var
+#           here. No secret: the console is a browser and desktop client, so every value it holds
+#           is public; the Web Push private key belongs to the notifications service, which signs
+#           the pushes. Config is keyed by config key: `console.<stem>` for the console's own
+#           classes, the base's key for an override of a package's config.
 # Runtime: node
-# Governing contract: ADR 0249, ADR 0254, ADR 0255, ADR 0175, ADR 0173, ADR 0231 d4
+# Governing contract: ADR 0296 (member runway), ADR 0294 (config keys), ADR 0249, ADR 0254,
+#                     ADR 0255, ADR 0175, ADR 0173, ADR 0231 d4
 $schema: "@stackra/runway/schema/app.json"
-version: 2
-# = stackra.config.ts `key`
-member: console
+version: 3
 
 # Every @Secret of the env and config classes, by name. None: a client bundle can hold no secret.
-secrets: {}
+secrets: []
 
 # The deploy gate's check, web and pwa targets only (desktop has no endpoint); the path is the
 # runway's alone, stackra.config.ts does not repeat it.
@@ -43,7 +46,7 @@ release:
       windows: false
     # feed = <root feed.publicOrigin>/console/<channel>/
     feedPath: console
-    # narrows desktop.config.ts packaging, never widens
+    # narrows stackra.config.ts `electron` targets, never widens
     platforms:
       mac: [dmg, zip]
       windows: [nsis]
@@ -81,10 +84,10 @@ environments:
       console.telemetry:
         traces:
           sampleRate: 1
-      console.pwa:
+      platform.pwa:
         install:
           prompt: none
-      console.analytics:
+      analytics:
         driver: none
     # Playwright's baseURL derives from port/host; never typed elsewhere
     e2e:

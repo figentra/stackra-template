@@ -49,7 +49,7 @@ export function PendingChangesList() {
         >
           <div className="flex items-center gap-3">
             <Chip size="sm" color={Tone.Danger}>
-              {t(I18n.console.queue.reason[conflict.reason.value])}
+              {t(I18n.console.queue.reason[conflict.reason])}
             </Chip>
             <span>{t(conflict.labelKey)}</span>
           </div>
@@ -57,12 +57,12 @@ export function PendingChangesList() {
           <div className="flex gap-2">
             {strategiesFor(conflict).map((strategy) => (
               <Button
-                key={strategy.value}
+                key={strategy}
                 size="sm"
                 variant="secondary"
                 onPress={() => resolve(conflict, strategy)}
               >
-                {t(I18n.console.queue.strategy[strategy.value])}
+                {t(I18n.console.queue.strategy[strategy])}
               </Button>
             ))}
             <AlertDialog>

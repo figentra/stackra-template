@@ -1,8 +1,7 @@
 {
-  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; the derived keys of its own declarations (shortcuts, enums, documents) sit under their kind segment and authored keys never do; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
   "shell": {
     "brand": "وحدة تحكم Acme",
-    "short_name": "وحدة التحكم",
     "top_bar": "الشريط العلوي",
     "menu": "القائمة",
     "sidebar": "تبديل الشريط الجانبي",
@@ -11,20 +10,44 @@
     "loading_session": "جارٍ تحميل الجلسة"
   },
   "shortcuts": {
-    "quick_order": "طلب سريع",
-    "quick_order_short": "طلب",
-    "quick_order_description": "أنشئ طلبًا لعميل ببضع نقرات."
+    "open_palette": {
+      "label": "لوحة الأوامر"
+    },
+    "toggle_sidebar": {
+      "label": "تبديل الشريط الجانبي"
+    },
+    "cycle_theme": {
+      "label": "تبديل السمة"
+    },
+    "open_pending_changes": {
+      "label": "التغييرات المعلّقة"
+    },
+    "sign_out": {
+      "label": "تسجيل الخروج"
+    }
   },
   "manifest": {
-    "description": "الطلبات والكتالوج والمخزون لمتجرك، متصلًا أو دون اتصال."
+    "name": "وحدة تحكم Acme",
+    "short_name": "وحدة التحكم",
+    "description": "الطلبات والكتالوج والمخزون لمتجرك، متصلًا أو دون اتصال.",
+    "shortcuts": {
+      "quick_order": {
+        "name": "طلب سريع",
+        "short_name": "طلب",
+        "description": "أنشئ طلبًا لعميل ببضع نقرات."
+      }
+    }
   },
   "pages": {
     "dashboard": "لوحة التحكم",
-    "welcome": "مرحبًا",
     "settings": "الإعدادات"
   },
-  "commands": {
-    "palette": "لوحة الأوامر",
+  "documents": {
+    "welcome": {
+      "title": "مرحبًا"
+    }
+  },
+  "palette": {
     "placeholder": "اكتب أمرًا أو صفحة أو ما تريد فعله…",
     "clear": "مسح",
     "no_match": "لا يوجد أمر مطابق",
@@ -32,11 +55,6 @@
     "group_app": "وحدة التحكم",
     "group_account": "الحساب",
     "group_intent": "إجراء مقترح",
-    "sidebar": "تبديل الشريط الجانبي",
-    "theme": "تبديل السمة",
-    "locale": "تبديل اللغة",
-    "pending_changes": "التغييرات المعلّقة",
-    "logout": "تسجيل الخروج",
     "navigate": "تنقّل",
     "select": "اختيار",
     "escape": "إلغاء"
@@ -120,8 +138,6 @@
     "scheme": "السمة",
     "locale": "اللغة",
     "density": "كثافة الجداول",
-    "density_comfortable": "مريحة",
-    "density_compact": "مضغوطة",
     "local_notifications": "إشعارات سطح المكتب",
     "local_notifications_hint": "تظهر أثناء فتح وحدة التحكم.",
     "save": "حفظ",
@@ -130,6 +146,12 @@
     "analytics_consent": "مشاركة إحصاءات الاستخدام",
     "analytics_consent_hint": "تساعدنا على معرفة الشاشات المهمة. لا يُرسل شيء حتى تفعّل هذا الخيار.",
     "notification_preferences": "تفضيلات الإشعارات"
+  },
+  "enums": {
+    "density": {
+      "comfortable": "مريحة",
+      "compact": "مضغوطة"
+    }
   },
   "capabilities": {
     "permission_denied": "لم يسمح المتصفح بالإشعارات.",
@@ -143,9 +165,6 @@
     "l1": "منخفض",
     "l2": "متوسط",
     "l3": "مرتفع"
-  },
-  "export": {
-    "pick_folder": "اختر مجلد التصدير"
   },
   "menu": {
     "file": "ملف",

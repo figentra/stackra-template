@@ -11,13 +11,13 @@
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
-import { Notifications } from "#stackra/clients";
+import { NotificationKind, Notifications } from "#stackra/clients";
 import { NotificationInbox } from "#src/components/notification-inbox";
 
-/** One unread notification as the service returns it: a kind and the data its label interpolates. */
+/** One unread notification as the service returns it: a kind and the data its label uses. */
 const UNREAD = {
   id: "ntf_01J9Z3K4M5N6P7Q8R9S0T1V2W3",
-  kind: Notifications.enums.NotificationKind.OrderPaid,
+  kind: NotificationKind.OrderPaid,
   data: { orderId: "ord_01J9Z3K4M5N6P7Q8R9S0T1V2W3", totalMinor: 2_000, currency: "USD", lines: 1 },
   readAt: null,
   createdAt: "2026-10-21T08:00:00Z",

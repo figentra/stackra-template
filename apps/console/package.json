@@ -2,7 +2,7 @@
   "name": "@acme/console",
   "version": "0.1.0",
   "private": true,
-  "description": "The tenant console as web, PWA and desktop from one source tree. Decorated classes (@App, @Panel, @Route, @Layout, @Provider, @Store, @Menu, @Command, @Bridge, @Block, @Override) declare the app; stackra gen writes the runtime into .stackra/.",
+  "description": "The tenant console as web, PWA and desktop from one source tree. Kind classes (panels, routes, layouts, menus, shortcuts, stores, blocks, documents, config) found by their group folders declare the app; stackra gen writes the entries, the wiring and the tool configs into .stackra/.",
   "license": "UNLICENSED",
   "type": "module",
   "imports": {
@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@acme/brand": "workspace:*",
+    "@acme/loyalty-kit": "workspace:*",
     "@heroui/styles": "catalog:ui",
     "@stackra-pro/ui": "catalog:stackra",
     "@stackra/actions": "catalog:stackra",
@@ -52,6 +53,7 @@
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
     "@stackra/coordinator": "catalog:stackra",
+    "@stackra/csp": "catalog:stackra",
     "@stackra/errors": "catalog:stackra",
     "@stackra/experience": "catalog:stackra",
     "@stackra/feature-flags": "catalog:stackra",
@@ -59,7 +61,6 @@
     "@stackra/i18n": "catalog:stackra",
     "@stackra/iam": "catalog:stackra",
     "@stackra/identity": "catalog:stackra",
-    "@stackra/kbd": "catalog:stackra",
     "@stackra/media": "catalog:stackra",
     "@stackra/navigation": "catalog:stackra",
     "@stackra/panel": "catalog:stackra",
@@ -67,8 +68,8 @@
     "@stackra/platform": "catalog:stackra",
     "@stackra/query": "catalog:stackra",
     "@stackra/realtime": "catalog:stackra",
-    "@stackra/schema": "catalog:stackra",
     "@stackra/settings": "catalog:stackra",
+    "@stackra/shortcuts": "catalog:stackra",
     "@stackra/state": "catalog:stackra",
     "@stackra/storage": "catalog:stackra",
     "@stackra/tenancy": "catalog:stackra",
@@ -83,7 +84,8 @@
     "workbox-navigation-preload": "catalog:frontend",
     "workbox-precaching": "catalog:frontend",
     "workbox-routing": "catalog:frontend",
-    "workbox-strategies": "catalog:frontend"
+    "workbox-strategies": "catalog:frontend",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@playwright/test": "catalog:quality",

@@ -1,25 +1,28 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: consent in the console. The categories a user decides on in settings, where
- *          the decision is kept, and the policy version that invalidates old decisions.
- * Boundary: values only; the settings page and `@stackra/consent` do the work. `necessary` is
- *           always granted and never asked. The decision is per user and device, in the prefs
- *           store.
+ * Purpose: the console's override of @stackra/consent's configuration: the categories a user
+ *          decides on in settings and the policy version that invalidates old decisions.
+ * Boundary: an override declares `override` members only and inherits the base's key (`consent`).
+ *           Values only; the settings page and the package do the work. Nothing is granted until
+ *           the user decides, and `necessary` is always granted and never asked (ADR 0298). The
+ *           decision is per user and device, in the prefs store the console's target map gives
+ *           the consent store.
  * Runtime: isomorphic
- * Governing contract: the `@stackra/consent` package contract (decline is the default)
+ * Governing contract: ADR 0294 (decision 19), ADR 0298 (decline by default, policy version)
  */
-import { Config } from "@stackra/config";
-import { ConsentCategory } from "@stackra/consent";
-import { List, OneOf, Str } from "@stackra/validation";
+import { ConsentCategory, ConsentConfig } from "@stackra/consent";
 
 /** User consent in the console: the categories asked and the policy version. */
-@Config("console.consent")
-export class ConsentConfig {
-  /**
-   * Categories the settings page asks about; `necessary` is implied.
-   * @defaultValue [ConsentCategory.Analytics]
-   */
-  @List(OneOf(ConsentCategory)) categories = [ConsentCategory.Analytics];
-  /** Bumping it asks everyone again. @defaultValue "2026-10" */
-  @Str({ pattern: /^\d{4}-\d{2}$/ }) policyVersion = "2026-10";
+export class ConsoleConsentConfig extends ConsentConfig {
+  /** The categories the settings page asks about, each refused until granted. */
+  override categories: ConsentConfig["categories"] = [
+    {
+      category: ConsentCategory.Analytics,
+      required: false,
+      defaultGranted: false,
+    },
+  ];
+
+  /** Bumping it asks everyone again. */
+  override policyVersion = "2026-10";
 }

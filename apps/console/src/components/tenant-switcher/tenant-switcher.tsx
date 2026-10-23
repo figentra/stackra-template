@@ -10,9 +10,9 @@
 import { Avatar, Dropdown, toast } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";
 import { Icon, Icons } from "@stackra/ui/icons";
-import { useActiveTenant } from "#src/providers/tenant/use-active-tenant";
-import { EmptyView } from "#src/components/empty-view";
 import { I18n, type I18nKey } from "#stackra/i18n";
+import { EmptyView } from "#src/components/empty-view";
+import { useActiveTenant } from "./use-active-tenant";
 
 /**
  * Membership role code → label. The identity service sends the role as a plain code, so a role the
