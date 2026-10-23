@@ -16,7 +16,7 @@
  * Runtime: worker
  */
 import { createPublicClients, RetryOn, type PublicClients } from "@stackra/clients/server";
-import { forwardedFacts } from "@stackra/clients/edge";
+import { forwardedFacts } from "@stackra/clients/worker";
 import { ApiArea } from "@stackra/contracts";
 import type { Locale } from "@stackra/i18n";
 import type { EnvConfig } from "#src/config/env.config";
