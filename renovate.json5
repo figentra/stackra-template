@@ -33,9 +33,15 @@
   packageRules: [
     {
       // The framework moves as one version line; its releases are ours, so they skip the age gate.
-      matchPackageNames: ["@stackra/**", "@stackra-pro/**"],
+      matchPackageNames: ["@stackra/**"],
       groupName: "stackra",
       minimumReleaseAge: null,
+    },
+    {
+      // HeroUI Pro is a licensed beta line: every bump is reviewed by hand against its changelog.
+      matchPackageNames: ["@heroui-pro/**"],
+      groupName: "heroui pro",
+      automerge: false,
     },
     {
       // Expo SDK packages move together, with `expo install --fix`; a new SDK major is a planned

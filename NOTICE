@@ -8,6 +8,8 @@ This project is MIT-licensed (LICENSE), with these exclusions:
   packages/design-system/theme/assets/NOTICE.
 - A font committed to this repository keeps its own licence, and that licence text sits beside the
   font file.
-- Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed. It is consumed as
-  a dependency (here through @stackra-pro/ui) under its vendor's terms and is not covered by the MIT
-  licence.
+- Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed. HeroUI Pro is
+  consumed as a dependency (@heroui-pro/react in the console, under Stackra ADR 0197 as amended)
+  under its vendor's terms and is not covered by the MIT licence. Installing it needs your own
+  HeroUI Pro licence token (HEROUI_PERSONAL_TOKEN, read from Infisical; see README.md), or replace
+  those components with free ones.

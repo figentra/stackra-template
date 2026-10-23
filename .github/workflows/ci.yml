@@ -64,7 +64,9 @@ jobs:
       # config files parse, secrets scan) through one committed script, the same command a contributor
       # or agent runs locally. Replace this step with `pnpm install --frozen-lockfile`, the commitlint
       # checks, `pnpm verify`, `pnpm spell` and `pnpm secrets:scan` once @stackra/cli is released, and
-      # delete .github/scripts/preview-gate.mjs.
+      # delete .github/scripts/preview-gate.mjs. The install needs the HeroUI Pro token: copy the
+      # "HeroUI Pro token (Infisical OIDC)" and "Drop the HeroUI Pro token" steps of release.yml around
+      # it and grant this job `id-token: write`.
       - name: Pre-release gate
         env:
           # Read by the script's commit-message check; empty outside pull requests, where it is

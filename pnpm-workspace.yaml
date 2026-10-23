@@ -95,7 +95,6 @@ catalogs:
     "@stackra/vite-plugin": 1.0.0
     "@stackra/webhooks": 1.0.0
     "@stackra/workflow": 1.0.0
-    "@stackra-pro/ui": 1.0.0
   # Shared by web, desktop and mobile members (`catalog:`). react and react-dom stay on the exact
   # renderer version react-native 0.86 (Expo SDK 57) ships with, so every member and every package
   # with a React entry resolves one React.
@@ -105,6 +104,9 @@ catalogs:
     react-router: 7.9.4
     isbot: 5.1.31
     "@react-email/components": 0.5.2
+    # HeroUI Pro for the console (Stackra ADR 0197 as amended): the vendor's current release line is
+    # still beta; its postinstall downloads the licensed components (allowBuilds below).
+    "@heroui-pro/react": 1.0.0-beta.10
     # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.
     "@types/node": 24.19.2
     # React's types follow the React 19.2 line above, for web, desktop and mobile alike.
@@ -133,6 +135,8 @@ catalogs:
   mobile:
     expo: 57.0.31
     react-native: 0.86.3
+    # jsdom tests of React Native components (a package's src/native) render through it.
+    react-native-web: 0.21.2
     "@react-navigation/native": 7.5.1
     "@react-navigation/native-stack": 7.21.0
     react-native-bottom-tabs: 1.4.0
@@ -222,3 +226,9 @@ allowBuilds:
   # Downloads the Sentry CLI that uploads native and JavaScript source maps (pulled in by
   # @sentry/react-native).
   "@sentry/cli": true
+  # HeroUI Pro (the console's @heroui-pro/react, Stackra ADR 0197 as amended): its postinstall
+  # downloads the licensed components with HEROUI_AUTH_TOKEN, which `pnpm install:pro` (locally) and
+  # release.yml's OIDC step (CI) fill from Infisical's HEROUI_PERSONAL_TOKEN; without it the
+  # install fails.
+  heroui-pro: true
+  "@heroui-pro/react": true

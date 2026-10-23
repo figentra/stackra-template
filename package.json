@@ -37,7 +37,8 @@
     "changeset:status": "changeset status",
     "secrets:scan": "gitleaks git . --config .gitleaks.toml --no-banner --redact",
     "sbom": "cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file sbom.cdx.json",
-    "agents:setup": "stackra agents setup"
+    "agents:setup": "stackra agents setup",
+    "install:pro": "infisical run --env=dev --path=/install --silent --command 'export HEROUI_AUTH_TOKEN=\"$HEROUI_PERSONAL_TOKEN\" && node .github/scripts/heroui-pro.mjs token && pnpm install && node .github/scripts/heroui-pro.mjs installed'"
   },
   "devDependencies": {
     "@changesets/changelog-git": "catalog:release",

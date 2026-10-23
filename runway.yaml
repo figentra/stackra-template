@@ -112,8 +112,11 @@ providers:
   apple:
     teamId: ref:apple.teamId
     ascAppId: ref:apple.ascAppId
+  # The Play developer account, and the SHA-256 of the Play app-signing certificate that the console's
+  # /.well-known/assetlinks.json publishes so Android verifies the mobile app's /m/* links.
   google:
     playDeveloperId: ref:google.playDeveloperId
+    appSigningSha256: ref:google.appSigningSha256
   # Licence keys and distribution of paid packages (Stackra ADR 0177).
   keygen:
     account: ref:keygen.account

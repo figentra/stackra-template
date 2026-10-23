@@ -42,7 +42,8 @@ storefront, a mobile app, and the commerce and notifications services behind the
 
    ```sh
    mise install                 # node, pnpm, gitleaks, infisical, maestro, encore, eas-cli, pinned
-   pnpm install                 # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`)
+   pnpm install:pro             # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`);
+                                # `pnpm install` inside Infisical for the HeroUI Pro licence token
    stackra agents setup         # once per machine: Stackra skills, sub-agents and guard hooks for your assistant
    pnpm gen && pnpm dev         # generate .stackra/ and run every member
    pnpm verify                  # the gate CI runs
@@ -375,6 +376,28 @@ files name them. Wrong place, for each row: a port number is runway, not config;
 not runway; the list of targets is `stackra.config.ts`; a group's cpu is the root runway, never a
 member's; a column is the model, never a hand-written migration.
 
+### HeroUI Pro licence
+
+The console builds on HeroUI Pro directly, `@heroui-pro/react`
+([Stackra ADR 0197](https://docs.stackra.figentra.com/adr/0197-heroui-pro-is-used-only-in-our-own-apps)
+as amended, stackra#127). Its postinstall downloads the licensed components, so installing the
+workspace needs a HeroUI Pro licence token. **A team that copies this template needs its own HeroUI
+Pro licence, or must replace the Pro components (the console shell, palette, sheet, KPI and empty
+states) with the free `@stackra/ui` ones and drop `@heroui-pro/react`.**
+
+The licence token is `HEROUI_PERSONAL_TOKEN` and lives only in Infisical. The postinstall reads only
+`HEROUI_AUTH_TOKEN`, and without it exits 0 leaving an empty package, so both install paths expose
+`HEROUI_PERSONAL_TOKEN` as `HEROUI_AUTH_TOKEN` for the install alone and run
+`.github/scripts/heroui-pro.mjs`, which fails before the install when the token is missing and after
+it when the components were not downloaded. Locally, `pnpm install:pro` runs `pnpm install` under
+`infisical run --env=dev --path=/install`, a folder that holds that one token so no other value
+reaches the dependencies' install scripts. In CI, release.yml exchanges the job's GitHub OIDC token
+with Infisical for `HEROUI_PERSONAL_TOKEN` from `/ci` (repository variables
+`INFISICAL_CI_IDENTITY_ID`, `INFISICAL_PROJECT_ID`, `INFISICAL_DOMAIN`) for the install step only,
+then blanks it. There is no `.npmrc` with a value and no repository secret. The `heroui-pro` and
+`heroui-native-pro` MCP servers in `.mcp.yaml` read the same token through `stackra mcp exec`, never
+from a file. No Pro source is committed.
+
 ## How each member kind is created
 
 | Kind    | Command                                              | What it writes                                                                                                                                               |
@@ -443,12 +466,12 @@ Vitest, `createMatcher`, `freezeClock` and `freezeIds` come from `@stackra/testi
 `@stackra/errors/testing` `refusal`, `toRefuseWith`; `@stackra/events/testing` `toEmit`,
 `drainOutbox`; `@stackra/database/testing` `usePostgres`, `Factory` (models are built with
 `XFactory.new().create()`); `@stackra/clients/testing`
-`fakeClient((fake) => fake.on(GetOrderQuery).returns(v))` or `.throws(refusal(ref))`, asserted with
-`client.called(GetOrderQuery)`; `@stackra/settings/testing` `fakeSettings`; `@stackra/queue/testing`
-`fakeQueue`, `toDeadLetter`; `@stackra/feature-flags/testing` flag helpers;
-`@stackra/notifications/testing` `renderMail`, `MemoryNotifier`; `@stackra/gen/testing`
-`toMatchManifest`, `expectBackwardCompatible`; `@stackra/ui/testing` `render`;
-`@stackra/testing/native` for React Native.
+`fakeClient((fake) => fake.on(GetOrderQuery).returns(v))` or `.throws(refusal(XyError))`, asserted
+with `client.called(GetOrderQuery)` (a queued call with `client.queued(CancelOrderAction)`);
+`@stackra/settings/testing` `fakeSettings`; `@stackra/queue/testing` `fakeQueue`, `toDeadLetter`;
+`@stackra/feature-flags/testing` flag helpers; `@stackra/notifications/testing` `renderMail`,
+`MemoryNotifier`; `@stackra/gen/testing` `toMatchManifest`, `expectBackwardCompatible`;
+`@stackra/ui/testing` `render`; `@stackra/testing/native` for React Native.
 
 ### Services and packages (in a module)
 
