@@ -31,7 +31,7 @@ import { WebAnalyticsConfig } from "#src/config/analytics.config";
 import { WebConsentConfig } from "#src/config/consent.config";
 import { WebCspConfig } from "#src/config/csp.config";
 import { EdgeConfig } from "#src/config/edge.config";
-import { WebEnv } from "#src/config/env.config";
+import { WebEnvConfig } from "#src/config/env.config";
 import { WebFeatureFlagsConfig } from "#src/config/feature-flags.config";
 import { WebI18nConfig } from "#src/config/i18n.config";
 import { WebSeoConfig } from "#src/config/seo.config";
@@ -85,7 +85,7 @@ export const wiring = {
     { module: "web", provide: ConsentConfig, config: WebConsentConfig },
     { module: "web", provide: CspConfig, config: WebCspConfig },
     { module: "web", provide: EdgeConfig, config: EdgeConfig },
-    { module: "web", provide: WebEnv, config: WebEnv },
+    { module: "web", provide: WebEnvConfig, config: WebEnvConfig },
     { module: "web", provide: FeatureFlagsConfig, config: WebFeatureFlagsConfig },
     { module: "web", provide: I18nConfig, config: WebI18nConfig },
     { module: "web", provide: SeoConfig, config: WebSeoConfig },

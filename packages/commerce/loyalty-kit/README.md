@@ -39,7 +39,7 @@ export class CommerceLoyaltyMembersDriver extends Driver(LoyaltyMembers) { … }
 | `./contracts` | the ports `LoyaltyLedger` (the kit drives it) and `LoyaltyMembers` (the host implements it), the enums `LoyaltyTier` and `EntryKind`, the types                                  |
 | `./node`      | `LoyaltyKitModule`, `LoyaltyKitSettings`, the access classes, actions, queries, events, extensions, listener, models, resources, services, workflow, postgres driver, migrations |
 | `./react`     | the renderers `PointsBalance` and `PointsIssued` of the kit's two Custom widgets, and `usePointsBalance`; never imports `./node`                                                 |
-| `./testing`   | `FakeLoyaltyMembers.with()`, `LoyaltyAccountFactory`, `LedgerEntryFactory`, `pointsEntry`, `toHaveBalance`, `LoyaltyKitDemoSeeder` and its `ids`                                 |
+| `./testing`   | `LoyaltyMembersFake.with()`, `LoyaltyAccountFactory`, `LedgerEntryFactory`, `pointsEntry`, `toHaveBalance`, `LoyaltyKitDemoSeeder` and its `ids`                                 |
 | `./assets/*`  | `loyalty_kit::` translations (`assets/lang/<locale>/loyalty_kit.json`)                                                                                                           |
 
 No symbol is exported from two entries; factories and the demo seeder live in `src/node/database/`
@@ -80,8 +80,8 @@ committed in the template only so it can be read, and is imported as `#stackra/<
 | migration                  | `node/database/migrations/0001-create-loyalty-tables.migration.ts`               | `Migration`                              | the `.int` tier applies it                                          |
 | factory, seeder            | `node/database/factories/`, `node/database/seeders/demo.seeder.ts`               | `Factory(Model)`, `Seeder`               | used by every seeded test                                           |
 | renderer                   | `react/points-balance/points-balance.tsx`                                        | a function, bound by the widget's name   | `react/points-balance/__tests__/points-balance.test.tsx`            |
-| fake, matcher              | `testing/fakes/`, `testing/matchers/`                                            | `Fake.of(Port)`, `createMatcher`         | `testing/matchers/__tests__/to-have-balance.matcher.test.ts`        |
-| value factory              | `testing/factories/points-entry.factory.ts`                                      | `factory<DTO>()` (not a kind)            | none                                                                |
+| fake, matcher              | `testing/loyalty-members.fake.ts`, `testing/to-have-balance.matcher.ts`          | `Fake.of(Port)`, `createMatcher`         | `testing/__tests__/to-have-balance.matcher.test.ts`                 |
+| fixture                    | `testing/points-entry.fixture.ts`                                                | `factory<DTO>()` (not a `.factory.ts`)   | none                                                                |
 
 A service shows the kinds a package does not: `ai/`, `raw/`, notifications and dated response
 changes. The `@AccessLogged` facet and an Explorer are in `packages/security/access-log`.

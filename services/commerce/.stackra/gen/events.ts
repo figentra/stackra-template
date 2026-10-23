@@ -5,8 +5,8 @@
  *          recorded, broadcast and offered as an outbound webhook.
  * Boundary: data for the outbox, the dispatcher and the manifest. An integration event's wire name
  *           is `<module>.<name>.v<version>` and it leaves through the outbox; a domain event never
- *           leaves the service and is never versioned. A broadcast channel is
- *           `tenant.{tenantId}.<module>`, derived. Model lifecycle events are domain events and are
+ *           leaves the service and is never versioned. A broadcast channel is derived from its
+ *           audience: `tenant.{tenantId}.<module>` or `principal.{principalId}.<module>`. Model lifecycle events are domain events and are
  *           not listed.
  * Runtime: isomorphic
  */
@@ -28,6 +28,7 @@ export const events = {
     recordedBy: ["OrderStateMachine.markPaid"],
     broadcast: "tenant.{tenantId}.orders",
     broadcastPermission: "orders.order.read",
+    broadcastAudience: "tenant",
     webhook: true,
   },
   OrderCancelled: {
@@ -52,6 +53,7 @@ export const events = {
     recordedBy: ["StockService.reserve"],
     broadcast: "tenant.{tenantId}.inventory",
     broadcastPermission: "inventory.stock.read",
+    broadcastAudience: "tenant",
   },
   AccountEnrolled: {
     wire: "loyalty_kit.account.enrolled.v1",

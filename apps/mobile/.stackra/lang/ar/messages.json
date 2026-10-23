@@ -5,7 +5,7 @@
       "send": "إرسال الرسائل",
       "read": "عرض الرسائل"
     },
-    "notification": {
+    "inbox_message": {
       "read": "عرض الإشعارات الخاصة",
       "update": "تحديد الإشعارات الخاصة كمقروءة"
     }
@@ -16,7 +16,7 @@
       "sent": "مُرسل",
       "failed": "فشل"
     },
-    "notification_kind": {
+    "inbox_message_kind": {
       "order_paid": "تم دفع الطلب {orderId} ({lines, plural, zero {لا بنود} one {بند واحد} two {بندان} few {# بنود} many {# بندًا} other {# بند}})"
     },
     "mail_auth_result": {
@@ -39,7 +39,7 @@
     "mail_provider_unavailable": {
       "message": "مزوّد البريد غير متاح؛ سنعيد المحاولة."
     },
-    "notification_not_found": {
+    "inbox_message_not_found": {
       "message": "لم يُعثر على هذا الإشعار."
     }
   },

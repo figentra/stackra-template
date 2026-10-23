@@ -11,19 +11,19 @@
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen } from "@stackra/testing/native";
-import { NotificationKind, Notifications } from "#stackra/clients";
+import { InboxMessageKind, Notifications } from "#stackra/clients";
 import { Routes } from "#stackra/routes";
 
 const entry = {
-  id: "ntf_01H2J3K4L5M6N7P8Q9R0ABCDEF",
-  kind: NotificationKind.OrderPaid,
+  id: "inm_01H2J3K4L5M6N7P8Q9R0ABCDEF",
+  kind: InboxMessageKind.OrderPaid,
   data: { orderId: "ord_01H2J3K4L5M6N7P8Q9R0ABCDEF", totalMinor: 2_000, currency: "USD", lines: 2 },
   createdAt: new Date("2026-10-21T09:00:00Z"),
   readAt: null,
 };
 const page = (unread: number) =>
   fakeClient(Notifications, (fake) =>
-    fake.queries.ListNotifications.returns({ items: [entry], hasMore: false, unread }),
+    fake.queries.ListInboxMessages.returns({ items: [entry], hasMore: false, unread }),
   );
 
 /** The inbox page over its route. */

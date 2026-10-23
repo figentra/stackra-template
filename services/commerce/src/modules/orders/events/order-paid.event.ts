@@ -7,13 +7,15 @@
  *           breaking change adds `version: 2` and `order-paid-v1.change.ts` beside this file. The
  *           broadcast declares `orders.order.read` as the permission a session needs to receive the
  *           data-free refresh on `tenant.{tenantId}.orders`, because the payload carries the paid
- *           total and the customer id; @stackra/realtime enforces it at delivery. `webhook: true`
+ *           total and the customer id; @stackra/realtime enforces it at delivery. The audience is
+ *           the tenant, stated because the default is the principal: the refresh feeds the staff's
+ *           revenue tile, a tenant-wide number, and names no person. `webhook: true`
  *           lets @stackra/webhooks deliver it, signed, to the endpoints a tenant registers.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078, ADR 0225 (broadcast)
  */
 import type { PublicId } from "@stackra/contracts";
-import { IntegrationEvent } from "@stackra/events";
+import { BroadcastAudience, IntegrationEvent } from "@stackra/events";
 import type { CurrencyCode } from "@stackra/money";
 import { Int } from "@stackra/validation";
 import { OrderPermissions } from "#modules/orders/access/order.permissions";
@@ -29,7 +31,10 @@ import { OrderPermissions } from "#modules/orders/access/order.permissions";
 export class OrderPaid extends IntegrationEvent({
   name: "order.paid",
   webhook: true,
-  broadcast: OrderPermissions.read,
+  broadcast: {
+    permission: OrderPermissions.read,
+    audience: BroadcastAudience.Tenant,
+  },
 }) {
   /** The paid order. */
   orderId!: PublicId<"ord">;

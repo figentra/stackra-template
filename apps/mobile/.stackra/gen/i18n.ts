@@ -21,7 +21,7 @@ export type { I18nKey };
 /** `I18n.<namespace>.<path>`; `_` holds the leaves of a branch that also has children. */
 export const I18n = keys({
   orders: {
-    nav: ["sales"],
+    nav: ["sales", "orders"],
     resources: { order: ["title"] },
     enums: {
       order_status: ["pending_payment", "paid", "cancelled", "expired"],
@@ -39,7 +39,7 @@ export const I18n = keys({
     },
     order: ["lines_count"],
     widgets: { revenue_today: ["title"] },
-    documents: { sales_today: ["title"] },
+    documents: { sales_today: ["title"], my_orders: ["title"] },
     quick_order: ["title", "variant", "quantity", "submit"],
     order_placed: { mail: ["subject", "body", "cta"] },
     order_receipt: { mail: ["subject", "intro"] },
@@ -78,11 +78,11 @@ export const I18n = keys({
   messages: {
     permissions: {
       message: ["send", "read"],
-      notification: ["read", "update"],
+      inbox_message: ["read", "update"],
     },
     enums: {
       message_status: ["queued", "sent", "failed"],
-      notification_kind: ["order_paid"],
+      inbox_message_kind: ["order_paid"],
       mail_auth_result: ["pass", "fail", "soft_fail", "none"],
     },
     settings: {
@@ -90,7 +90,7 @@ export const I18n = keys({
     },
     errors: {
       mail_provider_unavailable: ["message"],
-      notification_not_found: ["message"],
+      inbox_message_not_found: ["message"],
     },
     integrations: { resend: ["label"] },
   },

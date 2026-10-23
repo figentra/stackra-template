@@ -17,7 +17,7 @@ import { Target } from "@stackra/contracts";
 import { Str } from "@stackra/validation";
 
 /** Read as `env` from `#stackra/env`, validated once at boot. */
-export class ConsoleEnv extends Config {
+export class ConsoleEnvConfig extends Config {
   /** Which target is being built; set by `stackra build --target`, never by hand. */
   @Env("VITE_TARGET")
   target: Target = Target.Web;

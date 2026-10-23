@@ -24,8 +24,8 @@ export const Messages = table("messages.messages", {
   sentAt: "sent_at",
 });
 
-/** messages.notification → `messages.notifications` */
-export const Notifications = table("messages.notifications", {
+/** messages.inbox_message → `messages.inbox_messages` */
+export const InboxMessages = table("messages.inbox_messages", {
   id: "id",
   tenantId: "tenant_id",
   createdAt: "created_at",

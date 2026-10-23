@@ -344,7 +344,7 @@
   "config": [
     {
       "key": "web.env",
-      "class": "WebEnv",
+      "class": "WebEnvConfig",
       "file": "src/config/env.config.ts"
     },
     {

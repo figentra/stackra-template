@@ -20,8 +20,8 @@
 import { Config, Env } from "@stackra/config";
 import type { Url } from "@stackra/contracts";
 
-/** The public env. Components read it with `useConfig(MobileEnv)`, never through `process.env`. */
-export class MobileEnv extends Config {
+/** The public env. Components read it with `useConfig(MobileEnvConfig)`, never `process.env`. */
+export class MobileEnvConfig extends Config {
   /** EAS project id; the generated Expo config builds the update URL from it. Empty in a clone. */
   @Env("EXPO_PUBLIC_EAS_PROJECT_ID")
   easProjectId = "";

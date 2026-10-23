@@ -18,6 +18,6 @@ Governing contract: root AGENTS.md
 
 ## PII
 
-| Data      | Where                                     | Handling                                                   |
-| --------- | ----------------------------------------- | ---------------------------------------------------------- |
-| member id | ledger entries (`./node` postgres driver) | A branded public id (`MemberId`), never a name or address. |
+| Data      | Where                                          | Handling                                                                                                                                     |
+| --------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| member id | loyalty accounts and ledger entries (`./node`) | A branded public id (`MemberId`), never a name or address; `LoyaltyAccount.memberId` carries `@Classified(DataClassification.Pseudonymous)`. |

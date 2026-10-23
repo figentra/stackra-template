@@ -4,7 +4,7 @@
  *          notifications the notifications service delivered, each with a "mark read" action.
  * Boundary: presentation over `useNotificationInbox()`, with the console's loading, empty and error
  *           states, and a "load more" button while older notifications exist. An entry's text is
- *           its kind's derived label (`messages::enums.notification_kind.<code>`), interpolated
+ *           its kind's derived label (`messages::enums.inbox_message_kind.<code>`), interpolated
  *           with the entry's `data`, in the user's locale; the badge
  *           shows the service's inbox-wide unread count. A refused mark-read is a toast, and the
  *           entry stays unread.
@@ -26,9 +26,9 @@ export function NotificationInbox() {
   const { t } = useTranslation();
   const formatDateTime = useDateTime();
   const inbox = useNotificationInbox();
-  const markRead = (notificationId: string) =>
+  const markRead = (inboxMessageId: string) =>
     inbox
-      .markRead(notificationId)
+      .markRead(inboxMessageId)
       .catch(() => toast.danger(t(I18n.console.inbox.mark_read_failed)));
 
   return (
@@ -62,7 +62,7 @@ export function NotificationInbox() {
           {inbox.items.map((item) => (
             <article key={item.id} className="flex flex-col gap-1 py-2">
               <strong className={item.readAt ? "font-normal" : undefined}>
-                {t(I18n.messages.enums.notification_kind[item.kind], item.data)}
+                {t(I18n.messages.enums.inbox_message_kind[item.kind], item.data)}
               </strong>
               <div className="flex items-center gap-2">
                 <Description>{formatDateTime(item.createdAt)}</Description>

@@ -23,5 +23,5 @@ Governing contract: root AGENTS.md
 | Data                     | Where                                      | Handling                                                                                              |
 | ------------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
 | `principalId`, `subject` | messages (`message.model.ts`)              | The address is resolved from identity at send time and never stored; the subject is kept for support. |
-| `principalId`, `data`    | inbox entries (`notification.model.ts`)    | Entries for one principal; tenant-scoped; read only by that principal.                                |
+| `principalId`, `data`    | inbox entries (`inbox-message.model.ts`)   | Entries for one principal; tenant-scoped; read only by that principal.                                |
 | `apiKey`                 | Resend connection (`resend.connection.ts`) | A tenant credential in the connection store, encrypted, never read back.                              |

@@ -21,14 +21,14 @@
  */
 import { defineApp } from "@stackra/app";
 import { ApiArea, Target } from "@stackra/contracts";
-import { MobileEnv } from "./src/config/env.config";
+import { MobileEnvConfig } from "./src/config/env.config";
 
 /** Read by `stackra gen`, `stackra dev`, `stackra build` and `stackra test`. */
 export default defineApp({
   targets: [Target.Ios, Target.Android],
   area: ApiArea.App,
   /** Its `@Env` fields, and those of the config overrides, are the only values in the bundle. */
-  env: MobileEnv,
+  env: MobileEnvConfig,
   name: "Acme",
   /** Deep links (`acme://`) and the PKCE redirect (`acme://auth/callback`). */
   scheme: "acme",

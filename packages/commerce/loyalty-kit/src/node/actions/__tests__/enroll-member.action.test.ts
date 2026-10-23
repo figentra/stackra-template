@@ -10,7 +10,7 @@
  */
 import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake } from "@acme/loyalty-kit/testing";
 import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
@@ -24,7 +24,7 @@ import { AccountEnrolled } from "#node/events/account-enrolled.event";
 function compile() {
   return createTestingModule(LoyaltyKitModule)
     .useDrivers("memory")
-    .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+    .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
     .compile();
 }
 

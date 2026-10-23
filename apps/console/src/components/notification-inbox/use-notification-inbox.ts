@@ -11,12 +11,12 @@
  */
 import { useAction, useInfiniteQuery } from "@stackra/clients/react";
 import { useSubscription } from "@stackra/realtime/react";
-import { Notifications, type NotificationView } from "#stackra/clients";
+import { Notifications, type InboxMessageView } from "#stackra/clients";
 
 /** What the hook returns. */
 export interface NotificationInboxState {
   /** The newest notifications first, across every page loaded; empty before the first answer. */
-  readonly items: readonly NotificationView[];
+  readonly items: readonly InboxMessageView[];
   /** The actor's unread count across the whole inbox, as the service counts it. */
   readonly unread: number;
   /** True until the first answer arrives. */
@@ -30,7 +30,7 @@ export interface NotificationInboxState {
   /** Loads the next page after the last cursor. */
   readonly loadMore: () => void;
   /** Marks one notification read and refreshes the list; rejects when the service refuses. */
-  readonly markRead: (notificationId: string) => Promise<void>;
+  readonly markRead: (inboxMessageId: string) => Promise<void>;
   /** Asks again after an error. */
   readonly retry: () => void;
 }
@@ -38,11 +38,11 @@ export interface NotificationInboxState {
 /** Ten at a time is what the sheet shows without scrolling. */
 const PAGE_SIZE = 10;
 
-/** The inbox list, live through the `NotificationCreated` broadcast. */
+/** The inbox list, live through `InboxMessageCreated`, broadcast to this user's sessions only. */
 export function useNotificationInbox(): NotificationInboxState {
-  const list = useInfiniteQuery(Notifications.queries.ListNotifications, { limit: PAGE_SIZE });
-  const mark = useAction(Notifications.actions.MarkNotificationRead);
-  useSubscription(Notifications.events.NotificationCreated, () => list.refetch());
+  const list = useInfiniteQuery(Notifications.queries.ListInboxMessages, { limit: PAGE_SIZE });
+  const mark = useAction(Notifications.actions.MarkInboxMessageRead);
+  useSubscription(Notifications.events.InboxMessageCreated, () => list.refetch());
   const pages = list.data?.pages ?? [];
   return {
     items: pages.flatMap((page) => page.items),
@@ -52,8 +52,8 @@ export function useNotificationInbox(): NotificationInboxState {
     hasMore: list.hasNextPage,
     isLoadingMore: list.isFetchingNextPage,
     loadMore: () => void list.fetchNextPage(),
-    markRead: async (notificationId) => {
-      await mark.run({ notificationId });
+    markRead: async (inboxMessageId) => {
+      await mark.run({ inboxMessageId });
       await list.refetch();
     },
     retry: () => void list.refetch(),

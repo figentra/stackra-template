@@ -7,8 +7,8 @@
  * Runtime: isomorphic
  */
 export { AccessLogEntryFactory } from "#node/database/factories/access-log-entry.factory";
-export { FakeAccessLogSink } from "#testing/fakes/fake-access-log-sink.fake";
+export { AccessLogSinkFake } from "#testing/access-log-sink.fake";
 export {
   type ToHaveLoggedAccessOptions,
   toHaveLoggedAccess,
-} from "#testing/matchers/to-have-logged-access.matcher";
+} from "#testing/to-have-logged-access.matcher";

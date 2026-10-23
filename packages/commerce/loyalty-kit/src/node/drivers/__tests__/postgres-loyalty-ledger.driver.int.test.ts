@@ -12,7 +12,7 @@
 import { LoyaltyKitConfig, memberId } from "@acme/loyalty-kit";
 import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule, PostgresLoyaltyLedgerDriver } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers, pointsEntry } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake, pointsEntry } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { usePostgres } from "@stackra/database/testing";
 import { describe, expect, it } from "@stackra/testing";
@@ -32,7 +32,7 @@ describe(PostgresLoyaltyLedgerDriver, () => {
     const mod = await createTestingModule(LoyaltyKitModule)
       .useDrivers({ database: "postgres" })
       .withConfig(LoyaltyKitConfig, { ledger: "postgres" })
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
       .compile();
     const ledger = mod.get(LoyaltyLedger);
     const usr1 = memberId("usr_1");

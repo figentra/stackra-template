@@ -11,7 +11,7 @@ authored code never imports `schemas/`.
 | ------------------- | --------------------------------------------------------------------------------------------------------- |
 | `wiring.ts`         | the client container wiring: modules, bindings (routes, layout, menus, store), config overrides, drivers  |
 | `schemas/mobile.ts` | one Zod schema per shape class and config class of the app (`X$`) with its `X$Check`                      |
-| `env.ts`            | every public env read as a literal (`publicEnv`) and the validated `MobileEnv` instance                   |
+| `env.ts`            | every public env read as a literal (`publicEnv`) and the validated `MobileEnvConfig` instance                   |
 | `routes.ts`         | `Routes` (route key → route reference), the `RouteKey` enum, the typed params of every route              |
 | `route-table.ts`    | route key → route class and its page, for the generated entry and tree only                               |
 | `navigation.tsx`    | the React Navigation 7 tree built from the route folders, the tab bar menu and `MobileChromeConfig`       |

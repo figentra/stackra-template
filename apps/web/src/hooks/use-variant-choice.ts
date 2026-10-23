@@ -6,23 +6,12 @@
  * Boundary: selection logic only; prices and stock are the variants' own fields, never recomputed
  *           here.
  * Runtime: browser
- * Governing contract: ADR 0294 (decision 14: a hook with two importers lives in hooks/), ADR 0079
+ * Governing contract: ADR 0294 (decision 8: shared types in types/; decision 14: a hook with two
+ *                     importers lives in hooks/), ADR 0079
  */
 import { useMemo, useState } from "react";
-import type { StorefrontProductView } from "#stackra/clients";
-
-/** One of the product's variants. */
-export type Variant = StorefrontProductView["variants"][number];
-
-/** What the picker renders and the page reads. */
-export interface VariantChoice {
-  /** The variant the current option values resolve to. */
-  readonly variant: Variant;
-  /** Axis name → values in first-seen order (`{ Size: ["S", "M", "XL"] }`). */
-  readonly options: Readonly<Record<string, readonly string[]>>;
-  /** Pick a value on one axis; other axes keep their values. */
-  readonly choose: (axis: string, value: string) => void;
-}
+import type { Variant } from "#src/types/variant.type";
+import type { VariantChoice } from "#src/types/variant-choice.type";
 
 /**
  * Derives the axes once per product; the chosen values start from the first in-stock variant (or

@@ -37,7 +37,7 @@ is logged as `access_log_write_failed` and never fails the call.
 | `.`           | `AccessLogged`, `AccessLogService`, `AccessLogConfig` and its schema `AccessLogConfig$`, `MemoryAccessLogSinkDriver`, `ACCESS_LOG_WRITE_FAILED`               |
 | `./contracts` | the `AccessLogSink` port, `DataClassification` and its schema, `AccessRecord`, `AccessLoggedOptions`                                                          |
 | `./node`      | `AccessLogModule`, `AccessLogExplorer`, `PostgresAccessLogSinkDriver`, `AccessLogEntry`, the permissions, `PurgeAccessLogAction`, the migration, the resource |
-| `./testing`   | `FakeAccessLogSink.with({ failing })`, `AccessLogEntryFactory`, `toHaveLoggedAccess`                                                                          |
+| `./testing`   | `AccessLogSinkFake.with({ failing })`, `AccessLogEntryFactory`, `toHaveLoggedAccess`                                                                          |
 | `./assets/*`  | `access_log::` translations (`assets/lang/<locale>/access_log.json`)                                                                                          |
 
 No symbol is exported from two entries. Nobody writes an entry barrel: gen writes
@@ -48,25 +48,25 @@ in the template only so it can be read, and is imported as `#stackra/<name>`.
 
 ## Layout
 
-| Path                                                                       | Holds                                                                                   | Test                                                     |
-| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `src/contracts/ports/access-log-sink.port.ts`                              | `AccessLogSink extends Port`                                                            | through the drivers and the conformance test             |
-| `src/contracts/enums/data-classification.enum.ts`                          | `DataClassification`, an `Enum.of`                                                      | none                                                     |
-| `src/contracts/types/*.type.ts`                                            | `AccessRecord`, `AccessLoggedOptions`                                                   | none                                                     |
-| `src/config/access-log.config.ts`                                          | `AccessLogConfig extends Config`: `sink` (`DriverName<AccessLogSink>`), `retentionDays` | the purge test sets both                                 |
-| `src/core/decorators/access-logged.decorator.ts`                           | the class facet, made with `createDecorator`                                            | `node/__tests__/access-log.explorer.test.ts`             |
-| `src/core/services/access-log.service.ts`                                  | `AccessLogService extends Service`: resolves subjects, writes, swallows failures        | `core/services/__tests__/access-log.service.test.ts`     |
-| `src/core/drivers/memory-access-log-sink.driver.ts`                        | `MemoryAccessLogSinkDriver extends Driver(AccessLogSink)`                               | the conformance test                                     |
-| `src/node/access-log.module.ts`                                            | `AccessLogModule extends Module({ exports })`                                           | the conformance test imports it                          |
-| `src/node/access-log.explorer.ts`                                          | `AccessLogExplorer extends Explorer`                                                    | `node/__tests__/access-log.explorer.test.ts`             |
-| `src/node/access/access-log-entry.permissions.ts`                          | `read` (L1) and `purge` (L2, system)                                                    | none; the manifest locks the names                       |
-| `src/node/actions/purge-access-log.action.ts`                              | the retention job (`job:` with a cron)                                                  | `node/actions/__tests__/purge-access-log.action.test.ts` |
-| `src/node/drivers/postgres-access-log-sink.driver.ts`                      | `PostgresAccessLogSinkDriver`                                                           | the host's `.int` tier                                   |
-| `src/node/models/access-log-entry.model.ts`                                | `AccessLogEntry`, append-only by trait                                                  | none                                                     |
-| `src/node/resources/access-log-entry/access-log-entry.resource.ts`         | the read-only audit trail in the admin area                                             | the console e2e tier                                     |
-| `src/node/database/migrations/0001-create-access-log-entries.migration.ts` | the table in the `access_log` Postgres schema                                           | the `.int` tier applies it                               |
-| `src/node/database/factories/access-log-entry.factory.ts`                  | `AccessLogEntryFactory`, exported from `./testing` only                                 | none                                                     |
-| `src/testing/fakes/`, `src/testing/matchers/`                              | `FakeAccessLogSink`, `toHaveLoggedAccess`                                               | through the service and conformance tests                |
+| Path                                                                                  | Holds                                                                                   | Test                                                     |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `src/contracts/ports/access-log-sink.port.ts`                                         | `AccessLogSink extends Port`                                                            | through the drivers and the conformance test             |
+| `src/contracts/enums/data-classification.enum.ts`                                     | `DataClassification`, an `Enum.of`                                                      | none                                                     |
+| `src/contracts/types/*.type.ts`                                                       | `AccessRecord`, `AccessLoggedOptions`                                                   | none                                                     |
+| `src/config/access-log.config.ts`                                                     | `AccessLogConfig extends Config`: `sink` (`DriverName<AccessLogSink>`), `retentionDays` | the purge test sets both                                 |
+| `src/core/decorators/access-logged.decorator.ts`                                      | the class facet, made with `createDecorator`                                            | `node/__tests__/access-log.explorer.test.ts`             |
+| `src/core/services/access-log.service.ts`                                             | `AccessLogService extends Service`: resolves subjects, writes, swallows failures        | `core/services/__tests__/access-log.service.test.ts`     |
+| `src/core/drivers/memory-access-log-sink.driver.ts`                                   | `MemoryAccessLogSinkDriver extends Driver(AccessLogSink)`                               | the conformance test                                     |
+| `src/node/access-log.module.ts`                                                       | `AccessLogModule extends Module({ exports })`                                           | the conformance test imports it                          |
+| `src/node/access-log.explorer.ts`                                                     | `AccessLogExplorer extends Explorer`                                                    | `node/__tests__/access-log.explorer.test.ts`             |
+| `src/node/access/access-log-entry.permissions.ts`                                     | `read` (L1) and `purge` (L2, system)                                                    | none; the manifest locks the names                       |
+| `src/node/actions/purge-access-log.action.ts`                                         | the retention job (`job:` with a cron)                                                  | `node/actions/__tests__/purge-access-log.action.test.ts` |
+| `src/node/drivers/postgres-access-log-sink.driver.ts`                                 | `PostgresAccessLogSinkDriver`                                                           | the host's `.int` tier                                   |
+| `src/node/models/access-log-entry.model.ts`                                           | `AccessLogEntry`, append-only by trait                                                  | none                                                     |
+| `src/node/resources/access-log-entry/access-log-entry.resource.ts`                    | the read-only audit trail in the admin area                                             | the console e2e tier                                     |
+| `src/node/database/migrations/0001-create-access-log-entries.migration.ts`            | the table in the `access_log` Postgres schema                                           | the `.int` tier applies it                               |
+| `src/node/database/factories/access-log-entry.factory.ts`                             | `AccessLogEntryFactory`, exported from `./testing` only                                 | none                                                     |
+| `src/testing/access-log-sink.fake.ts`, `src/testing/to-have-logged-access.matcher.ts` | `AccessLogSinkFake`, `toHaveLoggedAccess`                                               | through the service and conformance tests                |
 
 ## Rules this package demonstrates
 

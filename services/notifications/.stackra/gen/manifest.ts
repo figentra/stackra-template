@@ -21,7 +21,7 @@ export const manifest = json as StackraManifest;
  * error.
  */
 export const Refusals = refusalRefs({
-  messages: ["mail_provider_unavailable", "notification_not_found"],
+  messages: ["mail_provider_unavailable", "inbox_message_not_found"],
   orders: ["order_not_payable", "orders_paused"], // consumed: commerce
   webhooks: ["invalid_signature"], // @stackra/webhooks, which verifies every WebhookEvent
   core: [

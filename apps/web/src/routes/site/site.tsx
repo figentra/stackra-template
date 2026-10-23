@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
  * Purpose: the component of `SiteLayout`, bound by name: the tenant brand variables, the skip link,
- *          header, outlet, footer and the consent banner.
+ *          header, the locale suggestion, outlet, footer and the consent banner.
  * Boundary: the layout owns nothing a page shows. A tenant's brand becomes `--brand-*` custom
  *           properties through one `<Style>` built by `@acme/brand` (every value checked against
  *           the CSS grammar of its token kind first), only when theming.config.ts allows it; the
@@ -9,7 +9,7 @@
  *           document never carries CSS.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 7 and 14), ADR 0175 (sites by host), ADR 0112 (no markup
- *                     in documents)
+ *                     in documents), ADR 0297 (decision 4: the locale suggestion)
  */
 import { brandCssVariables } from "@acme/brand";
 import { useConfig } from "@stackra/config/react";
@@ -19,6 +19,7 @@ import { Outlet } from "@stackra/navigation/react";
 import { ThemingConfig } from "@stackra/theming";
 import { I18n } from "#stackra/i18n";
 import { ConsentBanner } from "#src/components/consent-banner";
+import { LocaleSuggestion } from "#src/components/locale-suggestion";
 import { SiteFooter } from "#src/components/site-footer";
 import { SiteHeader } from "#src/components/site-header";
 import { useSite } from "#src/hooks/use-site";
@@ -35,6 +36,7 @@ export function Site() {
         {t(I18n.web.nav.skip)}
       </a>
       <SiteHeader siteName={site.name} locale={site.locale} />
+      <LocaleSuggestion locale={site.locale} />
       <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-8 md:px-6">
         <Outlet />
       </main>

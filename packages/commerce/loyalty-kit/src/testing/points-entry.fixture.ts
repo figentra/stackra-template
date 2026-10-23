@@ -1,11 +1,12 @@
 /**
  * Stackra file contract:
- * Purpose: builds PointsEntry values (the port's DTO, not a row) for driver and matcher tests.
- * Boundary: the generic value factory of @stackra/testing: the port's DTO is not a model, so this
- *           is a plain value, not a `Factory(Model)` kind, and it stays in ./testing. `at` is the
- *           frozen test clock.
+ * Purpose: the PointsEntry fixture: builds port DTOs (values, not rows) for driver and matcher
+ *          tests.
+ * Boundary: a test fixture in `testing/`, built on the generic `factory` of @stackra/testing. The
+ *           port's DTO is not a model, so this is no `Factory(Model)` kind and no `.factory.ts`:
+ *           that suffix belongs to `database/factories/` alone. `at` is the frozen test clock.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 15), ADR 0190 (factories), ADR 0269
+ * Governing contract: ADR 0294 (decisions 2 and 15), ADR 0269 (helpers in the owning package)
  */
 import { factory } from "@stackra/testing";
 import { EntryKind } from "#contracts/enums/entry-kind.enum";

@@ -23,14 +23,14 @@ tree, linking, the Expo configuration, EAS profiles, Metro, Maestro) is generate
 
 ## Where a fact goes (ADR 0295 decision 4)
 
-| Question about a fact                                                         | File                          | Here                                                                                                |
-| ----------------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------- |
-| What is the app, for build tools? (targets, area, env, name, scheme, ids)     | `stackra.config.ts`           | `defineApp({ targets, area, env: MobileEnv, name, scheme, ios, android, expo, eas, maestro, e2e })` |
-| Which remote modules does the binary ship?                                    | `src/mobile.module.ts`        | `Module({ imports: [Identity.modules.Identity, …] })`                                               |
-| What does the running app read? (chrome, locales, theme, packages' behaviour) | `src/config/<fact>.config.ts` | `MobileEnv` and twelve `Mobile<Base>` overrides of the packages' config classes                     |
-| What differs per environment? (Metro port, public values, EAS profiles)       | `runway.yaml`                 | `version: 3`: port, `EXPO_PUBLIC_*` values, EAS profiles and channels, Sentry project, config       |
-| Accounts, vendor ids, the release policy                                      | root `runway.yaml`            | not in this member (`providers.expo`, `providers.apple`, `targets.eas`)                             |
-| Derivable from declarations?                                                  | nowhere: `.stackra/`          | generated                                                                                           |
+| Question about a fact                                                         | File                          | Here                                                                                                      |
+| ----------------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| What is the app, for build tools? (targets, area, env, name, scheme, ids)     | `stackra.config.ts`           | `defineApp({ targets, area, env: MobileEnvConfig, name, scheme, ios, android, expo, eas, maestro, e2e })` |
+| Which remote modules does the binary ship?                                    | `src/mobile.module.ts`        | `Module({ imports: [Identity.modules.Identity, …] })`                                                     |
+| What does the running app read? (chrome, locales, theme, packages' behaviour) | `src/config/<fact>.config.ts` | `MobileEnvConfig` and twelve `Mobile<Base>` overrides of the packages' config classes                     |
+| What differs per environment? (Metro port, public values, EAS profiles)       | `runway.yaml`                 | `version: 3`: port, `EXPO_PUBLIC_*` values, EAS profiles and channels, Sentry project, config             |
+| Accounts, vendor ids, the release policy                                      | root `runway.yaml`            | not in this member (`providers.expo`, `providers.apple`, `targets.eas`)                                   |
+| Derivable from declarations?                                                  | nowhere: `.stackra/`          | generated                                                                                                 |
 
 ## Tree
 
@@ -45,7 +45,7 @@ apps/mobile
 ├── app.config.ts · metro.config.js · eas.json · vitest.config.ts   GENERATED root shims (gitignored)
 ├── src/
 │   ├── mobile.module.ts       the root module: the remote modules compiled into the binary
-│   ├── config/                MobileEnv, MobileChromeConfig and the package overrides (their presence mounts each context)
+│   ├── config/                MobileEnvConfig, MobileChromeConfig and the package overrides (their presence mounts each context)
 │   ├── routes/<name>/         <name>.route.ts (or tabs.layout.ts), the page <name>.tsx, use-<name>.ts, __tests__/
 │   ├── components/<name>/     shared presentational components
 │   ├── blocks/promo-banner/   the block (its props as fields) and its renderer

@@ -12,7 +12,7 @@
 import { LoyaltyKitConfig, LoyaltyService, memberId } from "@acme/loyalty-kit";
 import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers, pointsEntry } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake, pointsEntry } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { beforeEach, describe, expect, freezeClock, it } from "@stackra/testing";
@@ -41,7 +41,7 @@ describe(LoyaltyService, () => {
         earnPerMinor: 0.1,
         maxRedeemPercent: 30,
       })
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with(["usr_1"]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with(["usr_1"]))
       .compile();
     loyalty = mod.get(LoyaltyService);
     ledger = mod.get(LoyaltyLedger);

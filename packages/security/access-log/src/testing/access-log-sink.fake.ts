@@ -12,16 +12,16 @@ import { Fake } from "@stackra/testing";
 import { AccessLogSink } from "#contracts/ports/access-log-sink.port";
 import type { AccessRecord } from "#contracts/types/access-record.type";
 
-/** `FakeAccessLogSink.with({ failing: true })` throws on every write; the service swallows it. */
-export class FakeAccessLogSink extends Fake.of(AccessLogSink) {
+/** `AccessLogSinkFake.with({ failing: true })` throws on every write; the service swallows it. */
+export class AccessLogSinkFake extends Fake.of(AccessLogSink) {
   /** @param failing - when true, every write throws after it is recorded. */
   constructor(private readonly failing = false) {
     super();
   }
 
-  /** Shorthand constructor for `.override(AccessLogSink, FakeAccessLogSink.with())`. */
-  static with(options: { readonly failing?: boolean } = {}): FakeAccessLogSink {
-    return new FakeAccessLogSink(options.failing ?? false);
+  /** Shorthand constructor for `.override(AccessLogSink, AccessLogSinkFake.with())`. */
+  static with(options: { readonly failing?: boolean } = {}): AccessLogSinkFake {
+    return new AccessLogSinkFake(options.failing ?? false);
   }
 
   /** Recorded; throws when constructed as failing. */

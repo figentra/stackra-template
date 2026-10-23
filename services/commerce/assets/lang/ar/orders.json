@@ -1,6 +1,7 @@
 {
   "nav": {
-    "sales": "المبيعات"
+    "sales": "المبيعات",
+    "orders": "الطلبات"
   },
   "resources": {
     "order": {
@@ -60,6 +61,9 @@
   "documents": {
     "sales_today": {
       "title": "مبيعات اليوم"
+    },
+    "my_orders": {
+      "title": "طلباتي"
     }
   },
   "quick_order": {

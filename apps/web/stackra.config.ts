@@ -18,7 +18,7 @@
 import { defineApp } from "@stackra/app";
 import { ApiArea, Target } from "@stackra/contracts";
 import { RenderMode } from "@stackra/navigation";
-import { WebEnv } from "./src/config/env.config";
+import { WebEnvConfig } from "./src/config/env.config";
 
 /** `targets` and `render` pick the generated outputs: the Worker and browser entries, Wrangler. */
 export default defineApp({
@@ -29,7 +29,7 @@ export default defineApp({
    */
   render: RenderMode.Server,
   area: ApiArea.Public,
-  env: WebEnv,
+  env: WebEnvConfig,
   e2e: {
     // + chromium-rtl (i18n.config.ts rtl), by gen
     projects: ["chromium", "mobile-safari"],

@@ -15,15 +15,15 @@ export type { I18nKey };
 /** `I18n.<namespace>.<path>`; `_` holds the leaves of a branch that also has children. */
 export const I18n = keys({
   messages: {
-    permissions: { message: ["send", "read"], notification: ["read", "update"] },
+    permissions: { message: ["send", "read"], inbox_message: ["read", "update"] },
     enums: {
       message_status: ["queued", "sent", "failed"],
-      notification_kind: ["order_paid"],
+      inbox_message_kind: ["order_paid"],
       mail_auth_result: ["pass", "fail", "soft_fail", "none"],
     },
     errors: {
       mail_provider_unavailable: ["message"],
-      notification_not_found: ["message"],
+      inbox_message_not_found: ["message"],
     },
     settings: {
       messages: ["title", "order_updates", "order_receipts", "product_updates", "marketing"],

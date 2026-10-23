@@ -98,7 +98,7 @@ const config: ExpoConfig = {
   // i18n.config.ts locales → CFBundleLocalizations + InfoPlist strings
   locales: { en: "./.stackra/locales/en.json", ar: "./.stackra/locales/ar.json" },
   runtimeVersion: { policy: "fingerprint" }, // stackra.config.ts expo.runtimeVersion
-  // MobileEnv.easProjectId; a dev client from a bare clone has no update URL
+  // MobileEnvConfig.easProjectId; a dev client from a bare clone has no update URL
   updates: easProjectId ? { url: `https://u.expo.dev/${easProjectId}` } : { enabled: false },
   // reuse a native build whose fingerprint EAS already built (the fingerprint runtime policy)
   buildCacheProvider: "eas",
@@ -114,7 +114,7 @@ const config: ExpoConfig = {
       dark: "./.stackra/icons/app-icon-dark-1024.png",
       tinted: "./.stackra/icons/app-icon-tinted-1024.png",
     },
-    // MobileEnv.appOrigin; the member that serves it publishes apple-app-site-association
+    // MobileEnvConfig.appOrigin; the member that serves it publishes apple-app-site-association
     associatedDomains: [`applinks:${appHost}`],
     config: { usesNonExemptEncryption: false }, // stackra.config.ts expo.ios
     privacyManifests: {
@@ -195,7 +195,7 @@ const config: ExpoConfig = {
       "android.permission.READ_EXTERNAL_STORAGE",
       "android.permission.WRITE_EXTERNAL_STORAGE",
     ],
-    // MobileEnv.appOrigin; the member that serves it publishes assetlinks.json
+    // MobileEnvConfig.appOrigin; the member that serves it publishes assetlinks.json
     intentFilters: [
       {
         action: "VIEW",

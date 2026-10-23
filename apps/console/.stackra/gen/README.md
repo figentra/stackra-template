@@ -10,7 +10,7 @@ complete; none is an excerpt.
 
 | File              | Holds                                                                                                  |
 | ----------------- | ------------------------------------------------------------------------------------------------------ |
-| `env.ts`          | the validated `env: ConsoleEnv` parsed once from `import.meta.env`                                     |
+| `env.ts`          | the validated `env: ConsoleEnvConfig` parsed once from `import.meta.env`                                     |
 | `clients.ts`      | `Commerce`, `Notifications`, `Platform`, `Experience`, `Identity`: descriptors, `Enum.of` enums, shapes |
 | `i18n.ts`         | the complete `I18n` key tree with the derived keys, the loaders per namespace and locale, overrides     |
 | `routes.ts`       | `Routes` by route key (the route folder) and the `RouteKey` type                                       |

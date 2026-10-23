@@ -42,7 +42,7 @@ import type { PromoBannerBlock } from "#src/blocks/promo-banner/promo-banner.blo
 import type { MobileAnalyticsConfig } from "#src/config/analytics.config";
 import type { MobileChromeConfig } from "#src/config/chrome.config";
 import type { MobileConsentConfig } from "#src/config/consent.config";
-import type { MobileEnv } from "#src/config/env.config";
+import type { MobileEnvConfig } from "#src/config/env.config";
 import type { MobileFeatureFlagsConfig } from "#src/config/feature-flags.config";
 import type { MobileI18nConfig } from "#src/config/i18n.config";
 import type { MobileIdentityConfig } from "#src/config/identity.config";
@@ -163,13 +163,13 @@ export type SessionRequiredError$Check = Assert<
 
 // --- config --------------------------------------------------------------------------------------
 
-/** config `MobileEnv` (src/config/env.config.ts), key `mobile.env`. */
-export const MobileEnv$ = z.object({
+/** config `MobileEnvConfig` (src/config/env.config.ts), key `mobile.env`. */
+export const MobileEnvConfig$ = z.object({
   easProjectId: z.string().default(""),
   apiOrigin: url(),
   appOrigin: url(),
 });
-export type MobileEnv$Check = Assert<Same<z.output<typeof MobileEnv$>, Fields<MobileEnv>>>;
+export type MobileEnvConfig$Check = Assert<Same<z.output<typeof MobileEnvConfig$>, Fields<MobileEnvConfig>>>;
 
 /** override `MobileChromeConfig` (src/config/chrome.config.ts), key `navigation.chrome`. */
 export const MobileChromeConfig$ = ChromeConfig$.extend({

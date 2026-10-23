@@ -4,7 +4,7 @@
  *          first, each as its kind's label interpolated with its data.
  * Boundary: a function component bound to `InboxRoute` by its file name; composition of the hook
  *           beside it and the shared states. The kind's label is the producer's derived key
- *           `messages::enums.notification_kind.<code>`; the count uses the full CLDR plural set in
+ *           `messages::enums.inbox_message_kind.<code>`; the count uses the full CLDR plural set in
  *           Arabic (`I18n.mobile.inbox.unread`).
  * Runtime: react-native
  * Governing contract: ADR 0294 (decisions 7 and 14), ADR 0062, ADR 0080, ADR 0192
@@ -61,7 +61,7 @@ export const Inbox: RouteComponent<typeof InboxRoute> = () => {
         <Card testID={`inbox-${item.id}`}>
           <Card.Body className="gap-1">
             <Card.Title>
-              {t(I18n.messages.enums.notification_kind[item.kind], item.data)}
+              {t(I18n.messages.enums.inbox_message_kind[item.kind], item.data)}
             </Card.Title>
             <Text className="text-xs text-ink-muted">
               {dateTime(item.createdAt, { dateStyle: "medium", timeStyle: "short" })}

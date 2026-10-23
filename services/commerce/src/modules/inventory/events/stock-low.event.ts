@@ -6,19 +6,24 @@
  *           because only those may broadcast: the broadcast declares `inventory.stock.read` as the
  *           permission a session needs to receive the data-free refresh on
  *           `tenant.{tenantId}.inventory`, so the console's low-stock widget updates without
- *           polling; @stackra/realtime enforces it at delivery. Version 1 until a breaking change.
+ *           polling; @stackra/realtime enforces it at delivery. The audience is the tenant (the
+ *           default is the principal): stock is about a variant, never about one person. Version 1
+ *           until a breaking change.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078, ADR 0225 (broadcast)
  */
 import type { PublicId } from "@stackra/contracts";
-import { IntegrationEvent } from "@stackra/events";
+import { BroadcastAudience, IntegrationEvent } from "@stackra/events";
 import { Int, Str } from "@stackra/validation";
 import { StockPermissions } from "#modules/inventory/access/stock.permissions";
 
 /** Recorded on the StockLevel when a reservation crosses the threshold. */
 export class StockLow extends IntegrationEvent({
   name: "stock.low",
-  broadcast: StockPermissions.read,
+  broadcast: {
+    permission: StockPermissions.read,
+    audience: BroadcastAudience.Tenant,
+  },
 }) {
   /** The variant running low. */
   variantId!: PublicId<"var">;

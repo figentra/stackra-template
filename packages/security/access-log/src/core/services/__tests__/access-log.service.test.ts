@@ -11,13 +11,13 @@
 import { AccessLogConfig, AccessLogService } from "@acme/access-log";
 import { AccessLogSink, DataClassification } from "@acme/access-log/contracts";
 import { AccessLogModule } from "@acme/access-log/node";
-import { FakeAccessLogSink } from "@acme/access-log/testing";
+import { AccessLogSinkFake } from "@acme/access-log/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
 
 /** A service built against the given sink. */
-async function serviceWith(sink: FakeAccessLogSink): Promise<AccessLogService> {
+async function serviceWith(sink: AccessLogSinkFake): Promise<AccessLogService> {
   const app = await createTestingModule(AccessLogModule)
     .withConfig(AccessLogConfig, { sink: "memory" })
     .override(AccessLogSink, sink)
@@ -29,7 +29,7 @@ async function serviceWith(sink: FakeAccessLogSink): Promise<AccessLogService> {
 describe(AccessLogService, () => {
   /** A service acting for a customer is logged against that customer, not the service. */
   it("names the principal the call is for when the facet names no field", async () => {
-    const sink = FakeAccessLogSink.with();
+    const sink = AccessLogSinkFake.with();
     const service = await serviceWith(sink);
     const relay = actors.service("notifications", { onBehalfOf: actors.customer("usr_1") });
 
@@ -46,7 +46,7 @@ describe(AccessLogService, () => {
 
   /** The field is read from records among the arguments and from an array result, once each. */
   it("names the field of every record the call handled, or writes nothing", async () => {
-    const sink = FakeAccessLogSink.with();
+    const sink = AccessLogSinkFake.with();
     const service = await serviceWith(sink);
     const options = {
       classification: DataClassification.Pseudonymous,
@@ -64,7 +64,7 @@ describe(AccessLogService, () => {
 
   /** A sink outage is reported through the logger; the call it audits still succeeds. */
   it("swallows a sink failure", async () => {
-    const service = await serviceWith(FakeAccessLogSink.with({ failing: true }));
+    const service = await serviceWith(AccessLogSinkFake.with({ failing: true }));
 
     await expect(
       service.record(

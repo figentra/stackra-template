@@ -300,7 +300,7 @@
   "config": [
     {
       "key": "mobile.env",
-      "class": "MobileEnv",
+      "class": "MobileEnvConfig",
       "file": "src/config/env.config.ts"
     },
     {
@@ -377,7 +377,7 @@
     }
   ],
   "env": {
-    "class": "MobileEnv",
+    "class": "MobileEnvConfig",
     "public": [
       {
         "name": "EXPO_PUBLIC_EAS_PROJECT_ID",

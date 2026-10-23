@@ -13,7 +13,7 @@
 import { memberId } from "@acme/loyalty-kit";
 import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
 import { run } from "@stackra/actions/testing";
 import { createTestingModule, type TestingApp } from "@stackra/container/testing";
 import { usePostgres } from "@stackra/database/testing";
@@ -44,7 +44,7 @@ describe(RedeemPointsWorkflow, () => {
       .seed(LoyaltyKitDemoSeeder) // every demo member holds 1 000 points
       .override(
         LoyaltyMembers,
-        FakeLoyaltyMembers.with([LoyaltyKitDemoSeeder.ids.silver, LoyaltyKitDemoSeeder.ids.gold]),
+        LoyaltyMembersFake.with([LoyaltyKitDemoSeeder.ids.silver, LoyaltyKitDemoSeeder.ids.gold]),
       )
       .compile();
   });

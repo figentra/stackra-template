@@ -139,7 +139,7 @@ export const I18n = keys({
     errors: { insufficient_stock: ["message"] },
   },
   orders: {
-    nav: ["sales"],
+    nav: ["sales", "orders"],
     resources: { order: ["title"] },
     enums: {
       order_status: ["pending_payment", "paid", "cancelled", "expired"],
@@ -151,7 +151,7 @@ export const I18n = keys({
     actions: { order: { create: ["success", "queued"], cancel: ["confirm", "success"] } },
     order: ["lines_count"],
     widgets: { revenue_today: ["title"] },
-    documents: { sales_today: ["title"] },
+    documents: { sales_today: ["title"], my_orders: ["title"] },
     quick_order: ["title", "variant", "quantity", "submit"],
     flags: { quick_order: ["label"] },
     errors: { order_not_payable: ["message"], orders_paused: ["message"] },
@@ -183,8 +183,8 @@ export const I18n = keys({
     enums: { data_classification: ["personal", "financial", "health", "pseudonymous"] },
   },
   messages: {
-    enums: { notification_kind: ["order_paid"] },
-    errors: { notification_not_found: ["message"] },
+    enums: { inbox_message_kind: ["order_paid"] },
+    errors: { inbox_message_not_found: ["message"] },
     settings: {
       messages: ["title", "order_updates", "order_receipts", "product_updates", "marketing"],
     },

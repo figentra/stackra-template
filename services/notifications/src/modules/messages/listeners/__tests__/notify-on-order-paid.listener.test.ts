@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
  * Purpose: proves a commerce `orders.order.paid.v1` event adds one inbox entry (one call to
- *          commerce) and one `messages.notification.created.v1`, even when redelivered, and none
+ *          commerce) and one `messages.inbox_message.created.v1`, even when redelivered, and none
  *          for a customer who switched order updates off.
  * Boundary: unit tier; the generated commerce client is faked in the one typed form (ADR 0269), the
  *           event is injected through the memory inbox, settings are faked per user. Commerce's ids
@@ -18,10 +18,10 @@ import { fakeSettings } from "@stackra/settings/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { Commerce, CommerceClient } from "#stackra/clients";
 import { NotificationsModule } from "#src/notifications.module";
-import { NotificationCreated } from "#modules/messages/events/notification-created.event";
+import { InboxMessageCreated } from "#modules/messages/events/inbox-message-created.event";
 import { NotifyOnOrderPaidListener } from "#modules/messages/listeners/notify-on-order-paid.listener";
 import { MessagesSettings } from "#modules/messages/messages.settings";
-import { Notification } from "#modules/messages/models/notification.model";
+import { InboxMessage } from "#modules/messages/models/inbox-message.model";
 
 /** A booted service whose customer has `orderUpdates` as given, and the faked client. */
 async function setup(orderUpdates: boolean) {
@@ -62,9 +62,9 @@ describe(NotifyOnOrderPaidListener, () => {
     await drainOutbox();
 
     expect(commerce.called(commerce.order.get)).toHaveLength(1);
-    const rows = await app.repository(Notification).find({ principalId: paid.customerId });
+    const rows = await app.repository(InboxMessage).find({ principalId: paid.customerId });
     expect(rows.map((entry) => entry.data.lines)).toEqual([1]);
-    expect(app.events.published().ofType(NotificationCreated)).toHaveLength(1);
+    expect(app.events.published().ofType(InboxMessageCreated)).toHaveLength(1);
   });
 
   /** A customer who switched order updates off gets no entry and costs no call. */
@@ -75,6 +75,6 @@ describe(NotifyOnOrderPaidListener, () => {
     await drainOutbox();
 
     expect(commerce.called(commerce.order.get)).toHaveLength(0);
-    expect(await app.repository(Notification).count({ principalId: paid.customerId })).toBe(0);
+    expect(await app.repository(InboxMessage).count({ principalId: paid.customerId })).toBe(0);
   });
 });

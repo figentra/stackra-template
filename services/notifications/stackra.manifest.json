@@ -66,49 +66,49 @@
       "refusals": ["mail_provider_unavailable"]
     },
     {
-      "key": "messages.notification.list@1",
+      "key": "messages.inbox_message.list@1",
       "kind": "query",
       "module": "messages",
-      "class": "ListNotificationsQuery",
-      "file": "src/modules/messages/queries/list-notifications.query.ts",
-      "permission": "messages.notification.read",
+      "class": "ListInboxMessagesQuery",
+      "file": "src/modules/messages/queries/list-inbox-messages.query.ts",
+      "permission": "messages.inbox_message.read",
       "risk": "L0",
       "actors": ["user"],
       "endpoint": {
         "method": "GET",
-        "path": "/notifications",
+        "path": "/inbox-messages",
         "derived": true
       },
       "tool": "auto",
       "pagination": "cursor",
       "input": {
-        "$ref": "#/schemas/messages.ListNotificationsInput"
+        "$ref": "#/schemas/messages.ListInboxMessagesInput"
       },
       "output": {
-        "$ref": "#/schemas/messages.ListNotificationsOutput"
+        "$ref": "#/schemas/messages.ListInboxMessagesOutput"
       }
     },
     {
-      "key": "messages.notification.mark_read@1",
+      "key": "messages.inbox_message.mark_read@1",
       "kind": "action",
       "module": "messages",
-      "class": "MarkNotificationReadAction",
-      "file": "src/modules/messages/actions/mark-notification-read.action.ts",
-      "permission": "messages.notification.update",
+      "class": "MarkInboxMessageReadAction",
+      "file": "src/modules/messages/actions/mark-inbox-message-read.action.ts",
+      "permission": "messages.inbox_message.update",
       "risk": "L0",
       "actors": ["user"],
       "endpoint": {
         "method": "PUT",
-        "path": "/notifications/:notificationId/read",
+        "path": "/inbox-messages/:inboxMessageId/read",
         "derived": false
       },
       "input": {
-        "$ref": "#/schemas/messages.MarkNotificationReadInput"
+        "$ref": "#/schemas/messages.MarkInboxMessageReadInput"
       },
       "output": {
-        "$ref": "#/schemas/messages.NotificationView"
+        "$ref": "#/schemas/messages.InboxMessageView"
       },
-      "refusals": ["notification_not_found"]
+      "refusals": ["inbox_message_not_found"]
     }
   ],
   "events": [
@@ -123,17 +123,18 @@
       }
     },
     {
-      "name": "messages.notification.created.v1",
+      "name": "messages.inbox_message.created.v1",
       "module": "messages",
-      "class": "NotificationCreated",
+      "class": "InboxMessageCreated",
       "kind": "integration",
       "version": 1,
       "broadcast": {
-        "channel": "tenant.{tenantId}.messages",
-        "permission": "messages.notification.read"
+        "channel": "principal.{principalId}.messages",
+        "permission": "messages.inbox_message.read",
+        "audience": "principal"
       },
       "fields": {
-        "$ref": "#/schemas/messages.NotificationCreated"
+        "$ref": "#/schemas/messages.InboxMessageCreated"
       }
     }
   ],
@@ -171,11 +172,11 @@
       "risk": "L0"
     },
     {
-      "key": "messages.notification.read",
+      "key": "messages.inbox_message.read",
       "risk": "L0"
     },
     {
-      "key": "messages.notification.update",
+      "key": "messages.inbox_message.update",
       "risk": "L0"
     }
   ],
@@ -187,9 +188,9 @@
       "traits": ["HasPublicId", "BelongsToTenant", "Timestamps"]
     },
     {
-      "key": "messages.notification",
-      "table": "messages.notifications",
-      "publicId": "ntf",
+      "key": "messages.inbox_message",
+      "table": "messages.inbox_messages",
+      "publicId": "inm",
       "traits": ["HasPublicId", "BelongsToTenant", "Timestamps"]
     }
   ],
@@ -234,16 +235,19 @@
     {
       "key": "messages.resend",
       "class": "ResendIntegration",
-      "category": "email",
-      "connection": "messages.resend"
+      "provider": "resend",
+      "category": "email"
     }
   ],
   "connections": [
     {
       "key": "messages.resend",
       "class": "ResendConnection",
+      "integration": "messages.resend",
       "fields": ["apiKey", "fromAddress"],
-      "secrets": ["apiKey"]
+      "secrets": {
+        "apiKey": "RESEND_TENANT_API_KEY"
+      }
     }
   ],
   "errors": [
@@ -255,7 +259,7 @@
       "module": "messages"
     },
     {
-      "code": "notification_not_found",
+      "code": "inbox_message_not_found",
       "kind": "not_found",
       "category": "not_found",
       "retryable": false,
@@ -264,7 +268,7 @@
   ],
   "migrations": [
     "src/modules/messages/database/migrations/0001-create-messages.migration.ts",
-    "src/modules/messages/database/migrations/0002-create-notifications.migration.ts"
+    "src/modules/messages/database/migrations/0002-create-inbox-messages.migration.ts"
   ],
   "seeders": [],
   "infra": {
@@ -334,7 +338,55 @@
         }
       }
     },
-    "messages.ListNotificationsInput": {
+    "messages.InboxMessageCreated": {
+      "type": "object",
+      "required": ["inboxMessageId", "principalId", "kind"],
+      "properties": {
+        "inboxMessageId": {
+          "type": "string",
+          "pattern": "^inm_[0-9A-Za-z]{26}$"
+        },
+        "principalId": {
+          "type": "string",
+          "pattern": "^usr_[0-9A-Za-z]{26}$"
+        },
+        "kind": {
+          "$ref": "#/schemas/messages.InboxMessageKind"
+        }
+      }
+    },
+    "messages.InboxMessageKind": {
+      "type": "string",
+      "enum": ["order_paid"]
+    },
+    "messages.InboxMessageView": {
+      "type": "object",
+      "required": ["id", "kind", "data", "createdAt", "readAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^inm_[0-9A-Za-z]{26}$"
+        },
+        "kind": {
+          "$ref": "#/schemas/messages.InboxMessageKind"
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number"]
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "readAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "messages.ListInboxMessagesInput": {
       "type": "object",
       "properties": {
         "cursor": {
@@ -352,14 +404,14 @@
         }
       }
     },
-    "messages.ListNotificationsOutput": {
+    "messages.ListInboxMessagesOutput": {
       "type": "object",
       "required": ["items", "hasMore", "unread"],
       "properties": {
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/schemas/messages.NotificationView"
+            "$ref": "#/schemas/messages.InboxMessageView"
           }
         },
         "nextCursor": {
@@ -390,13 +442,13 @@
         }
       }
     },
-    "messages.MarkNotificationReadInput": {
+    "messages.MarkInboxMessageReadInput": {
       "type": "object",
-      "required": ["notificationId"],
+      "required": ["inboxMessageId"],
       "properties": {
-        "notificationId": {
+        "inboxMessageId": {
           "type": "string",
-          "pattern": "^ntf_[0-9A-Za-z]{26}$"
+          "pattern": "^inm_[0-9A-Za-z]{26}$"
         }
       }
     },
@@ -430,54 +482,6 @@
     "messages.MessageStatus": {
       "type": "string",
       "enum": ["queued", "sent", "failed"]
-    },
-    "messages.NotificationCreated": {
-      "type": "object",
-      "required": ["notificationId", "principalId", "kind"],
-      "properties": {
-        "notificationId": {
-          "type": "string",
-          "pattern": "^ntf_[0-9A-Za-z]{26}$"
-        },
-        "principalId": {
-          "type": "string",
-          "pattern": "^usr_[0-9A-Za-z]{26}$"
-        },
-        "kind": {
-          "$ref": "#/schemas/messages.NotificationKind"
-        }
-      }
-    },
-    "messages.NotificationKind": {
-      "type": "string",
-      "enum": ["order_paid"]
-    },
-    "messages.NotificationView": {
-      "type": "object",
-      "required": ["id", "kind", "data", "createdAt", "readAt"],
-      "properties": {
-        "id": {
-          "type": "string",
-          "pattern": "^ntf_[0-9A-Za-z]{26}$"
-        },
-        "kind": {
-          "$ref": "#/schemas/messages.NotificationKind"
-        },
-        "data": {
-          "type": "object",
-          "additionalProperties": {
-            "type": ["string", "number"]
-          }
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "readAt": {
-          "type": ["string", "null"],
-          "format": "date-time"
-        }
-      }
     },
     "messages.SendMessageInput": {
       "type": "object",

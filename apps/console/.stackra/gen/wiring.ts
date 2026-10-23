@@ -37,7 +37,7 @@ import { ConsoleAnalyticsConfig } from "#src/config/analytics.config";
 import { ConsoleConsentConfig } from "#src/config/consent.config";
 import { ConsoleCspConfig } from "#src/config/csp.config";
 import { ConsoleDesktopConfig } from "#src/config/desktop.config";
-import { ConsoleEnv } from "#src/config/env.config";
+import { ConsoleEnvConfig } from "#src/config/env.config";
 import { ConsoleFeatureFlagsConfig } from "#src/config/feature-flags.config";
 import { ConsoleI18nConfig } from "#src/config/i18n.config";
 import { ConsoleIdentityConfig } from "#src/config/identity.config";
@@ -103,7 +103,7 @@ export const wiring = {
     { module: "console", provide: ConsentConfig, config: ConsoleConsentConfig },
     { module: "console", provide: CspConfig, config: ConsoleCspConfig },
     { module: "console", provide: DesktopConfig, config: ConsoleDesktopConfig },
-    { module: "console", provide: ConsoleEnv, config: ConsoleEnv },
+    { module: "console", provide: ConsoleEnvConfig, config: ConsoleEnvConfig },
     { module: "console", provide: FeatureFlagsConfig, config: ConsoleFeatureFlagsConfig },
     { module: "console", provide: I18nConfig, config: ConsoleI18nConfig },
     { module: "console", provide: IdentityConfig, config: ConsoleIdentityConfig },

@@ -11,13 +11,13 @@
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
-import { NotificationKind, Notifications } from "#stackra/clients";
+import { InboxMessageKind, Notifications } from "#stackra/clients";
 import { NotificationInbox } from "#src/components/notification-inbox";
 
 /** One unread notification as the service returns it: a kind and the data its label uses. */
 const UNREAD = {
-  id: "ntf_01J9Z3K4M5N6P7Q8R9S0T1V2W3",
-  kind: NotificationKind.OrderPaid,
+  id: "inm_01J9Z3K4M5N6P7Q8R9S0T1V2W3",
+  kind: InboxMessageKind.OrderPaid,
   data: { orderId: "ord_01J9Z3K4M5N6P7Q8R9S0T1V2W3", totalMinor: 2_000, currency: "USD", lines: 1 },
   readAt: null,
   createdAt: "2026-10-21T08:00:00Z",
@@ -29,23 +29,23 @@ describe(NotificationInbox, () => {
   it("shows the service's unread count and marks one read", async () => {
     const page = { items: [UNREAD], hasMore: true, nextCursor: UNREAD.id, unread: 3 };
     const notifications = fakeClient(Notifications, (fake) => {
-      fake.queries.ListNotifications.returns(page);
-      fake.actions.MarkNotificationRead.returns({ ...UNREAD, readAt: "2026-10-21T08:01:00Z" });
+      fake.queries.ListInboxMessages.returns(page);
+      fake.actions.MarkInboxMessageRead.returns({ ...UNREAD, readAt: "2026-10-21T08:01:00Z" });
     });
     render(<NotificationInbox />, { locale: "en", clients: [notifications] });
     await userEvent.click(await screen.findByRole("button", { name: "Notifications: 3 unread" }));
     expect(screen.getByText("Order ord_01J9Z3K4M5N6P7Q8R9S0T1V2W3 is paid (1 item)")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Mark read" }));
-    expect(notifications.called(Notifications.actions.MarkNotificationRead)).toEqual([
-      { notificationId: UNREAD.id },
+    expect(notifications.called(Notifications.actions.MarkInboxMessageRead)).toEqual([
+      { inboxMessageId: UNREAD.id },
     ]);
   });
 
   /** Older notifications are one press away: the next page is asked for with the last cursor. */
   it("loads the next page with the cursor", async () => {
-    const older = { ...UNREAD, id: "ntf_01J9Z3K4M5N6P7Q8R9S0T1V2W4" };
+    const older = { ...UNREAD, id: "inm_01J9Z3K4M5N6P7Q8R9S0T1V2W4" };
     const notifications = fakeClient(Notifications, (fake) =>
-      fake.queries.ListNotifications.when({ cursor: UNREAD.id })
+      fake.queries.ListInboxMessages.when({ cursor: UNREAD.id })
         .returns({ items: [older], hasMore: false, unread: 3 })
         .otherwise({ items: [UNREAD], hasMore: true, nextCursor: UNREAD.id, unread: 3 }),
     );
@@ -60,8 +60,8 @@ describe(NotificationInbox, () => {
   it("shows a toast when marking read fails", async () => {
     const page = { items: [UNREAD], hasMore: false, unread: 1 };
     const notifications = fakeClient(Notifications, (fake) => {
-      fake.queries.ListNotifications.returns(page);
-      fake.actions.MarkNotificationRead.throws(new Error("network"));
+      fake.queries.ListInboxMessages.returns(page);
+      fake.actions.MarkInboxMessageRead.throws(new Error("network"));
     });
     render(<NotificationInbox />, { locale: "en", clients: [notifications] });
     await userEvent.click(await screen.findByRole("button", { name: "Notifications: 1 unread" }));
@@ -75,7 +75,7 @@ describe(NotificationInbox, () => {
   /** A user with no notifications sees the translated empty state, not a blank sheet. */
   it("shows the empty state in Arabic for a user with none", async () => {
     const notifications = fakeClient(Notifications, (fake) =>
-      fake.queries.ListNotifications.returns({ items: [], hasMore: false, unread: 0 }),
+      fake.queries.ListInboxMessages.returns({ items: [], hasMore: false, unread: 0 }),
     );
     render(<NotificationInbox />, { locale: "ar", clients: [notifications] });
     await userEvent.click(await screen.findByRole("button", { name: /الإشعارات/ }));

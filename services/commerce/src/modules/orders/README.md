@@ -30,6 +30,7 @@ of typing them.
 | `extensions/` | `order.extension-point.ts`                                                            | `adjustTotals` (transform) and `verifyPlacement` (verify)                         |
 | `resources/`  | `order/order.resource.ts`                                                             | `Resource(Order, { area, navigation, operations })` with `override table(t)`      |
 | `resources/`  | `order/revenue-today.widget.ts`, `order/sales-today.document.ts`                      | a query bound to the built-in Kpi display; a dashboard document                   |
+| `resources/`  | `order/my-orders.document.ts`                                                         | a Page document in the app area: the customer portal's orders list                |
 | `resources/`  | `order/order-placed.notification.ts`, `order/order-receipt.notification.ts`, `*.mail` | triggered by the event parameter; a mail template bound by name                   |
 | `database/`   | `migrations/`, `factories/`, `seeders/demo.seeder.ts`                                 | forward-only migrations numbered per module; Laravel factories; `static ids`      |
 | `ai/`         | `order.facts.ts`, `explain-order.prompt.ts`, `orders-support.skill.ts`                | `Facts(Order)`, `Prompt`, `Skill({ tools })`; assets bound by name                |

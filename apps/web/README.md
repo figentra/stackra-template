@@ -41,13 +41,14 @@ apps/web
     ├── flags/               Flag classes: pricing-yearly-first (the pricing experiment)
     ├── analytics/           AnalyticsEvent classes: lead-submitted
     ├── components/<name>/   one component per folder (its Props, its own hook, its `__tests__/`): site-header,
-    │                        site-footer, product-card, variant-picker, contact-form, consent-banner, locale-switcher
+    │                        site-footer, product-card, variant-picker, contact-form, consent-banner, locale-switcher,
+    │                        locale-suggestion (offers the browser's preferred locale; ADR 0297 d4)
     ├── hooks/               use-site (the site frame and the pricing table), use-variant-choice (product page and picker)
     ├── blocks/<name>/       one folder per block: <name>.block.ts (props as fields), <name>.tsx, __tests__/:
     │                        hero-section, feature-grid, pricing-table, testimonials, faq-section, cta-banner, product-grid
     ├── schemas/             shape classes shared by two files: contact, the store and contact query strings,
     │                        call-to-action, feature, the cache rule and the nested telemetry config objects
-    ├── types/               resolved-site, site-market
+    ├── types/               resolved-site, site-market, variant, variant-choice
     ├── enums/               app-local enums: billing-interval, cache-profile
     ├── errors/              refusals: site-context-missing
     └── styles/app.css       Tailwind v4 + HeroUI v3 + the generated brand tokens, logical CSS, light and dark
@@ -122,9 +123,11 @@ the gateway verifies the signature before it uses the address.
 Two rules hold on every page. A GET for HTML never sets a cookie and never redirects because of a
 cookie, `Accept-Language` or the visitor's address: consent (decline by default, Global Privacy
 Control counts as a refusal, ADR 0298) and the locale choice are written by the browser after the
-visitor acts, so the same URL is the same page for everyone. And nothing is prerendered: a
-prerendered page is one file for every visitor, so `prerender: true` needs `SiteConfig.fixedSiteId`,
-which this multi-tenant site leaves unset.
+visitor acts, so the same URL is the same page for everyone. A visitor whose browser prefers the
+other locale gets a suggestion banner, rendered in the browser, that opens the same page in that
+locale's mount (ADR 0297 d4). And nothing is prerendered: a prerendered page is one file for every
+visitor, so `prerender: true` needs `SiteConfig.fixedSiteId`, which this multi-tenant site leaves
+unset.
 
 Tenant pages (`*`) differ in one way: `RenderMode.Client` builds the head on the server from
 `Experience.queries.GetDocument({ path })` and renders the L2 document in the browser after

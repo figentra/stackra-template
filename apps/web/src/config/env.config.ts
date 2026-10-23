@@ -18,7 +18,7 @@ import { Config, Env, Secret } from "@stackra/config";
 import type { Url } from "@stackra/contracts";
 
 /** `env` (public part) from `#stackra/env` in the browser; `serverEnv(raw)` in the Worker. */
-export class WebEnv extends Config {
+export class WebEnvConfig extends Config {
   /** PostHog project key; public by design, gated by consent. Empty disables analytics. */
   @Env("VITE_POSTHOG_KEY")
   posthogKey = "";

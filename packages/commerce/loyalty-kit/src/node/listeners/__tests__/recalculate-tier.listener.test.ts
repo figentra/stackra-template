@@ -11,7 +11,7 @@
 import { memberId } from "@acme/loyalty-kit";
 import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule, PointsEarned } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { dispatch, drainEvents } from "@stackra/events/testing";
 import { SettingsReader } from "@stackra/settings";
@@ -26,7 +26,7 @@ function compile() {
   return createTestingModule(LoyaltyKitModule)
     .useDrivers("memory")
     .seed(LoyaltyKitDemoSeeder) // every demo member holds 1 000 points
-    .override(LoyaltyMembers, FakeLoyaltyMembers.with([LoyaltyKitDemoSeeder.ids.bronze]))
+    .override(LoyaltyMembers, LoyaltyMembersFake.with([LoyaltyKitDemoSeeder.ids.bronze]))
     .override(
       SettingsReader,
       fakeSettings([[LoyaltyKitSettings, { expiryMonths: 12, silverFrom: 500, goldFrom: 1_500 }]]),

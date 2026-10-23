@@ -37,7 +37,7 @@ import { ThemingConfig } from "@stackra/theming";
 import { MobileAnalyticsConfig } from "#src/config/analytics.config";
 import { MobileChromeConfig } from "#src/config/chrome.config";
 import { MobileConsentConfig } from "#src/config/consent.config";
-import { MobileEnv } from "#src/config/env.config";
+import { MobileEnvConfig } from "#src/config/env.config";
 import { MobileFeatureFlagsConfig } from "#src/config/feature-flags.config";
 import { MobileI18nConfig } from "#src/config/i18n.config";
 import { MobileIdentityConfig } from "#src/config/identity.config";
@@ -215,7 +215,7 @@ export const wiring = {
    * across the app; a package's context reads its base and gets the override.
    */
   config: [
-    { key: "mobile.env", provide: MobileEnv },
+    { key: "mobile.env", provide: MobileEnvConfig },
     { key: "navigation.chrome", provide: ChromeConfig, override: MobileChromeConfig },
     { key: "i18n", provide: I18nConfig, override: MobileI18nConfig },
     { key: "theming", provide: ThemingConfig, override: MobileThemingConfig },

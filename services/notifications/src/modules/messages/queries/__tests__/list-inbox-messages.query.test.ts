@@ -11,21 +11,21 @@ import { createTestingModule } from "@stackra/container/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { NotificationsModule } from "#src/notifications.module";
-import { NotificationFactory } from "#modules/messages/database/factories/notification.factory";
-import { ListNotificationsQuery } from "#modules/messages/queries/list-notifications.query";
+import { InboxMessageFactory } from "#modules/messages/database/factories/inbox-message.factory";
+import { ListInboxMessagesQuery } from "#modules/messages/queries/list-inbox-messages.query";
 
 /** Guards the inbox, where one customer must never see another's entries. */
-describe(ListNotificationsQuery, () => {
+describe(ListInboxMessagesQuery, () => {
   /** Two entries of mine (one read), one of someone else: all of mine, then only the unread one. */
   it("lists only the actor's entries and filters unread", async () => {
     await createTestingModule(NotificationsModule).useDrivers("memory").compile();
-    const unread = await NotificationFactory.new().create();
-    await NotificationFactory.new().read().create({ principalId: unread.principalId });
-    await NotificationFactory.new().create();
+    const unread = await InboxMessageFactory.new().create();
+    await InboxMessageFactory.new().read().create({ principalId: unread.principalId });
+    await InboxMessageFactory.new().create();
     const me = actors.customer(unread.principalId);
 
-    const all = await run(ListNotificationsQuery, {}, { as: me });
-    const fresh = await run(ListNotificationsQuery, { unreadOnly: true }, { as: me });
+    const all = await run(ListInboxMessagesQuery, {}, { as: me });
+    const fresh = await run(ListInboxMessagesQuery, { unreadOnly: true }, { as: me });
 
     expect(all.output.items).toHaveLength(2);
     expect(fresh.output.items.map((entry) => entry.id)).toEqual([unread.id]);
@@ -35,11 +35,11 @@ describe(ListNotificationsQuery, () => {
   /** A one-entry page still reports every unread entry the actor has. */
   it("counts unread across the whole inbox, not the page", async () => {
     await createTestingModule(NotificationsModule).useDrivers("memory").compile();
-    const first = await NotificationFactory.new().create();
-    await NotificationFactory.new().count(2).create({ principalId: first.principalId });
+    const first = await InboxMessageFactory.new().create();
+    await InboxMessageFactory.new().count(2).create({ principalId: first.principalId });
 
     const page = await run(
-      ListNotificationsQuery,
+      ListInboxMessagesQuery,
       { limit: 1 },
       { as: actors.customer(first.principalId) },
     );

@@ -912,7 +912,8 @@
       "version": 1,
       "broadcast": {
         "channel": "tenant.{tenantId}.orders",
-        "permission": "orders.order.read"
+        "permission": "orders.order.read",
+        "audience": "tenant"
       },
       "webhook": true,
       "fields": {
@@ -947,7 +948,8 @@
       "version": 1,
       "broadcast": {
         "channel": "tenant.{tenantId}.inventory",
-        "permission": "inventory.stock.read"
+        "permission": "inventory.stock.read",
+        "audience": "tenant"
       },
       "fields": {
         "$ref": "#/schemas/inventory.StockLow"
@@ -1390,7 +1392,7 @@
         },
         "permission": "loyalty_kit.loyalty_account.read",
         "roles": ["owner", "manager"],
-        "refreshOn": ["loyalty_kit.points.earned.v2", "loyalty_kit.points.redeemed"]
+        "refreshOn": ["loyalty_kit.points.earned.v2"]
       },
       {
         "key": "loyalty_kit.points_balance",
@@ -1415,6 +1417,14 @@
         "kind": "dashboard",
         "path": "/sales",
         "area": "admin",
+        "permission": "orders.order.read"
+      },
+      {
+        "key": "orders.my_orders",
+        "class": "MyOrdersDocument",
+        "kind": "page",
+        "path": "/orders",
+        "area": "app",
         "permission": "orders.order.read"
       },
       {
@@ -1707,10 +1717,13 @@
     "src/modules/inventory/database/migrations/0001-create-inventory.migration.ts",
     "src/modules/catalogue/database/migrations/0001-create-catalogue.migration.ts",
     "src/modules/catalogue/database/migrations/0002-add-variant-barcode.migration.ts",
-    "src/modules/catalogue/database/migrations/0003-add-storefront-fields.migration.ts",
-    "src/modules/catalogue/database/migrations/0004-add-product-search-index.migration.ts",
+    "src/modules/catalogue/database/migrations/0003-variants-barcode-index.migration.ts",
+    "src/modules/catalogue/database/migrations/0004-add-storefront-fields.migration.ts",
+    "src/modules/catalogue/database/migrations/0005-add-product-search-columns.migration.ts",
+    "src/modules/catalogue/database/migrations/0006-products-search-index.migration.ts",
     "src/modules/orders/database/migrations/0001-create-orders.migration.ts",
     "src/modules/orders/database/migrations/0002-add-order-paid-at.migration.ts",
+    "src/modules/orders/database/migrations/0003-orders-paid-at-index.migration.ts",
     {
       "from": "@acme/loyalty-kit/node",
       "class": "CreateLoyaltyTablesMigration",

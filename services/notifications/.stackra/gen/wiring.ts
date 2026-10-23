@@ -19,16 +19,16 @@ import { SettingsReader } from "@stackra/settings";
 import { DeliveryConfig } from "#config/delivery.config";
 import { NotificationsModule } from "#src/notifications.module";
 import { DeliverMessageAction } from "#modules/messages/actions/deliver-message.action";
-import { MarkNotificationReadAction } from "#modules/messages/actions/mark-notification-read.action";
+import { MarkInboxMessageReadAction } from "#modules/messages/actions/mark-inbox-message-read.action";
 import { SendMessageAction } from "#modules/messages/actions/send-message.action";
 import { ResendConnection } from "#modules/messages/connections/resend.connection";
 import { MemoryMailTransportDriver } from "#modules/messages/drivers/memory-mail-transport.driver";
 import { ResendIntegration } from "#modules/messages/integrations/resend.integration";
 import { CancelFromMailListener } from "#modules/messages/listeners/cancel-from-mail.listener";
 import { NotifyOnOrderPaidListener } from "#modules/messages/listeners/notify-on-order-paid.listener";
+import { InboxMessage } from "#modules/messages/models/inbox-message.model";
 import { Message } from "#modules/messages/models/message.model";
-import { Notification } from "#modules/messages/models/notification.model";
-import { ListNotificationsQuery } from "#modules/messages/queries/list-notifications.query";
+import { ListInboxMessagesQuery } from "#modules/messages/queries/list-inbox-messages.query";
 import { MessageService } from "#modules/messages/services/message.service";
 import { CommerceClient } from "./clients";
 
@@ -76,23 +76,23 @@ export const wiring = {
     {
       module: "messages",
       kind: "action",
-      provide: MarkNotificationReadAction,
+      provide: MarkInboxMessageReadAction,
       lifetime: Lifetime.Singleton,
-      deps: [repositoryOf(Notification)],
+      deps: [repositoryOf(InboxMessage)],
     },
     {
       module: "messages",
       kind: "query",
-      provide: ListNotificationsQuery,
+      provide: ListInboxMessagesQuery,
       lifetime: Lifetime.Singleton,
-      deps: [repositoryOf(Notification)],
+      deps: [repositoryOf(InboxMessage)],
     },
     {
       module: "messages",
       kind: "listener",
       provide: NotifyOnOrderPaidListener,
       lifetime: Lifetime.Singleton,
-      deps: [CommerceClient, repositoryOf(Notification), SettingsReader],
+      deps: [CommerceClient, repositoryOf(InboxMessage), SettingsReader],
     },
     {
       module: "messages",

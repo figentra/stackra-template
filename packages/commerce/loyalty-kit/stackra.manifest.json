@@ -465,7 +465,7 @@
         },
         "permission": "loyalty_kit.loyalty_account.read",
         "roles": ["owner", "manager"],
-        "refreshOn": ["loyalty_kit.points.earned.v2", "loyalty_kit.points.redeemed"]
+        "refreshOn": ["loyalty_kit.points.earned.v2"]
       },
       {
         "key": "loyalty_kit.points_balance",

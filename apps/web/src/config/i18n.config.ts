@@ -7,8 +7,9 @@
  * Boundary: an override declares `override` members only and inherits the base's key (`i18n`).
  *           The URL alone selects the locale: the server never redirects an HTML request because of
  *           the cookie or `Accept-Language`, and sends no `Vary`; the cookie only remembers the
- *           visitor's last choice for the switcher. The Latin-digit default is the public site's
- *           (no tenant choice to defer to, ADR 0192). Fields typed by an enum restate their type.
+ *           visitor's last choice, which the switcher and the locale suggestion banner write in the
+ *           browser. The Latin-digit default is the public site's (no tenant choice to defer to,
+ *           ADR 0192). Fields typed by an enum restate their type.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decision 19), ADR 0297 (decision 4), ADR 0080, ADR 0192
  */
@@ -40,6 +41,6 @@ export class WebI18nConfig extends I18nConfig {
   /** Fail gen on a namespace that misses a locale instead of warning. */
   override failOnMissingLocale = true;
 
-  /** Cookie that remembers the visitor's last choice; never read to redirect. */
+  /** Remembers the visitor's last choice in the browser; never read to redirect. */
   override cookieName = "locale";
 }

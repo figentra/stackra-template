@@ -10,7 +10,7 @@
 import { LoyaltyKitConfig, MemoryLoyaltyLedgerDriver } from "@acme/loyalty-kit";
 import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { describe, expect, it } from "@stackra/testing";
@@ -45,14 +45,14 @@ describe(LoyaltyKitModule, () => {
   it("binds the ledger named by config, or the ledger put in its place", async () => {
     const byConfig = await createTestingModule(LoyaltyKitModule)
       .withConfig(LoyaltyKitConfig, { ledger: "memory" })
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
       .compile();
     expect(byConfig.get(LoyaltyLedger)).toBeInstanceOf(MemoryLoyaltyLedgerDriver);
 
     const byHost = await createTestingModule(LoyaltyKitModule)
       .withConfig(LoyaltyKitConfig, { ledger: "memory" })
       .override(LoyaltyLedger, new HostLedger())
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
       .compile();
     expect(byHost.get(LoyaltyLedger)).toBeInstanceOf(HostLedger);
   });

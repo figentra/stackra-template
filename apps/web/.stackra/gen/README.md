@@ -9,7 +9,7 @@ classes under `src/`. In Vite the same modules are served virtually with HMR by
 
 | File                | Holds                                                                                                 |
 | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `env.ts`            | the validated public `env` (browser) and `serverEnv(raw)` (Worker), both from `WebEnv`                |
+| `env.ts`            | the validated public `env` (browser) and `serverEnv(raw)` (Worker), both from `WebEnvConfig`                |
 | `clients.ts`        | `Commerce`, `Billing`, `Content`, `Experience`, `Marketing`: public descriptors and shapes (`X$`, `X`) |
 | `clients.server.ts` | `publicClients(env, request, { locale, market })` for the Worker, with the forwarded request facts   |
 | `i18n.ts`           | the complete `I18n` key tree with the derived keys, the loaders, the applied string overrides         |

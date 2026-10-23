@@ -45,8 +45,8 @@
     {
       "service": "notifications",
       "manifest": "services/notifications/stackra.manifest.json",
-      "uses": ["messages.notification.list@1", "messages.notification.mark_read@1"],
-      "events": ["messages.notification.created.v1"]
+      "uses": ["messages.inbox_message.list@1", "messages.inbox_message.mark_read@1"],
+      "events": ["messages.inbox_message.created.v1"]
     },
     {
       "service": "experience",
@@ -241,8 +241,8 @@
         "layout": "shell"
       },
       {
-        "from": "CustomerPortalPanel (panel, app area) with commerce loyalty_kit.loyalty_overview (document, app)",
-        "paths": ["/portal", "/portal/loyalty"]
+        "from": "CustomerPortalPanel (panel, app area) with commerce orders.my_orders and loyalty_kit.loyalty_overview (documents, app)",
+        "paths": ["/portal", "/portal/orders", "/portal/loyalty"]
       }
     ],
     "documents": [
@@ -431,7 +431,7 @@
   "config": [
     {
       "key": "console.env",
-      "class": "ConsoleEnv",
+      "class": "ConsoleEnvConfig",
       "file": "src/config/env.config.ts"
     },
     {

@@ -4,7 +4,7 @@
       "send": "Send messages",
       "read": "View messages"
     },
-    "notification": {
+    "inbox_message": {
       "read": "View own notifications",
       "update": "Mark own notifications read"
     }
@@ -15,7 +15,7 @@
       "sent": "Sent",
       "failed": "Failed"
     },
-    "notification_kind": {
+    "inbox_message_kind": {
       "order_paid": "Order {orderId} is paid ({lines, plural, one {# item} other {# items}})"
     },
     "mail_auth_result": {
@@ -29,7 +29,7 @@
     "mail_provider_unavailable": {
       "message": "The mail provider is unavailable; we will retry."
     },
-    "notification_not_found": {
+    "inbox_message_not_found": {
       "message": "This notification was not found."
     }
   },

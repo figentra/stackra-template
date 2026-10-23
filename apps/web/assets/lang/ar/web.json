@@ -93,6 +93,12 @@
     "necessary": "ضروري لعمل الموقع.",
     "analytics_category": "يساعدنا على معرفة الصفحات المهمة."
   },
+  "locale_suggestion": {
+    "label": "اقتراح اللغة",
+    "body": "هذه الصفحة متاحة أيضًا باللغة {language}.",
+    "switch": "التبديل إلى {language}",
+    "stay": "إبقاء هذه اللغة"
+  },
   "theme": {
     "light": "فاتح",
     "dark": "داكن",

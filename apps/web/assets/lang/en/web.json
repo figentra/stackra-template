@@ -93,6 +93,12 @@
     "necessary": "Required for the site to work.",
     "analytics_category": "Helps us see which pages matter."
   },
+  "locale_suggestion": {
+    "label": "Language suggestion",
+    "body": "This page is also available in {language}.",
+    "switch": "Switch to {language}",
+    "stay": "Keep this language"
+  },
   "theme": {
     "light": "Light",
     "dark": "Dark",

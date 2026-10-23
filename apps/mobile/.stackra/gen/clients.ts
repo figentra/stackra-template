@@ -208,22 +208,22 @@ export const Commerce = {
 
 // --- notifications: messages --------------------------------------------------------------------
 
-/** `messages.NotificationKind`; labels `messages::enums.notification_kind.<code>`. */
-export const NotificationKind = Enum.of({
+/** `messages.InboxMessageKind`; labels `messages::enums.inbox_message_kind.<code>`. */
+export const InboxMessageKind = Enum.of({
   /** A customer's order was paid; data carries the order id, total and line count. */
   OrderPaid: "order_paid",
 });
 
 /** One of the codes above. */
-export type NotificationKind = Enum.Value<typeof NotificationKind>;
+export type InboxMessageKind = Enum.Value<typeof InboxMessageKind>;
 
-/** `messages.NotificationKind`, codes in source order. */
-export const NotificationKind$ = z.enum(["order_paid"]);
+/** `messages.InboxMessageKind`, codes in source order. */
+export const InboxMessageKind$ = z.enum(["order_paid"]);
 
-/** `messages.NotificationView`: one inbox entry; the app renders the kind's label with `data`. */
-export const NotificationView$ = z.object({
-  id: publicId("ntf"),
-  kind: NotificationKind$,
+/** `messages.InboxMessageView`: one inbox entry; the app renders the kind's label with `data`. */
+export const InboxMessageView$ = z.object({
+  id: publicId("inm"),
+  kind: InboxMessageKind$,
   data: z.record(z.string(), z.union([z.string(), z.number()])),
   createdAt: isoDateTime(),
   readAt: isoDateTime().nullable(),
@@ -233,56 +233,57 @@ export const NotificationView$ = z.object({
 export const Notifications = {
   modules: { Messages: moduleRef("notifications", "messages") },
   actions: {
-    MarkNotificationRead: actionRef("messages.notification.mark_read@1", {
-      input: z.object({ notificationId: publicId("ntf") }),
-      output: NotificationView$,
-      http: { method: HttpMethod.Put, path: "/notifications/:notificationId/read" },
+    MarkInboxMessageRead: actionRef("messages.inbox_message.mark_read@1", {
+      input: z.object({ inboxMessageId: publicId("inm") }),
+      output: InboxMessageView$,
+      http: { method: HttpMethod.Put, path: "/inbox-messages/:inboxMessageId/read" },
       risk: Risk.L0,
     }),
   },
   queries: {
     /** `unread` counts the actor's whole inbox, not the page. */
-    ListNotifications: queryRef("messages.notification.list@1", {
+    ListInboxMessages: queryRef("messages.inbox_message.list@1", {
       input: z.object({
         cursor: z.string().exactOptional(),
         limit: z.number().int().min(1).max(100).default(20),
         unreadOnly: z.boolean().default(false),
       }),
       output: z.object({
-        items: z.array(NotificationView$),
+        items: z.array(InboxMessageView$),
         nextCursor: z.string().exactOptional(),
         hasMore: z.boolean(),
         unread: z.number().int().min(0),
       }),
-      http: { method: HttpMethod.Get, path: "/notifications" },
+      http: { method: HttpMethod.Get, path: "/inbox-messages" },
     }),
   },
   permissions: {
     Notification: {
-      read: permissionRef("messages.notification.read"),
-      update: permissionRef("messages.notification.update"),
+      read: permissionRef("messages.inbox_message.read"),
+      update: permissionRef("messages.inbox_message.update"),
     },
   },
   events: {
     /**
-     * Broadcast as a data-free refresh to the tenant's sessions that hold
-     * `messages.notification.read`; the inbox refetches its own entries.
+     * Broadcast as a data-free refresh to the principal's own sessions that hold
+     * `messages.inbox_message.read` (audience `principal`); the inbox refetches its own entries.
      */
-    NotificationCreated: eventRef("messages.notification.created.v1", {
+    InboxMessageCreated: eventRef("messages.inbox_message.created.v1", {
       payload: z.object({
-        notificationId: publicId("ntf"),
+        inboxMessageId: publicId("inm"),
         principalId: publicId("usr"),
-        kind: NotificationKind$,
+        kind: InboxMessageKind$,
       }),
-      channel: "tenant.{tenantId}.messages",
+      channel: "principal.{principalId}.messages",
+      audience: "principal",
     }),
   },
   refusals: {
-    notification_not_found: refusalRef("messages.notification_not_found", {
-      message: I18n.messages.errors.notification_not_found.message,
+    inbox_message_not_found: refusalRef("messages.inbox_message_not_found", {
+      message: I18n.messages.errors.inbox_message_not_found.message,
     }),
   },
-  enums: { NotificationKind },
+  enums: { InboxMessageKind },
 } as const;
 
 // --- identity (acme-platform, revision from stackra.lock.yaml): identity, devices ----------------

@@ -12,7 +12,7 @@
 import { memberId } from "@acme/loyalty-kit";
 import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule, PointsEarned } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { beforeEach, describe, expect, freezeClock, it } from "@stackra/testing";
@@ -34,7 +34,7 @@ describe(AccountService, () => {
     const app = await createTestingModule(LoyaltyKitModule)
       .useDrivers("memory")
       .seed(LoyaltyKitDemoSeeder)
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
       .compile();
     accounts = app.get(AccountService);
   });

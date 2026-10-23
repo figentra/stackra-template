@@ -66,6 +66,11 @@ export const Resources = {
     panel: Panels.TenantAdmin,
     permission: Commerce.permissions.Order.read,
   }),
+  MyOrders: document("orders.my_orders", {
+    path: "/orders",
+    panel: Panels.CustomerPortal,
+    permission: Commerce.permissions.Order.read,
+  }),
   LoyaltyOverview: document("loyalty_kit.loyalty_overview", {
     path: "/loyalty",
     panel: Panels.CustomerPortal,

@@ -38,7 +38,7 @@ export const I18n = keys({
     errors: { insufficient_stock: ["message"] },
   },
   orders: {
-    nav: ["sales"],
+    nav: ["sales", "orders"],
     resources: { order: ["title"] },
     enums: {
       order_status: ["pending_payment", "paid", "cancelled", "expired"],
@@ -51,7 +51,7 @@ export const I18n = keys({
     actions: { order: { create: ["success", "queued"], cancel: ["confirm", "success"] } },
     order: ["lines_count"],
     widgets: { revenue_today: ["title"] },
-    documents: { sales_today: ["title"] },
+    documents: { sales_today: ["title"], my_orders: ["title"] },
     quick_order: ["title", "variant", "quantity", "submit"],
     order_placed: { mail: ["subject", "body", "cta"] },
     order_receipt: { mail: ["subject", "intro"] },

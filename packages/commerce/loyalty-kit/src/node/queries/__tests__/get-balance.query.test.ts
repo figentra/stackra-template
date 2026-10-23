@@ -9,7 +9,7 @@
  */
 import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule, PointsEarned } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
 import { run } from "@stackra/actions/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { dispatch, drainEvents } from "@stackra/events/testing";
@@ -30,7 +30,7 @@ describe(GetBalanceQuery, () => {
     const app = await createTestingModule(LoyaltyKitModule)
       .useDrivers("memory")
       .seed(LoyaltyKitDemoSeeder)
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([gold]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([gold]))
       .compile();
     const as = actors.customer(gold);
     const { id: accountId } = await app.get(AccountService).findOneOrFail({ memberId: gold });

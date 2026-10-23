@@ -7,6 +7,62 @@
     "x-stackra-member": "notifications"
   },
   "paths": {
+    "/inbox-messages": {
+      "get": {
+        "operationId": "messages.inbox_message.list@1",
+        "x-stackra-permission": "messages.inbox_message.read",
+        "x-stackra-risk": "L0",
+        "x-stackra-query": {
+          "$ref": "#/components/schemas/messages.ListInboxMessagesInput"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages.ListInboxMessagesOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inbox-messages/{inboxMessageId}/read": {
+      "put": {
+        "operationId": "messages.inbox_message.mark_read@1",
+        "x-stackra-permission": "messages.inbox_message.update",
+        "x-stackra-risk": "L0",
+        "parameters": [
+          {
+            "name": "inboxMessageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^inm_[0-9A-Za-z]{26}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages.InboxMessageView"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal",
+            "x-stackra-codes": ["inbox_message_not_found"]
+          }
+        }
+      }
+    },
     "/messages": {
       "post": {
         "operationId": "messages.message.send@1",
@@ -37,62 +93,6 @@
           "429": {
             "$ref": "#/components/responses/Refusal",
             "x-stackra-codes": ["rate_limited"]
-          }
-        }
-      }
-    },
-    "/notifications": {
-      "get": {
-        "operationId": "messages.notification.list@1",
-        "x-stackra-permission": "messages.notification.read",
-        "x-stackra-risk": "L0",
-        "x-stackra-query": {
-          "$ref": "#/components/schemas/messages.ListNotificationsInput"
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/messages.ListNotificationsOutput"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/notifications/{notificationId}/read": {
-      "put": {
-        "operationId": "messages.notification.mark_read@1",
-        "x-stackra-permission": "messages.notification.update",
-        "x-stackra-risk": "L0",
-        "parameters": [
-          {
-            "name": "notificationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^ntf_[0-9A-Za-z]{26}$"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/messages.NotificationView"
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/Refusal",
-            "x-stackra-codes": ["notification_not_found"]
           }
         }
       }
@@ -177,7 +177,38 @@
           }
         }
       },
-      "messages.ListNotificationsInput": {
+      "messages.InboxMessageKind": {
+        "type": "string",
+        "enum": ["order_paid"]
+      },
+      "messages.InboxMessageView": {
+        "type": "object",
+        "required": ["id", "kind", "data", "createdAt", "readAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^inm_[0-9A-Za-z]{26}$"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/messages.InboxMessageKind"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": ["string", "number"]
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "readAt": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        }
+      },
+      "messages.ListInboxMessagesInput": {
         "type": "object",
         "properties": {
           "cursor": {
@@ -195,14 +226,14 @@
           }
         }
       },
-      "messages.ListNotificationsOutput": {
+      "messages.ListInboxMessagesOutput": {
         "type": "object",
         "required": ["items", "hasMore", "unread"],
         "properties": {
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/messages.NotificationView"
+              "$ref": "#/components/schemas/messages.InboxMessageView"
             }
           },
           "nextCursor": {
@@ -233,13 +264,13 @@
           }
         }
       },
-      "messages.MarkNotificationReadInput": {
+      "messages.MarkInboxMessageReadInput": {
         "type": "object",
-        "required": ["notificationId"],
+        "required": ["inboxMessageId"],
         "properties": {
-          "notificationId": {
+          "inboxMessageId": {
             "type": "string",
-            "pattern": "^ntf_[0-9A-Za-z]{26}$"
+            "pattern": "^inm_[0-9A-Za-z]{26}$"
           }
         }
       },
@@ -256,37 +287,6 @@
       "messages.MessageStatus": {
         "type": "string",
         "enum": ["queued", "sent", "failed"]
-      },
-      "messages.NotificationKind": {
-        "type": "string",
-        "enum": ["order_paid"]
-      },
-      "messages.NotificationView": {
-        "type": "object",
-        "required": ["id", "kind", "data", "createdAt", "readAt"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^ntf_[0-9A-Za-z]{26}$"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/messages.NotificationKind"
-          },
-          "data": {
-            "type": "object",
-            "additionalProperties": {
-              "type": ["string", "number"]
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "readAt": {
-            "type": ["string", "null"],
-            "format": "date-time"
-          }
-        }
       },
       "messages.SendMessageInput": {
         "type": "object",

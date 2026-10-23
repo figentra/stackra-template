@@ -6,7 +6,9 @@
  *           src/react/points-issued/, bound by the widget's name, and an app may override it. The
  *           key (`loyalty_kit.points_issued`) and the title
  *           (`loyalty_kit::widgets.points_issued.title`) are derived, and the permission is the
- *           query's. `refreshOn` sends a data-free refresh when points move; roles shape
+ *           query's. `refreshOn` sends a data-free refresh when points are earned. It takes
+ *           integration events only, because a domain event never leaves the service: a
+ *           redemption (the private PointsRedeemed) shows at the tile's next load. Roles shape
  *           presentation only.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 16 and 20), ADR 0164, ADR 0273
@@ -15,7 +17,6 @@ import { SystemRole } from "@stackra/iam";
 import { Widget, WidgetDisplay, WidgetSize } from "@stackra/panel";
 import { Slots } from "#stackra/slots";
 import { PointsEarned } from "#node/events/points-earned.event";
-import { PointsRedeemed } from "#node/events/points-redeemed.event";
 import { PointsIssuedQuery } from "#node/queries/points-issued.query";
 
 /** Shown to owners and managers in the dashboard's main slot; tenant-wide numbers. */
@@ -25,5 +26,5 @@ export class PointsIssuedWidget extends Widget({
   display: WidgetDisplay.custom(),
   size: WidgetSize.Small,
   roles: [SystemRole.Owner, SystemRole.Manager],
-  refreshOn: [PointsEarned, PointsRedeemed],
+  refreshOn: [PointsEarned],
 }) {}

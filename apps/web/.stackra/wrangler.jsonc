@@ -23,7 +23,7 @@
     // every page request reaches the Worker; only the hashed build assets are served without it
     "run_worker_first": ["/*", "!/assets/*"]
   },
-  // Only the server fields of WebEnv (STACKRA_*) are Worker vars; VITE_* fields are inlined.
+  // Only the server fields of WebEnvConfig (STACKRA_*) are Worker vars; VITE_* fields are inlined.
   // Secrets (names only, from runway.yaml `secrets`): TURNSTILE_SECRET_KEY,
   // GATEWAY_VISITOR_SIGNING_KEY
   "env": {

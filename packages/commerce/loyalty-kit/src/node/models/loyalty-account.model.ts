@@ -5,12 +5,15 @@
  *           `loyalty_kit.loyalty_accounts` (the kit's Postgres schema), public ids `lac_…`. Tier
  *           and status move only through AccountService; recorded events reach the outbox when the
  *           unit of work flushes. The member id is the host principal's public id, whatever its
- *           prefix, so it stays a bounded string. Every index is an `@Index` here, so `stackra db
- *           diff` never proposes dropping one. No constructor-made state.
+ *           prefix, so it stays a bounded string; it is classified pseudonymous (personal only by
+ *           linkage to the host's principal), which the erasure and export flows read. Every
+ *           index is an `@Index` here, so `stackra db diff` never proposes dropping one. No
+ *           constructor-made state.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0239
- *                     (BelongsToTenant)
+ * Governing contract: ADR 0294 (decisions 4, 6, 11, 20 and 27), ADR 0133 (traits), ADR 0134
+ *                     (classification), ADR 0239 (BelongsToTenant)
  */
+import { DataClassification } from "@stackra/contracts";
 import { Collection, Index, Model, OneToMany } from "@stackra/model";
 import {
   BelongsToTenant,
@@ -19,7 +22,7 @@ import {
   Timestamps,
   Versioned,
 } from "@stackra/model/traits";
-import { Str } from "@stackra/validation";
+import { Classified, Str } from "@stackra/validation";
 import { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 import { LedgerEntry } from "#node/models/ledger-entry.model";
 import type { AccountNotes } from "#node/schemas/account-notes.schema";
@@ -40,7 +43,8 @@ export class LoyaltyAccount extends Model.with(
   Versioned,
   SoftDeletes,
 ) {
-  /** The host principal's public id; unique per tenant among live accounts. */
+  /** The host principal's public id; unique per tenant among live accounts; pseudonymous. */
+  @Classified(DataClassification.Pseudonymous)
   @Str({ max: 64 })
   memberId!: string;
 

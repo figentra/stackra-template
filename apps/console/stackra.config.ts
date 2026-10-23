@@ -20,13 +20,13 @@
  */
 import { defineApp } from "@stackra/app";
 import { ApiArea, Target } from "@stackra/contracts";
-import { ConsoleEnv } from "./src/config/env.config";
+import { ConsoleEnvConfig } from "./src/config/env.config";
 
 /** `targets` picks the generated outputs: Vite, the service worker, the manifests and Electron. */
 export default defineApp({
   targets: [Target.Web, Target.Pwa, Target.Desktop],
   area: ApiArea.App,
-  env: ConsoleEnv,
+  env: ConsoleEnvConfig,
   /** The product name: the PWA's install name fallback, the dock and the installers. */
   name: "Acme Console",
   /**

@@ -9,8 +9,9 @@
  *          A route whose path equals its layout's is the index. The splat (`PageRoute`) is last in
  *          every locale. A hand-written route config is banned (ADR 0165).
  * Boundary: read by the Vite plugin at build and by the router at run time; never edited. No route
- *           redirects between locales: the locale switcher and the suggestion banner link to the
- *           other mount (ADR 0297 d4).
+ *           redirects between locales: the locale switcher and the locale suggestion banner
+ *           (src/components/locale-suggestion/) open the same route in the other mount (ADR 0297
+ *           d4).
  * Runtime: isomorphic
  */
 import { index, layout, prefix, route, type RouteConfig } from "@react-router/dev/routes";

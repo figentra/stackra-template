@@ -15,24 +15,24 @@ file's path says its kind and its class extends one kind base (Stackra ADR 0294)
 And the reverse direction: commerce's `notifications` Notifier driver queues
 `messages.message.send@1` here with the rendered parts of its mails.
 
-| Path                                                            | What it is                                                                                                                             |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `stackra.config.ts`                                             | What the member is: API area, health checks, migration runner (`defineService`, static data)                                           |
-| `runway.yaml`                                                   | What it needs per environment: secret names, queue settings (`delivery` with a dead letter, `inbox`)                                   |
-| `stackra.manifest.json`, `openapi.json`                         | COMMITTED contract and its projection; commerce's generated `NotificationsClient` is built from it                                     |
-| `.stackra/`                                                     | What `stackra gen` writes (gitignored; committed here to read): the entry, wiring, clients, tables, …                                  |
-| `src/notifications.module.ts`                                   | The root module: the bare `extends Module`, because it hosts no package                                                                |
-| `src/config/delivery.config.ts`                                 | `DeliveryConfig` (key `notifications.delivery`): `transport: DriverName<MailTransport>`, the platform sender, two `@Secret` references |
-| `src/modules/messages/messages.settings.ts`                     | user-scope `orderUpdates`, `orderReceipts`, `productUpdates`, `marketing`                                                              |
-| `src/modules/messages/actions/send-message.action.ts`           | the queued-call target: opens the dedup row, dispatches delivery                                                                       |
-| `src/modules/messages/actions/deliver-message.action.ts`        | the job: five exponential retries, then the dead letter and `markFailed` (ADR 0148)                                                    |
-| `src/modules/messages/queries/list-notifications.query.ts`      | `messages.notification.list@1`: the caller's inbox, with the inbox-wide `unread` count                                                 |
-| `src/modules/messages/actions/mark-notification-read.action.ts` | `messages.notification.mark_read@1`: `PUT /notifications/:notificationId/read`, own entries only                                       |
-| `src/modules/messages/events/notification-created.event.ts`     | `messages.notification.created.v1`, broadcast as a data-free refresh with its read permission                                          |
-| `src/modules/messages/events/inbound-mail-received.event.ts`    | a `WebhookEvent`: public, signature-verified, the first of the three inbound-cancel safeguards                                         |
-| `src/modules/messages/listeners/cancel-from-mail.listener.ts`   | the other two safeguards, then the queued cancel on behalf of the customer                                                             |
-| `src/modules/messages/integrations/`, `connections/`            | Resend as an integration, and a tenant's own Resend credentials as a connection                                                        |
-| `src/modules/messages/drivers/`                                 | `extends Driver(MailTransport)`, named `memory` and `resend` by their file prefixes; config picks one                                  |
+| Path                                                             | What it is                                                                                                                             |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `stackra.config.ts`                                              | What the member is: API area, health checks, migration runner (`defineService`, static data)                                           |
+| `runway.yaml`                                                    | What it needs per environment: secret names, queue settings (`delivery` with a dead letter, `inbox`)                                   |
+| `stackra.manifest.json`, `openapi.json`                          | COMMITTED contract and its projection; commerce's generated `NotificationsClient` is built from it                                     |
+| `.stackra/`                                                      | What `stackra gen` writes (gitignored; committed here to read): the entry, wiring, clients, tables, …                                  |
+| `src/notifications.module.ts`                                    | The root module: the bare `extends Module`, because it hosts no package                                                                |
+| `src/config/delivery.config.ts`                                  | `DeliveryConfig` (key `notifications.delivery`): `transport: DriverName<MailTransport>`, the platform sender, two `@Secret` references |
+| `src/modules/messages/messages.settings.ts`                      | user-scope `orderUpdates`, `orderReceipts`, `productUpdates`, `marketing`                                                              |
+| `src/modules/messages/actions/send-message.action.ts`            | the queued-call target: opens the dedup row, dispatches delivery                                                                       |
+| `src/modules/messages/actions/deliver-message.action.ts`         | the job: five exponential retries, then the dead letter and `markFailed` (ADR 0148)                                                    |
+| `src/modules/messages/queries/list-inbox-messages.query.ts`      | `messages.inbox_message.list@1`: the caller's inbox, with the inbox-wide `unread` count                                                |
+| `src/modules/messages/actions/mark-inbox-message-read.action.ts` | `messages.inbox_message.mark_read@1`: `PUT /inbox-messages/:inboxMessageId/read`, own entries only                                     |
+| `src/modules/messages/events/inbox-message-created.event.ts`     | `messages.inbox_message.created.v1`, broadcast as a data-free refresh to the principal's own sessions                                  |
+| `src/modules/messages/events/inbound-mail-received.event.ts`     | a `WebhookEvent`: public, signature-verified, the first of the three inbound-cancel safeguards                                         |
+| `src/modules/messages/listeners/cancel-from-mail.listener.ts`    | the other two safeguards, then the queued cancel on behalf of the customer                                                             |
+| `src/modules/messages/integrations/`, `connections/`             | Resend as an `Integration({ provider })`, and a tenant's own Resend credentials as a `Connection(ResendIntegration)`                   |
+| `src/modules/messages/drivers/`                                  | `extends Driver(MailTransport)`, named `memory` and `resend` by their file prefixes; config picks one                                  |
 
 The MailTransport port comes from `@stackra/notifications/contracts`, because a port is declared in
 a package and implemented by its drivers (ADR 0294 decision 16). Whether notifications runs beside

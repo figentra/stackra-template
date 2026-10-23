@@ -9,7 +9,7 @@ here. Two forms:
   the generated entry (ADR 0295 decision 10), so the app writes no provider for it. A nested object
   is replaced whole, so an override merges the base value (`{ ...this.errors, sampleRate: 1 }`); a
   field typed by an enum or a driver name restates its type.
-- **A new class**, `extends Config`, keyed `mobile.<stem>`: only `MobileEnv`.
+- **A new class**, `extends Config`, keyed `mobile.<stem>`: only `MobileEnvConfig`.
 
 `@Env("EXPO_PUBLIC_*")` binds a field to a public variable, the only prefix gen accepts on a mobile
 target. Layers, lowest first: package defaults, these classes, the environment (`@Env`), then
@@ -20,7 +20,7 @@ domain, a channel or a profile (those are runway.yaml).
 
 | File                      | Class                      | Key                 | The fact                                                                     | Gen also reads it for                                                                               |
 | ------------------------- | -------------------------- | ------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `env.config.ts`           | `MobileEnv`                | `mobile.env`        | the env contract named by `stackra.config.ts`: EAS project, API, app origin  | `gen/env.ts`, `env.d.ts`, the `vars` check of runway.yaml, `eas-sync.json`, the update URL, linking |
+| `env.config.ts`           | `MobileEnvConfig`          | `mobile.env`        | the env contract named by `stackra.config.ts`: EAS project, API, app origin  | `gen/env.ts`, `env.d.ts`, the `vars` check of runway.yaml, `eas-sync.json`, the update URL, linking |
 | `chrome.config.ts`        | `MobileChromeConfig`       | `navigation.chrome` | the header and the tab bar                                                   | `gen/navigation.tsx` screen options, the Expo configuration's start values                          |
 | `i18n.config.ts`          | `MobileI18nConfig`         | `i18n`              | locales, default, RTL set, fallbacks, numerals                               | `#stackra/i18n` loaders, the RTL switch, one Maestro run per locale, `CFBundleLocalizations`        |
 | `theming.config.ts`       | `MobileThemingConfig`      | `theming`           | brand package, the one logo source, schemes, theme and splash colours        | icons and splash in the Expo configuration                                                          |

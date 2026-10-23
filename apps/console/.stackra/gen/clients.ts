@@ -81,11 +81,11 @@ export const StockAdjustReason = Enum.of({
 /** One of the `inventory.StockAdjustReason` codes. */
 export type StockAdjustReason = Enum.Value<typeof StockAdjustReason>;
 
-/** `messages.NotificationKind`: labels are `messages::enums.notification_kind.<code>`. */
-export const NotificationKind = Enum.of({ OrderPaid: "order_paid" });
+/** `messages.InboxMessageKind`: labels are `messages::enums.inbox_message_kind.<code>`. */
+export const InboxMessageKind = Enum.of({ OrderPaid: "order_paid" });
 
-/** One of the `messages.NotificationKind` codes. */
-export type NotificationKind = Enum.Value<typeof NotificationKind>;
+/** One of the `messages.InboxMessageKind` codes. */
+export type InboxMessageKind = Enum.Value<typeof InboxMessageKind>;
 
 /** `loyalty_kit.LoyaltyTier`: labels are `loyalty_kit::enums.loyalty_tier.<code>`. */
 export const LoyaltyTier = Enum.of({
@@ -210,19 +210,19 @@ export const ProductView$ = z.object({
 });
 
 /**
- * `messages.NotificationView$`: one entry of the in-app inbox; the client renders the kind's label
+ * `messages.InboxMessageView$`: one entry of the in-app inbox; the client renders the kind's label
  * with `data`.
  */
-export const NotificationView$ = z.object({
-  id: publicId("ntf"),
-  kind: z.enum(Enum.values(NotificationKind)),
+export const InboxMessageView$ = z.object({
+  id: publicId("inm"),
+  kind: z.enum(Enum.values(InboxMessageKind)),
   data: z.record(z.string(), z.union([z.string(), z.number()])),
   createdAt: z.iso.datetime({ offset: true }),
   readAt: z.iso.datetime({ offset: true }).nullable(),
 });
 
 /** One inbox entry as the console reads it. */
-export type NotificationView = z.output<typeof NotificationView$>;
+export type InboxMessageView = z.output<typeof InboxMessageView$>;
 
 /** `loyalty_kit.LoyaltyAccountView$`: one account as the loyalty resource lists and shows it. */
 export const LoyaltyAccountView$ = z.object({
@@ -579,47 +579,48 @@ export const Commerce = {
 /** The notifications service: the in-app inbox and the per-user notification preferences. */
 export const Notifications = {
   actions: {
-    MarkNotificationRead: actionRef("messages.notification.mark_read@1", {
-      input: z.object({ notificationId: publicId("ntf") }),
-      output: NotificationView$,
-      http: { method: HttpMethod.Put, path: "/notifications/:notificationId/read" },
+    MarkInboxMessageRead: actionRef("messages.inbox_message.mark_read@1", {
+      input: z.object({ inboxMessageId: publicId("inm") }),
+      output: InboxMessageView$,
+      http: { method: HttpMethod.Put, path: "/inbox-messages/:inboxMessageId/read" },
       risk: Risk.L0,
     }),
   },
   queries: {
     /** `unread` counts the actor's whole inbox, not the page. */
-    ListNotifications: queryRef("messages.notification.list@1", {
+    ListInboxMessages: queryRef("messages.inbox_message.list@1", {
       input: pageInput.extend({ unreadOnly: z.boolean().default(false) }),
-      output: page(NotificationView$).extend({ unread: z.number().int().nonnegative() }),
-      http: { method: HttpMethod.Get, path: "/notifications" },
+      output: page(InboxMessageView$).extend({ unread: z.number().int().nonnegative() }),
+      http: { method: HttpMethod.Get, path: "/inbox-messages" },
     }),
   },
   permissions: {
     Notification: {
-      read: permissionRef("messages.notification.read"),
-      update: permissionRef("messages.notification.update"),
+      read: permissionRef("messages.inbox_message.read"),
+      update: permissionRef("messages.inbox_message.update"),
     },
   },
   events: {
     /**
-     * Broadcast as a data-free refresh to the tenant's sessions that hold
-     * `messages.notification.read`; the inbox refetches its own entries.
+     * Broadcast as a data-free refresh to the principal's own sessions that hold
+     * `messages.inbox_message.read` (audience `principal`); the inbox refetches its own entries.
      */
-    NotificationCreated: eventRef("messages.notification.created.v1", {
+    InboxMessageCreated: eventRef("messages.inbox_message.created.v1", {
       payload: z.object({
-        notificationId: publicId("ntf"),
+        inboxMessageId: publicId("inm"),
         principalId: publicId("usr"),
-        kind: z.enum(Enum.values(NotificationKind)),
+        kind: z.enum(Enum.values(InboxMessageKind)),
       }),
-      channel: "tenant.{tenantId}.messages",
+      channel: "principal.{principalId}.messages",
+      audience: "principal",
     }),
   },
   refusals: {
-    notification_not_found: refusalRef("messages.notification_not_found", {
-      message: I18n.messages.errors.notification_not_found.message,
+    inbox_message_not_found: refusalRef("messages.inbox_message_not_found", {
+      message: I18n.messages.errors.inbox_message_not_found.message,
     }),
   },
-  enums: { NotificationKind },
+  enums: { InboxMessageKind },
 } as const;
 
 /** The platform service (acme-platform, pinned): settings values. */

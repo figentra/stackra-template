@@ -62,6 +62,7 @@ export const I18n = keys({
       errors: ["name", "email", "message", "consent"],
     },
     consent: ["title", "body", "accept", "decline", "settings", "necessary", "analytics_category"],
+    locale_suggestion: ["label", "body", "switch", "stay"],
     theme: ["toggle", "light", "dark", "system"],
     footer: ["rights", "legal", "privacy", "terms"],
     error_page: { not_found: ["title", "body", "home"], server: ["title", "body", "reference"] },

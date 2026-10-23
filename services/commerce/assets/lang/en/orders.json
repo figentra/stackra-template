@@ -1,6 +1,7 @@
 {
   "nav": {
-    "sales": "Sales"
+    "sales": "Sales",
+    "orders": "Orders"
   },
   "resources": {
     "order": {
@@ -60,6 +61,9 @@
   "documents": {
     "sales_today": {
       "title": "Sales today"
+    },
+    "my_orders": {
+      "title": "My orders"
     }
   },
   "quick_order": {

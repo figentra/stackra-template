@@ -7,7 +7,7 @@
  *           CommerceClient is injected by class, and nothing here imports commerce code. Queued on
  *           `inbox`, so a slow commerce call never blocks the event inbox; runs once per event id.
  *           Honours the customer's MessagesSettings (`orderUpdates`) and records
- *           `messages.notification.created.v1`, whose broadcast refreshes the inbox.
+ *           `messages.inbox_message.created.v1`, whose broadcast refreshes the inbox.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 4 and 16), ADR 0260 d3 and d4 (events and calls across
  *                     services), ADR 0078 d4 (listener semantics)
@@ -17,21 +17,21 @@ import { Listener } from "@stackra/events";
 import type { SettingsReader } from "@stackra/settings";
 import type { Commerce, CommerceClient } from "#stackra/clients";
 import { Queues } from "#stackra/queues";
-import { NotificationKind } from "#modules/messages/enums/notification-kind.enum";
-import { NotificationCreated } from "#modules/messages/events/notification-created.event";
+import { InboxMessageKind } from "#modules/messages/enums/inbox-message-kind.enum";
+import { InboxMessageCreated } from "#modules/messages/events/inbox-message-created.event";
 import { MessagesSettings } from "#modules/messages/messages.settings";
-import type { Notification } from "#modules/messages/models/notification.model";
+import type { InboxMessage } from "#modules/messages/models/inbox-message.model";
 
 /** The only consumer of commerce's payment fact in this service. */
 export class NotifyOnOrderPaidListener extends Listener({ queue: Queues.Inbox }) {
   /**
    * @param commerce - the generated client; in-process or RPC follows the root runway topology.
-   * @param notifications - the generic repository of Notification.
+   * @param inboxMessages - the generic repository of InboxMessage.
    * @param settings - reads the customer's preferences per call.
    */
   constructor(
     private readonly commerce: CommerceClient,
-    private readonly notifications: Repository<Notification>,
+    private readonly inboxMessages: Repository<InboxMessage>,
     private readonly settings: SettingsReader,
   ) {
     super();
@@ -43,16 +43,16 @@ export class NotifyOnOrderPaidListener extends Listener({ queue: Queues.Inbox })
     const preferences = await this.settings.for(MessagesSettings, { user: customerId });
     if (!preferences.orderUpdates) return;
     const order = await this.commerce.order.get.call({ orderId });
-    const entry = this.notifications.create({
+    const entry = this.inboxMessages.create({
       principalId: customerId,
-      kind: NotificationKind.OrderPaid,
+      kind: InboxMessageKind.OrderPaid,
       data: { orderId, totalMinor, currency, lines: order.lines.length },
     });
     entry.record(
-      NotificationCreated.create({
-        notificationId: entry.id,
+      InboxMessageCreated.create({
+        inboxMessageId: entry.id,
         principalId: customerId,
-        kind: NotificationKind.OrderPaid,
+        kind: InboxMessageKind.OrderPaid,
       }),
     );
   }

@@ -17,20 +17,20 @@ import type { MemberId } from "#contracts/types/member-id.type";
  * Answers `isMember` from a fixed set; `calls("isMember")` lists what was asked. One runtime export
  * per fake file: the shorthand is the static `with`.
  */
-export class FakeLoyaltyMembers extends Fake.of(LoyaltyMembers) {
+export class LoyaltyMembersFake extends Fake.of(LoyaltyMembers) {
   /** @param ids - principal public ids treated as enrolled. */
   constructor(private readonly ids: ReadonlySet<string>) {
     super();
   }
 
   /**
-   * Shorthand for `new FakeLoyaltyMembers(new Set(ids))`.
+   * Shorthand for `new LoyaltyMembersFake(new Set(ids))`.
    * @example
    * createTestingModule(LoyaltyKitModule)
-   *   .override(LoyaltyMembers, FakeLoyaltyMembers.with(["usr_1"]))
+   *   .override(LoyaltyMembers, LoyaltyMembersFake.with(["usr_1"]))
    */
-  static with(ids: readonly string[]): FakeLoyaltyMembers {
-    return new FakeLoyaltyMembers(new Set(ids));
+  static with(ids: readonly string[]): LoyaltyMembersFake {
+    return new LoyaltyMembersFake(new Set(ids));
   }
 
   /** Recorded, then answered from `ids`. */

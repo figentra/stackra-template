@@ -13,7 +13,7 @@ import { useInfiniteQuery } from "@stackra/clients/react";
 import { Notifications } from "#stackra/clients";
 
 /** One inbox entry as the list query returns it. */
-type InboxEntry = QueryOutput<typeof Notifications.queries.ListNotifications>["items"][number];
+type InboxEntry = QueryOutput<typeof Notifications.queries.ListInboxMessages>["items"][number];
 
 /** What the inbox page renders from. */
 export interface InboxState {
@@ -34,7 +34,7 @@ export interface InboxState {
 /** The inbox hook. */
 export function useInbox(): InboxState {
   const query = useInfiniteQuery(
-    Notifications.queries.ListNotifications,
+    Notifications.queries.ListInboxMessages,
     { limit: 20 },
     { getNextCursor: (page) => (page.hasMore ? page.nextCursor : undefined), refetchOnFocus: true },
   );

@@ -11,7 +11,7 @@
 import { memberId } from "@acme/loyalty-kit";
 import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { FakeLoyaltyMembers, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
+import { LoyaltyMembersFake, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { usePostgres } from "@stackra/database/testing";
 import { drainOutbox } from "@stackra/events/testing";
@@ -37,7 +37,7 @@ describe(AccountService, () => {
     const app = await createTestingModule(LoyaltyKitModule)
       .useDrivers({ database: "postgres", events: "postgres-outbox", queue: "memory" })
       .seed(LoyaltyKitDemoSeeder) // LoyaltyKitDemoSeeder.ids.bronze: 1 000 points
-      .override(LoyaltyMembers, FakeLoyaltyMembers.with([]))
+      .override(LoyaltyMembers, LoyaltyMembersFake.with([]))
       .override(
         SettingsReader,
         fakeSettings([

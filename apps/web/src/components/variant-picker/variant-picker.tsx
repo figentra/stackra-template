@@ -7,7 +7,7 @@
  */
 import { Select } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";
-import type { VariantChoice } from "#src/hooks/use-variant-choice";
+import type { VariantChoice } from "#src/types/variant-choice.type";
 import { I18n } from "#stackra/i18n";
 
 /** The hook's result, passed down so the page and the picker agree on the variant. */
