@@ -2,20 +2,20 @@
  * Stackra file contract:
  * Purpose: this app's override of @stackra/query's configuration: server state on the device, the
  *          persisted encrypted query cache and the offline mutation queue.
- * Boundary: an override declares `override` members only and inherits the base's key (`query`);
- *           its presence mounts the query context, so the app writes no query provider. Which
- *           actions may queue is the generated offline map (`#stackra/offline`), not a value here.
- *           Storage drivers come from the target (sqlite for `cache` and `outbox`, secure-store for
- *           the key). Encryption is not optional on a device (ADR 0059 decision 1), so there is no
+ * Boundary: an override declares `override` members only and inherits the base's key (`query`); its
+ *           presence mounts the query context, so the app writes no query provider. Which actions
+ *           may queue is the generated offline map (`#stackra/offline`), not a value here. Storage
+ *           drivers come from the target (sqlite for `cache` and `outbox`, secure-store for the
+ *           key). Encryption is not optional on a device (ADR 0059 decision 1), so there is no
  *           switch for it. A field typed by an enum restates its type.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0295 (decision 10), ADR 0059, ADR 0079,
- *                     ADR 0252, ADR 0256
+ * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
+ *                     alias), ADR 0295 (decision 10), ADR 0059, ADR 0079, ADR 0252, ADR 0256
  */
-import { QueryConfig, QueryScope } from "@stackra/query";
+import { QueryConfig as BaseQueryConfig, QueryScope } from "@stackra/query";
 
 /** Keyed by tenant, so a switch never shows another tenant's data; replayed gently on a radio. */
-export class MobileQueryConfig extends QueryConfig {
+export class QueryConfig extends BaseQueryConfig {
   /** What the cache and the queue are keyed by. */
   override scope: QueryScope = QueryScope.Tenant;
 

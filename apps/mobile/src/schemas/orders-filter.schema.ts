@@ -9,7 +9,7 @@
  * Governing contract: ADR 0294 (decisions 4 and 16)
  */
 import { Schema } from "@stackra/validation";
-import type { OrderStatus } from "#stackra/clients";
+import type { OrderStatus } from "#stackra/clients/commerce";
 
 /** The orders list filter read from the URL, such as `orders?status=paid`. */
 export class OrdersFilter extends Schema {

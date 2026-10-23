@@ -5,7 +5,8 @@ documents by key, the experience service validates its props on publish, and the
 re-validates on render and refuses a key nobody registers (ADR 0110 decision 6). Folder shape (ADR
 0294 decision 14): `<name>/{<name>.block.ts, <name>.tsx, __tests__/}`, with an optional
 `<name>.native.tsx` when a block also has a web renderer. The declaration's fields are the props;
-the renderer is bound by file name, so neither imports the other's file.
+the renderer is a class component bound by file name, so neither imports the other's file; the
+block's `icon` is an `IconName` string.
 
 | Folder          | Class              | Key                   | Renders                                                    |
 | --------------- | ------------------ | --------------------- | ---------------------------------------------------------- |

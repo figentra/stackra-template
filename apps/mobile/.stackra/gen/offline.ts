@@ -9,19 +9,15 @@
  *           listed.
  * Runtime: react-native
  */
-import {
-  ConflictResolution,
-  IdMinting,
-  OfflineMode,
-  OfflinePrecondition,
-} from "@stackra/actions";
+import { ConflictResolution, IdMinting, OfflineMode, OfflinePrecondition } from "@stackra/actions";
 import { offlineMap } from "@stackra/query";
-import { Commerce, Identity } from "#stackra/clients";
+import { CreateOrderAction } from "#stackra/clients/commerce";
+import { RegisterDeviceAction } from "#stackra/clients/identity";
 
 /** Action → offline policy, exactly as each producer's manifest declares it. */
 export const Offline = offlineMap([
   {
-    action: Commerce.actions.CreateOrder,
+    action: CreateOrderAction,
     mode: OfflineMode.Queue,
     idMinting: IdMinting.Client,
     precondition: OfflinePrecondition.None,
@@ -29,7 +25,7 @@ export const Offline = offlineMap([
     onConflict: [ConflictResolution.ServerWins, ConflictResolution.Manual],
   },
   {
-    action: Identity.actions.RegisterDevice,
+    action: RegisterDeviceAction,
     mode: OfflineMode.Queue,
     idMinting: IdMinting.Server,
     precondition: OfflinePrecondition.None,

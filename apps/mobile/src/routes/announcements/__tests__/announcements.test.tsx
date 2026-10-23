@@ -12,15 +12,15 @@ import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen } from "@stackra/testing/native";
 import { PromoBannerBlock } from "#src/blocks/promo-banner/promo-banner.block";
 import { AnnouncementsDocument } from "#src/documents/announcements.document";
-import { Experience } from "#stackra/clients";
+import { GetDocumentQuery } from "#stackra/clients/experience";
 import { Routes } from "#stackra/routes";
 
 /** The document page over the announcements route. */
 describe("Announcements", () => {
   /** The tenant's published tree wins over the default. */
   it("renders the published document", async () => {
-    const experience = fakeClient(Experience, (fake) =>
-      fake.queries.GetDocument.returns({
+    const experience = fakeClient((fake) =>
+      fake.on(GetDocumentQuery).returns({
         key: AnnouncementsDocument.key,
         version: 3,
         root: { component: PromoBannerBlock.key, props: { headline: "Welcome back" } },
@@ -28,22 +28,20 @@ describe("Announcements", () => {
     );
     renderRoute(Routes.announcements, { clients: [experience] });
     expect(await screen.findByText("Welcome back")).toBeTruthy();
-    expect(experience.called(Experience.queries.GetDocument)).toEqual([
-      { key: AnnouncementsDocument.key },
-    ]);
+    expect(experience.called(GetDocumentQuery)).toEqual([{ key: AnnouncementsDocument.key }]);
   });
 
   /** Nothing published: the adapter falls back to the class, translated. */
   it("renders the default document when nothing is published", async () => {
-    const experience = fakeClient(Experience, (fake) => fake.queries.GetDocument.returns(null));
+    const experience = fakeClient((fake) => fake.on(GetDocumentQuery).returns(null));
     renderRoute(Routes.announcements, { locale: "en", clients: [experience] });
     expect(await screen.findByText("Welcome to your workspace")).toBeTruthy();
   });
 
   /** A node naming no registered block never renders (ADR 0110 decision 6). */
   it("refuses an unregistered component key", async () => {
-    const experience = fakeClient(Experience, (fake) =>
-      fake.queries.GetDocument.returns({
+    const experience = fakeClient((fake) =>
+      fake.on(GetDocumentQuery).returns({
         key: AnnouncementsDocument.key,
         version: 1,
         root: { component: "evil.script", props: {} },

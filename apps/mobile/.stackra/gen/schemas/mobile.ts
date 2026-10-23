@@ -9,25 +9,26 @@
  *           a class name used elsewhere never collides. `?:` compiles to `.exactOptional()`; an
  *           enum to its codes in source order; a union of schema classes to a discriminated union
  *           on its enum-case field; defaults are the initializers. A new config class compiles from
- *           its fields; an override extends its package's own `Base$` and replaces only the
- *           defaults of its `override` members (a merged nested default is evaluated from the base
- *           default). The environment (`@Env`) and runway layers apply after these defaults, at
- *           boot. Authored code never imports this file: `validate(X, raw)` and `X.create()` find a
- *           schema through the registry.
+ *           its `schema` class; an override extends its package's own schema (imported as
+ *           `Base<Name>$`) and replaces only the defaults of its `override` members (a merged
+ *           nested default is evaluated from the base default). The environment (`EnvConfig`'s
+ *           `env` map) and runway layers apply after these defaults, at boot; an `EnvConfig` field
+ *           named after a package config field feeds it there. Authored code never imports this
+ *           file: `validate(X, raw)` and `X.create()` find a schema through the registry.
  * Runtime: isomorphic
  */
-import { AnalyticsConfig$ } from "@stackra/analytics";
-import { ConsentConfig$ } from "@stackra/consent";
-import { FeatureFlagsConfig$ } from "@stackra/feature-flags";
-import { I18nConfig$ } from "@stackra/i18n";
-import { IdentityConfig$ } from "@stackra/identity";
-import { TelemetryConfig$ } from "@stackra/logger";
-import { ChromeConfig$ } from "@stackra/navigation";
-import { PushConfig$ } from "@stackra/platform";
-import { QueryConfig$ } from "@stackra/query";
-import { RealtimeConfig$ } from "@stackra/realtime";
-import { StateConfig$ } from "@stackra/state";
-import { ThemingConfig$ } from "@stackra/theming";
+import { AnalyticsConfig$ as BaseAnalyticsConfig$ } from "@stackra/analytics";
+import { ConsentConfig$ as BaseConsentConfig$ } from "@stackra/consent";
+import { FeatureFlagsConfig$ as BaseFeatureFlagsConfig$ } from "@stackra/feature-flags";
+import { I18nConfig$ as BaseI18nConfig$ } from "@stackra/i18n";
+import { IdentityConfig$ as BaseIdentityConfig$ } from "@stackra/identity";
+import { TelemetryConfig$ as BaseTelemetryConfig$ } from "@stackra/logger";
+import { ChromeConfig$ as BaseChromeConfig$ } from "@stackra/navigation";
+import { PushConfig$ as BasePushConfig$ } from "@stackra/platform";
+import { QueryConfig$ as BaseQueryConfig$ } from "@stackra/query";
+import { RealtimeConfig$ as BaseRealtimeConfig$ } from "@stackra/realtime";
+import { StateConfig$ as BaseStateConfig$ } from "@stackra/state";
+import { ThemingConfig$ as BaseThemingConfig$ } from "@stackra/theming";
 import {
   type Assert,
   duration,
@@ -39,29 +40,30 @@ import {
 import { z } from "zod";
 import type { BarcodeScanned } from "#src/analytics/barcode-scanned.analytics-event";
 import type { PromoBannerBlock } from "#src/blocks/promo-banner/promo-banner.block";
-import type { MobileAnalyticsConfig } from "#src/config/analytics.config";
-import type { MobileChromeConfig } from "#src/config/chrome.config";
-import type { MobileConsentConfig } from "#src/config/consent.config";
-import type { MobileEnvConfig } from "#src/config/env.config";
-import type { MobileFeatureFlagsConfig } from "#src/config/feature-flags.config";
-import type { MobileI18nConfig } from "#src/config/i18n.config";
-import type { MobileIdentityConfig } from "#src/config/identity.config";
-import type { MobilePushConfig } from "#src/config/push.config";
-import type { MobileQueryConfig } from "#src/config/query.config";
-import type { MobileRealtimeConfig } from "#src/config/realtime.config";
-import type { MobileStateConfig } from "#src/config/state.config";
-import type { MobileTelemetryConfig } from "#src/config/telemetry.config";
-import type { MobileThemingConfig } from "#src/config/theming.config";
+import type { AnalyticsConfig } from "#src/config/analytics.config";
+import type { ChromeConfig } from "#src/config/chrome.config";
+import type { ConsentConfig } from "#src/config/consent.config";
+import type { EnvConfig } from "#src/config/env.config";
+import type { FeatureFlagsConfig } from "#src/config/feature-flags.config";
+import type { I18nConfig } from "#src/config/i18n.config";
+import type { IdentityConfig } from "#src/config/identity.config";
+import type { PushConfig } from "#src/config/push.config";
+import type { QueryConfig } from "#src/config/query.config";
+import type { RealtimeConfig } from "#src/config/realtime.config";
+import type { StateConfig } from "#src/config/state.config";
+import type { TelemetryConfig } from "#src/config/telemetry.config";
+import type { ThemingConfig } from "#src/config/theming.config";
 import type { SessionRequiredError } from "#src/errors/session-required.error";
 import type { ActionEvent } from "#src/schemas/action-event.schema";
 import type { CreateOrderForm } from "#src/schemas/create-order-form.schema";
 import type { CreateOrderParams } from "#src/schemas/create-order-params.schema";
+import type { EnvOptions } from "#src/schemas/env-options.schema";
 import type { NavigateEvent } from "#src/schemas/navigate-event.schema";
 import type { OrderDetailParams } from "#src/schemas/order-detail-params.schema";
 import type { OrdersFilter } from "#src/schemas/orders-filter.schema";
 import type { PromoBannerCta } from "#src/schemas/promo-banner-cta.schema";
 import type { PreferencesStore } from "#src/stores/preferences.store";
-import { OrderStatus$, RequestedLine$ } from "../clients";
+import { OrderStatus$, RequestedLine$ } from "../clients/commerce";
 
 // --- enums ---------------------------------------------------------------------------------------
 
@@ -106,7 +108,7 @@ export type OrdersFilter$Check = Assert<Same<z.output<typeof OrdersFilter$>, Fie
 
 /** schema `CreateOrderForm` (schemas/create-order-form.schema.ts), extending the client's line. */
 export const CreateOrderForm$ = RequestedLine$.extend({
-  redeemPoints: z.number().int().min(0, "mobile::create_order.errors.points_min").default(0),
+  redeemPoints: z.number().int().min(0, "pages::create_order.errors.points_min").default(0),
 });
 export type CreateOrderForm$Check = Assert<
   Same<z.output<typeof CreateOrderForm$>, Fields<CreateOrderForm>>
@@ -163,68 +165,85 @@ export type SessionRequiredError$Check = Assert<
 
 // --- config --------------------------------------------------------------------------------------
 
-/** config `MobileEnvConfig` (src/config/env.config.ts), key `mobile.env`. */
-export const MobileEnvConfig$ = z.object({
+/** schema `EnvOptions` (schemas/env-options.schema.ts): the shape of the public env. */
+export const EnvOptions$ = z.object({
   easProjectId: z.string().default(""),
   apiOrigin: url(),
   appOrigin: url(),
+  realtimeOrigin: url(),
+  identityIssuer: url(),
+  identityClientId: z.string().min(1),
+  telemetryDsn: z.string().default(""),
+  pushProvider: BasePushConfig$.shape.provider.unwrap().default("expo"),
+  analyticsPosthogKey: z.string().default(""),
+  featureFlagsPosthogKey: z.string().default(""),
 });
-export type MobileEnvConfig$Check = Assert<Same<z.output<typeof MobileEnvConfig$>, Fields<MobileEnvConfig>>>;
+export type EnvOptions$Check = Assert<Same<z.output<typeof EnvOptions$>, Fields<EnvOptions>>>;
 
-/** override `MobileChromeConfig` (src/config/chrome.config.ts), key `navigation.chrome`. */
-export const MobileChromeConfig$ = ChromeConfig$.extend({
-  header: ChromeConfig$.shape.header.unwrap().default(() => ({
-    ...ChromeConfig$.shape.header.parse(undefined),
+/**
+ * config `EnvConfig` (src/config/env.config.ts), key `mobile.env`: its `schema` is `EnvOptions`;
+ * its `env` map is applied at boot (gen/env.ts).
+ */
+export const EnvConfig$ = EnvOptions$;
+export type EnvConfig$Check = Assert<Same<z.output<typeof EnvConfig$>, Fields<EnvConfig>>>;
+
+/** override `ChromeConfig` (src/config/chrome.config.ts), key `navigation.chrome`. */
+export const ChromeConfig$ = BaseChromeConfig$.extend({
+  header: BaseChromeConfig$.shape.header.unwrap().default(() => ({
+    ...BaseChromeConfig$.shape.header.parse(undefined),
     blur: true,
     backTitle: "minimal",
   })),
-  tabBar: ChromeConfig$.shape.tabBar.unwrap().default(() => ({
-    ...ChromeConfig$.shape.tabBar.parse(undefined),
+  tabBar: BaseChromeConfig$.shape.tabBar.unwrap().default(() => ({
+    ...BaseChromeConfig$.shape.tabBar.parse(undefined),
     minimizeOnScroll: true,
     sidebarAdaptable: true,
   })),
 });
-export type MobileChromeConfig$Check = Assert<
-  Same<z.output<typeof MobileChromeConfig$>, Fields<MobileChromeConfig>>
->;
+export type ChromeConfig$Check = Assert<Same<z.output<typeof ChromeConfig$>, Fields<ChromeConfig>>>;
 
-/** override `MobileI18nConfig` (src/config/i18n.config.ts), key `i18n`. */
-export const MobileI18nConfig$ = I18nConfig$.extend({
-  locales: I18nConfig$.shape.locales.unwrap().default(() => ["en", "ar"]),
-  defaultLocale: I18nConfig$.shape.defaultLocale.unwrap().default("en"),
-  rtl: I18nConfig$.shape.rtl.unwrap().default(() => ["ar"]),
-  fallbacks: I18nConfig$.shape.fallbacks.unwrap().default(() => ({ ar: ["en"], en: [] })),
-  numerals: I18nConfig$.shape.numerals.unwrap().default("user"),
-  followDevice: I18nConfig$.shape.followDevice.unwrap().default(true),
-  failOnMissingLocale: I18nConfig$.shape.failOnMissingLocale.unwrap().default(true),
+/** override `I18nConfig` (src/config/i18n.config.ts), key `i18n`. */
+export const I18nConfig$ = BaseI18nConfig$.extend({
+  locales: BaseI18nConfig$.shape.locales.unwrap().default(() => ["en", "en-US", "ar", "ar-SA"]),
+  defaultLocale: BaseI18nConfig$.shape.defaultLocale.unwrap().default("en"),
+  rtl: BaseI18nConfig$.shape.rtl.unwrap().default(() => ["ar", "ar-SA"]),
+  fallbacks: BaseI18nConfig$.shape.fallbacks.unwrap().default(() => ({
+    "en-US": ["en"],
+    "ar-SA": ["ar", "en"],
+    ar: ["en"],
+    en: [],
+  })),
+  numerals: BaseI18nConfig$.shape.numerals.unwrap().default("user"),
+  followDevice: BaseI18nConfig$.shape.followDevice.unwrap().default(true),
+  failOnMissingLocale: BaseI18nConfig$.shape.failOnMissingLocale.unwrap().default(true),
 });
-export type MobileI18nConfig$Check = Assert<
-  Same<z.output<typeof MobileI18nConfig$>, Fields<MobileI18nConfig>>
->;
+export type I18nConfig$Check = Assert<Same<z.output<typeof I18nConfig$>, Fields<I18nConfig>>>;
 
-/** override `MobileThemingConfig` (src/config/theming.config.ts), key `theming`. */
-export const MobileThemingConfig$ = ThemingConfig$.extend({
-  brand: ThemingConfig$.shape.brand.unwrap().default("@acme/brand"),
-  logo: ThemingConfig$.shape.logo.unwrap().default("mobile::public/logo.svg"),
-  schemes: ThemingConfig$.shape.schemes.unwrap().default(() => ["light", "dark", "system"]),
-  defaultScheme: ThemingConfig$.shape.defaultScheme.unwrap().default("system"),
-  themeColor: ThemingConfig$.shape.themeColor
+/** override `ThemingConfig` (src/config/theming.config.ts), key `theming`. */
+export const ThemingConfig$ = BaseThemingConfig$.extend({
+  theme: BaseThemingConfig$.shape.theme.unwrap().default("acme"),
+  logo: BaseThemingConfig$.shape.logo.unwrap().default("mobile::public/logo.svg"),
+  schemes: BaseThemingConfig$.shape.schemes.unwrap().default(() => ["light", "dark", "system"]),
+  defaultScheme: BaseThemingConfig$.shape.defaultScheme.unwrap().default("system"),
+  themeColor: BaseThemingConfig$.shape.themeColor
     .unwrap()
     .default(() => ({ light: "#f7f7f5", dark: "#1c1e22" })),
-  splash: ThemingConfig$.shape.splash.unwrap().default(() => ({
-    ...ThemingConfig$.shape.splash.parse(undefined),
+  splash: BaseThemingConfig$.shape.splash.unwrap().default(() => ({
+    ...BaseThemingConfig$.shape.splash.parse(undefined),
     background: { light: "#f7f7f5", dark: "#1c1e22" },
   })),
-  selfHostedFonts: ThemingConfig$.shape.selfHostedFonts.unwrap().default(false),
+  selfHostedFonts: BaseThemingConfig$.shape.selfHostedFonts.unwrap().default(false),
 });
-export type MobileThemingConfig$Check = Assert<
-  Same<z.output<typeof MobileThemingConfig$>, Fields<MobileThemingConfig>>
+export type ThemingConfig$Check = Assert<
+  Same<z.output<typeof ThemingConfig$>, Fields<ThemingConfig>>
 >;
 
-/** override `MobileIdentityConfig` (src/config/identity.config.ts), key `identity`. */
-export const MobileIdentityConfig$ = IdentityConfig$.extend({
-  nativeRedirectPath: IdentityConfig$.shape.nativeRedirectPath.unwrap().default("auth/callback"),
-  scopes: IdentityConfig$.shape.scopes
+/** override `IdentityConfig` (src/config/identity.config.ts), key `identity`. */
+export const IdentityConfig$ = BaseIdentityConfig$.extend({
+  nativeRedirectPath: BaseIdentityConfig$.shape.nativeRedirectPath
+    .unwrap()
+    .default("auth/callback"),
+  scopes: BaseIdentityConfig$.shape.scopes
     .unwrap()
     .default(() => [
       "openid",
@@ -233,72 +252,67 @@ export const MobileIdentityConfig$ = IdentityConfig$.extend({
       "offline_access",
       "urn:zitadel:iam:org:projects:roles",
     ]),
-  idleMinutes: IdentityConfig$.shape.idleMinutes.unwrap().default(30),
-  refreshOnForeground: IdentityConfig$.shape.refreshOnForeground.unwrap().default(true),
+  idleMinutes: BaseIdentityConfig$.shape.idleMinutes.unwrap().default(30),
+  refreshOnForeground: BaseIdentityConfig$.shape.refreshOnForeground.unwrap().default(true),
 });
-export type MobileIdentityConfig$Check = Assert<
-  Same<z.output<typeof MobileIdentityConfig$>, Fields<MobileIdentityConfig>>
+export type IdentityConfig$Check = Assert<
+  Same<z.output<typeof IdentityConfig$>, Fields<IdentityConfig>>
 >;
 
-/** override `MobileQueryConfig` (src/config/query.config.ts), key `query`. */
-export const MobileQueryConfig$ = QueryConfig$.extend({
-  scope: QueryConfig$.shape.scope.unwrap().default("tenant"),
-  persistMaxAgeHours: QueryConfig$.shape.persistMaxAgeHours.unwrap().default(24),
-  replayOnReconnect: QueryConfig$.shape.replayOnReconnect.unwrap().default(true),
-  maxParallelAggregates: QueryConfig$.shape.maxParallelAggregates.unwrap().default(2),
-  queueRetentionDays: QueryConfig$.shape.queueRetentionDays.unwrap().default(7),
-  staleTimeSeconds: QueryConfig$.shape.staleTimeSeconds.unwrap().default(30),
-  refetchOnFocus: QueryConfig$.shape.refetchOnFocus.unwrap().default(true),
-  retry: QueryConfig$.shape.retry.unwrap().default(2),
+/** override `QueryConfig` (src/config/query.config.ts), key `query`. */
+export const QueryConfig$ = BaseQueryConfig$.extend({
+  scope: BaseQueryConfig$.shape.scope.unwrap().default("tenant"),
+  persistMaxAgeHours: BaseQueryConfig$.shape.persistMaxAgeHours.unwrap().default(24),
+  replayOnReconnect: BaseQueryConfig$.shape.replayOnReconnect.unwrap().default(true),
+  maxParallelAggregates: BaseQueryConfig$.shape.maxParallelAggregates.unwrap().default(2),
+  queueRetentionDays: BaseQueryConfig$.shape.queueRetentionDays.unwrap().default(7),
+  staleTimeSeconds: BaseQueryConfig$.shape.staleTimeSeconds.unwrap().default(30),
+  refetchOnFocus: BaseQueryConfig$.shape.refetchOnFocus.unwrap().default(true),
+  retry: BaseQueryConfig$.shape.retry.unwrap().default(2),
 });
-export type MobileQueryConfig$Check = Assert<
-  Same<z.output<typeof MobileQueryConfig$>, Fields<MobileQueryConfig>>
->;
+export type QueryConfig$Check = Assert<Same<z.output<typeof QueryConfig$>, Fields<QueryConfig>>>;
 
-/** override `MobileStateConfig` (src/config/state.config.ts), key `state`. */
-export const MobileStateConfig$ = StateConfig$.extend({
-  persistStore: StateConfig$.shape.persistStore.unwrap().default("prefs"),
-  blockingHydration: StateConfig$.shape.blockingHydration.unwrap().default(true),
+/** override `StateConfig` (src/config/state.config.ts), key `state`. */
+export const StateConfig$ = BaseStateConfig$.extend({
+  persistStore: BaseStateConfig$.shape.persistStore.unwrap().default("prefs"),
+  blockingHydration: BaseStateConfig$.shape.blockingHydration.unwrap().default(true),
 });
-export type MobileStateConfig$Check = Assert<
-  Same<z.output<typeof MobileStateConfig$>, Fields<MobileStateConfig>>
->;
+export type StateConfig$Check = Assert<Same<z.output<typeof StateConfig$>, Fields<StateConfig>>>;
 
-/** override `MobileTelemetryConfig` (src/config/telemetry.config.ts), key `logger.telemetry`. */
-export const MobileTelemetryConfig$ = TelemetryConfig$.extend({
-  dsn: TelemetryConfig$.shape.dsn.unwrap().default(""),
-  errors: TelemetryConfig$.shape.errors.unwrap().default(() => ({
-    ...TelemetryConfig$.shape.errors.parse(undefined),
+/** override `TelemetryConfig` (src/config/telemetry.config.ts), key `logger.telemetry`. */
+export const TelemetryConfig$ = BaseTelemetryConfig$.extend({
+  errors: BaseTelemetryConfig$.shape.errors.unwrap().default(() => ({
+    ...BaseTelemetryConfig$.shape.errors.parse(undefined),
     enabled: true,
     sampleRate: 1,
     nativeCrashes: true,
   })),
-  traces: TelemetryConfig$.shape.traces.unwrap().default(() => ({
-    ...TelemetryConfig$.shape.traces.parse(undefined),
+  traces: BaseTelemetryConfig$.shape.traces.unwrap().default(() => ({
+    ...BaseTelemetryConfig$.shape.traces.parse(undefined),
     sampleRate: 0.1,
   })),
-  replay: TelemetryConfig$.shape.replay.unwrap().default(() => ({
-    ...TelemetryConfig$.shape.replay.parse(undefined),
+  replay: BaseTelemetryConfig$.shape.replay.unwrap().default(() => ({
+    ...BaseTelemetryConfig$.shape.replay.parse(undefined),
     onErrorSampleRate: 1,
     consent: "crash_replay",
   })),
-  budgets: TelemetryConfig$.shape.budgets.unwrap().default(() => ({
-    ...TelemetryConfig$.shape.budgets.parse(undefined),
+  budgets: BaseTelemetryConfig$.shape.budgets.unwrap().default(() => ({
+    ...BaseTelemetryConfig$.shape.budgets.parse(undefined),
     coldStartMs: 1500,
   })),
 });
-export type MobileTelemetryConfig$Check = Assert<
-  Same<z.output<typeof MobileTelemetryConfig$>, Fields<MobileTelemetryConfig>>
+export type TelemetryConfig$Check = Assert<
+  Same<z.output<typeof TelemetryConfig$>, Fields<TelemetryConfig>>
 >;
 
-/** override `MobilePushConfig` (src/config/push.config.ts), key `platform.push`. */
-export const MobilePushConfig$ = PushConfig$.extend({
-  provider: PushConfig$.shape.provider.unwrap().default("expo"),
-  retries: PushConfig$.shape.retries.unwrap().default(3),
-  foregroundBanner: PushConfig$.shape.foregroundBanner.unwrap().default(true),
-  foregroundSound: PushConfig$.shape.foregroundSound.unwrap().default(false),
-  foregroundBadge: PushConfig$.shape.foregroundBadge.unwrap().default(true),
-  androidChannels: PushConfig$.shape.androidChannels.unwrap().default(() => [
+/** override `PushConfig` (src/config/push.config.ts), key `platform.push`. */
+export const PushConfig$ = BasePushConfig$.extend({
+  provider: BasePushConfig$.shape.provider.unwrap().default("expo"),
+  retries: BasePushConfig$.shape.retries.unwrap().default(3),
+  foregroundBanner: BasePushConfig$.shape.foregroundBanner.unwrap().default(true),
+  foregroundSound: BasePushConfig$.shape.foregroundSound.unwrap().default(false),
+  foregroundBadge: BasePushConfig$.shape.foregroundBadge.unwrap().default(true),
+  androidChannels: BasePushConfig$.shape.androidChannels.unwrap().default(() => [
     {
       id: "orders",
       nameKey: "mobile::push.channel_orders",
@@ -307,54 +321,52 @@ export const MobilePushConfig$ = PushConfig$.extend({
       sound: "default",
     },
   ]),
-  askOn: PushConfig$.shape.askOn.unwrap().default("first_session"),
-  iosProvisional: PushConfig$.shape.iosProvisional.unwrap().default(false),
+  askOn: BasePushConfig$.shape.askOn.unwrap().default("first_session"),
+  iosProvisional: BasePushConfig$.shape.iosProvisional.unwrap().default(false),
 });
-export type MobilePushConfig$Check = Assert<
-  Same<z.output<typeof MobilePushConfig$>, Fields<MobilePushConfig>>
+export type PushConfig$Check = Assert<Same<z.output<typeof PushConfig$>, Fields<PushConfig>>>;
+
+/** override `RealtimeConfig` (src/config/realtime.config.ts), key `realtime`. */
+export const RealtimeConfig$ = BaseRealtimeConfig$.extend({
+  reconnectOnForeground: BaseRealtimeConfig$.shape.reconnectOnForeground.unwrap().default(true),
+  backgroundGraceSeconds: BaseRealtimeConfig$.shape.backgroundGraceSeconds.unwrap().default(30),
+  maxBackoffSeconds: BaseRealtimeConfig$.shape.maxBackoffSeconds.unwrap().default(60),
+});
+export type RealtimeConfig$Check = Assert<
+  Same<z.output<typeof RealtimeConfig$>, Fields<RealtimeConfig>>
 >;
 
-/** override `MobileRealtimeConfig` (src/config/realtime.config.ts), key `realtime`. */
-export const MobileRealtimeConfig$ = RealtimeConfig$.extend({
-  reconnectOnForeground: RealtimeConfig$.shape.reconnectOnForeground.unwrap().default(true),
-  backgroundGraceSeconds: RealtimeConfig$.shape.backgroundGraceSeconds.unwrap().default(30),
-  maxBackoffSeconds: RealtimeConfig$.shape.maxBackoffSeconds.unwrap().default(60),
+/** override `AnalyticsConfig` (src/config/analytics.config.ts), key `analytics`. */
+export const AnalyticsConfig$ = BaseAnalyticsConfig$.extend({
+  driver: BaseAnalyticsConfig$.shape.driver.unwrap().default("posthog"),
+  consent: BaseAnalyticsConfig$.shape.consent.unwrap().default("analytics"),
+  autocaptureScreens: BaseAnalyticsConfig$.shape.autocaptureScreens.unwrap().default(true),
+  denyProperties: BaseAnalyticsConfig$.shape.denyProperties
+    .unwrap()
+    .default(() => ["email", "phone"]),
 });
-export type MobileRealtimeConfig$Check = Assert<
-  Same<z.output<typeof MobileRealtimeConfig$>, Fields<MobileRealtimeConfig>>
+export type AnalyticsConfig$Check = Assert<
+  Same<z.output<typeof AnalyticsConfig$>, Fields<AnalyticsConfig>>
 >;
 
-/** override `MobileAnalyticsConfig` (src/config/analytics.config.ts), key `analytics`. */
-export const MobileAnalyticsConfig$ = AnalyticsConfig$.extend({
-  driver: AnalyticsConfig$.shape.driver.unwrap().default("posthog"),
-  posthogKey: AnalyticsConfig$.shape.posthogKey.unwrap().default(""),
-  consent: AnalyticsConfig$.shape.consent.unwrap().default("analytics"),
-  autocaptureScreens: AnalyticsConfig$.shape.autocaptureScreens.unwrap().default(true),
-  denyProperties: AnalyticsConfig$.shape.denyProperties.unwrap().default(() => ["email", "phone"]),
-});
-export type MobileAnalyticsConfig$Check = Assert<
-  Same<z.output<typeof MobileAnalyticsConfig$>, Fields<MobileAnalyticsConfig>>
->;
-
-/** override `MobileConsentConfig` (src/config/consent.config.ts), key `consent`. */
-export const MobileConsentConfig$ = ConsentConfig$.extend({
-  categories: ConsentConfig$.shape.categories
+/** override `ConsentConfig` (src/config/consent.config.ts), key `consent`. */
+export const ConsentConfig$ = BaseConsentConfig$.extend({
+  categories: BaseConsentConfig$.shape.categories
     .unwrap()
     .default(() => ["necessary", "analytics", "crash_replay"]),
-  policyVersion: ConsentConfig$.shape.policyVersion.unwrap().default("2026-10"),
-  askOnFirstLaunch: ConsentConfig$.shape.askOnFirstLaunch.unwrap().default(true),
+  policyVersion: BaseConsentConfig$.shape.policyVersion.unwrap().default("2026-10"),
+  askOnFirstLaunch: BaseConsentConfig$.shape.askOnFirstLaunch.unwrap().default(true),
 });
-export type MobileConsentConfig$Check = Assert<
-  Same<z.output<typeof MobileConsentConfig$>, Fields<MobileConsentConfig>>
+export type ConsentConfig$Check = Assert<
+  Same<z.output<typeof ConsentConfig$>, Fields<ConsentConfig>>
 >;
 
-/** override `MobileFeatureFlagsConfig` (src/config/feature-flags.config.ts), `feature_flags`. */
-export const MobileFeatureFlagsConfig$ = FeatureFlagsConfig$.extend({
-  provider: FeatureFlagsConfig$.shape.provider.unwrap().default("config"),
-  posthogKey: FeatureFlagsConfig$.shape.posthogKey.unwrap().default(""),
-  values: FeatureFlagsConfig$.shape.values.unwrap().default(() => ({})),
-  refreshEvery: FeatureFlagsConfig$.shape.refreshEvery.unwrap().default(duration("60s")),
+/** override `FeatureFlagsConfig` (src/config/feature-flags.config.ts), `feature_flags`. */
+export const FeatureFlagsConfig$ = BaseFeatureFlagsConfig$.extend({
+  provider: BaseFeatureFlagsConfig$.shape.provider.unwrap().default("config"),
+  values: BaseFeatureFlagsConfig$.shape.values.unwrap().default(() => ({})),
+  refreshEvery: BaseFeatureFlagsConfig$.shape.refreshEvery.unwrap().default(duration("60s")),
 });
-export type MobileFeatureFlagsConfig$Check = Assert<
-  Same<z.output<typeof MobileFeatureFlagsConfig$>, Fields<MobileFeatureFlagsConfig>>
+export type FeatureFlagsConfig$Check = Assert<
+  Same<z.output<typeof FeatureFlagsConfig$>, Fields<FeatureFlagsConfig>>
 >;

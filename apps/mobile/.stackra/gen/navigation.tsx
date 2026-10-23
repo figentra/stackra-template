@@ -4,15 +4,15 @@
  * src/menus/tab-bar.menu.ts (items) and src/config/chrome.config.ts (header, tabBar) — do not edit
  * Purpose: the React Navigation 7 tree: the signed-in root native stack (the tabs layout plus every
  *          route with no layout), one native stack per tab under the native tab bar, and the
- *          signed-out stack (`auth: false`). Screen options come from `MobileChromeConfig`, read
+ *          signed-out stack (`auth: false`). Screen options come from `ChromeConfig`, read
  *          while the app runs, with each route's `chrome:` over it. `toScreen(entry)` validates the
  *          route's `params`, runs its `loader`, resolves its `document` through the experience
- *          adapter and renders the bound page.
+ *          adapter and renders the bound page (a class component compiled to a function).
  * Boundary: code-based routes (ADR 0061: a hand-written tree is banned). Titles and tab labels are
- *           the routes' derived keys, translated here because the native header and tab bar draw
- *           them. A route whose permission the actor lacks, or whose flag is off for the tenant, is
- *           not registered, so a deep link to it lands on the tab root. The layout's loader runs
- *           before any child.
+ *           the routes' derived keys (`pages::<route key>.title`), translated here because the
+ *           native header and tab bar draw them. A route whose permission the actor lacks, or whose
+ *           flag is off for the tenant, is not registered, so a deep link to it lands on the tab
+ *           root. The layout's loader runs before any child.
  * Runtime: react-native
  */
 import { createNativeBottomTabNavigator } from "@bottom-tabs/react-navigation";
@@ -28,12 +28,11 @@ import { SessionStatus } from "@stackra/identity";
 import { useSession } from "@stackra/identity/react";
 import { BackTitle } from "@stackra/navigation";
 import { toScreen, useLayoutLoader } from "@stackra/navigation/native";
-import { Icons } from "@stackra/ui/icons";
-import { useThemeColor } from "@stackra/ui/native";
+import { tabBarIcon, useThemeColor } from "@stackra/ui/native";
 import { Platform } from "react-native";
-import { MobileChromeConfig } from "#src/config/chrome.config";
+import { ChromeConfig } from "#src/config/chrome.config";
 import { TabsLayout } from "#src/routes/tabs/tabs.layout";
-import { Commerce } from "#stackra/clients";
+import { OrderPermissions, ProductPermissions } from "#stackra/clients/commerce";
 import { Flags } from "#stackra/flags";
 import { I18n } from "#stackra/i18n";
 import { routeTable } from "#stackra/route-table";
@@ -58,7 +57,7 @@ const fullScreen: NativeStackNavigationOptions = {
 
 /** chrome.config.ts `header`: glass (transparent on iOS), no shadow, the back title it names. */
 function useHeader(): NativeStackNavigationOptions {
-  const { header } = useConfig(MobileChromeConfig);
+  const { header } = useConfig(ChromeConfig);
   return {
     headerTransparent: ios && header.blur,
     headerShadowVisible: false,
@@ -89,7 +88,7 @@ function HomeTab() {
       <HomeStack.Screen
         name="home"
         component={toScreen(routeTable.home)}
-        options={{ title: t(I18n.mobile.routes.home.title) }}
+        options={{ title: t(I18n.pages.home.title) }}
       />
     </HomeStack.Navigator>
   );
@@ -102,7 +101,7 @@ function OrdersTab() {
       <OrdersStack.Screen
         name="orders"
         component={toScreen(routeTable.orders)}
-        options={{ title: t(I18n.mobile.routes.orders.title) }}
+        options={{ title: t(I18n.pages.orders.title) }}
       />
     </OrdersStack.Navigator>
   );
@@ -115,7 +114,7 @@ function SettingsTab() {
       <SettingsStack.Screen
         name="settings"
         component={toScreen(routeTable.settings)}
-        options={{ title: t(I18n.mobile.routes.settings.title) }}
+        options={{ title: t(I18n.pages.settings.title) }}
       />
     </SettingsStack.Navigator>
   );
@@ -124,12 +123,13 @@ function SettingsTab() {
 /**
  * menus/tab-bar.menu.ts: `m.tabs()`, the routes that declare `tab` in their `order`;
  * chrome.config.ts `tabBar`: minimize on scroll, a sidebar on iPad. A tab the actor may not open is
- * hidden. Each label is its route's title and each test id `tab-<route key>`.
+ * hidden. Each label is its route's title, each icon its route's `IconName` resolved by
+ * `tabBarIcon` to the platform's tab image, and each test id `tab-<route key>`.
  */
 function TabsShell() {
   const { t } = useTranslation();
   const can = usePermission();
-  const { tabBar } = useConfig(MobileChromeConfig);
+  const { tabBar } = useConfig(ChromeConfig);
   const [accent] = useThemeColor(["accent"]);
   return (
     <Tabs.Navigator
@@ -141,18 +141,18 @@ function TabsShell() {
         name="tab:home"
         component={HomeTab}
         options={{
-          title: t(I18n.mobile.routes.home.title),
-          tabBarIcon: () => Icons.House.native,
+          title: t(I18n.pages.home.title),
+          tabBarIcon: () => tabBarIcon("house"),
           tabBarButtonTestID: "tab-home",
         }}
       />
-      {can(Commerce.permissions.Order.read) ? (
+      {can(OrderPermissions.read) ? (
         <Tabs.Screen
           name="tab:orders"
           component={OrdersTab}
           options={{
-            title: t(I18n.mobile.routes.orders.title),
-            tabBarIcon: () => Icons.Package.native,
+            title: t(I18n.pages.orders.title),
+            tabBarIcon: () => tabBarIcon("package"),
             tabBarButtonTestID: "tab-orders",
           }}
         />
@@ -161,8 +161,8 @@ function TabsShell() {
         name="tab:settings"
         component={SettingsTab}
         options={{
-          title: t(I18n.mobile.routes.settings.title),
-          tabBarIcon: () => Icons.Settings.native,
+          title: t(I18n.pages.settings.title),
+          tabBarIcon: () => tabBarIcon("settings"),
           tabBarButtonTestID: "tab-settings",
         }}
       />
@@ -189,7 +189,7 @@ export function Navigation() {
         <SignedOut.Screen
           name="sign_in"
           component={toScreen(routeTable.sign_in)}
-          options={{ title: t(I18n.mobile.routes.sign_in.title) }}
+          options={{ title: t(I18n.pages.sign_in.title) }}
         />
       </SignedOut.Navigator>
     );
@@ -197,46 +197,46 @@ export function Navigation() {
   return (
     <Root.Navigator screenOptions={header}>
       <Root.Screen name="tabs" component={TabsShell} options={{ headerShown: false }} />
-      {can(Commerce.permissions.Order.read) ? (
+      {can(OrderPermissions.read) ? (
         <Root.Screen
           name="order_detail"
           component={toScreen(routeTable.order_detail)}
-          options={{ title: t(I18n.mobile.routes.order_detail.title) }}
+          options={{ title: t(I18n.pages.order_detail.title) }}
         />
       ) : null}
-      {can(Commerce.permissions.Order.create) ? (
+      {can(OrderPermissions.create) ? (
         <Root.Screen
           name="create_order"
           component={toScreen(routeTable.create_order)}
-          options={{ ...sheet, title: t(I18n.mobile.routes.create_order.title) }}
+          options={{ ...sheet, title: t(I18n.pages.create_order.title) }}
         />
       ) : null}
-      {can(Commerce.permissions.Product.read) && quickOrder ? (
+      {can(ProductPermissions.read) && quickOrder ? (
         <Root.Screen
           name="scan"
           component={toScreen(routeTable.scan)}
-          options={{ ...fullScreen, title: t(I18n.mobile.routes.scan.title) }}
+          options={{ ...fullScreen, title: t(I18n.pages.scan.title) }}
         />
       ) : null}
       <Root.Screen
         name="announcements"
         component={toScreen(routeTable.announcements)}
-        options={{ title: t(I18n.mobile.routes.announcements.title) }}
+        options={{ title: t(I18n.pages.announcements.title) }}
       />
       <Root.Screen
         name="inbox"
         component={toScreen(routeTable.inbox)}
-        options={{ title: t(I18n.mobile.routes.inbox.title) }}
+        options={{ title: t(I18n.pages.inbox.title) }}
       />
       <Root.Screen
         name="notification_preferences"
         component={toScreen(routeTable.notification_preferences)}
-        options={{ title: t(I18n.mobile.routes.notification_preferences.title) }}
+        options={{ title: t(I18n.pages.notification_preferences.title) }}
       />
       <Root.Screen
         name="profile"
         component={toScreen(routeTable.profile)}
-        options={{ title: t(I18n.mobile.routes.profile.title) }}
+        options={{ title: t(I18n.pages.profile.title) }}
       />
     </Root.Navigator>
   );

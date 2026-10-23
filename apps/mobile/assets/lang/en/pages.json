@@ -1,0 +1,78 @@
+{
+  "$comment": "Stackra file contract — Purpose: the mobile app's page strings, one object per route key (namespace `pages::`, locale `en`). Boundary: same keys in every base locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails. Each route key's `title` is the route's derived title (also the tab label and the native header) and is never authored elsewhere; every other key is authored. A regional overlay (`en-US`, `ar-SA`) holds only the keys whose wording differs there. Strings of another module are overrides under src/overrides/<owner>/, never here. Runtime: react-native. Governing contract: ADR 0294 (decision 20), ADR 0192, ADR 0234, ADR 0080",
+  "home": {
+    "title": "Home",
+    "quick_actions": "Quick actions",
+    "new_order": "New order",
+    "scan": "Scan",
+    "announcements": "Announcements",
+    "inbox": "Inbox"
+  },
+  "orders": {
+    "title": "Orders",
+    "empty": "No orders yet",
+    "empty_hint": "Place one from Home or scan a barcode."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "color_scheme": "Colour scheme",
+    "notifications": "Notifications",
+    "notification_preferences": "Notification preferences",
+    "inbox": "Inbox",
+    "profile": "Profile",
+    "sign_out": "Sign out",
+    "version": "Version"
+  },
+  "order_detail": {
+    "title": "Order",
+    "lines": "Items",
+    "total": "Total",
+    "placed_at": "Placed {at}",
+    "cancel": "Cancel order"
+  },
+  "create_order": {
+    "title": "New order",
+    "variant": "Variant",
+    "variant_hint": "Type the variant id or scan its barcode.",
+    "quantity": "Quantity",
+    "points": "Loyalty points",
+    "submit": "Place order",
+    "queued": "The order will be sent when you are back online",
+    "scan": "Scan",
+    "errors": {
+      "points_min": "Points cannot be negative."
+    }
+  },
+  "scan": {
+    "title": "Scan",
+    "hint": "Point the camera at a barcode.",
+    "permission": "Acme needs the camera to read barcodes.",
+    "unavailable": "Scanning is not available on this device."
+  },
+  "announcements": {
+    "title": "Announcements"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "empty": "No notifications yet",
+    "empty_hint": "Order updates and messages from your workspace appear here.",
+    "unread": "{count, plural, one {# unread notification} other {# unread notifications}}"
+  },
+  "notification_preferences": {
+    "title": "Notification preferences"
+  },
+  "profile": {
+    "title": "Profile",
+    "tenant": "Workspace",
+    "roles": "Roles",
+    "switch_tenant": "Switch tenant",
+    "switch_blocked_by_queue": "Send your waiting changes before switching workspace."
+  },
+  "sign_in": {
+    "title": "Sign in",
+    "heading": "Welcome to Acme",
+    "body": "Sign in with your workspace account.",
+    "button": "Sign in"
+  }
+}

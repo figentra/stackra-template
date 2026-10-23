@@ -11,7 +11,7 @@
 import { fakeFlags } from "@stackra/feature-flags/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { axe, renderRoute, screen, userEvent } from "@stackra/testing/native";
-import { Commerce } from "#stackra/clients";
+import { OrderPermissions } from "#stackra/clients/commerce";
 import { Flags } from "#stackra/flags";
 import { Routes } from "#stackra/routes";
 
@@ -22,9 +22,9 @@ describe("Home", () => {
     renderRoute(Routes.home, {
       locale: "en",
       entitlements: ["commerce.orders"],
-      permissions: [Commerce.permissions.Order.read],
+      permissions: [OrderPermissions.read],
     });
-    expect(screen.getByLabelText("Revenue today")).toBeTruthy();
+    expect(screen.getByLabelText("Sales")).toBeTruthy();
     expect(screen.queryByLabelText("Low stock")).toBeNull();
   });
 

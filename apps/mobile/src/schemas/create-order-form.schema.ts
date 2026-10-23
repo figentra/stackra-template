@@ -11,7 +11,7 @@
  * Governing contract: ADR 0294 (decisions 4 and 16), ADR 0055, ADR 0059
  */
 import { Int } from "@stackra/validation";
-import { RequestedLine } from "#stackra/clients";
+import { RequestedLine } from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
 
 /** The line's `variantId` and `quantity` with the action's bounds, plus `redeemPoints`. */
@@ -19,7 +19,7 @@ export class CreateOrderForm extends RequestedLine {
   /** Loyalty points to redeem, folded into `extensions.loyalty`; zero means "not entered". */
   @Int({
     min: 0,
-    message: I18n.mobile.create_order.errors.points_min,
+    message: I18n.pages.create_order.errors.points_min,
   })
   redeemPoints = 0;
 }

@@ -3,49 +3,38 @@
  * Purpose: one order's live data (read first by the route's loader) and its cancel action, with the
  *          confirmation the action declares. Used by the detail page, so it sits in its route
  *          folder.
- * Boundary: data and the one write. The confirmation text is the service's derived key
- *           (`orders::actions.order.cancel.confirm`, shortened by `assets/overrides/orders/`); the
- *           client hook shows it before calling (ADR 0139). Cancel is online-only in
- *           `#stackra/offline`, so it refuses at once without a connection.
+ * Boundary: data and the one write; a hook stays a plain function, and its result type is
+ *           `types/order-detail-state.type.ts`. The confirmation text is the service's derived key
+ *           (`orders::actions.order.cancel.confirm`, shortened by this app's override under
+ *           `src/overrides/commerce/orders/`); the client hook shows it before calling (ADR 0139).
+ *           Cancel is online-only in `#stackra/offline`, so it refuses at once without a
+ *           connection.
  * Runtime: react-native
  * Governing contract: ADR 0294 (decision 14), ADR 0059, ADR 0079, ADR 0139
  */
-import type { ClientError, QueryOutput } from "@stackra/clients";
 import { useAction, useQuery } from "@stackra/clients/react";
 import type { PublicId } from "@stackra/contracts";
-import { Commerce } from "#stackra/clients";
-
-/** What the detail page renders from and calls. */
-export interface OrderDetailState {
-  /** The order; `undefined` only while a cold cache waits for the first answer. */
-  readonly order: QueryOutput<typeof Commerce.queries.GetOrder> | undefined;
-  /** The error of the last fetch; `null` otherwise. */
-  readonly error: ClientError | null;
-  /** Refetches the order. */
-  readonly refresh: () => void;
-  /** Whether the actor may cancel: awaiting payment, and allowed by permission and policy. */
-  readonly canCancel: boolean;
-  /** Runs the cancel after the declared confirmation. */
-  readonly cancel: () => void;
-  /** Whether the cancel is in flight. */
-  readonly isCancelling: boolean;
-}
+import type { OrderDetailState } from "#src/types/order-detail-state.type";
+import {
+  CancelOrderAction,
+  GetOrderQuery,
+  ListOrdersQuery,
+  OrderStatus,
+} from "#stackra/clients/commerce";
 
 /**
  * The detail hook.
  * @param orderId - the public id from the route params
  */
 export function useOrderDetail(orderId: PublicId<"ord">): OrderDetailState {
-  const query = useQuery(Commerce.queries.GetOrder, { orderId }, { refetchOnFocus: true });
-  const cancel = useAction(Commerce.actions.CancelOrder, {
-    invalidates: [Commerce.queries.GetOrder, Commerce.queries.ListOrders],
-  });
+  const query = useQuery(GetOrderQuery, { orderId }, { refetchOnFocus: true });
+  const cancel = useAction(CancelOrderAction, { invalidates: [GetOrderQuery, ListOrdersQuery] });
   const order = query.data;
   return {
     order,
     error: query.error,
     refresh: query.refetch,
-    canCancel: order?.status === Commerce.enums.OrderStatus.PendingPayment && cancel.isAllowed,
+    canCancel: order?.status === OrderStatus.PendingPayment && cancel.isAllowed,
     cancel: () => void cancel.run({ orderId }),
     isCancelling: cancel.isPending,
   };

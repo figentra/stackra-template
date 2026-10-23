@@ -5,7 +5,8 @@
  * Boundary: imported only by the generated entry and navigation tree (the top of the import graph);
  *           app code refers to routes through `Routes` in `routes.ts`, so no layout, menu or page
  *           ever loads a route module. A route class names no component: the page is the
- *           `<name>.tsx` beside it, bound here.
+ *           class component `<name>.tsx` beside it, bound here; gen compiles each page class to a
+ *           function component before Metro bundles it.
  * Runtime: isomorphic
  */
 import { AnnouncementsRoute } from "#src/routes/announcements/announcements.route";

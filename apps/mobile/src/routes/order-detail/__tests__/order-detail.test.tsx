@@ -8,16 +8,22 @@
  * Runtime: react-native
  * Governing contract: ADR 0022, ADR 0082, ADR 0139
  */
-import type { QueryOutput } from "@stackra/clients";
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen, userEvent } from "@stackra/testing/native";
-import { Commerce, OrderStatus } from "#stackra/clients";
+import {
+  CancelOrderAction,
+  GetOrderQuery,
+  OrderPermissions,
+  OrderStatus,
+  type OrderView,
+} from "#stackra/clients/commerce";
 import { Routes } from "#stackra/routes";
 
-const pending: QueryOutput<typeof Commerce.queries.GetOrder> = {
+const pending: OrderView = {
   id: "ord_01H2J3K4L5M6N7P8Q9R0ABCDEF",
   status: OrderStatus.PendingPayment,
+  customerId: "usr_01H2J3K4L5M6N7P8Q9R0ABCDEF",
   totals: {
     currency: "SAR",
     subtotalMinor: 5000,
@@ -26,19 +32,20 @@ const pending: QueryOutput<typeof Commerce.queries.GetOrder> = {
   },
   lines: [{ variantId: "var_01H2J3K4L5M6N7P8Q9R0ABCDEF", quantity: 2, unitPriceMinor: 2500 }],
   createdAt: new Date("2026-10-21T09:00:00Z"),
+  paidAt: null,
 };
 const base = {
   params: { orderId: pending.id },
-  permissions: [Commerce.permissions.Order.read, Commerce.permissions.Order.cancel],
+  permissions: [OrderPermissions.read, OrderPermissions.cancel],
 } as const;
 
 /** The detail page over its route. */
 describe("OrderDetail", () => {
   /** The loader asks for exactly the param's order; cancel runs after the confirmation. */
   it("cancels through the client after the declared confirmation", async () => {
-    const commerce = fakeClient(Commerce, (fake) => {
-      fake.queries.GetOrder.returns(pending);
-      fake.actions.CancelOrder.returns({ orderId: pending.id, status: OrderStatus.Cancelled });
+    const commerce = fakeClient((fake) => {
+      fake.on(GetOrderQuery).returns(pending);
+      fake.on(CancelOrderAction).returns({ orderId: pending.id, status: OrderStatus.Cancelled });
     });
     renderRoute(Routes.order_detail, {
       ...base,
@@ -47,15 +54,19 @@ describe("OrderDetail", () => {
       confirm: "accept",
     });
     expect(await screen.findByText("Total: SAR 45.00")).toBeTruthy();
-    expect(commerce.called(Commerce.queries.GetOrder)[0]).toEqual({ orderId: pending.id });
+    expect(commerce.called(GetOrderQuery)[0]).toEqual({ orderId: pending.id });
     await userEvent.press(screen.getByTestId("order-cancel"));
-    expect(commerce.called(Commerce.actions.CancelOrder)).toEqual([{ orderId: pending.id }]);
+    expect(commerce.called(CancelOrderAction)).toEqual([{ orderId: pending.id }]);
   });
 
   /** A paid order has no cancel; the status label comes from the orders namespace in Arabic. */
   it("hides cancel for a paid order", async () => {
-    const commerce = fakeClient(Commerce, (fake) =>
-      fake.queries.GetOrder.returns({ ...pending, status: OrderStatus.Paid }),
+    const commerce = fakeClient((fake) =>
+      fake.on(GetOrderQuery).returns({
+        ...pending,
+        status: OrderStatus.Paid,
+        paidAt: new Date("2026-10-21T09:05:00Z"),
+      }),
     );
     renderRoute(Routes.order_detail, { ...base, locale: "ar", clients: [commerce] });
     expect(await screen.findByText("مدفوع")).toBeTruthy();
@@ -64,8 +75,8 @@ describe("OrderDetail", () => {
 
   /** `OrderDetailParams` refuses a non-prefixed id before the loader runs. */
   it("refuses a malformed id before loading", async () => {
-    const commerce = fakeClient(Commerce);
+    const commerce = fakeClient();
     renderRoute(Routes.order_detail, { ...base, params: { orderId: "123" }, clients: [commerce] });
-    expect(commerce.called(Commerce.queries.GetOrder)).toEqual([]);
+    expect(commerce.called(GetOrderQuery)).toEqual([]);
   });
 });

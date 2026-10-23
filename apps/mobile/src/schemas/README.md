@@ -16,6 +16,7 @@ once. A union of shapes is a union of classes with an enum case as the discrimin
 | `promo-banner-cta.schema.ts`    | `PromoBannerCta`    | `blocks/promo-banner` `cta`: a label and `NavigateEvent \| ActionEvent`           |
 | `navigate-event.schema.ts`      | `NavigateEvent`     | the navigate verb (`CtaVerb.Navigate`) holding a generated `RouteKey`             |
 | `action-event.schema.ts`        | `ActionEvent`       | the action verb (`CtaVerb.Action`) holding an action key                          |
+| `env-options.schema.ts`         | `EnvOptions`        | `config/env.config.ts` `schema`: every public env value of the binary             |
 
 The block's own props are fields of `PromoBannerBlock`, not a schema here. Tests:
 `__tests__/<name>.schema.test.ts`, pure, no DOM.

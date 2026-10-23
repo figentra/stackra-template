@@ -62,7 +62,7 @@ describe("useProfile", () => {
       queue: fakeQueue({ pending: 1 }),
     });
     expect(await result.current.switchTo(second.tenantId)).toBe(
-      I18n.mobile.profile.switch_blocked_by_queue,
+      I18n.pages.profile.switch_blocked_by_queue,
     );
   });
 });

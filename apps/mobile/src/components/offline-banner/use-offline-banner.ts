@@ -4,25 +4,15 @@
  *          mutation queue's pending and conflict counts from @stackra/query.
  * Boundary: reads only, plus `retry`, which asks the queue to replay now. Conflict resolution UI is
  *           not here: storage owns the conflict record, a screen owns the resolution. Used by the
- *           banner only, so it sits beside it.
+ *           banner only, so it sits beside it; a hook stays a plain function, and its result type
+ *           is `types/offline-banner-state.type.ts`.
  * Runtime: react-native
  * Governing contract: ADR 0294 (decision 14), ADR 0059, ADR 0252, ADR 0250
  */
 import { useCapability } from "@stackra/platform/react";
 import { useMutationQueue } from "@stackra/query/react";
 import { useSignal } from "@stackra/state/react";
-
-/** What the banner renders from. */
-export interface OfflineBannerState {
-  /** `false` when the network port reports no route; the banner shows. */
-  readonly isOnline: boolean;
-  /** Mutations held in the outbox waiting for a connection. */
-  readonly pending: number;
-  /** Mutations the server answered `409` to; they wait for the user (ADR 0059 decision 3). */
-  readonly conflicts: number;
-  /** Drains the queue now, without waiting for the reconnect event. */
-  readonly retry: () => Promise<void>;
-}
+import type { OfflineBannerState } from "#src/types/offline-banner-state.type";
 
 /** Combines the network signal and the queue counters; re-renders only when one of them changes. */
 export function useOfflineBanner(): OfflineBannerState {

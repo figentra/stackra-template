@@ -3,50 +3,33 @@
  * Purpose: the order list's data: a cursor-paginated query with the optional status filter, served
  *          from the persisted cache first, refreshed on focus and whenever the realtime connection
  *          reports a paid order.
- * Boundary: data only; used by the orders page, so it sits in its route folder. The subscription is
- *           the realtime package's `useSubscription` on the producer's event descriptor, never a
+ * Boundary: data only; used by the orders page, so it sits in its route folder; a hook stays a
+ *           plain function, and its result type is `types/orders-state.type.ts`. The subscription
+ *           is the realtime package's `useSubscription` on the producer's event class, never a
  *           channel string.
  * Runtime: react-native
  * Governing contract: ADR 0294 (decision 14), ADR 0079, ADR 0225
  */
-import type { ClientError, QueryOutput } from "@stackra/clients";
 import { useInfiniteQuery } from "@stackra/clients/react";
 import { useSubscription } from "@stackra/realtime/react";
-import { Commerce, type OrderStatus } from "#stackra/clients";
-
-/** One order as the list query returns it. */
-type OrderItem = QueryOutput<typeof Commerce.queries.ListOrders>["items"][number];
-
-/** What the list page renders from. */
-export interface OrdersState {
-  /** Every loaded page's orders, flattened, newest first. */
-  readonly orders: readonly OrderItem[];
-  /** True only while the first page loads with an empty cache. */
-  readonly isLoading: boolean;
-  /** The error of the last fetch; `null` otherwise. */
-  readonly error: ClientError | null;
-  /** Whether another page exists. */
-  readonly hasMore: boolean;
-  /** Whether a background refresh or a next-page fetch is in flight. */
-  readonly isFetching: boolean;
-  /** Loads the next page; no-op while fetching or when `hasMore` is false. */
-  readonly loadMore: () => void;
-  /** Refetches from the first page (pull to refresh, retry). */
-  readonly refresh: () => void;
-}
+import { Enum } from "@stackra/validation";
+import type { OrdersState } from "#src/types/orders-state.type";
+import { ListOrdersQuery, OrderPaid, OrderStatus } from "#stackra/clients/commerce";
 
 /**
- * The list hook.
+ * The list hook. The status filter is the table contract's own (`filter.status`); without a
+ * route param every status is asked for, because the table's default filter shows only open and
+ * paid orders and a phone's history shows them all.
  * @param status - optional status code from the route params
  */
 export function useOrders(status?: OrderStatus): OrdersState {
   const query = useInfiniteQuery(
-    Commerce.queries.ListOrders,
-    { limit: 20, ...(status ? { status } : {}) },
+    ListOrdersQuery,
+    { limit: 20, filter: { status: status ? [status] : Enum.values(OrderStatus) } },
     { getNextCursor: (page) => (page.hasMore ? page.nextCursor : undefined), refetchOnFocus: true },
   );
   // a paid order changes a row's status; refetch rather than patch, the list is short
-  useSubscription(Commerce.events.OrderPaid, () => query.refetch());
+  useSubscription(OrderPaid, () => query.refetch());
   return {
     orders: query.pages.flatMap((page) => page.items),
     isLoading: query.isLoading,

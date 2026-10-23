@@ -4,7 +4,8 @@
  * Purpose: the feature flags this build may read, as typed constants (`Flags.orders.quick_order`),
  *          with their default, scopes, expiry and label; the owning module is the first key.
  * Boundary: references only; the value is evaluated by @stackra/feature-flags per tenant through
- *           the provider `MobileFeatureFlagsConfig.provider` selects. The key and the label are the
+ *           the provider `FeatureFlagsConfig.provider` (src/config/feature-flags.config.ts)
+ *           selects. The key and the label are the
  *           producer's derived identities. A flag past its expiry fails gen.
  * Runtime: isomorphic
  */

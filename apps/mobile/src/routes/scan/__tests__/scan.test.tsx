@@ -15,7 +15,7 @@ import { fakePlatform } from "@stackra/platform/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { act, renderRoute, screen } from "@stackra/testing/native";
 import { BarcodeScanned } from "#src/analytics/barcode-scanned.analytics-event";
-import { Commerce } from "#stackra/clients";
+import { GetVariantByBarcodeQuery, VariantNotFoundError } from "#stackra/clients/commerce";
 import { Routes } from "#stackra/routes";
 
 const granted = () => fakePlatform({ scanner: { isAvailable: true, permission: "granted" } });
@@ -33,7 +33,7 @@ describe("Scan", () => {
   it("returns the found variant to the create-order sheet", async () => {
     const platform = granted();
     const analytics = fakeAnalytics();
-    const commerce = fakeClient(Commerce, (fake) => fake.queries.GetVariantByBarcode.returns(hit));
+    const commerce = fakeClient((fake) => fake.on(GetVariantByBarcodeQuery).returns(hit));
     const { navigation } = renderRoute(Routes.scan, { platform, analytics, clients: [commerce] });
     await act(() => platform.scanner.emit("6281000000012"));
     expect(navigation.replace).toHaveBeenCalledWith(Routes.create_order, {
@@ -45,8 +45,8 @@ describe("Scan", () => {
   /** An unknown code shows the catalogue's `variant_not_found` text and a retry. */
   it("shows the refusal and a retry for an unknown code", async () => {
     const platform = granted();
-    const commerce = fakeClient(Commerce, (fake) =>
-      fake.queries.GetVariantByBarcode.throws(refusal(Commerce.refusals.variant_not_found)),
+    const commerce = fakeClient((fake) =>
+      fake.on(GetVariantByBarcodeQuery).throws(refusal(VariantNotFoundError)),
     );
     renderRoute(Routes.scan, { locale: "en", platform, clients: [commerce] });
     await act(() => platform.scanner.emit("00000000"));

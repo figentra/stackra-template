@@ -13,7 +13,7 @@
 import { Store } from "@stackra/state";
 import { StorageArea } from "@stackra/storage";
 
-/** Hydrated before the first frame (`MobileStateConfig.blockingHydration`). */
+/** Hydrated before the first frame (`StateConfig.blockingHydration` in src/config). */
 export class PreferencesStore extends Store({ persist: StorageArea.Prefs }) {
   /** User public id to the tenant they last chose; the first membership wins when absent. */
   tenantByUser: Record<string, string> = {};

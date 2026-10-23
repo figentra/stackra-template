@@ -2,43 +2,37 @@
  * Stackra file contract:
  * Purpose: the scroll container every screen renders into, so layout and safe-area handling live in
  *          one place.
- * Boundary: scroll layout only; no data and no navigation. Padding uses logical classes (`px-`,
- *           `ps-`), never left/right.
+ * Boundary: a class component for scroll layout only; no data and no navigation. Padding uses
+ *           logical classes (`px-`, `ps-`), never left/right.
  * Runtime: react-native
- * Governing contract: ADR 0061, ADR 0080
+ * Governing contract: ADR 0294 (decision 14, as amended by programming model v3.1, AGENTS.md: class
+ *                     components), ADR 0061, ADR 0080
  */
-import type { ReactNode } from "react";
+import { Component } from "@stackra/ui/native";
 import { RefreshControl, ScrollView } from "react-native";
-
-/** Props of {@link Screen}. */
-export interface ScreenProps {
-  /** The screen's content, stacked with a 24pt gap. */
-  readonly children: ReactNode;
-  /** When given, pull-to-refresh calls it; `isRefreshing` shows the spinner. */
-  readonly onRefresh?: () => void;
-  /** Whether a refresh is in flight. @defaultValue false */
-  readonly isRefreshing?: boolean;
-  /** Maestro and screen readers find the screen by this id. */
-  readonly testID?: string;
-}
+import type { ScreenProps } from "#src/components/screen/screen.props";
 
 /**
  * The scroll container. `automatic` insets let content scroll under the glass header and the
  * minimized tab bar.
  */
-export function Screen({ children, onRefresh, isRefreshing = false, testID }: ScreenProps) {
-  return (
-    <ScrollView
-      testID={testID}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardDismissMode="on-drag"
-      className="flex-1 bg-background"
-      contentContainerClassName="gap-6 px-4 pb-16 pt-2"
-      refreshControl={
-        onRefresh ? <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} /> : undefined
-      }
-    >
-      {children}
-    </ScrollView>
-  );
+export class Screen extends Component<ScreenProps> {
+  /** The scroll view, with a refresh control only when `onRefresh` is given. */
+  render() {
+    const { children, onRefresh, isRefreshing = false, testID } = this.props;
+    return (
+      <ScrollView
+        testID={testID}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardDismissMode="on-drag"
+        className="flex-1 bg-background"
+        contentContainerClassName="gap-6 px-4 pb-16 pt-2"
+        refreshControl={
+          onRefresh ? <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} /> : undefined
+        }
+      >
+        {children}
+      </ScrollView>
+    );
+  }
 }

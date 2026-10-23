@@ -1,0 +1,9 @@
+{
+  "$comment": "Stackra file contract — Purpose: the mobile app's document strings, one object per document key (namespace `documents::`, locale `ar`). Boundary: same keys in every base locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails. Each document's `title` is its derived title; the other keys are the typed i18n keys its blocks reference, which the experience service substitutes per locale. A regional overlay (`en-US`, `ar-SA`) holds only the keys whose wording differs there. Strings of another module are overrides under src/overrides/<owner>/, never here. Runtime: react-native. Governing contract: ADR 0294 (decision 20), ADR 0192, ADR 0234, ADR 0080",
+  "announcements": {
+    "title": "الإعلانات",
+    "headline": "مرحبًا بك في مساحة عملك",
+    "body": "الطلبات التي تنشئها هنا تصل إلى لوحة التحكم فورًا، حتى لو كنت غير متصل.",
+    "cta": "أنشئ طلبًا"
+  }
+}

@@ -10,43 +10,44 @@
  *           reflect-metadata, no string token. A class is its own token; a class without
  *           `@Lifetime` is a singleton. `.stackra/entry/native.ts` passes this object to
  *           `createApp`, which mounts each package's context in graph order from the config
- *           classes below. Pages, blocks' renderers and components are functions, never bindings.
+ *           classes below. Pages, blocks' renderers and components are class components gen
+ *           compiles to functions; they are never bindings.
  * Runtime: react-native
  */
-import { AnalyticsConfig } from "@stackra/analytics";
+import { AnalyticsConfig as BaseAnalyticsConfig } from "@stackra/analytics";
 import { AnalyticsDriver } from "@stackra/analytics/contracts";
-import { ConsentConfig } from "@stackra/consent";
+import { ConsentConfig as BaseConsentConfig } from "@stackra/consent";
 import { Lifetime, type Wiring } from "@stackra/container";
 import { ErrorReporter } from "@stackra/errors/contracts";
-import { FeatureFlagsConfig } from "@stackra/feature-flags";
+import { FeatureFlagsConfig as BaseFeatureFlagsConfig } from "@stackra/feature-flags";
 import { FlagProvider } from "@stackra/feature-flags/contracts";
-import { I18nConfig } from "@stackra/i18n";
-import { IdentityConfig } from "@stackra/identity";
+import { I18nConfig as BaseI18nConfig } from "@stackra/i18n";
+import { IdentityConfig as BaseIdentityConfig } from "@stackra/identity";
 import { SessionStore } from "@stackra/identity/contracts";
-import { TelemetryConfig } from "@stackra/logger";
-import { ChromeConfig } from "@stackra/navigation";
-import { PushConfig } from "@stackra/platform";
+import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
+import { ChromeConfig as BaseChromeConfig } from "@stackra/navigation";
+import { PushConfig as BasePushConfig } from "@stackra/platform";
 import { PushTransport } from "@stackra/platform/contracts";
-import { QueryConfig } from "@stackra/query";
+import { QueryConfig as BaseQueryConfig } from "@stackra/query";
 import { QueryPersister } from "@stackra/query/contracts";
-import { RealtimeConfig } from "@stackra/realtime";
+import { RealtimeConfig as BaseRealtimeConfig } from "@stackra/realtime";
 import { RealtimeTransport } from "@stackra/realtime/contracts";
-import { StateConfig } from "@stackra/state";
+import { StateConfig as BaseStateConfig } from "@stackra/state";
 import { TenantSwitcher } from "@stackra/tenancy";
-import { ThemingConfig } from "@stackra/theming";
-import { MobileAnalyticsConfig } from "#src/config/analytics.config";
-import { MobileChromeConfig } from "#src/config/chrome.config";
-import { MobileConsentConfig } from "#src/config/consent.config";
-import { MobileEnvConfig } from "#src/config/env.config";
-import { MobileFeatureFlagsConfig } from "#src/config/feature-flags.config";
-import { MobileI18nConfig } from "#src/config/i18n.config";
-import { MobileIdentityConfig } from "#src/config/identity.config";
-import { MobilePushConfig } from "#src/config/push.config";
-import { MobileQueryConfig } from "#src/config/query.config";
-import { MobileRealtimeConfig } from "#src/config/realtime.config";
-import { MobileStateConfig } from "#src/config/state.config";
-import { MobileTelemetryConfig } from "#src/config/telemetry.config";
-import { MobileThemingConfig } from "#src/config/theming.config";
+import { ThemingConfig as BaseThemingConfig } from "@stackra/theming";
+import { AnalyticsConfig } from "#src/config/analytics.config";
+import { ChromeConfig } from "#src/config/chrome.config";
+import { ConsentConfig } from "#src/config/consent.config";
+import { EnvConfig } from "#src/config/env.config";
+import { FeatureFlagsConfig } from "#src/config/feature-flags.config";
+import { I18nConfig } from "#src/config/i18n.config";
+import { IdentityConfig } from "#src/config/identity.config";
+import { PushConfig } from "#src/config/push.config";
+import { QueryConfig } from "#src/config/query.config";
+import { RealtimeConfig } from "#src/config/realtime.config";
+import { StateConfig } from "#src/config/state.config";
+import { TelemetryConfig } from "#src/config/telemetry.config";
+import { ThemingConfig } from "#src/config/theming.config";
 import { OrderCardMenu } from "#src/menus/order-card.menu";
 import { TabBarMenu } from "#src/menus/tab-bar.menu";
 import { MobileModule } from "#src/mobile.module";
@@ -211,23 +212,24 @@ export const wiring = {
     },
   ],
   /**
-   * Config classes: the app's own, then each package base with the override that replaces it
-   * across the app; a package's context reads its base and gets the override.
+   * Config classes: the app's own, then each package base (imported as `Base<Name>`) with the
+   * override that replaces it across the app; a package's context reads its base and gets the
+   * override. `EnvConfig`'s package-named fields feed the overrides after their defaults.
    */
   config: [
-    { key: "mobile.env", provide: MobileEnvConfig },
-    { key: "navigation.chrome", provide: ChromeConfig, override: MobileChromeConfig },
-    { key: "i18n", provide: I18nConfig, override: MobileI18nConfig },
-    { key: "theming", provide: ThemingConfig, override: MobileThemingConfig },
-    { key: "identity", provide: IdentityConfig, override: MobileIdentityConfig },
-    { key: "query", provide: QueryConfig, override: MobileQueryConfig },
-    { key: "state", provide: StateConfig, override: MobileStateConfig },
-    { key: "logger.telemetry", provide: TelemetryConfig, override: MobileTelemetryConfig },
-    { key: "platform.push", provide: PushConfig, override: MobilePushConfig },
-    { key: "realtime", provide: RealtimeConfig, override: MobileRealtimeConfig },
-    { key: "analytics", provide: AnalyticsConfig, override: MobileAnalyticsConfig },
-    { key: "consent", provide: ConsentConfig, override: MobileConsentConfig },
-    { key: "feature_flags", provide: FeatureFlagsConfig, override: MobileFeatureFlagsConfig },
+    { key: "mobile.env", provide: EnvConfig },
+    { key: "navigation.chrome", provide: BaseChromeConfig, override: ChromeConfig },
+    { key: "i18n", provide: BaseI18nConfig, override: I18nConfig },
+    { key: "theming", provide: BaseThemingConfig, override: ThemingConfig },
+    { key: "identity", provide: BaseIdentityConfig, override: IdentityConfig },
+    { key: "query", provide: BaseQueryConfig, override: QueryConfig },
+    { key: "state", provide: BaseStateConfig, override: StateConfig },
+    { key: "logger.telemetry", provide: BaseTelemetryConfig, override: TelemetryConfig },
+    { key: "platform.push", provide: BasePushConfig, override: PushConfig },
+    { key: "realtime", provide: BaseRealtimeConfig, override: RealtimeConfig },
+    { key: "analytics", provide: BaseAnalyticsConfig, override: AnalyticsConfig },
+    { key: "consent", provide: BaseConsentConfig, override: ConsentConfig },
+    { key: "feature_flags", provide: BaseFeatureFlagsConfig, override: FeatureFlagsConfig },
   ],
   drivers: [
     // one candidate on this target: no selector, no config field
@@ -265,8 +267,7 @@ export const wiring = {
       port: AnalyticsDriver,
       selectedBy: "config:analytics.driver",
       candidates: {
-        posthog: () =>
-          import("@stackra/analytics/native").then((m) => m.PosthogAnalyticsDriver),
+        posthog: () => import("@stackra/analytics/native").then((m) => m.PosthogAnalyticsDriver),
         none: () => import("@stackra/analytics").then((m) => m.NoneAnalyticsDriver),
       },
     },
@@ -300,5 +301,6 @@ export const wiring = {
     capabilities: "all required present (5/5)",
     configsRead: "all read (13/13)",
     envPrefix: "all EXPO_PUBLIC_ (9/9)",
+    envBindings: "every package-named env field feeds a field of that config (6/6)",
   },
 } satisfies Wiring;

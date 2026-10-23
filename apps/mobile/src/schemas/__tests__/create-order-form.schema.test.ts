@@ -26,7 +26,7 @@ describe("CreateOrderForm", () => {
   it("refuses negative points with the typed key", () => {
     const result = validate(CreateOrderForm, { variantId, quantity: 1, redeemPoints: -5 });
     expect(result.error?.issues.map((issue) => issue.message)).toEqual([
-      I18n.mobile.create_order.errors.points_min,
+      I18n.pages.create_order.errors.points_min,
     ]);
   });
 

@@ -1,20 +1,24 @@
 /**
  * Stackra file contract:
  * Purpose: the root module boots from the generated wiring with the native drivers' fakes: the
- *          storage and platform ports resolve, the compiled modules load in dependency order with
- *          identity first, and every config override replaces its package's base.
+ *          storage and platform ports resolve, the six imported client modules load in dependency
+ *          order with identity first, and every config override replaces its package's base.
  * Boundary: unit tier on the client container: no device, no network; every port is the memory
  *           fake the testing module supplies.
  * Runtime: react-native
  * Governing contract: ADR 0022, ADR 0263, ADR 0295 (decisions 9 and 10)
  */
 import { createTestingModule } from "@stackra/container/testing";
-import { QueryConfig } from "@stackra/query";
 import { Platform } from "@stackra/platform";
+import { QueryConfig as BaseQueryConfig } from "@stackra/query";
 import { Storage } from "@stackra/storage";
 import { describe, expect, it } from "@stackra/testing";
-import { MobileQueryConfig } from "#src/config/query.config";
+import { QueryConfig } from "#src/config/query.config";
 import { MobileModule } from "#src/mobile.module";
+import { CatalogueModule, OrdersModule } from "#stackra/clients/commerce";
+import { ExperienceModule } from "#stackra/clients/experience";
+import { DevicesModule, IdentityModule } from "#stackra/clients/identity";
+import { MessagesModule } from "#stackra/clients/notifications";
 
 /** The root boots and gen's ordering holds. */
 describe(MobileModule, () => {
@@ -27,15 +31,15 @@ describe(MobileModule, () => {
   });
 
   /** Identity boots first; catalogue precedes orders, which depends on it. */
-  it("loads the compiled modules in dependency order", async () => {
+  it("loads the imported client modules in dependency order", async () => {
     const app = await createTestingModule(MobileModule).compile();
-    expect(app.modules.map((module) => module.key)).toEqual([
-      "identity",
-      "devices",
-      "catalogue",
-      "orders",
-      "messages",
-      "experience",
+    expect(app.modules.map((module) => module.type)).toEqual([
+      IdentityModule,
+      DevicesModule,
+      CatalogueModule,
+      OrdersModule,
+      MessagesModule,
+      ExperienceModule,
     ]);
     await app.close();
   });
@@ -43,7 +47,7 @@ describe(MobileModule, () => {
   /** A package reads its own base class and gets the app's override, so its context sees it. */
   it("resolves a package's config base to the app's override", async () => {
     const app = await createTestingModule(MobileModule).compile();
-    expect(app.get(QueryConfig)).toBeInstanceOf(MobileQueryConfig);
+    expect(app.get(BaseQueryConfig)).toBeInstanceOf(QueryConfig);
     await app.close();
   });
 });

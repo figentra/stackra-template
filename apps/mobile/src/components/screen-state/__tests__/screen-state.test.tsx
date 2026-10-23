@@ -10,7 +10,7 @@ import { fakeClientError } from "@stackra/clients/testing";
 import { describe, expect, it, vi } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/native";
 import { ScreenState } from "#src/components/screen-state";
-import { Commerce } from "#stackra/clients";
+import { InsufficientStockError } from "#stackra/clients/commerce";
 
 /** The three states. */
 describe("ScreenState", () => {
@@ -19,7 +19,7 @@ describe("ScreenState", () => {
    */
   it("shows the translated refusal when the module ships one", () => {
     const error = fakeClientError({
-      refusal: Commerce.refusals.insufficient_stock,
+      refusal: InsufficientStockError,
       message: "raw",
     });
     render(<ScreenState kind="error" error={error} onRetry={vi.fn()} />, { locale: "ar" });

@@ -9,8 +9,8 @@
  */
 import { slots } from "@stackra/panel";
 
-/** `Slots.Dashboard.Header` is rendered by the home page's `WidgetSlot`. */
+/** `Slots.Dashboard.Header` (the KPI band) is rendered by the home page's `WidgetSlot`. */
 export const Slots = slots({
-  Dashboard: ["Header", "Main", "Footer"],
+  Dashboard: ["Header", "Main"],
   SalesToday: ["Column1", "Column2", "Full"],
 });

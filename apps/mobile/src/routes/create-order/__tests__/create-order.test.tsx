@@ -11,18 +11,18 @@ import { fakeClient } from "@stackra/clients/testing";
 import { fakePlatform } from "@stackra/platform/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen, userEvent } from "@stackra/testing/native";
-import { Commerce, OrderStatus } from "#stackra/clients";
+import { CreateOrderAction, OrderPermissions, OrderStatus } from "#stackra/clients/commerce";
 import { Routes } from "#stackra/routes";
 
 const variantId = "var_01H2J3K4L5M6N7P8Q9R0ABCDEF";
 const orderId = "ord_01H2J3K4L5M6N7P8Q9R0ABCDEF";
 const base = {
   params: { variantId },
-  permissions: [Commerce.permissions.Order.create],
+  permissions: [OrderPermissions.create],
 } as const;
 const placed = () =>
-  fakeClient(Commerce, (fake) =>
-    fake.actions.CreateOrder.returns({
+  fakeClient((fake) =>
+    fake.on(CreateOrderAction).returns({
       orderId,
       status: OrderStatus.PendingPayment,
       totals: { currency: "SAR", subtotalMinor: 0, adjustments: [], totalMinor: 0 },
@@ -41,7 +41,7 @@ describe("CreateOrder", () => {
       clients: [commerce],
     });
     await userEvent.press(screen.getByTestId("create-order-submit"));
-    expect(commerce.called(Commerce.actions.CreateOrder)).toEqual([
+    expect(commerce.called(CreateOrderAction)).toEqual([
       { lines: [{ variantId, quantity: 1 }], extensions: {} },
     ]);
     expect(navigation.replace).toHaveBeenCalledWith(Routes.order_detail, { orderId });
@@ -54,14 +54,14 @@ describe("CreateOrder", () => {
     await userEvent.clear(screen.getByTestId("field-points"));
     await userEvent.type(screen.getByTestId("field-points"), "250");
     await userEvent.press(screen.getByTestId("create-order-submit"));
-    expect(commerce.called(Commerce.actions.CreateOrder)).toEqual([
+    expect(commerce.called(CreateOrderAction)).toEqual([
       { lines: [{ variantId, quantity: 1 }], extensions: { loyalty: { redeemPoints: 250 } } },
     ]);
   });
 
   /** Offline: the call is held in the outbox with its key; the toast shows; the sheet closes. */
   it("queues the order and closes the sheet when offline", async () => {
-    const commerce = fakeClient(Commerce);
+    const commerce = fakeClient();
     const { navigation, queue } = renderRoute(Routes.create_order, {
       ...base,
       locale: "ar",
@@ -71,7 +71,7 @@ describe("CreateOrder", () => {
     await userEvent.press(screen.getByTestId("create-order-submit"));
     expect(queue.items).toEqual([
       expect.objectContaining({
-        action: Commerce.actions.CreateOrder,
+        action: CreateOrderAction,
         idempotencyKey: expect.any(String),
       }),
     ]);

@@ -6,18 +6,19 @@
  * Runtime: react-native
  * Governing contract: ADR 0022, ADR 0080, ADR 0192
  */
-import type { QueryOutput } from "@stackra/clients";
 import { describe, expect, it, vi } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/native";
 import { OrderCard } from "#src/components/order-card";
-import { type Commerce, OrderStatus } from "#stackra/clients";
+import { OrderStatus, type OrderView } from "#stackra/clients/commerce";
 
-const order: QueryOutput<typeof Commerce.queries.GetOrder> = {
+const order: OrderView = {
   id: "ord_01H2J3K4L5M6N7P8Q9R0ABCDEF",
   status: OrderStatus.Paid,
+  customerId: "usr_01H2J3K4L5M6N7P8Q9R0ABCDEF",
   totals: { currency: "SAR", subtotalMinor: 5000, totalMinor: 4500, adjustments: [] },
   lines: [],
   createdAt: new Date("2026-10-21T09:30:00Z"),
+  paidAt: new Date("2026-10-21T09:32:00Z"),
 };
 
 /** One list row. */

@@ -22,7 +22,7 @@ executionOrder:
     - offline-queue
 # screenshots, logs and the report, under the member root (gitignored)
 testOutputDir: maestro-report
-# gen runs the whole set once per platform (ios, android from targets) and once per locale (en, ar
-# from i18n.config.ts), against the `e2e` EAS profile build of runway.yaml, and passes `--env
-# APP_ID=example.acme.mobile` (stackra.config.ts ios.bundleId, equal to android.package) and
-# `--env MAESTRO_LOCALE=<locale>` to each run.
+# gen runs the whole set once per platform (ios, android from targets) and once per locale (en,
+# en-US, ar, ar-SA from i18n.config.ts), against the `e2e` EAS profile build of runway.yaml, and
+# passes `--env APP_ID=example.acme.mobile` (stackra.config.ts ios.bundleId, equal to
+# android.package) and `--env MAESTRO_LOCALE=<locale>` to each run.

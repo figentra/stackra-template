@@ -11,7 +11,7 @@
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen } from "@stackra/testing/native";
-import { InboxMessageKind, Notifications } from "#stackra/clients";
+import { InboxMessageKind, ListInboxMessagesQuery } from "#stackra/clients/notifications";
 import { Routes } from "#stackra/routes";
 
 const entry = {
@@ -22,8 +22,8 @@ const entry = {
   readAt: null,
 };
 const page = (unread: number) =>
-  fakeClient(Notifications, (fake) =>
-    fake.queries.ListInboxMessages.returns({ items: [entry], hasMore: false, unread }),
+  fakeClient((fake) =>
+    fake.on(ListInboxMessagesQuery).returns({ items: [entry], hasMore: false, unread }),
   );
 
 /** The inbox page over its route. */

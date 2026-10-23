@@ -2,7 +2,7 @@
   "name": "@acme/mobile",
   "version": "0.1.0",
   "private": true,
-  "description": "The mobile app for iOS and Android: Expo with code-based React Navigation; routes, layouts, menus, blocks, documents, stores and config overrides are kind classes found by their group folders, and stackra gen writes the entry, the navigation tree and every tool file into .stackra/.",
+  "description": "The mobile app for iOS and Android: Expo with code-based React Navigation; routes, layouts, menus, blocks, documents, stores and config overrides are kind classes found by their group folders, pages and components are class components, and stackra gen writes the entry, the navigation tree and every tool file into .stackra/.",
   "license": "UNLICENSED",
   "main": ".stackra/entry/native.ts",
   "imports": {
@@ -36,7 +36,7 @@
     "clean": "rm -rf dist .expo .turbo maestro-report"
   },
   "dependencies": {
-    "@acme/brand": "workspace:*",
+    "@acme/theme": "workspace:*",
     "@bottom-tabs/react-navigation": "catalog:mobile",
     "@gorhom/bottom-sheet": "catalog:mobile",
     "@react-navigation/native": "catalog:mobile",
@@ -51,6 +51,7 @@
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
     "@stackra/errors": "catalog:stackra",
+    "@stackra/events": "catalog:stackra",
     "@stackra/experience": "catalog:stackra",
     "@stackra/feature-flags": "catalog:stackra",
     "@stackra/i18n": "catalog:stackra",
@@ -106,6 +107,7 @@
   },
   "devDependencies": {
     "@stackra/cli": "catalog:stackra",
+    "@stackra/gen": "catalog:stackra",
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
     "@stackra/typescript-config": "workspace:*",
