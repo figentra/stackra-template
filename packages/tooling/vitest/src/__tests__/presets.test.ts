@@ -60,6 +60,13 @@ describe("@stackra/vitest-config", () => {
     expect(react?.test.include).toEqual(["src/react/**/__tests__/**/*.test.tsx"]);
   });
 
+  it("libraryPreset adds a jsdom project for the native folder beside the react one", () => {
+    const all = projects(libraryPreset({ root: "/lib", react: "src/react", native: "src/native" }));
+    expect(all.map((project) => project.test.name)).toEqual(["unit", "int", "react", "native"]);
+    expect(all.at(-1)?.test).toMatchObject({ name: "native", environment: "jsdom" });
+    expect(all.at(-1)?.test.include).toEqual(["src/native/**/__tests__/**/*.test.tsx"]);
+  });
+
   it("appPreset runs jsdom except in the node folders, and honours exclude", () => {
     const config = appPreset({
       root: "/app",

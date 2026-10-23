@@ -38,6 +38,11 @@ export interface LibraryPresetOptions {
   root: string;
   /** A source folder whose `.test.tsx` files run in jsdom, for example `src/react`. */
   react?: string;
+  /**
+   * A source folder whose `.test.tsx` files render React Native components, for example
+   * `src/native`; they run in jsdom like the mobile app's tests.
+   */
+  native?: string;
 }
 
 /** Options of {@link appPreset}. */
@@ -86,25 +91,30 @@ export function servicePreset({ root, exclude = [] }: ServicePresetOptions): Vit
   );
 }
 
-/** The service layout under the shared coverage gate, plus a jsdom project for the `react` folder. */
-export function libraryPreset({ root, react }: LibraryPresetOptions): ViteUserConfig {
+/**
+ * The service layout under the shared coverage gate, plus one jsdom project for the `react` folder
+ * and one for the `native` folder when the package has them.
+ */
+export function libraryPreset({ root, react, native }: LibraryPresetOptions): ViteUserConfig {
   const config = servicePreset({ root });
-  if (react === undefined) return withCoverage(config);
+  const folders = [
+    { name: "react", folder: react },
+    { name: "native", folder: native },
+  ].filter((entry): entry is { name: string; folder: string } => entry.folder !== undefined);
+  if (folders.length === 0) return withCoverage(config);
   return withCoverage(
     mergeConfig(
       config,
       defineConfig({
         test: {
-          projects: [
-            {
-              extends: true,
-              test: {
-                name: "react",
-                environment: "jsdom",
-                include: [`${react}/**/__tests__/**/*.test.tsx`],
-              },
+          projects: folders.map(({ name, folder }) => ({
+            extends: true as const,
+            test: {
+              name,
+              environment: "jsdom",
+              include: [`${folder}/**/__tests__/**/*.test.tsx`],
             },
-          ],
+          })),
         },
       }),
     ),
