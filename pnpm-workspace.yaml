@@ -4,7 +4,7 @@
 #          version any member references is pinned here; a member's package.json names a catalog
 #          (`catalog:<name>`) or `workspace:*`, never a literal version.
 # Boundary: versions and install policy only; no scripts and no secret. Exact pins, no ranges.
-#           Workspace members (@acme/loyalty-kit, @acme/access-log, @acme/brand and the
+#           Workspace members (@acme/loyalty-kit, @acme/access-log, @acme/theme and the
 #           packages/tooling presets) are `workspace:*`, never catalog entries.
 # Runtime: node
 # Governing contract: Stackra ADR 0013 (versions come only from catalogs and workspace references),
@@ -40,7 +40,6 @@ catalogs:
     "@stackra/cli": 1.0.0
     "@stackra/clients": 1.0.0
     "@stackra/config": 1.0.0
-    "@stackra/connections": 1.0.0
     "@stackra/consent": 1.0.0
     "@stackra/container": 1.0.0
     "@stackra/content": 1.0.0
@@ -56,6 +55,7 @@ catalogs:
     "@stackra/filesystem": 1.0.0
     "@stackra/gen": 1.0.0
     "@stackra/i18n": 1.0.0
+    "@stackra/icons": 1.0.0
     "@stackra/iam": 1.0.0
     "@stackra/identity": 1.0.0
     "@stackra/integrations": 1.0.0
@@ -87,6 +87,7 @@ catalogs:
     "@stackra/tenancy": 1.0.0
     "@stackra/testing": 1.0.0
     "@stackra/theming": 1.0.0
+    "@stackra/tokens": 1.0.0
     "@stackra/transport": 1.0.0
     "@stackra/ui": 1.0.0
     "@stackra/validation": 1.0.0
@@ -102,7 +103,6 @@ catalogs:
     react: 19.2.3
     react-dom: 19.2.3
     react-router: 7.9.4
-    resend: 6.1.2
     isbot: 5.1.31
     "@react-email/components": 0.5.2
     # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.

@@ -42,6 +42,8 @@ ignoreRegExpList:
   - "/\\b[0-9a-f]{40}\\b/g"
   - "/sha256:[0-9a-f]{64}/g"
 words:
+  - "mintlify's"
+  - "zitadel's"
   - acme
   - allkeys
   - applinks
@@ -69,6 +71,7 @@ words:
   - deeplink
   - deployable
   - deployables
+  - dmarc
   - docblock
   - docblocks
   - dtos
@@ -110,8 +113,10 @@ words:
   - lighthouseci
   - lighthouserc
   - llms
+  - lproj
   - ltree
   - maestro
+  - magento
   - mailpit
   - maxage
   - meilisearch
@@ -123,7 +128,6 @@ words:
   - minidumps
   - minio
   - mintlify
-  - "mintlify's"
   - mise
   - mkcert
   - mmkv
@@ -151,6 +155,7 @@ words:
   - pinnable
   - pitr
   - pkce
+  - plpgsql
   - pnpm
   - posthog
   - prebuild
@@ -186,6 +191,7 @@ words:
   - ssr
   - stackra
   - stylesheet
+  - svix
   - syft
   - tanstack
   - tenancy
@@ -203,6 +209,7 @@ words:
   - typecheck
   - typegen
   - typesense
+  - unaccent
   - ungrantable
   - uniwind
   - unlogged
@@ -212,9 +219,9 @@ words:
   - valkey
   - vite
   - vitest
+  - wcag
   - webp
   - worklets
   - worktrees
   - zitadel
-  - "zitadel's"
   - zod

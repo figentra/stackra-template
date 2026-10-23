@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./schemas/mcp.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/mcp.json
 # Stackra file contract:
 # Purpose: every MCP server this project uses, in one file. `stackra mcp sync` (run by `pnpm install`
 #          through `prepare`) renders it into the gitignored .mcp.json that Claude Code reads; other

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./schemas/runway-root.schema.json
+# yaml-language-server: $schema=https://static.stackra.figentra.com/schemas/runway/root.json
 # Stackra file contract:
 # Purpose: the ROOT runway: WHERE things run and HOW they are packed. Providers and accounts,
 #          destinations per environment (AWS account and region, Encore Cloud app, Docker host,
