@@ -15,6 +15,9 @@ rules:
 The preset extends `@commitlint/config-conventional` and sets the house type list, subject case,
 `scope-case` off (member short names may carry digits) and the header and body lengths.
 
+The preset is exported by its role name, `commitlintPreset` (Stackra ADR 0300 decision 2), and as
+the default export, which commitlint's `extends` loads.
+
 | Rule             | Default | Meaning                                                                                                             |
 | ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | `refs-issue-key` | off     | The value is the issue prefix. A `feat`, `fix`, `refactor` or `perf` commit then needs a `Refs: <PREFIX>-n` footer. |

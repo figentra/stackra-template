@@ -1,17 +1,24 @@
 /**
  * Proves the refs-issue-key rule: off without a prefix, keyed types need `Refs: <PREFIX>-n`, unkeyed types do not,
- * and a different prefix does not satisfy it; the preset ships the rule off.
+ * and a different prefix does not satisfy it; the preset ships the rule off and is exported by its role
+ * name as well as by default.
  */
 import { describe, expect, it } from "vitest";
-import preset, { refsIssueKey } from "../preset.ts";
+import preset, { commitlintPreset, refsIssueKey } from "../preset.ts";
 
 const commit = (type: string, raw: string) => ({ type, raw });
 const ok = (c: { type: string; raw: string }, prefix?: string) =>
   refsIssueKey(c, "always", prefix)[0];
 
+describe("commitlintPreset", () => {
+  it("is the named export and the default commitlint's `extends` loads", () => {
+    expect(preset).toBe(commitlintPreset);
+  });
+});
+
 describe("refs-issue-key", () => {
   it("is off in the preset and passes without a prefix", () => {
-    expect(preset.rules["refs-issue-key"]).toEqual([0]);
+    expect(commitlintPreset.rules["refs-issue-key"]).toEqual([0]);
     expect(ok(commit("feat", "feat: x"))).toBe(true);
   });
 

@@ -4,7 +4,13 @@
  * member factory lays out the projects its docblock promises.
  */
 import { describe, expect, it } from "vitest";
-import { appPreset, libraryPreset, mobilePreset, servicePreset, tooling } from "../factories.ts";
+import {
+  appPreset,
+  libraryPreset,
+  mobilePreset,
+  servicePreset,
+  toolingPreset,
+} from "../factories.ts";
 import { stackraVitest } from "../preset.ts";
 import { stackraVitestDecorators } from "../preset-decorators.ts";
 import { stackraVitestReact } from "../preset-react.ts";
@@ -76,13 +82,13 @@ describe("@stackra/vitest-config", () => {
     expect(decorator(config)?.legacy).toBe(true);
   });
 
-  it("tooling runs the preset packages' own tests in plain Node and refuses an empty suite", () => {
-    expect(tooling.test).toMatchObject({
+  it("toolingPreset runs the preset packages' own tests in plain Node and refuses an empty suite", () => {
+    expect(toolingPreset.test).toMatchObject({
       environment: "node",
       include: ["src/**/__tests__/**/*.test.ts"],
       passWithNoTests: false,
     });
-    expect(decorator(tooling)).toBeUndefined();
-    expect(tooling.test?.coverage).toBeUndefined();
+    expect(decorator(toolingPreset)).toBeUndefined();
+    expect(toolingPreset.test?.coverage).toBeUndefined();
   });
 });

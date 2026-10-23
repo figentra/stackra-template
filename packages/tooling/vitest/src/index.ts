@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
  * Purpose: the package's `.` entry: the base preset and the role vocabulary (libraryPreset, servicePreset,
- *          appPreset, mobilePreset, tooling) in one import.
+ *          appPreset, mobilePreset, toolingPreset) in one import.
  * Boundary: re-exports only. Kept apart from preset.ts so factories.ts can import the presets without a
  *           module cycle.
  * Runtime: node

@@ -2,7 +2,7 @@
  * Stackra file contract:
  * Purpose: the role vocabulary of the vitest configs, one export per member role: `libraryPreset`
  *          (packages, coverage-gated), `servicePreset` (services), `appPreset` (the Vite and React
- *          Router apps), `mobilePreset` (the Expo app) and `tooling` (the preset packages' own
+ *          Router apps), `mobilePreset` (the Expo app) and `toolingPreset` (the preset packages' own
  *          tests). `stackra gen` writes every member's `.stackra/vitest.config.ts` against these
  *          names, with a gitignored shim at the member root; only the tooling packages author their
  *          own config.
@@ -158,8 +158,9 @@ export function mobilePreset({ root }: MobilePresetOptions): ViteUserConfig {
 /**
  * The preset packages' own tests (packages/tooling/*): plain Node, explicit `vitest` imports, no
  * decorators, no coverage gate and no `@stackra/source` resolution, because a preset is loaded as it
- * ships. An empty suite fails. A tooling package's vitest.config.ts is `export default tooling;`.
+ * ships. An empty suite fails. A tooling package's vitest.config.ts is
+ * `export default toolingPreset;`.
  */
-export const tooling: ViteUserConfig = defineConfig({
+export const toolingPreset: ViteUserConfig = defineConfig({
   test: { environment: "node", include: [UNIT_TESTS], passWithNoTests: false },
 });

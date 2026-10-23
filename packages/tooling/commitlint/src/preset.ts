@@ -7,7 +7,7 @@
  *          `repo`.
  * Boundary: rules only; no repo-specific prefix lives here.
  * Runtime: node
- * Governing contract: ADR 0007 (documentation).
+ * Governing contract: ADR 0007 (documentation), ADR 0300 (decision 2: role-named exports).
  */
 
 /** Commit types that must name an issue. */
@@ -29,7 +29,11 @@ export function refsIssueKey(
   return [when === "never" ? !keyed || !has : !keyed || has, message];
 }
 
-export default {
+/**
+ * The preset, by its role name (Stackra ADR 0300 decision 2). commitlint's `extends` loads the default
+ * export, so the same object is the default too.
+ */
+export const commitlintPreset = {
   extends: ["@commitlint/config-conventional"],
   plugins: [{ rules: { "refs-issue-key": refsIssueKey } }],
   rules: {
@@ -46,3 +50,5 @@ export default {
     "body-max-line-length": [1, "always", 120],
   },
 };
+
+export default commitlintPreset;

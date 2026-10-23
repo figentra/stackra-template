@@ -16,15 +16,16 @@ export default libraryPreset({
 ```
 
 Only the preset packages in `packages/tooling` author their own `vitest.config.ts`
-(`export default tooling`), because they hold no module and run no gen (Stackra ADR 0294 rule R12).
+(`export default toolingPreset`), because they hold no module and run no gen (Stackra ADR 0294 rule
+R12).
 
-| Role            | Use for                                   | What it sets                                                                                        |
-| --------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `libraryPreset` | packages (`packages/<category>/<name>`)   | `servicePreset` under the coverage gate, plus a jsdom `react` project for `react: "<folder>"`       |
-| `servicePreset` | services                                  | legacy decorators; a `unit` project (`*.test.ts`) and an `int` project (`*.int.test.ts`)            |
-| `appPreset`     | web and desktop apps                      | jsdom and legacy decorators; a node project per `nodeFolders` entry; `exclude` for e2e files        |
-| `mobilePreset`  | the mobile app                            | jsdom and legacy decorators over every `*.test.ts` and `*.test.tsx`                                 |
-| `tooling`       | the preset packages in `packages/tooling` | plain Node, explicit `vitest` imports, no decorators and no coverage gate: `export default tooling` |
+| Role            | Use for                                   | What it sets                                                                                              |
+| --------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `libraryPreset` | packages (`packages/<category>/<name>`)   | `servicePreset` under the coverage gate, plus a jsdom `react` project for `react: "<folder>"`             |
+| `servicePreset` | services                                  | legacy decorators; a `unit` project (`*.test.ts`) and an `int` project (`*.int.test.ts`)                  |
+| `appPreset`     | web and desktop apps                      | jsdom and legacy decorators; a node project per `nodeFolders` entry; `exclude` for e2e files              |
+| `mobilePreset`  | the mobile app                            | jsdom and legacy decorators over every `*.test.ts` and `*.test.tsx`                                       |
+| `toolingPreset` | the preset packages in `packages/tooling` | plain Node, explicit `vitest` imports, no decorators and no coverage gate: `export default toolingPreset` |
 
 The same role names appear in `@stackra/tsdown-config` (`libraryPreset`) and as the
 `@stackra/typescript-config` roles (`library`, `service`, `app`, `mobile`, `tooling`).

@@ -11,13 +11,13 @@ One role vocabulary runs through them: a member is an `app`, `mobile`, `library`
 `tooling` member, and each preset package names its export after that role
 (`@stackra/typescript-config/library`, `libraryPreset` in vitest and tsdown).
 
-| Package                    | Presets for                                                                                                                                 |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`typescript`](typescript) | `@stackra/typescript-config`: tsconfig roles (`app`, `mobile`, `library`, `service`, `tooling`)                                             |
-| [`oxlint`](oxlint)         | `@stackra/oxlint-config`: oxlint presets, including the boundaries rules                                                                    |
-| [`vitest`](vitest)         | `@stackra/vitest-config`: the role presets (`libraryPreset`, `servicePreset`, `appPreset`, `mobilePreset`, `tooling`) and the coverage gate |
-| [`tsdown`](tsdown)         | `@stackra/tsdown-config`: the `libraryPreset(entries)` build preset                                                                         |
-| [`commitlint`](commitlint) | `@stackra/commitlint-config`: the conventional-commit rules of `.commitlintrc.yaml`                                                         |
+| Package                    | Presets for                                                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`typescript`](typescript) | `@stackra/typescript-config`: tsconfig roles (`app`, `mobile`, `library`, `service`, `tooling`)                                                   |
+| [`oxlint`](oxlint)         | `@stackra/oxlint-config`: oxlint presets, including the boundaries rules                                                                          |
+| [`vitest`](vitest)         | `@stackra/vitest-config`: the role presets (`libraryPreset`, `servicePreset`, `appPreset`, `mobilePreset`, `toolingPreset`) and the coverage gate |
+| [`tsdown`](tsdown)         | `@stackra/tsdown-config`: the `libraryPreset(entries)` build preset                                                                               |
+| [`commitlint`](commitlint) | `@stackra/commitlint-config`: `commitlintPreset`, the conventional-commit rules of `.commitlintrc.yaml`                                           |
 
 ## Rules
 
