@@ -1,5 +1,5 @@
 {
-  "$comment": "Stackra file contract — Purpose: the public site's own strings in en (namespace `web::`); Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries zero, one, two, few, many and other; another namespace's strings are overridden in assets/overrides/<namespace>/<locale>.json; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the public site's own strings in en (namespace `web::`); Boundary: same keys in every locale (gen fails otherwise); the derived keys of the site's classes live under `errors.<code>.message`, `enums.<enum>.<code>` and `flags.<flag>.label`, so page strings for error screens are `error_page.*`; every Arabic plural carries zero, one, two, few, many and other; another namespace's strings are overridden in assets/overrides/<namespace>/<locale>.json; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0294 (decision 20: derived keys), ADR 0192 (ICU plurals)",
   "nav": {
     "home": "Home",
     "pricing": "Pricing",
@@ -33,8 +33,6 @@
   "pricing": {
     "title": "Simple pricing, no surprises",
     "subtitle": "Every plan starts with a {days, plural, one {# day} other {# days}} free trial. No card required.",
-    "month": "Monthly",
-    "year": "Yearly",
     "year_hint": "Two months free",
     "per_month": "{amount} per month",
     "contact_sales": "Contact sales",
@@ -107,7 +105,7 @@
     "terms": "Terms",
     "legal": "Legal"
   },
-  "errors": {
+  "error_page": {
     "not_found": {
       "title": "Page not found",
       "body": "This page moved or never existed.",
@@ -117,6 +115,28 @@
       "title": "Something went wrong",
       "body": "We have been told. Please try again in a moment.",
       "reference": "Reference: {reference}"
+    }
+  },
+  "errors": {
+    "site_context_missing": {
+      "message": "useSite was called outside the site layout."
+    }
+  },
+  "enums": {
+    "billing_interval": {
+      "month": "Monthly",
+      "year": "Yearly"
+    },
+    "cache_profile": {
+      "marketing": "Marketing content",
+      "catalogue": "Catalogue data",
+      "page": "Pages",
+      "none": "Not cached"
+    }
+  },
+  "flags": {
+    "pricing_yearly_first": {
+      "label": "Pricing page opens on yearly prices"
     }
   }
 }

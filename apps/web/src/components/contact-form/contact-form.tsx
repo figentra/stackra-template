@@ -8,7 +8,8 @@
  *           `captchaToken`. The form records no analytics: a lead exists only once the server
  *           accepted it, so the contact page records `LeadSubmitted` from the submit's answer.
  * Runtime: browser
- * Governing contract: ADR 0165 decision 2 (form adapters live in @stackra/ui), ADR 0055
+ * Governing contract: ADR 0294 d14, ADR 0165 decision 2 (form adapters live in @stackra/ui), ADR
+ *                     0055
  */
 import { useTranslation } from "@stackra/i18n/react";
 import { RouteForm, useNavigation } from "@stackra/navigation/react";
@@ -16,7 +17,7 @@ import { Button } from "@stackra/ui";
 import { CheckboxField, TextAreaField, TextField, useSchemaForm } from "@stackra/ui/form";
 import { Turnstile } from "@stackra/ui/turnstile";
 import { I18n, type I18nKey } from "#stackra/i18n";
-import { ContactInput } from "#src/schemas/contact.schema";
+import { ContactInput } from "#src/schemas/contact-input.schema";
 
 /** What the route passes back after a POST, and where the visitor came from. */
 export interface ContactFormProps {

@@ -1,26 +1,32 @@
 /**
  * Stackra file contract:
- * Purpose: registers `ProductGrid` as the page-builder block `web.product_grid`: a featured
- *          collection of products on a tenant landing page.
- * Boundary: a `@Block` class: the component and the props schema are options; the key is declared
- *           short and snake_case and gen prefixes the member key on the wire. `accepts` names the
- *           query whose output the component takes as `data`, batched by the renderer.
+ * Purpose: the page-builder block `web.product_grid`: a featured collection of products on a tenant
+ *          landing page.
+ * Boundary: the class is the props shape a document may pass (the collection and the cap);
+ *           `accepts` names the query whose output the renderer takes as `data`, batched by the
+ *           document renderer with the collection as its input. Its renderer is `product-grid.tsx`,
+ *           bound by name; the key is derived from the folder.
  * Runtime: isomorphic
- * Governing contract: ADR 0110 (L2: registered coded components, validated props), ADR 0231
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110 (registered coded blocks)
  */
-import { Block } from "@stackra/experience";
+import { Block, BlockCategory } from "@stackra/experience";
+import { Icons } from "@stackra/ui/icons";
+import { Int } from "@stackra/validation";
 import { Commerce } from "#stackra/clients";
-import { ProductGrid } from "#src/blocks/product-grid/product-grid";
-import { ProductGridProps } from "#src/schemas/product-grid-props.schema";
 
-/**
- * Page-builder block `web.product_grid`: a featured collection of products on a tenant landing
- * page.
- */
-@Block({
-  key: "product_grid",
-  component: ProductGrid,
-  props: ProductGridProps,
+/** A collection slug and a cap of one to twelve cards. */
+export class ProductGridBlock extends Block({
+  category: BlockCategory.Commerce,
+  icon: Icons.Package,
   accepts: Commerce.queries.ListStorefrontProducts,
-})
-export class ProductGridBlock {}
+}) {
+  /** The collection slug the grid features; the renderer's query input. */
+  collection!: string;
+
+  /** Cap on cards shown; the first row (4) is priority-loaded. */
+  @Int({
+    min: 1,
+    max: 12,
+  })
+  limit = 4;
+}

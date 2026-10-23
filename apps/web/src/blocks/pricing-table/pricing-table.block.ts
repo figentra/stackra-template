@@ -1,23 +1,25 @@
 /**
  * Stackra file contract:
- * Purpose: registers `PricingTable` as the page-builder block `web.pricing_table`: the plan ladder
- *          a tenant places in a document.
- * Boundary: a `@Block` class: the component and the props schema are options; the key is declared
- *           short and snake_case and gen prefixes the member key on the wire. `accepts` names the
- *           query whose output the component takes as `data`, batched by the renderer.
+ * Purpose: the page-builder block `web.pricing_table`: the plan ladder a tenant places in a
+ *          document.
+ * Boundary: the class is the props shape a document may pass (which product's ladder it shows);
+ *           `accepts` names the query whose output the renderer takes as `data`, batched by the
+ *           document renderer. Its renderer is `pricing-table.tsx`, bound by name; the key is
+ *           derived from the folder.
  * Runtime: isomorphic
- * Governing contract: ADR 0110 (L2: registered coded components, validated props), ADR 0231
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110 (registered coded blocks),
+ *                     ADR 0242
  */
-import { Block } from "@stackra/experience";
+import { Block, BlockCategory } from "@stackra/experience";
+import { Icons } from "@stackra/ui/icons";
 import { Billing } from "#stackra/clients";
-import { PricingTable } from "#src/blocks/pricing-table/pricing-table";
-import { PricingTableProps } from "#src/schemas/pricing-table-props.schema";
 
-/** Page-builder block `web.pricing_table`: the plan ladder a tenant places in a document. */
-@Block({
-  key: "pricing_table",
-  component: PricingTable,
-  props: PricingTableProps,
+/** The product whose ladder the table shows; the plans arrive through `accepts`. */
+export class PricingTableBlock extends Block({
+  category: BlockCategory.Commerce,
+  icon: Icons.Receipt,
   accepts: Billing.queries.ListPlans,
-})
-export class PricingTableBlock {}
+}) {
+  /** The product key of `billing.catalog.plan.list`; part of the trial link. */
+  product!: string;
+}

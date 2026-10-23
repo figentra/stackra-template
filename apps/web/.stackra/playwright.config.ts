@@ -5,7 +5,8 @@
  * Purpose: the end-to-end tier: the built site on `wrangler dev` and the consumed services on
  *          memory drivers with the declared seeds, axe on every journey, one project per runner
  *          plus one RTL project per RTL locale.
- * Boundary: `baseURL` and the Turnstile mode come from the member runway; no literal URL here.
+ * Boundary: `baseURL` and the Turnstile mode come from the member runway; no literal URL here. The
+ *           gitignored `playwright.config.ts` at the member root re-exports this file.
  * Runtime: node
  */
 import { fileURLToPath } from "node:url";
@@ -15,10 +16,10 @@ import { baseUrlOf } from "@stackra/runway/ports";
 export default e2ePreset({
   root: fileURLToPath(new URL("..", import.meta.url)),
   app: "@acme/web",
-  target: "web-ssr", // builds, then serves `build/` with wrangler dev on the member's dev port
+  target: "web", // builds, then serves `build/` with wrangler dev on the member's dev port
   baseURL: baseUrlOf("web"),
   services: ["@acme/service-commerce", "billing", "experience", "content", "marketing"],
-  seeds: ["orders.demo", "billing.ladder", "content.marketing"], // stackra.config.ts e2e.seeds
+  seeds: ["orders.demo", "billing.demo", "content.demo"], // stackra.config.ts e2e.seeds
   // runway.yaml environments.dev.e2e.turnstile: the Worker gets Cloudflare's always-pass test
   // secret
   turnstile: "test-keys",

@@ -1,10 +1,11 @@
 /**
  * Stackra file contract:
- * Purpose: quotes from the `testimonial` content type: quote, author, role.
- * Boundary: presentation over `content.entry.list`; fields are plain strings the content type
- *           validated.
+ * Purpose: the renderer of `TestimonialsBlock`, bound by name: quotes from the `testimonial`
+ *          content type (quote, author, role).
+ * Boundary: presentation over `content.entry.list`, the block's `accepts`; fields are plain strings
+ *           the content type validated.
  * Runtime: browser
- * Governing contract: ADR 0116 CT4 (testimonial is a built-in content type), ADR 0128
+ * Governing contract: ADR 0294 d14, ADR 0116 CT4 (testimonial is a built-in content type)
  */
 import { Card } from "@stackra/ui";
 import type { QueryOutput } from "@stackra/clients";

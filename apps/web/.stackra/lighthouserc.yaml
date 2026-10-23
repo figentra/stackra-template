@@ -5,7 +5,8 @@
 #          lhci after Playwright). URLs are telemetry.config.ts lighthouse.paths × locales on the
 #          member's dev origin; the origin is resolved at gen time from ports.json (lane offsets
 #          applied), so no port is typed anywhere but runway.yaml.
-# Boundary: the seeded `demo-tee` product is the measured product page (orders.demo seed).
+# Boundary: the seeded `demo-tee` product (commerce's `catalogue.demo`) is the measured product
+#           page. The gitignored `lighthouserc.yaml` at the member root is a copy of this file.
 # Runtime: node
 # Governing contract: ADR 0183 (quality budgets), ADR 0182 (test tiers)
 ci:

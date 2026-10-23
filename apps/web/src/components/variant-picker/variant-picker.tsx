@@ -3,7 +3,7 @@
  * Purpose: one Select per option axis (Size, Colour) bound to the variant choice.
  * Boundary: presentation; the choice and the matching are the hook's.
  * Runtime: browser
- * Governing contract: ADR 0128, WCAG 2.2 AA (each select labelled with the axis name)
+ * Governing contract: ADR 0294 d14, WCAG 2.2 AA (each select labelled with the axis name)
  */
 import { Select } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";

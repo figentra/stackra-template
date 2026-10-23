@@ -19,12 +19,14 @@ interface ImportMeta {
 
 /**
  * The Worker's bindings: server vars, secrets (by name; values synced by runway) and the assets
- * binding.
+ * binding. `entry/worker.ts` reads only `STACKRA_SITE_URL` raw, for its host guard; everything else
+ * is read through the validated `serverEnv`.
  */
 interface Env {
   readonly STACKRA_API_URL: string;
   readonly STACKRA_SITE_URL: string;
   readonly STACKRA_SENTRY_DSN: string;
   readonly TURNSTILE_SECRET_KEY: string;
+  readonly GATEWAY_VISITOR_SIGNING_KEY: string;
   readonly ASSETS: Fetcher;
 }

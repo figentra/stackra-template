@@ -68,7 +68,7 @@ Governing contract: ADR 0080 (logical CSS, light and dark), ADR 0165 (HeroUI v3 
   font-size: 106.25%;
 }
 
-/* Skip link: visible only when focused, first in the tab order (site-frame.tsx). */
+/* Skip link: visible only when focused, first in the tab order (routes/site/site.tsx). */
 .skip-link {
   position: absolute;
   inset-inline-start: 1rem;

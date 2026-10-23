@@ -8,7 +8,7 @@
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
 import { Icons } from "@stackra/ui/icons";
-import { FeatureGrid } from "#src/blocks/feature-grid";
+import { FeatureGrid } from "#src/blocks/feature-grid/feature-grid";
 
 /** Guards the feature grid a tenant places on a landing page. */
 describe(FeatureGrid, () => {

@@ -1,13 +1,15 @@
 /**
  * Stackra file contract:
  * Purpose: the cookie banner: one necessary cookie is always on; analytics is off until the visitor
- *          allows it. Shown until a choice is recorded.
- * Boundary: UI over @stackra/consent. The decision's effect on analytics is the hook's; the banner
- *           never talks to the analytics driver itself. Equal-weight buttons on purpose: declining
- *           is as easy as accepting.
+ *          allows it. Shown once the browser has read the stored decision and found none.
+ * Boundary: UI over @stackra/consent. It renders nothing on the server and on the first client
+ *           paint: the decision lives only in the browser, so shared HTML never carries banner
+ *           state. A browser sending Global Privacy Control has refused and never sees it. The
+ *           decision's effect on analytics is the package's; the banner never talks to the
+ *           analytics driver itself. Equal-weight buttons on purpose: declining is as easy as
+ *           accepting.
  * Runtime: browser
- * Governing contract: the `@stackra/consent` package contract (decline is the privacy-preserving
- *                     default)
+ * Governing contract: ADR 0294 (decision 14), ADR 0298 (decisions 1, 2 and 6)
  */
 import { useTranslation } from "@stackra/i18n/react";
 import { Button, Surface } from "@stackra/ui";
@@ -20,8 +22,8 @@ import { useAnalyticsConsent } from "./use-analytics-consent";
  */
 export function ConsentBanner() {
   const { t } = useTranslation();
-  const { isDecided, allow, decline } = useAnalyticsConsent();
-  if (isDecided) return null;
+  const { isLoaded, isDecided, allow, decline } = useAnalyticsConsent();
+  if (!isLoaded || isDecided) return null;
   return (
     <Surface
       render={

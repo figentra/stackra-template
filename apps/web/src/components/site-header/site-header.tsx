@@ -6,7 +6,7 @@
  *           `/ar/...`; the scheme is `@stackra/theming`'s, which persists it and writes
  *           `data-theme` on `<html>`. No data fetching.
  * Runtime: browser
- * Governing contract: ADR 0128 (component folder), ADR 0080 (keys, logical CSS), ADR 0165 (UI
+ * Governing contract: ADR 0294 d14, ADR 0080 (keys, logical CSS), ADR 0165 (UI
  *                     through @stackra/ui)
  */
 import { useTranslation } from "@stackra/i18n/react";

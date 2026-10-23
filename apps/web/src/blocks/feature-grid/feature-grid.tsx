@@ -1,16 +1,18 @@
 /**
  * Stackra file contract:
- * Purpose: three to six feature cards under a heading.
- * Boundary: presentation only; icons are `Icons` cases resolved by @stackra/ui/icons, never SVG
- *           passed in (a block may not carry markup, ADR 0112).
+ * Purpose: the renderer of `FeatureGridBlock`, bound by name: three to six feature cards under a
+ *          heading.
+ * Boundary: presentation only; text arrives resolved to the visitor's locale. Icons are `Icons`
+ *           cases resolved by @stackra/ui/icons, never SVG passed in (a block may not carry markup,
+ *           ADR 0112).
  * Runtime: browser
- * Governing contract: ADR 0128, ADR 0110
+ * Governing contract: ADR 0294 (decisions 7 and 14), ADR 0110
  */
 import { Card } from "@stackra/ui";
 import { Icon, type Icons } from "@stackra/ui/icons";
 
-/** One feature card's content. */
-export interface Feature {
+/** One feature card's content, its text resolved. */
+export interface FeatureCard {
   /** An `Icons` case; decorative, hidden from assistive tech. */
   readonly icon: Icons;
   /** The card heading, already translated. */
@@ -24,7 +26,7 @@ export interface FeatureGridProps {
   /** The section heading, already in the visitor's language. */
   readonly title: string;
   /** Rendered in order; the grid is one column on phones, three on desktop. */
-  readonly features: readonly Feature[];
+  readonly features: readonly FeatureCard[];
 }
 
 /** A labelled section so screen readers can jump to it; icons are decorative. */

@@ -6,14 +6,13 @@
  * Boundary: selection logic only; prices and stock are the variants' own fields, never recomputed
  *           here.
  * Runtime: browser
- * Governing contract: ADR 0128 (a hook shared by two folders lives in hooks/), ADR 0079
+ * Governing contract: ADR 0294 (decision 14: a hook with two importers lives in hooks/), ADR 0079
  */
 import { useMemo, useState } from "react";
-import type { z } from "@stackra/schema";
 import type { StorefrontProductView } from "#stackra/clients";
 
 /** One of the product's variants. */
-export type Variant = z.infer<typeof StorefrontProductView>["variants"][number];
+export type Variant = StorefrontProductView["variants"][number];
 
 /** What the picker renders and the page reads. */
 export interface VariantChoice {

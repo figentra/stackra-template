@@ -1,11 +1,11 @@
 /**
  * Stackra file contract:
- * Purpose: a responsive grid of product cards; the store page's body and the `web.product-grid`
- *          block.
- * Boundary: layout over `catalogue.product.list` output; pagination is the route's, filtering is
- *           the query's.
+ * Purpose: a responsive grid of product cards; the store page's body and the renderer of
+ *          `ProductGridBlock`, bound by name.
+ * Boundary: layout over the storefront listing output (the block's `accepts`); pagination is the
+ *           route's, filtering is the query's.
  * Runtime: browser
- * Governing contract: ADR 0128, ADR 0110 (block with `accepts`)
+ * Governing contract: ADR 0294 (decisions 7 and 14), ADR 0110 (block with `accepts`)
  */
 import type { QueryOutput } from "@stackra/clients";
 import type { Commerce } from "#stackra/clients";

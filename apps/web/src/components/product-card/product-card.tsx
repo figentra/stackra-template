@@ -6,10 +6,9 @@
  *           variant from `@stackra/media`, so a list never downloads a full-size image (ADR 0183
  *           LCP and transfer budget).
  * Runtime: browser
- * Governing contract: ADR 0128, ADR 0222 (public assets and image variants), ADR 0135 (slugs in
+ * Governing contract: ADR 0294 d14, ADR 0222 (public assets and image variants), ADR 0135 (slugs in
  *                     URLs, not ids)
  */
-import type { z } from "@stackra/schema";
 import { useMoney, useTranslation } from "@stackra/i18n/react";
 import { ImageFormat } from "@stackra/media";
 import { useImageVariant } from "@stackra/media/react";
@@ -22,7 +21,7 @@ import { Routes } from "#stackra/routes";
 /** The card's data and whether it is above the fold. */
 export interface ProductCardProps {
   /** One item of the storefront listing. */
-  readonly product: z.infer<typeof StorefrontProductCard>;
+  readonly product: StorefrontProductCard;
   /** True for the first row: the image loads eagerly with high priority; the rest are lazy. */
   readonly isPriority?: boolean;
 }

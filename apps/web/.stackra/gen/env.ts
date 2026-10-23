@@ -3,9 +3,9 @@
  * (environments.<env>.vars, secrets) — do not edit
  * Purpose: the validated env on both sides. `env` is the public part (`VITE_` fields) parsed from
  *          `import.meta.env` once; `serverEnv(raw)` parses the Worker's bindings (server fields
- *          plus the named secret) through the same field rules and is called once per request by
- *          workers/app.ts. A missing or malformed value fails with a typed error naming the
- *          variable.
+ *          plus the named secrets) through the same field rules and is called once per request by
+ *          `createApp` in `../entry/worker.ts`. A missing or malformed value fails with a typed
+ *          error naming the variable.
  * Boundary: validation only; no value is defaulted here. `isDevelopment` comes from the build mode,
  *           so code never reads `import.meta.env` itself.
  * Runtime: isomorphic
@@ -13,13 +13,13 @@
 import { hydrateEnv, type BuildFacts, type PublicPart } from "@stackra/config/env";
 import { WebEnv } from "#src/config/env.config";
 
-/** The parsed public env (`posthogKey`, `turnstileSiteKey`) and the build facts (`isDevelopment`). */
+/** The parsed public env (`posthogKey`, `turnstileSiteKey`) and the build fact `isDevelopment`. */
 export const env: PublicPart<WebEnv> & BuildFacts = hydrateEnv(WebEnv, import.meta.env, {
   only: "public",
 });
 
 /**
- * The parsed server env of one request (every field, the secret resolved by name from the Worker
+ * The parsed server env of one request (every field, the secrets resolved by name from the Worker
  * `env`).
  */
 export function serverEnv(raw: unknown): WebEnv {

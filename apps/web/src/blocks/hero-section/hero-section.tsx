@@ -2,12 +2,13 @@
  * Stackra file contract:
  * Purpose: the page opener: a headline, a line under it, a primary and an optional secondary call
  *          to action.
- * Boundary: presentation only. Props are plain strings so the same component serves the coded
- *           landing page (keys already translated) and the `web.hero` block (the renderer picks the
- *           locale's value first). Actions name route keys, never paths.
+ * Boundary: the renderer of `HeroSectionBlock`, bound by name. Props are plain strings so the same
+ *           component serves the coded landing page (keys already translated) and the block (the
+ *           document renderer picks the locale's value first). Actions name route keys, never
+ *           paths.
  * Runtime: browser
- * Governing contract: ADR 0128, ADR 0110 (a block is a coded component with typed props), WCAG 2.2
- *                     AA (one h1)
+ * Governing contract: ADR 0294 (decisions 7 and 14), ADR 0110 (a block is a coded component with
+ *                     typed props), WCAG 2.2 AA (one h1)
  */
 import { Link } from "@stackra/navigation/react";
 import { Button } from "@stackra/ui";

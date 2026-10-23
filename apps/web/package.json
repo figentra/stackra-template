@@ -2,7 +2,7 @@
   "name": "@acme/web",
   "version": "0.1.0",
   "private": true,
-  "description": "The public site: landing, pricing, storefront and tenant pages. React Router 7 framework mode on a Cloudflare Worker, declared with @Route/@Layout/@Block/@Menu/@Flag classes; stackra gen writes the runtime into .stackra/.",
+  "description": "The public site: landing, pricing, storefront and tenant pages. React Router 7 framework mode on a Cloudflare Worker, declared with kind classes (routes, the site layout, blocks, menus, a flag, an analytics event, config) found by their group folders; stackra gen writes the entries, the wiring and the tool configs into .stackra/.",
   "license": "UNLICENSED",
   "type": "module",
   "imports": {
@@ -37,6 +37,8 @@
     "@heroui/styles": "catalog:ui",
     "@stackra/analytics": "catalog:stackra",
     "@stackra/app": "catalog:stackra",
+    "@stackra/assets": "catalog:stackra",
+    "@stackra/cache": "catalog:stackra",
     "@stackra/clients": "catalog:stackra",
     "@stackra/config": "catalog:stackra",
     "@stackra/consent": "catalog:stackra",
@@ -52,9 +54,7 @@
     "@stackra/media": "catalog:stackra",
     "@stackra/money": "catalog:stackra",
     "@stackra/navigation": "catalog:stackra",
-    "@stackra/panel": "catalog:stackra",
     "@stackra/platform": "catalog:stackra",
-    "@stackra/schema": "catalog:stackra",
     "@stackra/seo": "catalog:stackra",
     "@stackra/state": "catalog:stackra",
     "@stackra/theming": "catalog:stackra",
@@ -64,7 +64,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "catalog:",
-    "tailwindcss": "catalog:frontend"
+    "tailwindcss": "catalog:frontend",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@lhci/cli": "catalog:quality",

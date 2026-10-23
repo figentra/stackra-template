@@ -13,7 +13,7 @@ import { Locale } from "@stackra/i18n";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
 import { Flags } from "#stackra/flags";
-import { PricingTable } from "#src/blocks/pricing-table";
+import { PricingTable } from "#src/blocks/pricing-table/pricing-table";
 
 /** One priced plan and one contact-sales plan. */
 const LADDER = {

@@ -1,41 +1,37 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: the look. The one logo source (favicon and the OG template mark derive from
- *          it), schemes, theme colours, and whether a resolved site's brand may override the
- *          defaults.
- * Boundary: tokens themselves are `@acme/brand`; a tenant site's brand arrives at runtime with
- *           the resolved site and is layered over the defaults by the site frame. This is the one
- *           app where per-tenant brand is real.
+ * Purpose: the site's override of @stackra/theming's configuration: the look. The one logo source
+ *          (favicon and the OG template mark derive from it), schemes, theme colours, and whether a
+ *          resolved site's brand may override the defaults.
+ * Boundary: an override declares `override` members only and inherits the base's key (`theming`);
+ *           the theme colours spread the base first. Tokens themselves are `@acme/brand`; a tenant
+ *           site's brand arrives at runtime with the resolved site and is layered over the
+ *           defaults by the site frame. This is the one app where per-tenant brand is real.
  * Runtime: isomorphic
- * Governing contract: ADR 0080 d4, ADR 0234 (asset keys)
+ * Governing contract: ADR 0294 (decision 19), ADR 0080 d4, ADR 0234 (asset keys)
  */
-import { Config } from "@stackra/config";
-import { ColorScheme } from "@stackra/theming";
-import { Bool, List, Nested, OneOf, Str } from "@stackra/validation";
+import { ColorScheme, ThemingConfig } from "@stackra/theming";
+import { Enum } from "@stackra/validation";
+import { Assets } from "#stackra/assets";
 
-/** The `<meta name="theme-color">` pair. */
-class ThemeColors {
-  /** Light scheme colour. @defaultValue "#f7f7f5" */
-  @Str({ pattern: /^#[0-9a-f]{6}$/i }) light = "#f7f7f5";
-  /** Dark scheme colour. @defaultValue "#1c1e22" */
-  @Str({ pattern: /^#[0-9a-f]{6}$/i }) dark = "#1c1e22";
-}
+/** Look of the site: logo source, schemes, theme colours and the tenant override switch. */
+export class WebThemingConfig extends ThemingConfig {
+  /** The one SVG the favicon and the OG mark derive from. */
+  override logo = Assets.web.public.logo_svg;
 
-/** Look of the web app: logo source, schemes and the tenant override switch. */
-@Config("web.theming")
-export class ThemingConfig {
-  /** Schemes the visitor may choose between. @defaultValue ColorScheme.values() */
-  @List(OneOf(ColorScheme)) schemes = ColorScheme.values();
-  /**
-   * The scheme of a first visit; `System` follows `prefers-color-scheme`.
-   * @defaultValue ColorScheme.System
-   */
-  @OneOf(ColorScheme) defaultScheme = ColorScheme.System;
-  /** The browser chrome colour per scheme. */
-  @Nested(ThemeColors) themeColor = new ThemeColors();
-  /**
-   * Whether a resolved site's brand tokens are layered over the defaults by the site frame.
-   * @defaultValue true
-   */
-  @Bool() tenantOverride = true;
+  /** Schemes the visitor may choose between. */
+  override schemes: ColorScheme[] = Enum.values(ColorScheme);
+
+  /** The scheme of a first visit; `System` follows `prefers-color-scheme`. */
+  override defaultScheme: ColorScheme = ColorScheme.System;
+
+  /** `<meta name="theme-color">` per scheme. */
+  override themeColor: ThemingConfig["themeColor"] = {
+    ...this.themeColor,
+    light: "#f7f7f5",
+    dark: "#1c1e22",
+  };
+
+  /** Whether a resolved site's brand tokens are layered over the defaults by the site frame. */
+  override tenantOverride = true;
 }

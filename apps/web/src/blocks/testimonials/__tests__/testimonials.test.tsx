@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
-import { Testimonials } from "#src/blocks/testimonials";
+import { Testimonials } from "#src/blocks/testimonials/testimonials";
 
 const data = {
   entries: [{ id: "t1", fields: { quote: "Sales doubled.", author: "Sara", role: "Owner" } }],

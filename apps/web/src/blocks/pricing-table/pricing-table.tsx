@@ -3,22 +3,24 @@
  * Purpose: the plan ladder: one card per plan, a monthly/yearly toggle, prices in the market
  *          currency, limits and the trial line; enterprise shows "contact sales" instead of a
  *          price.
- * Boundary: presentation over the query output. `data` is `billing.catalog.plan.list` (typed
- *           through `accepts`): the component never fetches. The interval and the money display are
+ * Boundary: the renderer of `PricingTableBlock`, bound by name; presentation over the query output.
+ *           `data` is `billing.catalog.plan.list` (the block's `accepts`): the component never
+ *           fetches. The interval and the money display are
  *           the hook's; the trial link is the site's signup URL, so it follows the environment.
  * Runtime: browser
- * Governing contract: ADR 0242 (plan ladders, 14-day trial), ADR 0220 (money), ADR 0128
+ * Governing contract: ADR 0294 d14, ADR 0242 (plan ladders, 14-day trial), ADR 0220 (money)
  */
 import type { QueryOutput } from "@stackra/clients";
 import { useMoney, useTranslation } from "@stackra/i18n/react";
 import { Link } from "@stackra/navigation/react";
 import { Button, Card, Chip, ToggleButton, ToggleButtonGroup } from "@stackra/ui";
+import { Enum } from "@stackra/validation";
 import type { Billing } from "#stackra/clients";
 import { I18n } from "#stackra/i18n";
-import { BillingInterval } from "#src/enums/billing-interval.enum";
-import { useSite } from "#src/providers/site/use-site";
-import { useBillingInterval } from "./use-billing-interval";
 import { Routes } from "#stackra/routes";
+import { BillingInterval } from "#src/enums/billing-interval.enum";
+import { useSite } from "#src/hooks/use-site";
+import { useBillingInterval } from "./use-billing-interval";
 
 /** Block props plus the bound query's output. */
 export interface PricingTableProps {
@@ -50,13 +52,16 @@ export function PricingTable({ data, product }: PricingTableProps) {
         aria-label={t(I18n.web.pricing.interval)}
         selectionMode="single"
         disallowEmptySelection
-        selectedKeys={[interval.value]}
-        onSelectionChange={(keys) => setInterval(BillingInterval.from(String([...keys][0])))}
+        selectedKeys={[interval]}
+        onSelectionChange={(keys) => {
+          const next = Enum.values(BillingInterval).find((code) => [...keys].includes(code));
+          if (next) setInterval(next);
+        }}
         className="mx-auto mb-8 w-fit"
       >
-        {BillingInterval.values().map((option) => (
-          <ToggleButton key={option.value} id={option.value}>
-            {t(option.label)}
+        {Enum.values(BillingInterval).map((option) => (
+          <ToggleButton key={option} id={option}>
+            {t(I18n.web.enums.billing_interval[option])}
             {option === BillingInterval.Year && (
               <Chip size="sm">{t(I18n.web.pricing.year_hint)}</Chip>
             )}
@@ -66,13 +71,13 @@ export function PricingTable({ data, product }: PricingTableProps) {
 
       <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {data.plans.map((plan) => {
-          const price = plan.prices[interval.value];
+          const price = plan.prices[interval];
           const amount = price === null ? null : money(perMonth(price, plan.currency));
           const trial = new URL(signupUrl);
           trial.search = new URLSearchParams({
             product,
             plan: plan.key,
-            interval: interval.value,
+            interval,
           }).toString();
           return (
             <li key={plan.key} id={plan.key}>

@@ -1,12 +1,12 @@
 /**
  * Stackra file contract:
- * Purpose: the FAQ accordion from the `faq` content type; the matching FAQPage JSON-LD is the
- *          route's `meta`.
- * Boundary: presentation over `content.entry.list`. Answers are plain text; a rich answer would be
- *           an L2 document rendered by DocumentRenderer, never HTML.
+ * Purpose: the renderer of `FaqSectionBlock`, bound by name: the FAQ accordion from the `faq`
+ *          content type; the matching FAQPage JSON-LD is the route's `meta`.
+ * Boundary: presentation over `content.entry.list`, the block's `accepts`. Answers are plain text;
+ *           a rich answer would be an L2 document rendered by DocumentRenderer, never HTML.
  * Runtime: browser
- * Governing contract: ADR 0116 CT4, ADR 0128, WCAG 2.2 AA (HeroUI Accordion: buttons with names,
- *                     arrow keys)
+ * Governing contract: ADR 0294 d14, ADR 0116 CT4, WCAG 2.2 AA (HeroUI Accordion: buttons with
+ *                     names, arrow keys)
  */
 import { Accordion } from "@stackra/ui";
 import type { QueryOutput } from "@stackra/clients";
