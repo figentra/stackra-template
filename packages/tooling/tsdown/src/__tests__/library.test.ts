@@ -35,7 +35,8 @@ describe("@stackra/tsdown-config libraryPreset()", () => {
       { decorators: true },
     ) as unknown as Resolved;
     expect(cfg.inputOptions).toBeTypeOf("function");
-    if (!cfg.inputOptions) throw new Error("unreachable: asserted above");
+    // The assertion above already failed the test when it is missing; this narrows the type.
+    if (!cfg.inputOptions) return expect.unreachable("inputOptions is asserted above");
     const out = cfg.inputOptions({ transform: { target: "es2022" } }) as {
       transform: {
         decorator: { legacy: boolean; emitDecoratorMetadata: boolean };

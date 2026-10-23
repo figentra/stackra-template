@@ -17,6 +17,7 @@ import { stackraVitestReact } from "../preset-react.ts";
 
 interface Project {
   extends?: boolean;
+  resolve?: { alias?: Record<string, string> };
   test: { name: string; environment?: string; include: string[]; exclude?: string[] };
 }
 
@@ -65,6 +66,7 @@ describe("@stackra/vitest-config", () => {
     expect(all.map((project) => project.test.name)).toEqual(["unit", "int", "react", "native"]);
     expect(all.at(-1)?.test).toMatchObject({ name: "native", environment: "jsdom" });
     expect(all.at(-1)?.test.include).toEqual(["src/native/**/__tests__/**/*.test.tsx"]);
+    expect(all.at(-1)?.resolve?.alias).toEqual({ "react-native": "react-native-web" });
   });
 
   it("appPreset runs jsdom except in the node folders, and honours exclude", () => {

@@ -40,7 +40,8 @@ export interface LibraryPresetOptions {
   react?: string;
   /**
    * A source folder whose `.test.tsx` files render React Native components, for example
-   * `src/native`; they run in jsdom like the mobile app's tests.
+   * `src/native`. They run in jsdom with `react-native` resolved to react-native-web, so the
+   * package lists `react-native-web` (`catalog:mobile`) as a devDependency.
    */
   native?: string;
 }
@@ -97,28 +98,32 @@ export function servicePreset({ root, exclude = [] }: ServicePresetOptions): Vit
  */
 export function libraryPreset({ root, react, native }: LibraryPresetOptions): ViteUserConfig {
   const config = servicePreset({ root });
-  const folders = [
-    { name: "react", folder: react },
-    { name: "native", folder: native },
-  ].filter((entry): entry is { name: string; folder: string } => entry.folder !== undefined);
-  if (folders.length === 0) return withCoverage(config);
-  return withCoverage(
-    mergeConfig(
-      config,
-      defineConfig({
-        test: {
-          projects: folders.map(({ name, folder }) => ({
-            extends: true as const,
-            test: {
-              name,
-              environment: "jsdom",
-              include: [`${folder}/**/__tests__/**/*.test.tsx`],
-            },
-          })),
+  const projects = [
+    react === undefined
+      ? undefined
+      : {
+          extends: true as const,
+          test: {
+            name: "react",
+            environment: "jsdom",
+            include: [`${react}/**/__tests__/**/*.test.tsx`],
+          },
         },
-      }),
-    ),
-  );
+    native === undefined
+      ? undefined
+      : {
+          extends: true as const,
+          // React Native components render through react-native-web in jsdom.
+          resolve: { alias: { "react-native": "react-native-web" } },
+          test: {
+            name: "native",
+            environment: "jsdom",
+            include: [`${native}/**/__tests__/**/*.test.tsx`],
+          },
+        },
+  ].filter((project) => project !== undefined);
+  if (projects.length === 0) return withCoverage(config);
+  return withCoverage(mergeConfig(config, defineConfig({ test: { projects } })));
 }
 
 /** jsdom for every test, except the `nodeFolders`, which get a node-environment project each. */
