@@ -1,0 +1,87 @@
+{
+  "name": "@acme/theme",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The acme theme of the Stackra Design System: the example product's colours, fonts and radius as a defineTheme value, its HeroUI web and Uniwind native CSS, and the Acme mark.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/figentra/stackra-template.git",
+    "directory": "packages/design-system/theme"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "stackra.manifest.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./assets/public/themes/**/*.css"
+  ],
+  "imports": {
+    "#core/*": [
+      "./src/core/*",
+      "./src/core/*.ts",
+      "./src/core/*.tsx",
+      "./src/core/*/index.ts"
+    ],
+    "#stackra/*": [
+      "./.stackra/gen/*",
+      "./.stackra/gen/*.ts",
+      "./.stackra/gen/*.tsx",
+      "./.stackra/gen/*/index.ts"
+    ]
+  },
+  "exports": {
+    ".": "./.stackra/entry/index.ts",
+    "./node": "./.stackra/entry/node.ts",
+    "./themes/*": "./assets/public/themes/*",
+    "./assets/*": "./assets/*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "import": "./dist/index.mjs"
+      },
+      "./node": {
+        "types": "./dist/node.d.mts",
+        "import": "./dist/node.mjs"
+      },
+      "./themes/*": "./assets/public/themes/*",
+      "./assets/*": "./assets/*"
+    },
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "gen": "stackra gen",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@stackra/app": "catalog:stackra",
+    "@stackra/tokens": "catalog:stackra"
+  },
+  "devDependencies": {
+    "@stackra/gen": "catalog:stackra",
+    "@stackra/testing": "catalog:stackra",
+    "@stackra/tsdown-config": "workspace:*",
+    "@stackra/typescript-config": "workspace:*",
+    "@stackra/vitest-config": "workspace:*",
+    "@vitest/coverage-v8": "catalog:quality",
+    "oxfmt": "catalog:quality",
+    "oxlint": "catalog:quality",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:quality"
+  }
+}

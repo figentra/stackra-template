@@ -4,7 +4,9 @@
  * Boundary: every leaf is a branded `I18nKey` (`loyalty_kit::enums.loyalty_tier.gold`), so a raw
  *           string where a key is expected is a type error. Derived keys follow
  *           `<module>::<kind>.<name>.<part>` (ADR 0294 decision 20); gen fails when one is missing
- *           in any locale. `nav`, `overview`, `account` and `adjustment` are authored keys.
+ *           in any base locale; a regional overlay (`en-US`) holds only the keys that differ.
+ *           `nav`, `account` and `adjustment` are authored keys; `intents` are the phrase lists of
+ *           the actions and queries that set `intent: true`.
  * Runtime: isomorphic
  */
 import { type I18nKey, keys } from "@stackra/i18n";
@@ -20,12 +22,22 @@ export const I18n = keys({
       entry_kind: ["earn", "redeem", "expire", "adjust"],
     },
     resources: { loyalty_account: ["title"] },
-    widgets: { points_issued: ["title"], points_balance: ["title"] },
+    widgets: { points_issued: ["title"], points_balance: ["title", "expiry_note"] },
     documents: { loyalty_overview: ["title"] },
-    overview: ["redeem_title", "expiry_note"],
-    settings: { loyalty_kit: ["title", "expiry_months", "silver_from", "gold_from"] },
+    settings: {
+      _: ["title"],
+      expiry_months: ["label", "help"],
+      tiers: {
+        _: ["label", "help"],
+        silver_from: ["label"],
+        gold_from: ["label"],
+      },
+    },
     permissions: { loyalty_account: ["read", "enroll", "freeze", "redeem", "expire"] },
-    actions: { account: { enroll: ["success"], freeze: ["confirm", "success"] } },
+    actions: {
+      account: { enroll: ["success", "intents"], freeze: ["confirm", "success"] },
+      points: { balance: ["intents"] },
+    },
     account: ["frozen_badge"],
     adjustment: ["points"],
     errors: {
@@ -42,11 +54,15 @@ export const loaders = {
   loyalty_kit: {
     en: () => import("../../assets/lang/en/loyalty_kit.json"),
     ar: () => import("../../assets/lang/ar/loyalty_kit.json"),
+    "en-US": () => import("../../assets/lang/en-US/loyalty_kit.json"),
   },
 } as const;
+
+/** Regional overlays hold only the keys that differ and fall back to their base language. */
+export const fallbacks = { "en-US": "en" } as const;
 
 /** Lang overrides this package makes of other namespaces: none. */
 export const overrides = [] as const;
 
 /** The locales the namespace ships. */
-export const locales = ["en", "ar"] as const;
+export const locales = ["en", "ar", "en-US"] as const;

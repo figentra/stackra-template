@@ -3,26 +3,16 @@
  * Purpose: `expect(sink).toHaveLoggedAccess({ target, subjects, actorId })` over the memory sink or
  *          the fake.
  * Boundary: a domain matcher owned by this package (ADR 0269); importing the ./testing entry
- *           registers it. Its argument type is the matcher's companion,
- *           `ToHaveLoggedAccessOptions`.
+ *           registers it. Its argument type, `ToHaveLoggedAccessOptions`, is its own file (one
+ *           declaration per file).
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 2, 8 and 15), ADR 0269
+ * Governing contract: ADR 0294 (decisions 2, 8 and 15, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0269
  */
 import { createMatcher } from "@stackra/testing";
 import type { AccessLogSink } from "#contracts/ports/access-log-sink.port";
 import type { AccessRecord } from "#contracts/types/access-record.type";
-
-/** What the assertion looks for; every given field must match one record. */
-export interface ToHaveLoggedAccessOptions {
-  /** The `<Class>.<method>` the record must name. */
-  readonly target: string;
-
-  /** Record ids that must all appear among the record's subjects. */
-  readonly subjects?: readonly string[];
-
-  /** The public id the record's actor must carry. */
-  readonly actorId?: string;
-}
+import type { ToHaveLoggedAccessOptions } from "#testing/to-have-logged-access-options.type";
 
 /** A sink the matcher can read: the memory driver (`records()`) or the fake (`calls("write")`). */
 type ReadableSink = AccessLogSink & {

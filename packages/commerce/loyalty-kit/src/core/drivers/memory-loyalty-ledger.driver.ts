@@ -4,9 +4,14 @@
  *          expiry contract as postgres.
  * Boundary: the memory driver every capability ships before its production driver (ADR 0266). Its
  *           name is the file prefix (`memory`); gen writes it as a candidate of the port into
- *           `#stackra/wiring`. Isomorphic, so it lives in core and ships from the `.` entry.
+ *           `#stackra/wiring`. Isomorphic, so it lives in core and ships from the `.` entry. The
+ *           base is `Driver(LoyaltyLedger)`, a call that already returns a class, so it carries no
+ *           `define` prefix (`define*` is kept for the four stackra.config.ts functions); the port
+ *           is a value argument because the driver inherits its abstract members, which TypeScript
+ *           then makes this class implement.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 15 and 16), ADR 0266 decision 2
+ * Governing contract: ADR 0294 (decisions 15 and 16, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0266 decision 2
  */
 import { Driver } from "@stackra/container";
 import { EntryKind } from "#contracts/enums/entry-kind.enum";

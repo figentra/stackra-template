@@ -4,15 +4,19 @@
  *          extension chain, appends to the ledger and records the event. The only code that
  *          writes LoyaltyAccount.tier at enrolment and isFrozen.
  * Boundary: exported by the module for hosts; runs inside the caller's transaction.
- *           CrudService(LoyaltyAccount) supplies the inherited reads and writes (`find`,
- *           `findOne`, `findOneOrFail`, `create`), which the resource's generated list and get
- *           operations call too. Events are recorded on the aggregate and reach the outbox when
- *           the unit of work flushes, so a rolled-back change emits nothing. The extension point
- *           is injected as a class and called as a method. This is the one earn path: the pure
- *           maths is `LoyaltyService.quoteEarn`, which writes nothing.
+ *           `CrudService<LoyaltyAccount>` (the model is the type argument) supplies every standard
+ *           read and write (`find`, `findOne`, `findOneOrFail`, `create`, `update`, `delete`,
+ *           `table` for the resource's list and `metrics` for KPIs), which the resource's
+ *           generated list and get operations call too; this class adds only the domain
+ *           operations: `enroll`, `setFrozen` and `earn`. Events are recorded on the aggregate and
+ *           reach the outbox when the unit of work flushes, so a rolled-back change emits nothing.
+ *           The extension point is injected as a class and its `earnAdjust` slot called as a
+ *           method. This is the one earn path: the pure maths is `LoyaltyService.quoteEarn`, which
+ *           writes nothing.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 13, 16 and 27), ADR 0105 (as amended), ADR 0136,
- *                     ADR 0141, ADR 0265 (the owner calls its extension point explicitly)
+ * Governing contract: ADR 0294 (decisions 13, 16 and 27, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0105 (as amended), ADR 0136, ADR 0141, ADR 0265 (the owner
+ *                     calls its extension point explicitly)
  */
 import type { RequestContext } from "@stackra/actions";
 import type { Clock, PublicId } from "@stackra/contracts";
@@ -28,14 +32,14 @@ import { AccountEnrolled } from "#node/events/account-enrolled.event";
 import { AccountFrozen } from "#node/events/account-frozen.event";
 import { PointsEarned } from "#node/events/points-earned.event";
 import type { LoyaltyKitExtensionPoint } from "#node/extensions/loyalty-kit.extension-point";
-import { LoyaltyAccount } from "#node/models/loyalty-account.model";
+import type { LoyaltyAccount } from "#node/models/loyalty-account.model";
 
 /** The account aggregate's write side. */
-export class AccountService extends CrudService(LoyaltyAccount) {
+export class AccountService extends CrudService<LoyaltyAccount> {
   /**
    * @param ledger - the configured ledger driver, by type.
    * @param loyalty - the base earn maths.
-   * @param extensions - the kit's extension points; `earnAdjust` runs implementers in order.
+   * @param extensions - the kit's extension point; its `earnAdjust` slot runs extensions in order.
    * @param clock - the pipeline clock, frozen in tests.
    * @param request - the ambient context of the running action, listener or job, handed to the
    *                  extension chain.

@@ -1,41 +1,41 @@
 /**
  * Stackra file contract:
- * Purpose: the staff screens for loyalty accounts in the admin area: list, View, enroll, freeze.
- *          Declared here, rendered by @stackra/panel; a package module contributes UI exactly like
- *          a service module.
- * Boundary: a declaration only. Pages follow from `operations`: List and View are standard reads
- *           gen writes (`loyalty_kit.loyalty_account.list@1` and `.get@1`, output
- *           LoyaltyAccountView); Create submits EnrollMemberAction, never a direct insert; there is
- *           no update operation. Table and infolist keys are `keyof LoyaltyAccount`, the form's are
- *           `keyof EnrollMemberInput`, so a renamed field is a type error. The title is the derived
- *           i18n key `loyalty_kit::resources.loyalty_account.title`; the customer area gets the
- *           overview document instead (one area per resource).
+ * Purpose: the staff screens for loyalty accounts in the admin area: a searchable, filterable list,
+ *          the View page, enrolment and freezing. Declared here, rendered by @stackra/panel; a
+ *          package module contributes UI exactly like a service module.
+ * Boundary: a declaration; gen runs each member once and records the tree in the manifest. Pages
+ *           follow from `operations`: List and View are standard reads gen writes
+ *           (`loyalty_kit.loyalty_account.list@1` and `.get@1`) whose row is LoyaltyAccountView,
+ *           not the model, so the row is the second type argument
+ *           (`Resource<LoyaltyAccount, LoyaltyAccountView>`) and table and infolist keys are paths
+ *           of that view; Create submits EnrollMemberAction, so form keys are paths of its input.
+ *           The table is a server contract: gen compiles it into the list query's closed input;
+ *           search comes from the model's `@Searchable` text fields and every sortable or
+ *           filterable key is one of its indexed filters. Every button is in `actions`: placement
+ *           follows the action's input (the record id puts Freeze on rows and View), `.bulk()`
+ *           adds the bulk bar with the policy checked per record, and the L2 permission makes the
+ *           panel confirm. Labels are derived (`loyalty_kit::resources.loyalty_account.*`). The
+ *           customer area gets the overview document instead (one area per resource).
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 3, 11, 13 and 16), ADR 0164 (panels are resources),
- *                     ADR 0082 (API areas), ADR 0139
+ * Governing contract: ADR 0294 (decisions 3, 11, 13 and 16), ADR 0164 (as amended by programming
+ *                     model v3.1, AGENTS.md: tables as server contracts, placement by input),
+ *                     ADR 0082 (API areas)
  */
 import { ApiArea, SortDirection } from "@stackra/contracts";
-import {
-  type Actions,
-  type BulkActions,
-  type Form,
-  type Infolist,
-  Resource,
-  type Table,
-} from "@stackra/panel";
-import { Icons } from "@stackra/ui/icons";
+import { type Actions, type Form, type Infolist, Resource, type Table } from "@stackra/panel";
 import { I18n } from "#stackra/i18n";
-import type { EnrollMemberInput } from "#core/schemas/enroll-member-input.schema";
+import type { LoyaltyAccountView } from "#core/schemas/loyalty-account-view.schema";
 import { EnrollMemberAction } from "#node/actions/enroll-member.action";
 import { FreezeAccountAction } from "#node/actions/freeze-account.action";
-import { LoyaltyAccount } from "#node/models/loyalty-account.model";
+import type { LoyaltyAccount } from "#node/models/loyalty-account.model";
+import type { EnrollMemberInput } from "#node/schemas/enroll-member-input.schema";
 
-/** Row and bulk actions hide when the permission or the record policy refuses. */
-export class LoyaltyAccountResource extends Resource(LoyaltyAccount, {
+/** Buttons hide when the permission or the record policy refuses; the run still decides. */
+export class LoyaltyAccountResource extends Resource<LoyaltyAccount, LoyaltyAccountView>({
   area: ApiArea.Admin,
   navigation: {
     group: I18n.loyalty_kit.nav.loyalty,
-    icon: Icons.Star,
+    icon: "star",
     order: 30,
   },
   operations: {
@@ -45,22 +45,16 @@ export class LoyaltyAccountResource extends Resource(LoyaltyAccount, {
   },
 }) {
   /** The list: the tier badge from the enum, frozen accounts flagged, newest first. */
-  override table(t: Table<LoyaltyAccount>) {
+  override table(t: Table<LoyaltyAccountView>) {
     return t
       .columns((c) => [
-        c.text("memberId").copyable().searchable(),
-        c.enum("tier").sortable(),
-        c.boolean("isFrozen", { trueLabel: I18n.loyalty_kit.account.frozen_badge }),
-        c.count("entries").sortable(),
-        c.dateTime("frozenAt").toggleable({ hiddenByDefault: true }),
-        c.dateTime("createdAt").sortable(),
+        c.from("memberId").copyable(),
+        c.from("tier").sortable(),
+        c.from("isFrozen"),
+        c.from("frozenAt").hidden(),
+        c.from("createdAt").sortable(),
       ])
-      .filters((f) => [
-        f.select("tier"),
-        f.boolean("isFrozen"),
-        f.dateRange("createdAt"),
-        f.trashed(),
-      ])
+      .filters((f) => [f.from("tier"), f.from("isFrozen"), f.from("createdAt"), f.trashed()])
       .defaultSort("createdAt", SortDirection.Desc);
   }
 
@@ -69,28 +63,22 @@ export class LoyaltyAccountResource extends Resource(LoyaltyAccount, {
    * address the panel mints when the form opens, so it is never a field.
    */
   override form(f: Form<EnrollMemberInput>) {
-    return f.fields((x) => [x.text("principalId").required(), x.enum("tier")]);
+    return f.fields((x) => [x.from("principalId"), x.from("tier")]);
   }
 
-  /** The View page: the account, its notes and the ledger as a read-only relation panel. */
-  override infolist(i: Infolist<LoyaltyAccount>) {
+  /** The View page: the account and when it was frozen. */
+  override infolist(i: Infolist<LoyaltyAccountView>) {
     return i.entries((e) => [
-      e.text("memberId"),
-      e.enum("tier"),
-      e.boolean("isFrozen"),
-      e.dateTime("frozenAt"),
-      e.keyValue("notes"),
-      e.relation("entries", { columns: ["kind", "points", "reference", "at"] }),
+      e.from("memberId"),
+      e.from("tier"),
+      e.from("isFrozen"),
+      e.from("frozenAt"),
+      e.from("createdAt"),
     ]);
   }
 
-  /** Freeze on a row and on the View page; the record fills `accountId`. */
-  override actions(a: Actions<LoyaltyAccount>) {
-    return [a.run(FreezeAccountAction)];
-  }
-
-  /** Freeze many accounts at once with one confirmation; each is still checked by the policy. */
-  override bulkActions(b: BulkActions<LoyaltyAccount>) {
-    return [b.run(FreezeAccountAction)];
+  /** Freeze on a row, on the View page and for a selection; the record fills `accountId`. */
+  override actions(a: Actions<LoyaltyAccountView, LoyaltyAccountView>) {
+    return [a.run(FreezeAccountAction).bulk()];
   }
 }

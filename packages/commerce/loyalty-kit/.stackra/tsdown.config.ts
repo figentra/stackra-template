@@ -14,5 +14,6 @@ export default libraryPreset({
   contracts: ".stackra/entry/contracts.ts",
   node: ".stackra/entry/node.ts",
   react: ".stackra/entry/react.ts",
+  native: ".stackra/entry/native.ts",
   testing: ".stackra/entry/testing.ts",
 });

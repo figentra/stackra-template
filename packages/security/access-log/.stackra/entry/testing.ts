@@ -8,7 +8,5 @@
  */
 export { AccessLogEntryFactory } from "#node/database/factories/access-log-entry.factory";
 export { AccessLogSinkFake } from "#testing/access-log-sink.fake";
-export {
-  type ToHaveLoggedAccessOptions,
-  toHaveLoggedAccess,
-} from "#testing/to-have-logged-access.matcher";
+export { toHaveLoggedAccess } from "#testing/to-have-logged-access.matcher";
+export type { ToHaveLoggedAccessOptions } from "#testing/to-have-logged-access-options.type";

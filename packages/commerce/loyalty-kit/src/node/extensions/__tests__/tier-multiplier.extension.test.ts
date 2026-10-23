@@ -1,6 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: proves gold doubles and bronze is untouched.
+ * Purpose: proves gold doubles and bronze is untouched, through the `handle` of the earnAdjust
+ *          extension.
  * Boundary: unit tier; the extension has no dependencies, so it is constructed directly; the
  *           context comes from @stackra/actions/testing.
  * Runtime: node
@@ -22,7 +23,7 @@ describe(TierMultiplierExtension, () => {
     const extension = new TierMultiplierExtension();
     const ctx = fakeExtensionContext();
 
-    expect(await extension.earnAdjust(100, { ...draft, tier: LoyaltyTier.Bronze }, ctx)).toBe(100);
-    expect(await extension.earnAdjust(100, { ...draft, tier: LoyaltyTier.Gold }, ctx)).toBe(200);
+    expect(await extension.handle(100, { ...draft, tier: LoyaltyTier.Bronze }, ctx)).toBe(100);
+    expect(await extension.handle(100, { ...draft, tier: LoyaltyTier.Gold }, ctx)).toBe(200);
   });
 });

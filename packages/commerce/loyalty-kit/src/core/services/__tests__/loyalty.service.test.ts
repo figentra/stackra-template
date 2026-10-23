@@ -9,14 +9,19 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decision 15), ADR 0143, ADR 0022 (tests beside the subject)
  */
-import { LoyaltyKitConfig, LoyaltyService, memberId } from "@acme/loyalty-kit";
+import {
+  InsufficientPointsError,
+  LoyaltyKitConfig,
+  LoyaltyService,
+  memberId,
+  NotAMemberError,
+} from "@acme/loyalty-kit";
 import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 import { LoyaltyMembersFake, pointsEntry } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { beforeEach, describe, expect, freezeClock, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
 
 /** The one enrolled member of these cases. */
 const usr1 = memberId("usr_1");
@@ -70,10 +75,10 @@ describe(LoyaltyService, () => {
   it("refuses a redemption above the balance, and any redemption by a non-member", async () => {
     await ledger.append(pointsEntry.build({ memberId: usr1, points: 100, at })); // 100 points
     await expect(loyalty.assertCanRedeem(usr1, 101)).rejects.toRefuseWith(
-      refusal(Refusals.loyalty_kit.insufficient_points),
+      refusal(InsufficientPointsError),
     );
     await expect(loyalty.assertCanRedeem(memberId("usr_2"), 1)).rejects.toRefuseWith(
-      refusal(Refusals.loyalty_kit.not_a_member),
+      refusal(NotAMemberError),
     );
   });
 });

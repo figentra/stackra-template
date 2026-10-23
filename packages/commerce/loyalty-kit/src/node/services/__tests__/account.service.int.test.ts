@@ -41,7 +41,7 @@ describe(AccountService, () => {
       .override(
         SettingsReader,
         fakeSettings([
-          [LoyaltyKitSettings, { expiryMonths: 12, silverFrom: 1_500, goldFrom: 9_000 }],
+          [LoyaltyKitSettings, { expiryMonths: 12, tiers: { silverFrom: 1_500, goldFrom: 9_000 } }],
         ]),
       )
       .compile();

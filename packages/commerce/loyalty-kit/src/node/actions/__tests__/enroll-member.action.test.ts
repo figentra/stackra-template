@@ -8,6 +8,7 @@
  * Runtime: node
  * Governing contract: ADR 0098 (one pipeline), ADR 0294 (decision 16), ADR 0022
  */
+import { NotOwnPrincipalError } from "@acme/loyalty-kit";
 import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 import { LoyaltyMembersFake } from "@acme/loyalty-kit/testing";
@@ -16,7 +17,6 @@ import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
 import { EnrollMemberAction } from "#node/actions/enroll-member.action";
 import { AccountEnrolled } from "#node/events/account-enrolled.event";
 
@@ -40,7 +40,7 @@ describe(EnrollMemberAction, () => {
 
     const result = await run(EnrollMemberAction, input, { as: actors.customer("usr_1") });
 
-    expect(result).toRefuseWith(refusal(Refusals.loyalty_kit.not_own_principal));
+    expect(result).toRefuseWith(refusal(NotOwnPrincipalError));
   });
 
   /**

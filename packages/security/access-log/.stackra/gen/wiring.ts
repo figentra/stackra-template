@@ -15,10 +15,12 @@ import { Clock, Logger } from "@stackra/contracts";
 import { repositoryOf } from "@stackra/database";
 import { AccessLogConfig } from "#config/access-log.config";
 import { AccessLogSink } from "#contracts/ports/access-log-sink.port";
+import { AccessLogOptions } from "#core/schemas/access-log-options.schema";
 import { AccessLogService } from "#core/services/access-log.service";
 import { AccessLogExplorer } from "#node/access-log.explorer";
 import { AccessLogModule } from "#node/access-log.module";
 import { PurgeAccessLogAction } from "#node/actions/purge-access-log.action";
+import { DataClassificationMacro } from "#node/database/macros/data-classification.macro";
 import { AccessLogEntry } from "#node/models/access-log-entry.model";
 import { AccessLogEntryResource } from "#node/resources/access-log-entry/access-log-entry.resource";
 import { AccessLogEntryOperations } from "./operations";
@@ -86,8 +88,20 @@ export const wiring = {
       deps: [],
     },
   ],
-  /** The package's config class; a host override replaces it under the same key. */
-  config: [{ key: "access_log", provide: AccessLogConfig }],
+  /**
+   * The package's config class with its options shape and environment map; a host override
+   * replaces it under the same key.
+   */
+  config: [
+    {
+      key: "access_log",
+      provide: AccessLogConfig,
+      schema: AccessLogOptions,
+      env: { sink: "STACKRA_ACCESS_LOG_SINK" },
+    },
+  ],
+  /** Blueprint macros this package ships; every host that imports it may call them. */
+  macros: [{ name: "dataClassification", provide: DataClassificationMacro }],
   drivers: [
     {
       port: AccessLogSink,

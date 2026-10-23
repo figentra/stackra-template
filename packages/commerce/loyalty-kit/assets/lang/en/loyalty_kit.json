@@ -25,7 +25,8 @@
       "title": "Points today"
     },
     "points_balance": {
-      "title": "Points balance"
+      "title": "Points balance",
+      "expiry_note": "Some of your points expire soon."
     }
   },
   "documents": {
@@ -33,16 +34,21 @@
       "title": "My points"
     }
   },
-  "overview": {
-    "redeem_title": "Spend points",
-    "expiry_note": "Some of your points expire soon."
-  },
   "settings": {
-    "loyalty_kit": {
-      "title": "Loyalty",
-      "expiry_months": "Points expire after (months)",
-      "silver_from": "Silver from (points)",
-      "gold_from": "Gold from (points)"
+    "title": "Loyalty",
+    "expiry_months": {
+      "label": "Points expire after (months)",
+      "help": "Unspent earned points expire this many months after they were earned."
+    },
+    "tiers": {
+      "label": "Tiers",
+      "help": "The balances at which an account is promoted; an account is never demoted automatically.",
+      "silver_from": {
+        "label": "Silver from (points)"
+      },
+      "gold_from": {
+        "label": "Gold from (points)"
+      }
     }
   },
   "permissions": {
@@ -57,11 +63,17 @@
   "actions": {
     "account": {
       "enroll": {
-        "success": "Member enrolled"
+        "success": "Member enrolled",
+        "intents": ["enroll this customer in loyalty", "add them to the points programme"]
       },
       "freeze": {
         "confirm": "Freeze this account? The member cannot earn or spend until it is unfrozen.",
         "success": "Account updated"
+      }
+    },
+    "points": {
+      "balance": {
+        "intents": ["how many points do I have", "show my loyalty balance"]
       }
     }
   },

@@ -7,14 +7,19 @@
  *           unit of work flushes. The member id is the host principal's public id, whatever its
  *           prefix, so it stays a bounded string; it is classified pseudonymous (personal only by
  *           linkage to the host's principal), which the erasure and export flows read. Every
- *           index is an `@Index` here, so `stackra db diff` never proposes dropping one. No
+ *           index is declared here (`@Index`, and the filter indexes of `@Searchable`), so
+ *           `stackra db diff` never proposes dropping one. `@Searchable` is the search facet: its
+ *           `text` fields feed the staff search box of the account resource and the global search,
+ *           its `filters` are the keys the resource may filter and sort on, each indexed; the
+ *           migration writes them with the search package's `t.searchable(...)` macro. No
  *           constructor-made state.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 4, 6, 11, 20 and 27), ADR 0133 (traits), ADR 0134
- *                     (classification), ADR 0239 (BelongsToTenant)
+ *                     (classification), ADR 0221 (Postgres hybrid search), ADR 0239
+ *                     (BelongsToTenant)
  */
 import { DataClassification } from "@stackra/contracts";
-import { Collection, Index, Model, OneToMany } from "@stackra/model";
+import { Collection, Index, Model, OneToMany, Searchable } from "@stackra/model";
 import {
   BelongsToTenant,
   HasPublicId,
@@ -35,6 +40,10 @@ import type { AccountNotes } from "#node/schemas/account-notes.schema";
 @Index(["tenantId", "memberId"], {
   unique: true,
   where: "deleted_at is null",
+})
+@Searchable({
+  text: ["memberId"],
+  filters: ["tier", "isFrozen", "createdAt"],
 })
 export class LoyaltyAccount extends Model.with(
   HasPublicId("lac"),

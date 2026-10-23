@@ -1,20 +1,29 @@
 /**
  * Stackra file contract:
- * Purpose: runtime, per-tenant loyalty settings: the expiry window and the tier thresholds,
- *          resolved through the settings cascade (platform → tenant).
+ * Purpose: runtime loyalty settings a tenant admin tunes without a deploy: the expiry window and
+ *          the tier thresholds, resolved through the settings cascade (platform → tenant).
  * Boundary: the module's one settings group; its key is the package key (`loyalty_kit`) and each
- *           field is a setting named after the property (`loyalty_kit.expiryMonths`). Gen writes
- *           the settings page in the admin area and the `loyalty_kit.settings.update` permission;
- *           labels are the derived i18n keys `loyalty_kit::settings.loyalty_kit.<field>`. Code
- *           reads the resolved group with `SettingsReader#for(LoyaltyKitSettings)`; deploy-time
- *           values (the ledger driver, the earn rate) are config.
+ *           field is a setting named by its path (`loyalty_kit.expiryMonths`,
+ *           `loyalty_kit.tiers.goldFrom`). A field typed by a schema class is a section, one card
+ *           on the page, one level deep; its defaults are the section class's initializers.
+ *           `@Setting` narrows one field: `lockable` lets the platform pin the value for every
+ *           tenant, `approval` makes a change wait for a second holder of
+ *           `loyalty_kit.settings.approve`. `rules(r)` is the cross-field check, run on client and
+ *           server. Gen writes the settings page in the admin area, the get, update, history,
+ *           revert and approve operations, their permissions and the `settings.changed.v1` event;
+ *           labels are `loyalty_kit::settings.<path>.label`. Code reads the resolved group with
+ *           `SettingsReader#get(LoyaltyKitSettings)`, which caches it per tenant version and drops
+ *           it on `settings.changed.v1`, so no cache module is imported. Never a secret;
+ *           deploy-time values (the ledger driver, the earn rate) are config.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 6, 13, 16 and 20), ADR 0108, ADR 0213 (settings v2)
+ * Governing contract: ADR 0294 (decisions 13, 16 and 20), ADR 0108 and ADR 0213 (settings, as
+ *                     amended by programming model v3.1, AGENTS.md)
  */
-import { Setting, SettingScope, Settings } from "@stackra/settings";
+import { Setting, SettingScope, Settings, type SettingsRules } from "@stackra/settings";
 import { Int } from "@stackra/validation";
+import type { LoyaltyTierSettings } from "#node/schemas/loyalty-tier-settings.schema";
 
-/** What a tenant admin tunes without a deploy; the platform scope holds the defaults below. */
+/** The platform scope holds the defaults below; a tenant overrides what is not locked. */
 export class LoyaltyKitSettings extends Settings({
   scopes: [SettingScope.Platform, SettingScope.Tenant],
 }) {
@@ -23,14 +32,15 @@ export class LoyaltyKitSettings extends Settings({
     min: 1,
     max: 60,
   })
+  @Setting({ lockable: true })
   expiryMonths = 12;
 
-  /** Balance at which an account becomes silver. */
-  @Int({ min: 0 })
-  silverFrom = 1_000;
+  /** The tier thresholds; changing a member benefit needs a second admin's approval. */
+  @Setting({ approval: true })
+  tiers!: LoyaltyTierSettings;
 
-  /** Balance at which an account becomes gold; the platform may lock it for franchise tenants. */
-  @Int({ min: 0 })
-  @Setting({ lockable: true })
-  goldFrom = 5_000;
+  /** Silver must start below gold, or no account could ever be silver. */
+  override rules(r: SettingsRules<LoyaltyKitSettings>) {
+    return [r.lessThan("tiers.silverFrom", "tiers.goldFrom")];
+  }
 }

@@ -1,7 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: the LoyaltyMembers port: who may redeem. The kit asks; the host answers from its own
- *          customer data.
+ * Purpose: the LoyaltyMembers port: who may redeem. A port is an interface the package defines and
+ *          someone else implements: the kit asks the question, the host answers it from its own
+ *          customer data, so the kit never imports the host.
  * Boundary: an abstract class that is its own token, key `loyalty_kit.LoyaltyMembers`. The kit
  *           ships no driver for it: a host writes one in its own `drivers/` folder (commerce's
  *           `commerce-loyalty-members.driver.ts`, named `commerce`), which is the port's only

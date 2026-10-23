@@ -3,25 +3,28 @@
  * Purpose: the steps behind `loyalty_kit.points.redeem`: quote (verify included), debit, confirm.
  *          The debit is undone (credited back) when confirmation never comes.
  * Boundary: the public async methods are the steps, run in declaration order; `undoDebit`
- *           compensates `debit`; `output` maps the results to the action's output. Each step is
- *           its own transaction and is idempotent on the run id. The run parks before `confirm`
- *           until ConfirmRedemptionAction sends RedemptionConfirmed for the same member and
- *           reference; no step body waits, so the same graph runs on any workflow engine. The run
- *           timeout covers that wait. Started only by RedeemPointsAction through `ctx.run`.
+ *           compensates `debit`; `output` maps the results to the action's output. A step needs
+ *           `@Step` only when it takes options (here `confirm` waits for a signal); every other
+ *           public method is a step by its place in the class. Each step is its own transaction
+ *           and is idempotent on the run id. The run parks before `confirm` until
+ *           ConfirmRedemptionAction sends RedemptionConfirmed for the same member and reference;
+ *           no step body waits, so the same graph runs on any workflow engine. The run timeout
+ *           covers that wait. Started only by RedeemPointsAction through `ctx.run`.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 6, 16 and 18), ADR 0101, ADR 0151, ADR 0152 decision 1
- *                     (`waitFor`), ADR 0265 (the owner runs its verify point)
+ *                     (`waitFor`), ADR 0265 (as amended by programming model v3.1, AGENTS.md:
+ *                     the owner runs its `before` slot)
  */
 import { type Run, Step, type StepContext, Workflow } from "@stackra/workflow";
 import { EntryKind } from "#contracts/enums/entry-kind.enum";
 import type { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
 import { memberId } from "#core/functions/member-id.function";
-import type { RedeemPointsInput } from "#core/schemas/redeem-points-input.schema";
-import { RedeemPointsOutput } from "#core/schemas/redeem-points-output.schema";
 import type { LoyaltyService } from "#core/services/loyalty.service";
 import { PointsRedeemed } from "#node/events/points-redeemed.event";
 import type { LoyaltyKitExtensionPoint } from "#node/extensions/loyalty-kit.extension-point";
 import { QuotedRedemption } from "#node/schemas/quoted-redemption.schema";
+import type { RedeemPointsInput } from "#node/schemas/redeem-points-input.schema";
+import { RedeemPointsOutput } from "#node/schemas/redeem-points-output.schema";
 import { RedemptionConfirmed } from "#node/workflows/redemption-confirmed.signal";
 
 /** The run timeout is the confirmation wait plus room for the quote and the debit. */
@@ -36,15 +39,16 @@ export class RedeemPointsWorkflow extends Workflow<RedeemPointsInput>({ timeout:
   }
 
   /**
-   * Verifies (the kit's own rules, then every `redeemVerify` implementer) and quotes; no side
-   * effects, so no undo.
-   * @throws NotAMemberError, InsufficientPointsError, or the first implementer's refusal.
+   * Runs the `redeemVerify` slot, then the kit's own rules, and quotes; no side effects, so no
+   * undo. A `before` slot returns the arguments the step continues with, so an extension may
+   * lower the points asked for; the reference stays the caller's.
+   * @throws the first extension's refusal, NotAMemberError or InsufficientPointsError.
    */
   async quote(run: Run<this>, ctx: StepContext): Promise<QuotedRedemption> {
     const member = memberId((ctx.actor.onBehalfOf ?? ctx.actor).id);
-    await this.loyalty.assertCanRedeem(member, run.input.points);
-    await this.extensions.redeemVerify(run.input, ctx);
-    const quote = await this.loyalty.quote(member, run.input.points, run.input.totalMinor);
+    const [input] = await this.extensions.redeemVerify(run.input, ctx);
+    await this.loyalty.assertCanRedeem(member, input.points);
+    const quote = await this.loyalty.quote(member, input.points, input.totalMinor);
     return QuotedRedemption.create({
       memberId: member,
       points: quote.points,

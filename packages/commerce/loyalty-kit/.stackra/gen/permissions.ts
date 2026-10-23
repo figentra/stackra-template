@@ -42,7 +42,16 @@ export const permissions = {
     usedBy: ["loyalty_kit.points.expire@1"],
     system: true,
   },
-  "loyalty_kit.settings.update": { risk: Risk.L2, usedBy: ["LoyaltyKitSettings page"] },
+  "loyalty_kit.settings.read": { risk: Risk.L0, usedBy: ["loyalty_kit.settings.get@1"] },
+  "loyalty_kit.settings.update": {
+    risk: Risk.L2,
+    usedBy: [
+      "loyalty_kit.settings.update@1",
+      "loyalty_kit.settings.history@1",
+      "loyalty_kit.settings.revert@1",
+    ],
+  },
+  "loyalty_kit.settings.approve": { risk: Risk.L2, usedBy: ["loyalty_kit.settings.approve@1"] },
 } as const;
 
 /** Union of the keys above; a role definition in IAM is typed against it. */

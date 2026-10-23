@@ -19,6 +19,7 @@ import { SettingsReader } from "@stackra/settings";
 import { LoyaltyKitConfig } from "#config/loyalty-kit.config";
 import { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
 import { LoyaltyMembers } from "#contracts/ports/loyalty-members.port";
+import { LoyaltyKitOptions } from "#core/schemas/loyalty-kit-options.schema";
 import { LoyaltyService } from "#core/services/loyalty.service";
 import { LoyaltyAccountPolicy } from "#node/access/loyalty-account.policy";
 import { ConfirmRedemptionAction } from "#node/actions/confirm-redemption.action";
@@ -183,19 +184,42 @@ export const wiring = {
       deps: [],
     },
   ],
-  /** Extension points gen builds from their implementers; injected by class like a binding. */
+  /** Partners gen read from type arguments; nothing passes them at run time. */
+  partners: [
+    { class: LoyaltyAccountPolicy, model: "loyalty_kit.loyalty_account" },
+    { class: AccountService, model: "loyalty_kit.loyalty_account" },
+    {
+      class: LoyaltyAccountResource,
+      model: "loyalty_kit.loyalty_account",
+      row: "LoyaltyAccountView",
+    },
+  ],
+  /**
+   * Extension points gen builds from their slots' extensions (each extension's indexed type
+   * argument names its slot); injected by class like a binding.
+   */
   extensionPoints: [
     {
       module: "loyalty_kit",
       point: LoyaltyKitExtensionPoint,
-      implementers: {
-        earnAdjust: [TierMultiplierExtension],
-        redeemVerify: [],
+      slots: {
+        earnAdjust: { kind: "after", extensions: [TierMultiplierExtension] },
+        redeemVerify: { kind: "before", extensions: [] },
       },
     },
   ],
-  /** The package's config class; a host override replaces it under the same key. */
-  config: [{ key: "loyalty_kit", provide: LoyaltyKitConfig }],
+  /**
+   * The package's config class with its options shape and environment map; a host override
+   * replaces it under the same key.
+   */
+  config: [
+    {
+      key: "loyalty_kit",
+      provide: LoyaltyKitConfig,
+      schema: LoyaltyKitOptions,
+      env: { ledger: "STACKRA_LOYALTY_KIT_LEDGER" },
+    },
+  ],
   drivers: [
     {
       port: LoyaltyLedger,
@@ -228,5 +252,6 @@ export const wiring = {
     unexportedInjections: "none",
     unresolvedTypes: "LoyaltyMembers: provided by the host",
     policyVerbsWithoutPermission: "none",
+    partnerMismatch: "none",
   },
 } satisfies Wiring;

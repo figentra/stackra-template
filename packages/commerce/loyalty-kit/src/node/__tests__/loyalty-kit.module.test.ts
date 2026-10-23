@@ -11,10 +11,10 @@ import { LoyaltyKitConfig, MemoryLoyaltyLedgerDriver } from "@acme/loyalty-kit";
 import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 import { LoyaltyMembersFake } from "@acme/loyalty-kit/testing";
+import { UnresolvedPortError } from "@stackra/container";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
 
 /** A ledger of the kind a host writes for a test: one class extending the port. */
 class HostLedger extends LoyaltyLedger {
@@ -63,6 +63,6 @@ describe(LoyaltyKitModule, () => {
   it("refuses to compile without a LoyaltyMembers driver", async () => {
     await expect(
       createTestingModule(LoyaltyKitModule).useDrivers("memory").compile(),
-    ).rejects.toRefuseWith(refusal(Refusals.core.unresolved_port));
+    ).rejects.toRefuseWith(refusal(UnresolvedPortError));
   });
 });

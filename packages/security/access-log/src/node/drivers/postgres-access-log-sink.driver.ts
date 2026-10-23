@@ -5,6 +5,8 @@
  * Boundary: implements the port only. Its name is the file prefix (`postgres`), the package
  *           default in AccessLogConfig; the generated wiring loads it lazily, so it never reaches a
  *           browser bundle.
+ *           `Driver(AccessLogSink)` takes the port as a value because the driver inherits its
+ *           abstract members; the call returns the class, so there is no `defineDriver`.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 15 and 16), ADR 0263
  */

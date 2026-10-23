@@ -3,7 +3,7 @@
  * Purpose: the PointsEntry fixture: builds port DTOs (values, not rows) for driver and matcher
  *          tests.
  * Boundary: a test fixture in `testing/`, built on the generic `factory` of @stackra/testing. The
- *           port's DTO is not a model, so this is no `Factory(Model)` kind and no `.factory.ts`:
+ *           port's DTO is not a model, so this is no `Factory<Model>` kind and no `.factory.ts`:
  *           that suffix belongs to `database/factories/` alone. `at` is the frozen test clock.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 2 and 15), ADR 0269 (helpers in the owning package)

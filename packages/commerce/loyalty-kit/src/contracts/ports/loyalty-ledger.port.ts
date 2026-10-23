@@ -1,12 +1,15 @@
 /**
  * Stackra file contract:
- * Purpose: the LoyaltyLedger port: where points live. The kit drives it; drivers implement it.
+ * Purpose: the LoyaltyLedger port: where points live. A port is the interface the kit codes
+ *          against without knowing who implements it: an abstract class listing the methods, with
+ *          no code. The kit calls it; a driver (memory, postgres, or a host's own) implements it.
  * Boundary: an abstract class that is its own token, key `loyalty_kit.LoyaltyLedger`. Drivers
  *           extend `Driver(LoyaltyLedger)` and are named by their file prefix (`memory`,
  *           `postgres`); config `ledger` picks one by name; a host swaps in its own class with
  *           `@Replaces(LoyaltyLedger)`. A leaf file: it imports nothing outside src/contracts.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 15, 16 and 17), ADR 0263 (ports resolve by type)
+ * Governing contract: ADR 0294 (decisions 15, 16 and 17), ADR 0263 (ports resolve by type),
+ *                     ADR 0260 decision 9
  */
 import { Port } from "@stackra/container";
 import type { MemberId } from "#contracts/types/member-id.type";

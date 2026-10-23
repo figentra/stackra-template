@@ -1,0 +1,10 @@
+{
+  // Stackra file contract:
+  // Purpose: TypeScript settings of the theme package: the library preset.
+  // Boundary: exactly one preset and nothing local: the preset owns strictness, legacy decorators
+  //           (no emitDecoratorMetadata), module resolution and the member's include (`src`,
+  //           resolved from this file's folder); `#` subpaths resolve through package.json imports.
+  // Runtime: node
+  // Governing contract: ADR 0005 (legacy decorators), ADR 0003 (one preset per member)
+  "extends": "@stackra/typescript-config/library"
+}

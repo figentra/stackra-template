@@ -9,14 +9,13 @@
  * Runtime: node
  * Governing contract: ADR 0105 (as amended), ADR 0141, ADR 0294 (decision 16), ADR 0022
  */
-import { memberId } from "@acme/loyalty-kit";
+import { AccountFrozenError, memberId } from "@acme/loyalty-kit";
 import { LoyaltyMembers, LoyaltyTier } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule, PointsEarned } from "@acme/loyalty-kit/node";
 import { LoyaltyMembersFake, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { beforeEach, describe, expect, freezeClock, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
 import { AccountService } from "#node/services/account.service";
 
 /** One purchase of 100.00, idempotent on its order reference. */
@@ -70,6 +69,6 @@ describe(AccountService, () => {
 
     await expect(
       accounts.earn(memberId(LoyaltyKitDemoSeeder.ids.silver), purchase),
-    ).rejects.toRefuseWith(refusal(Refusals.loyalty_kit.account_frozen));
+    ).rejects.toRefuseWith(refusal(AccountFrozenError));
   });
 });

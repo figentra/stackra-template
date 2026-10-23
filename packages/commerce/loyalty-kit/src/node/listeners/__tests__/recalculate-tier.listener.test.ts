@@ -29,7 +29,9 @@ function compile() {
     .override(LoyaltyMembers, LoyaltyMembersFake.with([LoyaltyKitDemoSeeder.ids.bronze]))
     .override(
       SettingsReader,
-      fakeSettings([[LoyaltyKitSettings, { expiryMonths: 12, silverFrom: 500, goldFrom: 1_500 }]]),
+      fakeSettings([
+        [LoyaltyKitSettings, { expiryMonths: 12, tiers: { silverFrom: 500, goldFrom: 1_500 } }],
+      ]),
     )
     .compile();
 }

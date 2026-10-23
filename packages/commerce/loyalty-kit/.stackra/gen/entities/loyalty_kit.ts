@@ -28,6 +28,12 @@ export const LoyaltyAccountSchema = new EntitySchema<LoyaltyAccount>({
         '"loyalty_kit"."loyalty_accounts" ("tenant_id", "member_id") where "deleted_at" is null',
     },
   ],
+  // the filter indexes of `@Searchable`; the search vector itself belongs to the search driver
+  indexes: [
+    { name: "idx_loyalty_accounts_tenant_id_tier", properties: ["tenantId", "tier"] },
+    { name: "idx_loyalty_accounts_tenant_id_is_frozen", properties: ["tenantId", "isFrozen"] },
+    { name: "idx_loyalty_accounts_tenant_id_created_at", properties: ["tenantId", "createdAt"] },
+  ],
   properties: {
     id: { type: "string", primary: true, columnType: "varchar(30)" }, // trait HasPublicId("lac")
     tenantId: { type: "uuid", index: true }, // trait BelongsToTenant

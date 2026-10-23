@@ -17,10 +17,10 @@ import { LoyaltyMembersFake, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/test
 import { run } from "@stackra/actions/testing";
 import { createTestingModule, type TestingApp } from "@stackra/container/testing";
 import { usePostgres } from "@stackra/database/testing";
+import { WorkflowTimedOutError } from "@stackra/errors";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { beforeAll, describe, expect, freezeClock, freezeIds, it } from "@stackra/testing";
-import { Refusals } from "#stackra/manifest";
 import { ConfirmRedemptionAction } from "#node/actions/confirm-redemption.action";
 import { RedeemPointsAction } from "#node/actions/redeem-points.action";
 import { RedeemPointsWorkflow } from "#node/workflows/redeem-points.workflow";
@@ -97,6 +97,6 @@ describe(RedeemPointsWorkflow, () => {
       "confirm:timed_out",
     ]);
     await expect(app.get(LoyaltyLedger)).toHaveBalance(gold, 1_000);
-    expect(result).toRefuseWith(refusal(Refusals.core.workflow_timed_out));
+    expect(result).toRefuseWith(refusal(WorkflowTimedOutError));
   });
 });

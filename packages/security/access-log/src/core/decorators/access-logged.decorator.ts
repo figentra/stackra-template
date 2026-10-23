@@ -22,7 +22,7 @@ import type { AccessLoggedOptions } from "#contracts/types/access-logged-options
  * @example
  * ```ts
  * @AccessLogged({ classification: DataClassification.Personal, subjects: "customerId" })
- * export class CustomerService extends CrudService(Customer) { … }
+ * export class CustomerService extends CrudService<Customer> { … }
  * ```
  */
 export const AccessLogged = createDecorator<AccessLoggedOptions>({

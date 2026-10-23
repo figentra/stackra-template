@@ -1,27 +1,33 @@
 /**
  * Stackra file contract:
- * Purpose: package defaults of the access log: which sink, and the retention the purge job
+ * Purpose: the access log's configuration class: which sink, and the retention the purge job
  *          enforces.
- * Boundary: a config class: the property types are the rules, the initializers the defaults, and
- *           gen compiles them to `AccessLogConfig$`, which hosts extend. The key is the package key
- *           (`access_log`), because the file is named after the package. Values only; a host
- *           overrides with a `<Host>AccessLogConfig` subclass, and a custom sink class is a host
- *           `@Replaces(AccessLogSink)`. Runway `config.access_log.sink` is the per-environment
- *           layer of the driver choice.
+ * Boundary: the class is the DI token and its key is derived from the file name (`access_log`).
+ *           `schema` names the shape (AccessLogOptions); `env` maps the one field read from the
+ *           environment to its variable. Values only; a custom sink class is a host
+ *           `@Replaces(AccessLogSink)`, and runway `config.access_log.sink` is the per-environment
+ *           layer of the driver choice. A second override of this class, or a second class with
+ *           the key, fails gen.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 4, 19 and 20), ADR 0146 (config layers), ADR 0263
+ * Governing contract: ADR 0294 (decisions 19 and 20), ADR 0146 (config layers, as amended by
+ *                     programming model v3.1, AGENTS.md), ADR 0263
  */
 import { Config } from "@stackra/config";
-import type { DriverName } from "@stackra/container";
-import { Int } from "@stackra/validation";
-import type { AccessLogSink } from "#contracts/ports/access-log-sink.port";
+import { AccessLogOptions } from "#core/schemas/access-log-options.schema";
 
-/** Injected by type; validated once at boot. */
-export class AccessLogConfig extends Config {
-  /** Which sink driver runs; the names are the driver file prefixes, so a typo is a type error. */
-  sink: DriverName<AccessLogSink> = "postgres";
-
-  /** Days a record is kept before `PurgeAccessLogAction` deletes it; bounded by a legal minimum. */
-  @Int({ min: 90 })
-  retentionDays = 400;
-}
+/**
+ * Injected by type; validated once at boot. A host overrides values under the same name:
+ *
+ * @example
+ * ```ts
+ * import { AccessLogConfig as BaseAccessLogConfig } from "@acme/access-log";
+ *
+ * export class AccessLogConfig extends BaseAccessLogConfig {
+ *   override retentionDays = 730;
+ * }
+ * ```
+ */
+export class AccessLogConfig extends Config({
+  schema: AccessLogOptions,
+  env: { sink: "STACKRA_ACCESS_LOG_SINK" },
+}) {}

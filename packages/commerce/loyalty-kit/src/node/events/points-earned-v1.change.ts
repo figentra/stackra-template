@@ -3,11 +3,13 @@
  * Purpose: the version change of `loyalty_kit.points.earned`: v1 had no tier and no balance. `up`
  *          reads a stored v1 payload as v2; `down` gives a v1 consumer the shape it was built
  *          against.
- * Boundary: a change beside its event: the fields are the v1 shape. Both versions are published
+ * Boundary: a change beside its event: the event it versions is the type argument
+ *           (`Change<PointsEarned>`), the fields are the v1 shape. Both versions are published
  *           until the sunset; after it, gen fails while this file still exists, and deleting it
  *           stops v1.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 1, 13 and 16), ADR 0141, ADR 0131 (sunset)
+ * Governing contract: ADR 0294 (decisions 1, 13 and 16, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0141, ADR 0131 (sunset)
  */
 import { Int } from "@stackra/validation";
 import { Change } from "@stackra/versioning";
@@ -18,7 +20,7 @@ import { PointsEarned } from "#node/events/points-earned.event";
  * A v1 row has no balance, so `balanceAfter` is the credit itself and the tier is bronze; listeners
  * treat both as lower bounds.
  */
-export class PointsEarnedV1Change extends Change(PointsEarned, {
+export class PointsEarnedV1Change extends Change<PointsEarned>({
   from: 1,
   sunset: "2027-04-01",
 }) {

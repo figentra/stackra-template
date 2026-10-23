@@ -7,7 +7,9 @@
  *           a browser bundle. The journal owns the arithmetic every ledger shares (idempotent
  *           append per reference, running balance, set-based reversal); the kit keeps its own
  *           domain port, so a host can still `@Replaces` it. Runs inside whatever transaction the
- *           caller holds. No SQL is written here.
+ *           caller holds. No SQL is written here. `Driver(LoyaltyLedger)` takes the port as a
+ *           value because the driver inherits its abstract members; the call returns the class,
+ *           so there is no `defineDriver`.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 15 and 16), ADR 0220 (integer minor units), ADR 0266
  */

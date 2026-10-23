@@ -115,6 +115,8 @@
     "@stackra/panel": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
     "@stackra/scheduler": "catalog:stackra",
+    "@stackra/search": "catalog:stackra",
+    "@stackra/tenancy": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "zod": "catalog:"
   },

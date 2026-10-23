@@ -2,7 +2,7 @@
   "name": "@acme/loyalty-kit",
   "version": "0.1.0",
   "private": true,
-  "description": "Points, tiers and redemption as a module: a ledger port with postgres and memory drivers, extension points and a redemption workflow.",
+  "description": "Points, tiers and redemption as a module: a ledger port with postgres and memory drivers, an extension point, a redemption workflow, and web and native renderers.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -55,6 +55,12 @@
       "./src/react/*.tsx",
       "./src/react/*/index.ts"
     ],
+    "#native/*": [
+      "./src/native/*",
+      "./src/native/*.ts",
+      "./src/native/*.tsx",
+      "./src/native/*/index.ts"
+    ],
     "#testing/*": [
       "./src/testing/*",
       "./src/testing/*.ts",
@@ -73,6 +79,7 @@
     "./contracts": "./.stackra/entry/contracts.ts",
     "./node": "./.stackra/entry/node.ts",
     "./react": "./.stackra/entry/react.ts",
+    "./native": "./.stackra/entry/native.ts",
     "./testing": "./.stackra/entry/testing.ts",
     "./assets/*": "./assets/*"
   },
@@ -93,6 +100,10 @@
       "./react": {
         "types": "./dist/react.d.mts",
         "import": "./dist/react.mjs"
+      },
+      "./native": {
+        "types": "./dist/native.d.mts",
+        "import": "./dist/native.mjs"
       },
       "./testing": {
         "types": "./dist/testing.d.mts",
@@ -128,7 +139,9 @@
     "@stackra/panel": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
     "@stackra/scheduler": "catalog:stackra",
+    "@stackra/search": "catalog:stackra",
     "@stackra/settings": "catalog:stackra",
+    "@stackra/tenancy": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "@stackra/versioning": "catalog:stackra",
     "@stackra/workflow": "catalog:stackra",
@@ -151,10 +164,14 @@
     "@stackra/i18n": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
     "@stackra/ui": "catalog:stackra",
-    "react": "catalog:"
+    "react": "catalog:",
+    "react-native": "catalog:mobile"
   },
   "peerDependenciesMeta": {
     "@stackra/testing": {
+      "optional": true
+    },
+    "react-native": {
       "optional": true
     }
   }

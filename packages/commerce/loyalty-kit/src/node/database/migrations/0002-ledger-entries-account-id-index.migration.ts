@@ -1,23 +1,24 @@
 /**
  * Stackra file contract:
- * Purpose: the index of the entries' account column, in its own migration because a concurrent
- *          build cannot run inside a transaction.
+ * Purpose: `idx_ledger_entries_account_id`, built online on the live table.
  * Boundary: written by `stackra db diff` after gen began indexing every many-to-one column,
- *           reviewed, then committed and never edited. `concurrently()` makes the compiler emit it
- *           outside a transaction, so writes continue while it builds. Forward only.
+ *           reviewed, frozen once on main. A snapshot: it imports only @stackra/database and names
+ *           the table and column with literals. An index on a table an earlier migration created
+ *           must be `concurrently()`, so the compiler emits it as its own non-transactional step
+ *           and writes continue while it builds. No `down()`: gen derives the dev inverse (drop
+ *           the index concurrently).
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 13 and 27), ADR 0159 (as amended: concurrent index
- *                     builds in their own migration)
+ * Governing contract: ADR 0294 (decisions 13 and 27), ADR 0159 (as amended by programming model
+ *                     v3.1, AGENTS.md: online operations in their own step)
  */
-import { type Blueprint, Migration } from "@stackra/database";
-import { LedgerEntries } from "#stackra/tables";
+import { type Blueprint, Migration, type SchemaBuilder } from "@stackra/database";
 
-/** `idx_ledger_entries_account_id`, built without locking writes. */
+/** Writes continue while it builds. */
 export class LedgerEntriesAccountIdIndexMigration extends Migration {
-  /** Builds the index while writes continue; the build cannot share a transaction. */
-  up(schema: Blueprint): void {
-    schema.table(LedgerEntries, (t) => {
-      t.index([LedgerEntries.columns.account]).concurrently();
+  /** One concurrent index. */
+  up(schema: SchemaBuilder): void {
+    schema.table("ledger_entries", (t: Blueprint) => {
+      t.index(["account_id"]).concurrently();
     });
   }
 }

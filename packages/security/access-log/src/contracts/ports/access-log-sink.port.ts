@@ -1,7 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: the AccessLogSink port: where access records go. AccessLogService writes to it; drivers
- *          implement it.
+ * Purpose: the AccessLogSink port: where access records go. A port is an interface the package
+ *          codes against without knowing who implements it: AccessLogService writes to it, and a
+ *          driver (memory, postgres, or a host's SIEM forwarder) implements it.
  * Boundary: an abstract class that is its own token, key `access_log.AccessLogSink`. Drivers
  *           extend `Driver(AccessLogSink)` and are named by their file prefix (`memory`,
  *           `postgres`); config `sink` picks one; a host's SIEM forwarder is a class marked

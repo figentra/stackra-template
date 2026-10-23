@@ -20,7 +20,14 @@ export const AccessLogEntrySchema = new EntitySchema<AccessLogEntry>({
   uniques: [
     { name: "idx_access_log_entries_tenant_id_call_id", properties: ["tenantId", "callId"] },
   ],
-  indexes: [{ name: "idx_access_log_entries_at", properties: ["at"] }],
+  // the time index and the filter index of `@Searchable`; the search vector belongs to the driver
+  indexes: [
+    { name: "idx_access_log_entries_at", properties: ["at"] },
+    {
+      name: "idx_access_log_entries_tenant_id_classification",
+      properties: ["tenantId", "classification"],
+    },
+  ],
   properties: {
     id: { type: "string", primary: true, columnType: "varchar(30)" }, // trait HasPublicId("acl")
     tenantId: { type: "uuid", index: true }, // trait BelongsToTenant

@@ -6,15 +6,16 @@
  * Boundary: each is a real query registered like a hand-written one: its key is
  *           `access_log.access_log_entry.<operation>@1`, its permission the model's `read` verb (so
  *           its risk is the permission's, ADR 0132) and its endpoint the convention's. The model
- *           has no CrudService, so both read through its repository; there is no write operation,
- *           because the model is append-only.
+ *           has no CrudService, so both read through its repository, and the list applies the
+ *           table's closed input (sort, filters, search); there is no write operation, because the
+ *           model is append-only.
  * Runtime: node
  */
 import { operationQuery } from "@stackra/database";
 import { AccessLogEntryPermissions } from "#node/access/access-log-entry.permissions";
 import { AccessLogEntry } from "#node/models/access-log-entry.model";
 
-/** From `Resource(AccessLogEntry, { operations: { list: true, get: true } })`. */
+/** From `Resource<AccessLogEntry>({ operations: { list: true, get: true } })`. */
 export const AccessLogEntryOperations = {
   /** `access_log.access_log_entry.list@1`, `GET /access-log-entries`; cursor-paginated. */
   List: operationQuery(AccessLogEntry, "list", {

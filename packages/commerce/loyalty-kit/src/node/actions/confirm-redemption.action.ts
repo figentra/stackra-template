@@ -7,33 +7,20 @@
  *           run resumes, so permission, tenancy and the audit trail apply to every confirmation.
  *           The member is the actor, or the customer a service acts for; a member confirms only
  *           their own redemption, because the waiting step correlates on member and reference.
- *           The template's path is kept, so the endpoint is written.
+ *           Input and output are schemas in `schemas/`. The template's path is kept, so the
+ *           `endpoint` surface is written; no `tool` (a confirmation is the host's, not an
+ *           agent's).
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 2, 16, 18 and 21), ADR 0098, ADR 0101, ADR 0152
- *                     decision 1 (`waitFor`)
+ * Governing contract: ADR 0294 (decisions 2, 16, 18 and 21, as amended by programming model v3.1,
+ *                     AGENTS.md), ADR 0098, ADR 0101, ADR 0152 decision 1 (`waitFor`)
  */
 import { Action, type ActionContext } from "@stackra/actions";
 import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { Schema, Str } from "@stackra/validation";
 import { memberId } from "#core/functions/member-id.function";
 import { LoyaltyAccountPermissions } from "#node/access/loyalty-account.permissions";
+import type { ConfirmRedemptionInput } from "#node/schemas/confirm-redemption-input.schema";
+import { ConfirmRedemptionOutput } from "#node/schemas/confirm-redemption-output.schema";
 import { RedemptionConfirmed } from "#node/workflows/redemption-confirmed.signal";
-
-/** The same reference the caller passed to `loyalty_kit.points.redeem`. */
-export class ConfirmRedemptionInput extends Schema {
-  /** Public id of the thing paid for (`ord_…`); the path parameter of the endpoint. */
-  @Str({
-    min: 1,
-    max: 120,
-  })
-  reference!: string;
-}
-
-/** The confirmed reference; the redemption's own result arrives as the redeem action's output. */
-export class ConfirmRedemptionOutput extends Schema {
-  /** The reference that was confirmed. */
-  reference!: string;
-}
 
 /**
  * Called by the host once its own step succeeded, usually by a service acting for the customer; a

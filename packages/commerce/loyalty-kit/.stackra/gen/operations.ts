@@ -8,8 +8,9 @@
  *           `loyalty_kit.loyalty_account.<operation>@1`, its permission the model's `read` verb (so
  *           its risk is the permission's, ADR 0132), refined per record by
  *           LoyaltyAccountPolicy#read, and its endpoint the convention's. It calls the method
- *           AccountService inherits from CrudService(LoyaltyAccount) and returns
- *           LoyaltyAccountView, the model's view.
+ *           AccountService inherits from `CrudService<LoyaltyAccount>` and returns
+ *           LoyaltyAccountView, the resource's row; the list applies the table's closed input
+ *           (sort, filters, search) through `CrudService.table`.
  * Runtime: node
  */
 import { operationQuery } from "@stackra/database";
@@ -18,7 +19,7 @@ import { LoyaltyAccountPermissions } from "#node/access/loyalty-account.permissi
 import { LoyaltyAccount } from "#node/models/loyalty-account.model";
 import { AccountService } from "#node/services/account.service";
 
-/** From `Resource(LoyaltyAccount, { operations: { list: true, get: true, create } })`. */
+/** From `Resource<LoyaltyAccount, LoyaltyAccountView>`: `list: true`, `get: true` and `create`. */
 export const LoyaltyAccountOperations = {
   /** `loyalty_kit.loyalty_account.list@1`, `GET /loyalty-accounts`; cursor-paginated. */
   List: operationQuery(LoyaltyAccount, "list", {
