@@ -4,30 +4,72 @@
  * Purpose: resource, widget and document declarations as data for @stackra/panel, and the
  *          `Resources.*` route constants a route redirects to (`ctx.redirect(Resources.Order.view,
  *          { id })`).
- * Boundary: data only; actions, queries, permissions, slots and events are the typed descriptors of
- *           `#stackra/clients`, `#stackra/slots` and `#stackra/panels`, never strings. Each
- *           resource lives in one area, so it is mounted in the panel that hosts that area;
- *           labels are the derived `<module>::resources.<model>.title` keys. Widgets render
- *           through a built-in display, or a Custom display whose renderer the producing package's
- *           react entry ships (`@acme/loyalty-kit/react`); the console replaces none.
+ * Boundary: data only; actions, queries, permissions, widgets, slots and events are the named
+ *           client classes of `#stackra/clients/<service>`, `#stackra/slots` and `#stackra/panels`,
+ *           never strings. Each resource lives in one area, so it is mounted in the panel that
+ *           hosts that area; labels are the derived `<module>::resources.<model>.title` keys.
+ *           Widgets render through a built-in display, or a Custom display whose renderer the
+ *           producing package's react entry ships (`@acme/loyalty-kit/react`), unless the app's
+ *           `src/overrides/<owner>/` shadows it: the console shadows `PointsBalance` and places
+ *           `PointsBalanceWidget` on its dashboard.
  * Runtime: browser
  */
 import { SortDirection } from "@stackra/contracts";
 import { SystemRole } from "@stackra/iam";
 import {
+  ActionPlace,
   Column,
-  Display,
+  Count,
   Entry,
+  ExportFormat,
   Field,
   Filter,
-  WidgetSize,
+  ImportMode,
+  Placement,
+  Relation,
+  ResourcePage,
+  Section,
+  Step,
+  View,
   document,
   resource,
   widget,
 } from "@stackra/panel";
-import { PointsBalance, PointsIssued } from "@acme/loyalty-kit/react";
-import { Commerce } from "#stackra/clients";
+import { PointsIssued } from "@acme/loyalty-kit/react";
+import {
+  AccessLogEntryPermissions,
+  ArchiveProductAction,
+  AwaitingPaymentWidget,
+  AttachProductImageAction,
+  CancelOrderAction,
+  CreateProductAction,
+  DataClassification,
+  EnrollMemberAction,
+  FreezeAccountAction,
+  GetAccessLogEntryQuery,
+  GetLoyaltyAccountQuery,
+  GetOrderQuery,
+  GetProductQuery,
+  ListAccessLogEntriesQuery,
+  ListLoyaltyAccountsQuery,
+  ListOrderLinesQuery,
+  ListOrdersQuery,
+  ListProductsQuery,
+  LowStockWidget,
+  LoyaltyAccountPermissions,
+  LoyaltyTier,
+  OrderKpisWidget,
+  OrderPermissions,
+  OrderStatus,
+  PointsBalanceWidget,
+  PointsIssuedWidget,
+  ProductPermissions,
+  ProductStatus,
+  StockPermissions,
+  UpdateProductAction,
+} from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
+import { PointsBalance } from "#src/overrides/@acme/loyalty-kit/src/react/points-balance/points-balance";
 import { Panels } from "#stackra/panels";
 import { Slots } from "#stackra/slots";
 
@@ -35,158 +77,261 @@ import { Slots } from "#stackra/slots";
 export const Resources = {
   Product: resource("catalogue.product", {
     base: "/catalogue/products",
-    list: Commerce.queries.ListProducts,
-    view: Commerce.queries.GetProduct,
-    create: Commerce.actions.CreateProduct,
-    update: Commerce.actions.UpdateProduct,
-    permission: Commerce.permissions.Product.read,
+    list: ListProductsQuery,
+    view: GetProductQuery,
+    create: CreateProductAction,
+    update: UpdateProductAction,
+    permission: ProductPermissions.read,
   }),
   Order: resource("orders.order", {
     base: "/orders/orders",
-    list: Commerce.queries.ListOrders,
-    view: Commerce.queries.GetOrder,
-    permission: Commerce.permissions.Order.read,
+    list: ListOrdersQuery,
+    view: GetOrderQuery,
+    permission: OrderPermissions.read,
   }),
   LoyaltyAccount: resource("loyalty_kit.loyalty_account", {
     base: "/loyalty/accounts",
-    list: Commerce.queries.ListLoyaltyAccounts,
-    view: Commerce.queries.GetLoyaltyAccount,
-    create: Commerce.actions.EnrollMember,
-    permission: Commerce.permissions.LoyaltyAccount.read,
+    list: ListLoyaltyAccountsQuery,
+    view: GetLoyaltyAccountQuery,
+    create: EnrollMemberAction,
+    permission: LoyaltyAccountPermissions.read,
   }),
   AccessLogEntry: resource("access_log.access_log_entry", {
     base: "/access-log/entries",
-    list: Commerce.queries.ListAccessLogEntries,
-    view: Commerce.queries.GetAccessLogEntry,
-    permission: Commerce.permissions.AccessLogEntry.read,
+    list: ListAccessLogEntriesQuery,
+    view: GetAccessLogEntryQuery,
+    permission: AccessLogEntryPermissions.read,
   }),
   FailedJob: resource("queue.failed_job", { base: "/queue/failed-jobs" }),
-  SalesToday: document("orders.sales_today", {
+  SalesOverview: document("orders.sales_overview", {
     path: "/sales",
     panel: Panels.TenantAdmin,
-    permission: Commerce.permissions.Order.read,
+    permission: OrderPermissions.read,
   }),
   MyOrders: document("orders.my_orders", {
     path: "/orders",
     panel: Panels.CustomerPortal,
-    permission: Commerce.permissions.Order.read,
+    permission: OrderPermissions.read,
   }),
   LoyaltyOverview: document("loyalty_kit.loyalty_overview", {
     path: "/loyalty",
     panel: Panels.CustomerPortal,
-    permission: Commerce.permissions.LoyaltyAccount.read,
+    permission: LoyaltyAccountPermissions.read,
   }),
 } as const;
 
-/** Every widget a consumed service declared, with its slot, query, display and refresh events. */
+/**
+ * Every widget a consumed service declared, with its slot, query, display and permission; a widget
+ * refreshes on its query's `invalidateOn` events. `PointsBalanceWidget` is the console's placement
+ * shadow (`src/overrides/@acme/loyalty-kit/…/points-balance.widget.ts`, slot Main, order 40) and
+ * renders through the console's shadow of `PointsBalance`; every other Custom renderer is the
+ * producing package's.
+ */
 export const widgets = [
-  widget(Commerce.widgets.LowStock, {
-    slot: Slots.Dashboard.Main,
-    size: WidgetSize.Medium,
-    query: Commerce.queries.ListLowStock,
-    params: { limit: 5 },
-    display: Display.list({ primary: "variantId", secondary: "available" }),
-    permission: Commerce.permissions.Stock.read,
-    refreshOn: [Commerce.events.StockLow],
-  }),
-  widget(Commerce.widgets.RevenueToday, {
+  widget(OrderKpisWidget, {
     slot: Slots.Dashboard.Header,
-    size: WidgetSize.Small,
-    query: Commerce.queries.OrdersToday,
-    display: Display.kpi({ value: "revenueMinor", currency: "currency", sparkline: "hourly" }),
-    permission: Commerce.permissions.Order.read,
+    order: 10,
+    ranges: ["today", "last_7_days", "last_30_days", "this_month"],
+    range: "today",
+    permission: OrderPermissions.read,
     roles: [SystemRole.Owner, SystemRole.Manager],
-    refreshOn: [Commerce.events.OrderPaid],
   }),
-  widget(Commerce.widgets.PointsIssued, {
+  // no slot: only the Sales overview dashboard places it; refreshed on `order.paid` and each minute
+  widget(AwaitingPaymentWidget, {
+    slot: null,
+    size: "full",
+    refreshEvery: "60s",
+    permission: OrderPermissions.read,
+  }),
+  widget(LowStockWidget, {
     slot: Slots.Dashboard.Main,
-    size: WidgetSize.Small,
-    query: Commerce.queries.PointsIssued,
-    display: Display.custom(PointsIssued),
-    permission: Commerce.permissions.LoyaltyAccount.read,
-    roles: [SystemRole.Owner, SystemRole.Manager],
-    // `loyalty_kit.points.redeemed` refreshes it too, inside the service: a domain event never
-    // reaches a client
-    refreshOn: [Commerce.events.PointsEarned],
+    size: "medium",
+    order: 20,
+    params: { limit: 5 },
+    permission: StockPermissions.read,
   }),
-  // no slot: the loyalty overview document places it, bound to the viewer's own account
-  widget(Commerce.widgets.PointsBalance, {
-    size: WidgetSize.Medium,
-    query: Commerce.queries.GetBalance,
+  widget(PointsIssuedWidget, {
+    slot: Slots.Dashboard.Main,
+    order: 30,
+    renderer: PointsIssued,
+    permission: LoyaltyAccountPermissions.read,
+    roles: [SystemRole.Owner, SystemRole.Manager],
+  }),
+  // placed by src/overrides/@acme/loyalty-kit/src/node/resources/loyalty-account/points-balance.widget.ts
+  widget(PointsBalanceWidget, {
+    slot: Slots.Dashboard.Main,
+    order: 40,
+    placedBy:
+      "src/overrides/@acme/loyalty-kit/src/node/resources/loyalty-account/points-balance.widget.ts",
     params: { accountId: "actor.accountId" },
-    display: Display.custom(PointsBalance),
-    permission: Commerce.permissions.LoyaltyAccount.read,
+    renderer: PointsBalance,
+    permission: LoyaltyAccountPermissions.read,
   }),
 ] as const;
 
-/** Every resource screen: its panel, columns, filters, form fields and actions. */
+/**
+ * Every resource screen: its panel, navigation, table contract (columns, filters, default sort,
+ * estimated count), views, form or infolist, relations and action placements. The commerce
+ * entries mirror its v3.1 resources: one `actions` list, placement by the action's input shape;
+ * inventory declares no resource, only LowStockWidget.
+ */
 export const resources = {
+  // Resource<Product, ProductView>: keys are paths of ProductView (the generated list's row)
   "catalogue.product": {
     label: I18n.catalogue.resources.product.title,
     panels: [Panels.TenantAdmin],
+    navigation: {
+      group: I18n.catalogue.nav.catalogue,
+      icon: "package",
+      order: 10,
+      badge: "drafts",
+    },
     table: {
       columns: [
-        Column.text("title", { searchable: true }),
-        Column.text("slug"),
-        Column.enum("status", { enum: Commerce.enums.ProductStatus }),
+        Column.from("title"),
+        Column.from("slug", { copyable: true, sortable: true }),
+        Column.from("status", { enum: ProductStatus }),
         Column.count("variants"),
       ],
-      filters: [Filter.select("status", { enum: Commerce.enums.ProductStatus })],
-      rowActions: [Commerce.actions.ArchiveProduct],
+      filters: [Filter.from("status", { enum: ProductStatus, pinned: true })],
+      search: true,
+      defaultSort: { key: "slug", direction: SortDirection.Asc },
+      count: Count.Estimated,
     },
+    views: [
+      View.of("on_sale", { status: [ProductStatus.Active] }),
+      View.of("drafts", { status: [ProductStatus.Draft] }),
+      View.of("archived", { status: [ProductStatus.Archived] }),
+    ],
     form: {
-      fields: [
-        Field.text("title", { required: true, translatable: true }),
-        Field.text("slug", { required: true }),
-        Field.upload("images", {
-          action: Commerce.actions.AttachProductImage,
-          label: I18n.catalogue.product.images,
-          accept: ["image/png", "image/jpeg", "image/webp"],
-          maxBytes: 5_000_000,
-        }),
-        Field.repeater("variants", [
-          Field.text("sku", { required: true }),
-          Field.text("barcode"),
-          Field.toggle("trackInventory"),
+      steps: [
+        Step.of("basics", [Field.from("title", { span: 2 }), Field.from("slug")], { grid: 2 }),
+        Step.of("media", [
+          Field.upload("images", {
+            action: AttachProductImageAction,
+            accept: ["image/png", "image/jpeg", "image/webp"],
+            maxBytes: 5_000_000,
+          }),
         ]),
+        Step.of("variants", [
+          Field.repeater("variants", [
+            Field.from("sku"),
+            Field.from("barcode"),
+            Field.from("trackInventory"),
+          ]),
+        ]),
+        Step.of("seo", [Field.from("seo")]),
       ],
     },
     infolist: {
-      entries: [
-        Entry.text("title"),
-        Entry.enum("status", { enum: Commerce.enums.ProductStatus }),
-        Entry.relation("variants"),
+      sections: [
+        Section.of("summary", [
+          Entry.from("title"),
+          Entry.from("slug", { copyable: true }),
+          Entry.from("status", { enum: ProductStatus }),
+        ]),
+        Section.of("variants", [Entry.list("variants", { columns: ["id", "sku"] })]),
       ],
     },
+    actions: [
+      Placement.run(ArchiveProductAction, {
+        places: [ActionPlace.Row, ActionPlace.View, ActionPlace.Bulk],
+      }),
+      Placement.run(AttachProductImageAction, { places: [ActionPlace.View, ActionPlace.Edit] }),
+      Placement.import({
+        mode: ImportMode.Upsert,
+        match: "slug",
+        maxRows: 10_000,
+        permission: ProductPermissions.import,
+        places: [ActionPlace.ListHeader, ActionPlace.Empty],
+      }),
+      Placement.create({ then: ResourcePage.View }),
+    ],
   },
+  // Resource<Order, OrderView>: keys are paths of OrderView (the list query's row)
   "orders.order": {
     label: I18n.orders.resources.order.title,
     panels: [Panels.TenantAdmin],
     create: false,
+    navigation: {
+      group: I18n.orders.nav.sales,
+      icon: "receipt",
+      order: 20,
+      badge: "awaiting_payment",
+    },
     table: {
       columns: [
-        Column.text("id", { copyable: true }),
-        Column.enum("status", { enum: Commerce.enums.OrderStatus }),
-        Column.money("totals.totalMinor", { currencyField: "totals.currency", sortable: true }),
-        Column.dateTime("createdAt", { sortable: true }),
+        Column.from("id", { copyable: true }),
+        Column.from("status", { enum: OrderStatus }),
+        Column.principal("customerId"),
+        Column.money("totals.totalMinor", { currency: "totals.currency", sortable: true }),
+        Column.count("lines"),
+        Column.from("createdAt", { sortable: true }),
+        Column.from("paidAt", { hidden: true }),
       ],
       filters: [
-        Filter.select("status", { enum: Commerce.enums.OrderStatus }),
-        Filter.dateRange("createdAt"),
+        Filter.from("status", {
+          enum: OrderStatus,
+          default: [OrderStatus.PendingPayment, OrderStatus.Paid],
+          pinned: true,
+        }),
+        Filter.from("createdAt"),
+        Filter.from("paidAt"),
+        Filter.principal("customerId"),
       ],
-      defaultSort: { createdAt: SortDirection.Desc },
-      rowActions: [Commerce.actions.CancelOrder],
-      bulkActions: [Commerce.actions.CancelOrder],
+      defaultSort: { key: "createdAt", direction: SortDirection.Desc },
+      count: Count.Estimated,
     },
+    views: [
+      View.of("awaiting_payment", { status: [OrderStatus.PendingPayment] }),
+      View.of(
+        "paid_today",
+        { status: [OrderStatus.Paid], paidAt: "today" },
+        { sort: { key: "paidAt", direction: SortDirection.Desc } },
+      ),
+      View.of("closed", { status: [OrderStatus.Cancelled, OrderStatus.Expired] }),
+    ],
     infolist: {
-      entries: [
-        Entry.enum("status", { enum: Commerce.enums.OrderStatus }),
-        Entry.money("totals.subtotalMinor", { currencyField: "totals.currency" }),
-        Entry.list("totals.adjustments", { columns: ["label", "amountMinor"] }),
-        Entry.money("totals.totalMinor", { currencyField: "totals.currency" }),
-        Entry.relation("lines"),
+      sections: [
+        Section.of("summary", [
+          Entry.from("id", { copyable: true }),
+          Entry.from("status", { enum: OrderStatus }),
+          Entry.principal("customerId"),
+          Entry.from("createdAt"),
+          Entry.from("paidAt"),
+        ]),
+        Section.of(
+          "totals",
+          [
+            Entry.money("totals.subtotalMinor", { currency: "totals.currency" }),
+            Entry.list("totals.adjustments", { columns: ["label", "amountMinor"] }),
+            Entry.money("totals.totalMinor", { currency: "totals.currency" }),
+          ],
+          { aside: true },
+        ),
       ],
     },
+    relations: [
+      Relation.table(ListOrderLinesQuery, {
+        bind: { orderId: "record.id" },
+        columns: [
+          Column.from("sku", { copyable: true }),
+          Column.from("quantity"),
+          Column.money("unitPriceMinor", { currency: "record.totals.currency" }),
+          Column.from("trackInventory"),
+        ],
+      }),
+    ],
+    actions: [
+      Placement.run(CancelOrderAction, {
+        places: [ActionPlace.Row, ActionPlace.View, ActionPlace.Bulk],
+      }),
+      Placement.export({
+        formats: [ExportFormat.Csv, ExportFormat.Xlsx],
+        permission: OrderPermissions.export,
+        places: [ActionPlace.ListHeader, ActionPlace.Bulk],
+      }),
+    ],
   },
   "loyalty_kit.loyalty_account": {
     label: I18n.loyalty_kit.resources.loyalty_account.title,
@@ -194,32 +339,32 @@ export const resources = {
     table: {
       columns: [
         Column.text("memberId", { copyable: true, searchable: true }),
-        Column.enum("tier", { enum: Commerce.enums.LoyaltyTier, sortable: true }),
+        Column.enum("tier", { enum: LoyaltyTier, sortable: true }),
         Column.boolean("isFrozen", { trueLabel: I18n.loyalty_kit.account.frozen_badge }),
         Column.count("entries", { sortable: true }),
         Column.dateTime("frozenAt", { toggleable: { hiddenByDefault: true } }),
         Column.dateTime("createdAt", { sortable: true }),
       ],
       filters: [
-        Filter.select("tier", { enum: Commerce.enums.LoyaltyTier }),
+        Filter.select("tier", { enum: LoyaltyTier }),
         Filter.boolean("isFrozen"),
         Filter.dateRange("createdAt"),
         Filter.trashed(),
       ],
       defaultSort: { createdAt: SortDirection.Desc },
-      rowActions: [Commerce.actions.FreezeAccount],
-      bulkActions: [Commerce.actions.FreezeAccount],
+      rowActions: [FreezeAccountAction],
+      bulkActions: [FreezeAccountAction],
     },
     form: {
       fields: [
         Field.text("principalId", { required: true }),
-        Field.enum("tier", { enum: Commerce.enums.LoyaltyTier }),
+        Field.enum("tier", { enum: LoyaltyTier }),
       ],
     },
     infolist: {
       entries: [
         Entry.text("memberId"),
-        Entry.enum("tier", { enum: Commerce.enums.LoyaltyTier }),
+        Entry.enum("tier", { enum: LoyaltyTier }),
         Entry.boolean("isFrozen"),
         Entry.dateTime("frozenAt"),
         Entry.keyValue("notes"),
@@ -235,11 +380,11 @@ export const resources = {
       columns: [
         Column.dateTime("at", { sortable: true }),
         Column.text("target", { searchable: true }),
-        Column.enum("classification", { enum: Commerce.enums.DataClassification, sortable: true }),
+        Column.enum("classification", { enum: DataClassification, sortable: true }),
         Column.text("callId", { copyable: true, toggleable: { hiddenByDefault: true } }),
       ],
       filters: [
-        Filter.select("classification", { enum: Commerce.enums.DataClassification }),
+        Filter.select("classification", { enum: DataClassification }),
         Filter.dateRange("at"),
       ],
       defaultSort: { at: SortDirection.Desc },
@@ -248,7 +393,7 @@ export const resources = {
       entries: [
         Entry.dateTime("at"),
         Entry.text("target"),
-        Entry.enum("classification", { enum: Commerce.enums.DataClassification }),
+        Entry.enum("classification", { enum: DataClassification }),
         Entry.keyValue("actor"),
         Entry.list("subjects"),
       ],

@@ -3,7 +3,8 @@
  * Purpose: every route by its key (`Routes.<snake(folder)>`) as a `RouteRef`: layouts, frames,
  *          menus, pages and data navigate with `Routes.<key>`
  *          (`ctx.redirect(Routes.sign_in)`, `m.route(Routes.quick_order)`), never with the route
- *          class.
+ *          class. A ref resolves to the active locale's prefixed path (`/ar-sa/settings`), so no
+ *          caller writes a prefix.
  * Boundary: data plus types. The route classes are imported as types only, so importing this file
  *           never loads a route module and no layout, menu or page can close an import cycle
  *           through it (links point down: shell ← layout ← route → page). The router mounts the
@@ -13,9 +14,12 @@
 import { routeRef } from "@stackra/navigation";
 import type { DashboardRoute } from "#src/routes/dashboard/dashboard.route";
 import type { NotFoundRoute } from "#src/routes/not-found/not-found.route";
+import type { OfflineRoute } from "#src/routes/offline/offline.route";
 import type { OpenRoute } from "#src/routes/open/open.route";
+import type { OpenFileRoute } from "#src/routes/open-file/open-file.route";
 import type { QuickOrderRoute } from "#src/routes/quick-order/quick-order.route";
 import type { SettingsRoute } from "#src/routes/settings/settings.route";
+import type { ShareRoute } from "#src/routes/share/share.route";
 import type { SignInRoute } from "#src/routes/sign-in/sign-in.route";
 import type { WelcomeRoute } from "#src/routes/welcome/welcome.route";
 
@@ -27,6 +31,9 @@ export const Routes = {
   sign_in: routeRef<typeof SignInRoute>("sign_in"),
   welcome: routeRef<typeof WelcomeRoute>("welcome"),
   open: routeRef<typeof OpenRoute>("open"),
+  share: routeRef<typeof ShareRoute>("share"),
+  open_file: routeRef<typeof OpenFileRoute>("open_file"),
+  offline: routeRef<typeof OfflineRoute>("offline"),
   not_found: routeRef<typeof NotFoundRoute>("not_found"),
 } as const;
 

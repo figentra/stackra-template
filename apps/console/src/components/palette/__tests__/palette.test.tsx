@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
-import { Commerce } from "#stackra/clients";
+import { ArchiveProductAction } from "#stackra/clients/commerce";
 import { Palette } from "#src/components/palette";
 import { PaletteStore } from "#src/stores/palette.store";
 
@@ -39,6 +39,6 @@ describe(Palette, () => {
     await userEvent.type(screen.getByRole("combobox"), "archive the summer dress");
     expect(actions.ran()).toHaveLength(0);
     await userEvent.click(await screen.findByRole("option", { name: /archive/i }));
-    expect(actions.ran().map((run) => run.ref)).toEqual([Commerce.actions.ArchiveProduct]);
+    expect(actions.ran().map((run) => run.ref)).toEqual([ArchiveProductAction]);
   });
 });

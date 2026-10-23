@@ -4,7 +4,9 @@
  * — do not edit
  * Purpose: the capability section of the client manifest for the active target: what it offers and
  *          which file needs which capability. This sample is the `desktop` target; `web` and `pwa`
- *          reach print and file saving through their Web API drivers where the browser has them.
+ *          reach print and file saving through their Web API drivers where the browser has them,
+ *          and the `pwa` target adds the share target. The device capabilities are the ones
+ *          desktop.config.ts `devices` declares.
  * Boundary: data. A call to a port the target lacks gets the `unavailable` refusal at run time
  *           (ADR 0250 d3); a file that requires one the target lacks fails gen. The drivers behind
  *           each port are wiring.ts's.
@@ -26,13 +28,19 @@ export const target = {
     Capability.Updates,
     Capability.Window,
     Capability.Tray,
+    Capability.FileHandling,
+    Capability.Camera,
+    Capability.Microphone,
+    Capability.Usb,
+    Capability.Bluetooth,
+    Capability.Serial,
   ],
 } as const;
 
 /** What each file declared; `required` fails gen for a target without it, `optional` degrades. */
 export const requirements = [
   {
-    file: "components/offline-banner/use-online-status.ts",
+    file: "hooks/use-online-status.ts",
     required: [Capability.Network],
     optional: [],
   },
@@ -42,6 +50,8 @@ export const requirements = [
     optional: [Capability.LocalNotifications],
   },
   { file: "menus/tray.menu.ts", required: [Capability.Tray], optional: [] },
+  { file: "routes/share/share.route.ts", required: [], optional: [Capability.ShareTarget] },
+  { file: "routes/open-file/open-file.tsx", required: [], optional: [Capability.FileHandling] },
 ] as const;
 
 /** Check result gen printed: every required capability is in {@link target}. */

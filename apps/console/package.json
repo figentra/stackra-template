@@ -2,7 +2,7 @@
   "name": "@acme/console",
   "version": "0.1.0",
   "private": true,
-  "description": "The tenant console as web, PWA and desktop from one source tree. Kind classes (panels, routes, layouts, menus, shortcuts, stores, blocks, documents, config) found by their group folders declare the app; stackra gen writes the entries, the wiring and the tool configs into .stackra/.",
+  "description": "The tenant console as web, PWA and desktop from one source tree. Kind classes (panels, routes, layouts, menus, shortcuts, stores, blocks, documents, config) found by their group folders declare the app, and its components are class components; stackra gen writes the entries, the wiring and the tool configs into .stackra/.",
   "license": "UNLICENSED",
   "type": "module",
   "imports": {
@@ -39,8 +39,8 @@
     "format:check": "oxfmt --check ."
   },
   "dependencies": {
-    "@acme/brand": "workspace:*",
     "@acme/loyalty-kit": "workspace:*",
+    "@acme/theme": "workspace:*",
     "@heroui/styles": "catalog:ui",
     "@stackra-pro/ui": "catalog:stackra",
     "@stackra/actions": "catalog:stackra",
@@ -60,6 +60,7 @@
     "@stackra/filesystem": "catalog:stackra",
     "@stackra/i18n": "catalog:stackra",
     "@stackra/iam": "catalog:stackra",
+    "@stackra/icons": "catalog:stackra",
     "@stackra/identity": "catalog:stackra",
     "@stackra/media": "catalog:stackra",
     "@stackra/navigation": "catalog:stackra",
@@ -74,6 +75,7 @@
     "@stackra/storage": "catalog:stackra",
     "@stackra/tenancy": "catalog:stackra",
     "@stackra/theming": "catalog:stackra",
+    "@stackra/tokens": "catalog:stackra",
     "@stackra/ui": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "react": "catalog:",
@@ -90,6 +92,7 @@
   "devDependencies": {
     "@playwright/test": "catalog:quality",
     "@stackra/cli": "catalog:stackra",
+    "@stackra/gen": "catalog:stackra",
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
     "@stackra/typescript-config": "workspace:*",

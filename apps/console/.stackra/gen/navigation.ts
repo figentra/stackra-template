@@ -8,14 +8,13 @@
  * Boundary: data; labels are the derived i18n keys of each resource, document and settings page
  *           (`<module>::resources.<model>.title`) or the group key the declaring module wrote;
  *           targets are the generated resources and route keys (`Routes.*`, never route classes);
- *           icons are `Icons` cases. An app route appears here only when it declares
- *           `navigation:` (none does), so quick order reaches the shell through its tab. `Tabs` is
- *           built from the routes that declare `tab: { order, icon }`, labelled with the route's
- *           title and sorted by `order`.
+ *           icons are `IconName` strings, checked by gen against the pinned icon set. An app route
+ *           appears here only when it declares `navigation:` (none does), so quick order reaches
+ *           the shell through its tab. `Tabs` is built from the routes that declare `tab: { order,
+ *           icon }`, labelled with the route's title and sorted by `order`.
  * Runtime: browser
  */
 import { navigation, tabs } from "@stackra/navigation";
-import { Icons } from "@stackra/ui/icons";
 import { I18n } from "#stackra/i18n";
 import { Panels } from "#stackra/panels";
 import { Resources } from "#stackra/resources";
@@ -29,18 +28,18 @@ export const Navigation = navigation(Panels.TenantAdmin, [
   {
     group: I18n.catalogue.nav.catalogue,
     items: [
-      { label: I18n.catalogue.resources.product.title, to: Resources.Product, icon: Icons.Package },
+      { label: I18n.catalogue.resources.product.title, to: Resources.Product, icon: "package" },
     ],
   },
   {
     group: I18n.orders.nav.sales,
     items: [
       {
-        label: I18n.orders.documents.sales_today.title,
-        to: Resources.SalesToday,
-        icon: Icons.Chart,
+        label: I18n.orders.documents.sales_overview.title,
+        to: Resources.SalesOverview,
+        icon: "chart-line",
       },
-      { label: I18n.orders.resources.order.title, to: Resources.Order, icon: Icons.Receipt },
+      { label: I18n.orders.resources.order.title, to: Resources.Order, icon: "receipt" },
     ],
   },
   {
@@ -50,44 +49,44 @@ export const Navigation = navigation(Panels.TenantAdmin, [
       {
         label: I18n.loyalty_kit.resources.loyalty_account.title,
         to: Resources.LoyaltyAccount,
-        icon: Icons.Star,
+        icon: "star",
       },
     ],
   },
   {
-    group: I18n.console.pages.settings,
+    group: I18n.pages.settings.title,
     items: [
-      { label: I18n.orders.settings.orders.title, to: SettingsPages.orders, icon: Icons.Gear },
+      { label: I18n.orders.settings.orders.title, to: SettingsPages.orders, icon: "settings" },
       {
         label: I18n.inventory.settings.inventory.title,
         to: SettingsPages.inventory,
-        icon: Icons.Gear,
+        icon: "settings",
       },
       {
         label: I18n.loyalty_kit.settings.loyalty_kit.title,
         to: SettingsPages.loyalty_kit,
-        icon: Icons.Gear,
+        icon: "settings",
       },
       {
         label: I18n.messages.settings.messages.title,
         to: SettingsPages.messages,
-        icon: Icons.Bell,
+        icon: "bell",
       },
-      { label: I18n.queue.nav.failed_jobs, to: Resources.FailedJob, icon: Icons.Warning },
+      { label: I18n.queue.nav.failed_jobs, to: Resources.FailedJob, icon: "triangle-alert" },
     ],
   },
   {
     // the group access-log declares (`access_log.nav.audit`, order 90), so it sorts last
     group: I18n.access_log.nav.audit,
     items: [
-      { label: I18n.access_log.nav.access_log, to: Resources.AccessLogEntry, icon: Icons.Shield },
+      { label: I18n.access_log.nav.access_log, to: Resources.AccessLogEntry, icon: "shield" },
     ],
   },
 ]);
 
 /** The shell's bottom tabs on a phone-sized PWA: every route with `tab`, in `order`. */
 export const Tabs = tabs([
-  { route: Routes.dashboard, order: 1, icon: Icons.House, label: I18n.console.pages.dashboard },
-  { route: Routes.quick_order, order: 2, icon: Icons.Bolt, label: I18n.orders.quick_order.title },
-  { route: Routes.settings, order: 3, icon: Icons.Gear, label: I18n.console.pages.settings },
+  { route: Routes.dashboard, order: 1, icon: "house", label: I18n.pages.dashboard.title },
+  { route: Routes.quick_order, order: 2, icon: "zap", label: I18n.orders.quick_order.title },
+  { route: Routes.settings, order: 3, icon: "settings", label: I18n.pages.settings.title },
 ]);

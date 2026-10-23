@@ -1,11 +1,11 @@
 /**
  * Stackra file contract:
  * Purpose: the desktop menu bar: groups of shortcuts, actions, routes and links; labels are i18n
- *          keys translated in main with the locale the renderer reports.
+ *          keys (`menus::app.*`) translated in main with the locale the renderer reports.
  * Boundary: a builder, because menus are deep and repeated, using only the closed item verbs
  *           (route, link, action, shortcut, group, separator, navigation) with no CSS. Items name
- *           Shortcut classes, generated action descriptors and route keys, so a removed one is a
- *           type error. Electron's own role items (the macOS app menu, Close, Edit, the zoom and
+ *           Shortcut classes, generated client classes and route keys, so a removed one is a type
+ *           error. Electron's own role items (the macOS app menu, Close, Edit, the zoom and
  *           full-screen items, Window) are not item verbs: the shell places them from
  *           desktop.config.ts `menus.standardRoles`. Desktop only by its kind: a PWA has no OS menu
  *           bar (ADR 0281 d2), and the web and PWA reach the same items through the palette. No
@@ -18,7 +18,7 @@
  */
 import { Menu, MenuKind, type MenuBuilder } from "@stackra/navigation";
 import type { DesktopConfig } from "@stackra/platform";
-import { Commerce } from "#stackra/clients";
+import { CreateOrderAction } from "#stackra/clients/commerce";
 import { Flags } from "#stackra/flags";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
@@ -37,17 +37,17 @@ export class AppMenu extends Menu({ kind: MenuKind.App }) {
   /** File places an order; View, Go and Help hold the console's shortcuts. */
   items(m: MenuBuilder) {
     return [
-      m.group(I18n.console.menu.file, [
-        m.action(Commerce.actions.CreateOrder, { flag: Flags.orders.quick_order }),
+      m.group(I18n.menus.app.file, [
+        m.action(CreateOrderAction, { flag: Flags.orders.quick_order }),
         m.route(Routes.quick_order, { shortcut: "mod+shift+o" }),
       ]),
-      m.group(I18n.console.menu.view, [
+      m.group(I18n.menus.app.view, [
         m.shortcut(ToggleSidebarShortcut),
         m.shortcut(CycleThemeShortcut),
       ]),
-      m.group(I18n.console.menu.go, [m.shortcut(OpenPaletteShortcut), m.navigation()]),
-      m.group(I18n.console.menu.help, [
-        m.link(I18n.console.menu.docs, this.desktop.menus.docsUrl),
+      m.group(I18n.menus.app.go, [m.shortcut(OpenPaletteShortcut), m.navigation()]),
+      m.group(I18n.menus.app.help, [
+        m.link(I18n.menus.app.docs, this.desktop.menus.docsUrl),
         m.separator(),
         m.shortcut(OpenPendingChangesShortcut),
       ]),

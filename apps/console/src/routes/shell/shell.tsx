@@ -9,10 +9,12 @@
  *           exists. HeroUI Pro's `AppLayout` and `Sidebar` because this is our own app (ADR 0197).
  *           Keyboard shortcuts have one owner each, the Shortcut classes: the layout's own `mod+b`
  *           binding is off, and every key hint is drawn by the shortcuts package with the
- *           platform's modifier (⌘ on Apple devices, Ctrl elsewhere).
+ *           platform's modifier (⌘ on Apple devices, Ctrl elsewhere). A class component; layouts
+ *           take no props, so it needs no props file; gen compiles it to a function component.
  * Runtime: browser
- * Governing contract: ADR 0294 (decisions 7 and 14), ADR 0164 (panel shell), ADR 0214
- *                     (gate-filtered navigation), ADR 0197 (HeroUI Pro)
+ * Governing contract: ADR 0294 (decisions 7 and 14; as amended by programming model v3.1,
+ *                     AGENTS.md: class components), ADR 0164 (panel shell), ADR 0214 (gate-filtered
+ *                     navigation), ADR 0197 (HeroUI Pro)
  */
 import { AppLayout, Navbar, Sidebar } from "@stackra-pro/ui";
 import { Tone } from "@stackra/contracts";
@@ -22,8 +24,7 @@ import { Link, NavLink, Outlet, useNavigate, useNavigation } from "@stackra/navi
 import { PanelShell, useBreadcrumbs } from "@stackra/panel/react";
 import { ShortcutKeys, useShortcut } from "@stackra/shortcuts/react";
 import { useStore } from "@stackra/state/react";
-import { Avatar, Breadcrumbs, Button, Dropdown, Separator } from "@stackra/ui";
-import { Icon, Icons } from "@stackra/ui/icons";
+import { Avatar, Breadcrumbs, Button, Component, Dropdown, Icon, Separator } from "@stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { Navigation } from "#stackra/navigation";
 import { Panels } from "#stackra/panels";
@@ -45,113 +46,142 @@ import { UiStore } from "#src/stores/ui.store";
  * menu all move the same value; `main` carries the density class so the panel's tables inherit
  * it. Breadcrumbs come from the matched routes' titles and the panel's resource labels.
  */
-export function Shell() {
-  const { t } = useTranslation();
-  const session = useSession();
-  const actor = session.user ?? null;
-  const navigate = useNavigate();
-  const groups = useNavigation(Navigation);
-  const breadcrumbs = useBreadcrumbs();
-  const ui = useStore(UiStore);
-  const openPalette = useShortcut(OpenPaletteShortcut);
-  const signOut = useShortcut(SignOutShortcut);
+export class Shell extends Component {
+  /** The translator of the active locale. */
+  i18n = useTranslation();
 
-  return (
-    <PanelShell panel={Panels.TenantAdmin}>
-      <AppLayout
-        sidebarCollapsible="icon"
-        sidebarOpen={!ui.sidebarCollapsed}
-        onSidebarOpenChange={(open) => ui.setSidebarCollapsed(!open)}
-        navigate={(href) => navigate(href)}
-        toggleShortcut={false}
-        navbar={
-          <Navbar maxWidth="full" aria-label={t(I18n.console.shell.top_bar)}>
-            <Navbar.Header>
-              <AppLayout.MenuToggle aria-label={t(I18n.console.shell.menu)} />
-              <Sidebar.Trigger aria-label={t(I18n.console.shell.sidebar)} />
-              <Separator orientation="vertical" />
-              <Breadcrumbs>
-                {breadcrumbs.map((crumb) => (
-                  <Breadcrumbs.Item key={crumb.to} href={crumb.to}>
-                    {t(crumb.label)}
-                  </Breadcrumbs.Item>
-                ))}
-              </Breadcrumbs>
-              <Navbar.Spacer />
-              <Button variant="tertiary" size="sm" onPress={openPalette}>
-                <Icon name={Icons.Magnifier} aria-hidden />
-                {t(I18n.console.shortcuts.open_palette.label)}
-                <ShortcutKeys shortcut={OpenPaletteShortcut} />
-              </Button>
-              <ConnectionIndicator />
-              <NotificationInbox />
-              <PendingChanges />
-              <LocaleSwitcher />
-              <ThemeToggle />
-              <Dropdown>
-                <Dropdown.Trigger aria-label={t(I18n.console.shell.account)}>
-                  <Avatar name={actor?.displayName} src={actor?.avatarUrl} size="sm" />
-                </Dropdown.Trigger>
-                <Dropdown.Menu>
-                  <Dropdown.Item id={Routes.settings.name} render={<Link to={Routes.settings} />}>
-                    {t(I18n.console.pages.settings)}
-                  </Dropdown.Item>
-                  <Dropdown.Item id={SignOutShortcut.name} color={Tone.Danger} onAction={signOut}>
-                    {t(I18n.console.shortcuts.sign_out.label)}
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </Navbar.Header>
-          </Navbar>
-        }
-        sidebar={
-          <>
-            <Sidebar aria-label={t(I18n.console.shell.navigation)}>
-              <Sidebar.Header>
-                <TenantSwitcher />
-              </Sidebar.Header>
-              <Sidebar.Main>
-                <Sidebar.Menu>
-                  {groups.map((group) => (
-                    <Sidebar.MenuSection key={group.group} title={t(group.group)}>
-                      {group.items.map((item) => (
-                        <Sidebar.MenuItem key={item.label} textValue={t(item.label)}>
-                          <NavLink to={item.to}>
-                            <Sidebar.MenuIcon>
-                              <Icon name={item.icon} aria-hidden />
-                            </Sidebar.MenuIcon>
-                            <Sidebar.MenuItemContent>
-                              <Sidebar.MenuLabel>{t(item.label)}</Sidebar.MenuLabel>
-                            </Sidebar.MenuItemContent>
-                          </NavLink>
-                        </Sidebar.MenuItem>
-                      ))}
-                    </Sidebar.MenuSection>
+  /** The session; the layout's loader guarantees one. */
+  session = useSession();
+
+  /** The router's navigate, handed to the app layout's links. */
+  navigate = useNavigate();
+
+  /** The generated navigation, gate-filtered for this actor. */
+  groups = useNavigation(Navigation);
+
+  /** The matched routes' titles and the panel's resource labels. */
+  breadcrumbs = useBreadcrumbs();
+
+  /** Sidebar and density state. */
+  ui = useStore(UiStore);
+
+  /** Runs `OpenPaletteShortcut`. */
+  openPalette = useShortcut(OpenPaletteShortcut);
+
+  /** Runs `SignOutShortcut`. */
+  signOut = useShortcut(SignOutShortcut);
+
+  /** The signed-in user, or `null` while the session refreshes. */
+  get actor() {
+    return this.session.user ?? null;
+  }
+
+  /** The panel shell, the app layout with its top bar and sidebar, the outlet and the palette. */
+  render() {
+    const { t } = this.i18n;
+    const actor = this.actor;
+    const ui = this.ui;
+    return (
+      <PanelShell panel={Panels.TenantAdmin}>
+        <AppLayout
+          sidebarCollapsible="icon"
+          sidebarOpen={!ui.sidebarCollapsed}
+          onSidebarOpenChange={(open) => ui.setSidebarCollapsed(!open)}
+          navigate={(href) => this.navigate(href)}
+          toggleShortcut={false}
+          navbar={
+            <Navbar maxWidth="full" aria-label={t(I18n.console.shell.top_bar)}>
+              <Navbar.Header>
+                <AppLayout.MenuToggle aria-label={t(I18n.console.shell.menu)} />
+                <Sidebar.Trigger aria-label={t(I18n.console.shell.sidebar)} />
+                <Separator orientation="vertical" />
+                <Breadcrumbs>
+                  {this.breadcrumbs.map((crumb) => (
+                    <Breadcrumbs.Item key={crumb.to} href={crumb.to}>
+                      {t(crumb.label)}
+                    </Breadcrumbs.Item>
                   ))}
-                </Sidebar.Menu>
-              </Sidebar.Main>
-              <Sidebar.Footer>
-                <Sidebar.MenuItem textValue={t(I18n.console.pages.settings)}>
-                  <NavLink to={Routes.settings}>
-                    <Sidebar.MenuIcon>
-                      <Icon name={Icons.Gear} aria-hidden />
-                    </Sidebar.MenuIcon>
-                    <Sidebar.MenuLabel>{t(I18n.console.pages.settings)}</Sidebar.MenuLabel>
-                  </NavLink>
-                </Sidebar.MenuItem>
-              </Sidebar.Footer>
-              <Sidebar.Rail />
-            </Sidebar>
-            <Sidebar.Mobile />
-          </>
-        }
-      >
-        <OfflineBanner />
-        <main id="main" className={ui.densityClass} tabIndex={-1}>
-          <Outlet />
-        </main>
-      </AppLayout>
-      <Palette />
-    </PanelShell>
-  );
+                </Breadcrumbs>
+                <Navbar.Spacer />
+                <Button variant="tertiary" size="sm" onPress={this.openPalette}>
+                  <Icon name="search" aria-hidden />
+                  {t(I18n.shortcuts.open_palette.label)}
+                  <ShortcutKeys shortcut={OpenPaletteShortcut} />
+                </Button>
+                <ConnectionIndicator />
+                <NotificationInbox />
+                <PendingChanges />
+                <LocaleSwitcher />
+                <ThemeToggle />
+                <Dropdown>
+                  <Dropdown.Trigger aria-label={t(I18n.console.shell.account)}>
+                    <Avatar name={actor?.displayName} src={actor?.avatarUrl} size="sm" />
+                  </Dropdown.Trigger>
+                  <Dropdown.Menu>
+                    <Dropdown.Item id={Routes.settings.name} render={<Link to={Routes.settings} />}>
+                      {t(I18n.pages.settings.title)}
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      id={SignOutShortcut.name}
+                      color={Tone.Danger}
+                      onAction={this.signOut}
+                    >
+                      {t(I18n.shortcuts.sign_out.label)}
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Navbar.Header>
+            </Navbar>
+          }
+          sidebar={
+            <>
+              <Sidebar aria-label={t(I18n.console.shell.navigation)}>
+                <Sidebar.Header>
+                  <TenantSwitcher />
+                </Sidebar.Header>
+                <Sidebar.Main>
+                  <Sidebar.Menu>
+                    {this.groups.map((group) => (
+                      <Sidebar.MenuSection key={group.group} title={t(group.group)}>
+                        {group.items.map((item) => (
+                          <Sidebar.MenuItem key={item.label} textValue={t(item.label)}>
+                            <NavLink to={item.to}>
+                              <Sidebar.MenuIcon>
+                                <Icon name={item.icon} aria-hidden />
+                              </Sidebar.MenuIcon>
+                              <Sidebar.MenuItemContent>
+                                <Sidebar.MenuLabel>{t(item.label)}</Sidebar.MenuLabel>
+                              </Sidebar.MenuItemContent>
+                            </NavLink>
+                          </Sidebar.MenuItem>
+                        ))}
+                      </Sidebar.MenuSection>
+                    ))}
+                  </Sidebar.Menu>
+                </Sidebar.Main>
+                <Sidebar.Footer>
+                  <Sidebar.MenuItem textValue={t(I18n.pages.settings.title)}>
+                    <NavLink to={Routes.settings}>
+                      <Sidebar.MenuIcon>
+                        <Icon name="settings" aria-hidden />
+                      </Sidebar.MenuIcon>
+                      <Sidebar.MenuLabel>{t(I18n.pages.settings.title)}</Sidebar.MenuLabel>
+                    </NavLink>
+                  </Sidebar.MenuItem>
+                </Sidebar.Footer>
+                <Sidebar.Rail />
+              </Sidebar>
+              <Sidebar.Mobile />
+            </>
+          }
+        >
+          <OfflineBanner />
+          <main id="main" className={ui.densityClass} tabIndex={-1}>
+            <Outlet />
+          </main>
+        </AppLayout>
+        <Palette />
+      </PanelShell>
+    );
+  }
 }

@@ -24,12 +24,14 @@ export default e2ePreset({
     "experience",
     "platform",
     "identity",
-  ], // from #stackra/clients imports
+  ], // from the #stackra/clients/<service> imports
   seeds: ["orders.demo"],
   projects: [
     "chromium",
     "mobile-safari",
-    { name: "chromium-rtl", base: "chromium", locale: "ar" }, // from i18n.config.ts rtl: [ar]
+    // one RTL project per i18n.config.ts rtl entry: ar, ar-SA
+    { name: "chromium-rtl", base: "chromium", locale: "ar" },
+    { name: "chromium-rtl-sa", base: "chromium", locale: "ar-SA" },
     { name: "pwa", target: "pwa", serviceWorkers: "allow", match: /\.offline\.e2e\.test\.ts$/ },
     { name: "desktop", target: "desktop", match: /\.desktop\.e2e\.test\.ts$/ },
   ],

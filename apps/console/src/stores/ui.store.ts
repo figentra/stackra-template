@@ -4,8 +4,8 @@
  *          device.
  * Boundary: a store class on @stackra/state (ADR 0079): the fields are the state, `set` the only
  *           writer, methods the only callers of `set`, getters the derived values. Nothing
- *           server-owned is copied here; a preference that must follow the user across devices is
- *           a setting. Persisted in the prefs store under the derived key `console.ui`.
+ *           server-owned is copied here; a preference that must follow the user across devices is a
+ *           setting. Persisted in the prefs store under the derived key `console.ui`.
  * Runtime: browser
  * Governing contract: ADR 0294 (decisions 14 and 16), ADR 0079, ADR 0256 (prefs store)
  */

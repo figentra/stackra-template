@@ -10,10 +10,17 @@ Governing contract: root AGENTS.md
 
 - Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is the tenant console (web, PWA,
   desktop).
-- UI and routes only; data comes from the services through the generated clients
-  (`#stackra/clients`), and the session, tenant, query and realtime contexts are the packages',
-  mounted from their config classes. `src/providers/` exists only for a `Module({ wrap })` component
-  no package ships; the console has none.
+- UI and routes only; data comes from the services through the generated client classes
+  (`#stackra/clients/<service>`, imported by name), and the session, tenant, query and realtime
+  contexts are the packages', mounted from their config classes. The console writes no root module
+  (it would say nothing gen cannot derive) and no error boundary (`@stackra/navigation` owns it).
+- Components, pages, layouts and block renderers are class components from `@stackra/ui`, compiled
+  to function components by gen; never `Component` from `react`. One exported declaration per file:
+  Props in `<name>.props.ts`, hook results in `src/types/`. Icons are `IconName` strings.
+- Code the console does not own is shadowed only under `src/overrides/<owner>/` at the owner's path;
+  a config override stays in `src/config/` as `extends BaseX`.
+- Strings live in `assets/lang/<locale>/<namespace>.json`; `en` and `ar` are complete, `en-US` and
+  `ar-SA` hold only keys that differ.
 - `.stackra/` holds generated samples; change `stackra.config.ts` or `src/` and rerun `stackra gen`,
   never edit them. The committed contract is `stackra.manifest.json` at the member root.
 - Secrets: forbidden; secret values come from the project's secret store at run time.

@@ -42,7 +42,7 @@ test("switches tenant, theme and locale from the shell", async ({ page }) => {
   await page.getByRole("button", { name: /^theme: |^السمة: / }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", /dark|light/);
 
-  await page.getByRole("button", { name: /switch language|تبديل اللغة/ }).click();
+  await page.getByRole("button", { name: /^language: |^اللغة: / }).click();
   await page.getByRole("menuitemradio", { name: "العربية" }).click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(await axe(page)).toHaveNoViolations();

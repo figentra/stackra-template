@@ -7,7 +7,7 @@
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0140
  */
-import { CoreRefusals } from "@stackra/errors";
+import { ForbiddenError } from "@stackra/errors";
 import { refusal } from "@stackra/errors/testing";
 import { describe, expect, it, vi } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
@@ -17,7 +17,7 @@ import { ErrorState } from "#src/components/error-state";
 describe(ErrorState, () => {
   /** Retrying a permission refusal can never succeed, so offering it would mislead the user. */
   it("shows no retry for a permission refusal", () => {
-    const denied = refusal(CoreRefusals.forbidden);
+    const denied = refusal(ForbiddenError);
     render(<ErrorState error={denied} onRetry={vi.fn()} />, { locale: "en" });
     expect(screen.getByRole("alert")).toHaveTextContent("You do not have access");
     expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();

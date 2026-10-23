@@ -5,16 +5,16 @@
  * Boundary: presentation over `useNotificationInbox()`, with the console's loading, empty and error
  *           states, and a "load more" button while older notifications exist. An entry's text is
  *           its kind's derived label (`messages::enums.inbox_message_kind.<code>`), interpolated
- *           with the entry's `data`, in the user's locale; the badge
- *           shows the service's inbox-wide unread count. A refused mark-read is a toast, and the
- *           entry stays unread.
+ *           with the entry's `data`, in the user's locale; the badge shows the service's inbox-wide
+ *           unread count. A refused mark-read is a toast, and the entry stays unread. A class
+ *           component; gen compiles it to a function component.
  * Runtime: browser
- * Governing contract: ADR 0139 (feedback), ADR 0140 (error envelope)
+ * Governing contract: ADR 0139 (feedback), ADR 0140 (error envelope), ADR 0294 (as amended by
+ *                     programming model v3.1, AGENTS.md: class components)
  */
 import { Sheet } from "@stackra-pro/ui";
 import { useDateTime, useTranslation } from "@stackra/i18n/react";
-import { Badge, Button, Description, toast } from "@stackra/ui";
-import { Icon, Icons } from "@stackra/ui/icons";
+import { Badge, Button, Component, Description, Icon, toast } from "@stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { EmptyView } from "#src/components/empty-view";
 import { ErrorState } from "#src/components/error-state";
@@ -22,71 +22,91 @@ import { LoadingState } from "#src/components/loading-state";
 import { useNotificationInbox } from "./use-notification-inbox";
 
 /** The trigger and the sheet; one instance in the shell. */
-export function NotificationInbox() {
-  const { t } = useTranslation();
-  const formatDateTime = useDateTime();
-  const inbox = useNotificationInbox();
-  const markRead = (inboxMessageId: string) =>
-    inbox
-      .markRead(inboxMessageId)
-      .catch(() => toast.danger(t(I18n.console.inbox.mark_read_failed)));
+export class NotificationInbox extends Component {
+  /** The translator of the active locale. */
+  i18n = useTranslation();
 
-  return (
-    <Sheet>
-      <Sheet.Trigger>
-        <Button
-          variant="tertiary"
-          size="sm"
-          isIconOnly
-          aria-label={t(I18n.console.inbox.open, { count: inbox.unread })}
-        >
-          <Badge content={inbox.unread || undefined} color="accent">
-            <Icon name={Icons.Bell} aria-hidden />
-          </Badge>
-        </Button>
-      </Sheet.Trigger>
-      <Sheet.Content side="end" aria-label={t(I18n.console.inbox.title)}>
-        <Sheet.Header>
-          <Sheet.Title>{t(I18n.console.inbox.title)}</Sheet.Title>
-        </Sheet.Header>
-        <Sheet.Body>
-          {inbox.isLoading && <LoadingState label={I18n.console.inbox.loading} />}
-          {inbox.error !== null && <ErrorState error={inbox.error} onRetry={inbox.retry} />}
-          {!inbox.isLoading && inbox.error === null && inbox.items.length === 0 && (
-            <EmptyView
-              title={I18n.console.inbox.empty_title}
-              description={I18n.console.inbox.empty_body}
-              icon={Icons.Bell}
-            />
-          )}
-          {inbox.items.map((item) => (
-            <article key={item.id} className="flex flex-col gap-1 py-2">
-              <strong className={item.readAt ? "font-normal" : undefined}>
-                {t(I18n.messages.enums.inbox_message_kind[item.kind], item.data)}
-              </strong>
-              <div className="flex items-center gap-2">
-                <Description>{formatDateTime(item.createdAt)}</Description>
-                {item.readAt === null && (
-                  <Button size="sm" variant="tertiary" onPress={() => markRead(item.id)}>
-                    {t(I18n.console.inbox.mark_read)}
-                  </Button>
-                )}
-              </div>
-            </article>
-          ))}
-          {inbox.hasMore && (
-            <Button
-              variant="secondary"
-              size="sm"
-              isPending={inbox.isLoadingMore}
-              onPress={inbox.loadMore}
-              className="mt-2 self-center"
-            >
-              {t(I18n.console.inbox.load_more)}
-            </Button>
-          )}
-        </Sheet.Body>
-      </Sheet.Content>
-    </Sheet>
-  );
+  /** Formats an instant in the user's locale and time zone. */
+  formatDateTime = useDateTime();
+
+  /** The inbox's entries, paging state and calls. */
+  inbox = useNotificationInbox();
+
+  /** Marks one entry read; a refusal becomes a toast and the entry stays unread. */
+  async markRead(inboxMessageId: string) {
+    try {
+      await this.inbox.markRead(inboxMessageId);
+    } catch {
+      toast.danger(this.i18n.t(I18n.console.inbox.mark_read_failed));
+    }
+  }
+
+  /** Whether the first answer arrived without an error and held nothing. */
+  get isEmpty() {
+    return !this.inbox.isLoading && this.inbox.error === null && this.inbox.items.length === 0;
+  }
+
+  /** The bell with its badge, and the sheet with the list. */
+  render() {
+    const { t } = this.i18n;
+    const inbox = this.inbox;
+    return (
+      <Sheet>
+        <Sheet.Trigger>
+          <Button
+            variant="tertiary"
+            size="sm"
+            isIconOnly
+            aria-label={t(I18n.console.inbox.open, { count: inbox.unread })}
+          >
+            <Badge content={inbox.unread || undefined} color="accent">
+              <Icon name="bell" aria-hidden />
+            </Badge>
+          </Button>
+        </Sheet.Trigger>
+        <Sheet.Content side="end" aria-label={t(I18n.console.inbox.title)}>
+          <Sheet.Header>
+            <Sheet.Title>{t(I18n.console.inbox.title)}</Sheet.Title>
+          </Sheet.Header>
+          <Sheet.Body>
+            {inbox.isLoading && <LoadingState label={I18n.console.inbox.loading} />}
+            {inbox.error !== null && <ErrorState error={inbox.error} onRetry={inbox.retry} />}
+            {this.isEmpty && (
+              <EmptyView
+                title={I18n.console.inbox.empty_title}
+                description={I18n.console.inbox.empty_body}
+                icon="bell"
+              />
+            )}
+            {inbox.items.map((item) => (
+              <article key={item.id} className="flex flex-col gap-1 py-2">
+                <strong className={item.readAt ? "font-normal" : undefined}>
+                  {t(I18n.messages.enums.inbox_message_kind[item.kind], item.data)}
+                </strong>
+                <div className="flex items-center gap-2">
+                  <Description>{this.formatDateTime(item.createdAt)}</Description>
+                  {item.readAt === null && (
+                    <Button size="sm" variant="tertiary" onPress={() => this.markRead(item.id)}>
+                      {t(I18n.console.inbox.mark_read)}
+                    </Button>
+                  )}
+                </div>
+              </article>
+            ))}
+            {inbox.hasMore && (
+              <Button
+                variant="secondary"
+                size="sm"
+                isPending={inbox.isLoadingMore}
+                onPress={inbox.loadMore}
+                className="mt-2 self-center"
+              >
+                {t(I18n.console.inbox.load_more)}
+              </Button>
+            )}
+          </Sheet.Body>
+        </Sheet.Content>
+      </Sheet>
+    );
+  }
 }

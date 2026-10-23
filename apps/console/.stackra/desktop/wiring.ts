@@ -6,7 +6,8 @@
  * Purpose: the main-process container wiring of @acme/console for the `desktop` target: the menus,
  *          the bridges the packages ship behind their ports (receipt printer, folder picker) and
  *          the Node-side drivers they need (file system, receipt printer, cash drawer, scanner),
- *          plus the config classes main reads, each console override bound in place of its base.
+ *          plus the config classes main reads, each override bound in place of its base (the app
+ *          class keeps the base's name). The derived root module stands in for a module file.
  * Boundary: main only. Nothing here reaches the renderer bundle, and nothing in the renderer wiring
  *           (`gen/wiring.ts`: contexts, stores, routes) reaches main; a bridge is the only path
  *           between the two. Derived from the classes and their constructor parameter types at
@@ -15,21 +16,21 @@
  * Runtime: node
  */
 import { Lifetime, type Wiring } from "@stackra/container";
-import { CspConfig } from "@stackra/csp";
+import { CspConfig as BaseCspConfig } from "@stackra/csp";
 import { FileSystem } from "@stackra/filesystem/contracts";
-import { I18nConfig } from "@stackra/i18n";
-import { PeripheralsConfig } from "@stackra/peripherals";
+import { I18nConfig as BaseI18nConfig } from "@stackra/i18n";
+import { PeripheralsConfig as BasePeripheralsConfig } from "@stackra/peripherals";
 import { BarcodeScanner, CashDrawer, ReceiptPrinter } from "@stackra/peripherals/contracts";
 import { PrintReceiptBridge } from "@stackra/peripherals/electron";
-import { DesktopConfig } from "@stackra/platform";
+import { DesktopConfig as BaseDesktopConfig } from "@stackra/platform";
 import { PickFolderBridge } from "@stackra/platform/electron";
-import { ThemingConfig } from "@stackra/theming";
-import { ConsoleCspConfig } from "#src/config/csp.config";
-import { ConsoleDesktopConfig } from "#src/config/desktop.config";
-import { ConsoleI18nConfig } from "#src/config/i18n.config";
-import { ConsolePeripheralsConfig } from "#src/config/peripherals.config";
+import { ThemingConfig as BaseThemingConfig } from "@stackra/theming";
+import { CspConfig } from "#src/config/csp.config";
+import { DesktopConfig } from "#src/config/desktop.config";
+import { I18nConfig } from "#src/config/i18n.config";
+import { PeripheralsConfig } from "#src/config/peripherals.config";
 import { TelemetryConfig } from "#src/config/telemetry.config";
-import { ConsoleThemingConfig } from "#src/config/theming.config";
+import { ThemingConfig } from "#src/config/theming.config";
 import { AppMenu } from "#src/menus/app.menu";
 import { TrayMenu } from "#src/menus/tray.menu";
 
@@ -53,7 +54,7 @@ export const mainWiring = {
     },
   },
   bindings: [
-    { module: "console", provide: AppMenu, kind: "menu", deps: [DesktopConfig] },
+    { module: "console", provide: AppMenu, kind: "menu", deps: [BaseDesktopConfig] },
     { module: "console", provide: TrayMenu, kind: "menu", deps: [] },
     {
       module: "peripherals",
@@ -69,12 +70,12 @@ export const mainWiring = {
       lifetime: Lifetime.Request,
       deps: [FileSystem],
     },
-    { module: "console", provide: CspConfig, config: ConsoleCspConfig },
-    { module: "console", provide: DesktopConfig, config: ConsoleDesktopConfig },
-    { module: "console", provide: I18nConfig, config: ConsoleI18nConfig },
-    { module: "console", provide: PeripheralsConfig, config: ConsolePeripheralsConfig },
+    { module: "console", provide: BaseCspConfig, config: CspConfig },
+    { module: "console", provide: BaseDesktopConfig, config: DesktopConfig },
+    { module: "console", provide: BaseI18nConfig, config: I18nConfig },
+    { module: "console", provide: BasePeripheralsConfig, config: PeripheralsConfig },
     { module: "console", provide: TelemetryConfig, config: TelemetryConfig },
-    { module: "console", provide: ThemingConfig, config: ConsoleThemingConfig },
+    { module: "console", provide: BaseThemingConfig, config: ThemingConfig },
   ],
   drivers: [
     {

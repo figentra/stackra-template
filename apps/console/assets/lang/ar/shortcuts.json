@@ -1,0 +1,18 @@
+{
+  "$comment": "Stackra file contract — Purpose: the derived labels of the console's Shortcut classes (namespace `shortcuts::`, `<name>.label`), shown by the palette, the desktop menu and the key hints; Boundary: one entry per class in src/shortcuts/, keyed by its derived name; gen fails on a class without a label in any locale; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080",
+  "open_palette": {
+    "label": "لوحة الأوامر"
+  },
+  "toggle_sidebar": {
+    "label": "تبديل الشريط الجانبي"
+  },
+  "cycle_theme": {
+    "label": "تبديل السمة"
+  },
+  "open_pending_changes": {
+    "label": "التغييرات المعلّقة"
+  },
+  "sign_out": {
+    "label": "تسجيل الخروج"
+  }
+}

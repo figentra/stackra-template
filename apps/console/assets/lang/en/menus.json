@@ -1,0 +1,13 @@
+{
+  "$comment": "Stackra file contract — Purpose: the desktop menus' words (namespace `menus::`): the app menu's group and link labels and the tray's own item; Boundary: translated in Electron main with the locale the renderer reports; Shortcut items take their label from `shortcuts::`; Runtime: node; Governing contract: ADR 0058 (Electron), ADR 0281 d2, ADR 0080",
+  "app": {
+    "file": "File",
+    "view": "View",
+    "go": "Go",
+    "help": "Help",
+    "docs": "Documentation"
+  },
+  "tray": {
+    "show": "Show console"
+  }
+}

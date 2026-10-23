@@ -18,11 +18,11 @@ import { WelcomeHeroBlock } from "#src/blocks/welcome-hero/welcome-hero.block";
 describe(WelcomeHero, () => {
   /** The call to action must move the user through the router. */
   it("navigates on the call to action", async () => {
-    const action = { labelKey: I18n.console.welcome.cta, route: "quick_order" } as const;
+    const action = { labelKey: I18n.documents.welcome.hero.cta, route: "quick_order" } as const;
     const hero = (
       <WelcomeHero
-        titleKey={I18n.console.welcome.title}
-        bodyKey={I18n.console.welcome.body}
+        titleKey={I18n.documents.welcome.hero.title}
+        bodyKey={I18n.documents.welcome.hero.body}
         action={action}
       />
     );
@@ -33,8 +33,11 @@ describe(WelcomeHero, () => {
 
   /** A URL or an unknown key is not a route key, so a document can never redirect off the app. */
   it("refuses a call to action that is not a route key", () => {
-    const keys = { titleKey: I18n.console.welcome.title, bodyKey: I18n.console.welcome.body };
-    const offApp = { labelKey: I18n.console.welcome.cta, route: "https://evil.example" };
+    const keys = {
+      titleKey: I18n.documents.welcome.hero.title,
+      bodyKey: I18n.documents.welcome.hero.body,
+    };
+    const offApp = { labelKey: I18n.documents.welcome.hero.cta, route: "https://evil.example" };
     expect(validate(WelcomeHeroBlock, { ...keys, action: offApp }).success).toBe(false);
   });
 });

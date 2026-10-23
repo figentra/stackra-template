@@ -15,7 +15,12 @@ import { refusal } from "@stackra/errors/testing";
 import { fakeFlags } from "@stackra/feature-flags/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen, userEvent } from "@stackra/testing/react";
-import { Commerce } from "#stackra/clients";
+import {
+  CreateOrderAction,
+  InsufficientStockError,
+  OrderStatus,
+  SearchVariantsQuery,
+} from "#stackra/clients/commerce";
 import { Flags } from "#stackra/flags";
 import { QuickOrderRoute } from "#src/routes/quick-order/quick-order.route";
 import { Routes } from "#stackra/routes";
@@ -35,7 +40,7 @@ const HITS = {
 /** The order the fake creates. */
 const CREATED = {
   orderId: "ord_01JA0000000000000000000003",
-  status: Commerce.enums.OrderStatus.PendingPayment,
+  status: OrderStatus.PendingPayment,
   totals: { currency: "SAR", subtotalMinor: 0, totalMinor: 0, adjustments: [] },
   paymentClientSecret: "cs_test",
 };
@@ -54,9 +59,9 @@ describe(QuickOrderRoute, () => {
    * Loyalty data must be sent only when points are entered, and success must land on the new order.
    */
   it("sends the loyalty extension only with points, then follows the redirect", async () => {
-    const commerce = fakeClient(Commerce, (fake) => {
-      fake.queries.SearchVariants.returns(HITS);
-      fake.actions.CreateOrder.returns(CREATED);
+    const commerce = fakeClient((fake) => {
+      fake.on(SearchVariantsQuery).returns(HITS);
+      fake.on(CreateOrderAction).returns(CREATED);
     });
     const { router } = renderRoute(Routes.quick_order, {
       locale: "en",
@@ -67,7 +72,7 @@ describe(QuickOrderRoute, () => {
     await userEvent.clear(screen.getByLabelText("Loyalty points"));
     await userEvent.type(screen.getByLabelText("Loyalty points"), "250");
     await userEvent.click(screen.getByRole("button", { name: "Place order" }));
-    expect(commerce.called(Commerce.actions.CreateOrder)).toEqual([
+    expect(commerce.called(CreateOrderAction)).toEqual([
       {
         lines: [{ variantId: "var_01JA0000000000000000000001", quantity: 1 }],
         extensions: { loyalty: { redeemPoints: 250 } },
@@ -78,12 +83,12 @@ describe(QuickOrderRoute, () => {
 
   /** A refusal with `details.fields` is a field error, not an error page (ADR 0140). */
   it("surfaces a server field refusal on its field", async () => {
-    const stock = refusal(Commerce.refusals.insufficient_stock, {
+    const stock = refusal(InsufficientStockError, {
       fields: { "lines.0.variantId": "insufficient_stock" },
     });
-    const commerce = fakeClient(Commerce, (fake) => {
-      fake.queries.SearchVariants.returns(HITS);
-      fake.actions.CreateOrder.throws(stock);
+    const commerce = fakeClient((fake) => {
+      fake.on(SearchVariantsQuery).returns(HITS);
+      fake.on(CreateOrderAction).throws(stock);
     });
     renderRoute(Routes.quick_order, { locale: "en", clients: [commerce], session: STAFF });
     await pickVariant();

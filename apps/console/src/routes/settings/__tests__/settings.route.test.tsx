@@ -11,7 +11,7 @@ import { fakeClient } from "@stackra/clients/testing";
 import { refusal } from "@stackra/errors/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen, userEvent } from "@stackra/testing/react";
-import { Platform } from "#stackra/clients";
+import { SetSettingValuesAction, SettingsLockedError } from "#stackra/clients/platform";
 import { Settings } from "#stackra/settings";
 import { SettingsRoute } from "#src/routes/settings/settings.route";
 import { Routes } from "#stackra/routes";
@@ -33,10 +33,10 @@ describe(SettingsRoute, () => {
    * A platform lock is shown, not hidden; saving still reaches the server, which answers per field.
    */
   it("shows a locked tenant value and surfaces the server refusal on the field", async () => {
-    const locked = refusal(Platform.refusals.settings_locked, {
+    const locked = refusal(SettingsLockedError, {
       fields: { [KEY]: "settings_locked" },
     });
-    const platform = fakeClient(Platform, (fake) => fake.actions.SetSettingValues.throws(locked));
+    const platform = fakeClient((fake) => fake.on(SetSettingValuesAction).throws(locked));
     renderRoute(Routes.settings, {
       locale: "en",
       clients: [platform],

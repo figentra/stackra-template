@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: proves the not-found page says so in the user's language and links home to the
- *          dashboard route.
+ * Purpose: proves the not-found page says so in the user's language and links home to the dashboard
+ *          route.
  * Boundary: unit tier, jsdom; the page renders inside the testing router.
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0140

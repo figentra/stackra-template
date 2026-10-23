@@ -5,8 +5,8 @@
  *          `menus.standardRoles`, placed by the shell around these items.
  * Boundary: a menu of kind `Tray`, using only the closed item verbs; items name Shortcut classes.
  * Runtime: node
- * Governing contract: ADR 0294 (decisions 14 and 16), ADR 0295 (decision 12), ADR 0058
- *                     (Electron), ADR 0254 (opt-in tray keep-alive)
+ * Governing contract: ADR 0294 (decisions 14 and 16), ADR 0295 (decision 12), ADR 0058 (Electron),
+ *                     ADR 0254 (opt-in tray keep-alive)
  */
 import { Menu, MenuKind, type MenuBuilder } from "@stackra/navigation";
 import { OpenPendingChangesShortcut } from "#src/shortcuts/open-pending-changes.shortcut";

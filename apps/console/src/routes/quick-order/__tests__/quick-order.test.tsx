@@ -10,20 +10,18 @@
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
-import { Commerce } from "#stackra/clients";
+import { CreateOrderAction, SearchVariantsQuery } from "#stackra/clients/commerce";
 import { QuickOrder } from "#src/routes/quick-order/quick-order";
 
 /** Guards the screen staff place orders from. */
 describe(QuickOrder, () => {
   /** Without a variant the schema refuses in the browser, so no order request is made. */
   it("labels its fields and refuses an order without a variant", async () => {
-    const commerce = fakeClient(Commerce, (fake) =>
-      fake.queries.SearchVariants.returns({ items: [] }),
-    );
+    const commerce = fakeClient((fake) => fake.on(SearchVariantsQuery).returns({ items: [] }));
     render(<QuickOrder />, { locale: "en", clients: [commerce], route: "/quick-order" });
     expect(screen.getByRole("heading", { level: 1, name: "Quick order" })).toBeTruthy();
     expect(screen.getByLabelText("Quantity")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Place order" }));
-    expect(commerce.called(Commerce.actions.CreateOrder)).toHaveLength(0);
+    expect(commerce.called(CreateOrderAction)).toHaveLength(0);
   });
 });

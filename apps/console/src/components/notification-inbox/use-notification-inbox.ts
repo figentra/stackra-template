@@ -5,44 +5,28 @@
  *          marks one read.
  * Boundary: one component's hook; the query and the action are the generated descriptors, so the
  *           server decides whose notifications are listed. Nothing is cached beyond the query
- *           cache. A failed mark-read is the caller's to show; the list is left as it was.
+ *           cache. A failed mark-read is the caller's to show; the list is left as it was. The
+ *           result type is `types/notification-inbox-state.type.ts`.
  * Runtime: browser
  * Governing contract: ADR 0225 (broadcast), ADR 0079, HTTP conventions (cursor pagination)
  */
 import { useAction, useInfiniteQuery } from "@stackra/clients/react";
 import { useSubscription } from "@stackra/realtime/react";
-import { Notifications, type InboxMessageView } from "#stackra/clients";
-
-/** What the hook returns. */
-export interface NotificationInboxState {
-  /** The newest notifications first, across every page loaded; empty before the first answer. */
-  readonly items: readonly InboxMessageView[];
-  /** The actor's unread count across the whole inbox, as the service counts it. */
-  readonly unread: number;
-  /** True until the first answer arrives. */
-  readonly isLoading: boolean;
-  /** The query's error, rendered by the error state; `null` when fine. */
-  readonly error: unknown;
-  /** True while the service has older notifications than the ones loaded. */
-  readonly hasMore: boolean;
-  /** True while the next page is on its way. */
-  readonly isLoadingMore: boolean;
-  /** Loads the next page after the last cursor. */
-  readonly loadMore: () => void;
-  /** Marks one notification read and refreshes the list; rejects when the service refuses. */
-  readonly markRead: (inboxMessageId: string) => Promise<void>;
-  /** Asks again after an error. */
-  readonly retry: () => void;
-}
+import {
+  InboxMessageCreated,
+  ListInboxMessagesQuery,
+  MarkInboxMessageReadAction,
+} from "#stackra/clients/notifications";
+import type { NotificationInboxState } from "#src/types/notification-inbox-state.type";
 
 /** Ten at a time is what the sheet shows without scrolling. */
 const PAGE_SIZE = 10;
 
 /** The inbox list, live through `InboxMessageCreated`, broadcast to this user's sessions only. */
 export function useNotificationInbox(): NotificationInboxState {
-  const list = useInfiniteQuery(Notifications.queries.ListInboxMessages, { limit: PAGE_SIZE });
-  const mark = useAction(Notifications.actions.MarkInboxMessageRead);
-  useSubscription(Notifications.events.InboxMessageCreated, () => list.refetch());
+  const list = useInfiniteQuery(ListInboxMessagesQuery, { limit: PAGE_SIZE });
+  const mark = useAction(MarkInboxMessageReadAction);
+  useSubscription(InboxMessageCreated, () => list.refetch());
   const pages = list.data?.pages ?? [];
   return {
     items: pages.flatMap((page) => page.items),

@@ -10,7 +10,7 @@
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen } from "@stackra/testing/react";
-import { Experience } from "#stackra/clients";
+import { GetDocumentQuery } from "#stackra/clients/experience";
 import { WelcomeRoute } from "#src/routes/welcome/welcome.route";
 import { Routes } from "#stackra/routes";
 
@@ -21,10 +21,10 @@ const STAFF = { permissions: ["orders.order.read"] };
 describe(WelcomeRoute, () => {
   /** No published document: the coded default renders, hero first. */
   it("falls back to the coded document", async () => {
-    const experience = fakeClient(Experience, (fake) => fake.queries.GetDocument.returns(null));
+    const experience = fakeClient((fake) => fake.on(GetDocumentQuery).returns(null));
     renderRoute(Routes.welcome, { locale: "en", clients: [experience], session: STAFF });
     expect(await screen.findByRole("heading", { name: "Welcome to your console" })).toBeTruthy();
-    expect(experience.called(Experience.queries.GetDocument)).toEqual([{ key: "console.welcome" }]);
+    expect(experience.called(GetDocumentQuery)).toEqual([{ key: "console.welcome" }]);
   });
 
   /** A tenant's published version replaces the coded default, block for block. */
@@ -36,20 +36,18 @@ describe(WelcomeRoute, () => {
         {
           type: "console.welcome_hero",
           props: {
-            titleKey: "console::welcome.title",
-            bodyKey: "console::welcome.body",
-            action: { labelKey: "console::welcome.cta", route: "settings" },
+            titleKey: "documents::welcome.hero.title",
+            bodyKey: "documents::welcome.hero.body",
+            action: { labelKey: "documents::welcome.hero.cta", route: "settings" },
           },
         },
       ],
     };
-    const experience = fakeClient(Experience, (fake) =>
-      fake.queries.GetDocument.returns(published),
-    );
+    const experience = fakeClient((fake) => fake.on(GetDocumentQuery).returns(published));
     renderRoute(Routes.welcome, { locale: "en", clients: [experience], session: STAFF });
     expect(await screen.findByRole("heading", { name: "Welcome to your console" })).toBeTruthy();
     const cta = screen.getByRole("link", { name: "Place your first order" });
     expect(cta.getAttribute("href")).toBe("/settings");
-    expect(screen.queryByRole("region", { name: "Revenue today" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Orders and revenue" })).toBeNull();
   });
 });

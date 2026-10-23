@@ -4,19 +4,20 @@
  *          its props are validated on publish and on render.
  * Boundary: the class is the props shape (its fields), and its renderer is `welcome-hero.tsx` in
  *           this folder, bound by name; the key is derived from the folder. Text arrives as i18n
- *           keys, never markup; the call to action names a route key, never a URL.
+ *           keys, never markup; the call to action names a route key, never a URL. The icon is an
+ *           `IconName`.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110 (registered coded blocks)
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20; as amended by programming model v3.1,
+ *                     AGENTS.md: icon names), ADR 0110 (registered coded blocks)
  */
 import type { I18nKey } from "@stackra/i18n";
 import { Block, BlockCategory } from "@stackra/experience";
-import { Icons } from "@stackra/ui/icons";
 import type { WelcomeHeroAction } from "#src/schemas/welcome-hero-action.schema";
 
 /** Heading key, body key and one optional call to action. */
 export class WelcomeHeroBlock extends Block({
   category: BlockCategory.Content,
-  icon: Icons.House,
+  icon: "house",
 }) {
   /** The heading, as an i18n key the document references. */
   titleKey!: I18nKey;

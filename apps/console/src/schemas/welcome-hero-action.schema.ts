@@ -3,8 +3,8 @@
  * Purpose: the one call to action of the `console.welcome_hero` block: a label key and the route it
  *          opens.
  * Boundary: a shape class nested in the block's props. Text arrives as an i18n key, never markup;
- *           the target is a route key of this app, never a URL, so a published document cannot
- *           send a user off the app. The route check runs when a document is parsed, not at import.
+ *           the target is a route key of this app, never a URL, so a published document cannot send
+ *           a user off the app. The route check runs when a document is parsed, not at import.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4 and 6), ADR 0110 d6, ADR 0112 (no raw HTML)
  */

@@ -2,21 +2,24 @@
  * Stackra file contract:
  * Purpose: the console's override of @stackra/query's configuration: server state on the client,
  *          the persisted query cache and the offline mutation queue (ADR 0252).
- * Boundary: an override declares `override` members only and inherits the base's key (`query`).
- *           The query context `createApp` mounts reads it, scoped to the active tenant so a switch
+ * Boundary: an override declares `override` members only and inherits the base's key (`query`). The
+ *           query context `createApp` mounts reads it, scoped to the active tenant so a switch
  *           never shows another tenant's cache. Which actions may queue is the generated offline
  *           map (`#stackra/offline`); storage drivers per target are picked by gen, and the
  *           persister is the encrypted IndexedDB one on every target (on desktop its key is held by
- *           Electron `safeStorage`, desktop.config.ts `offlineStore`).
+ *           Electron `safeStorage`, desktop.config.ts `offlineStore`). The class keeps the base's
+ *           name and imports the base as `BaseQueryConfig`; a second override of the same base
+ *           fails gen.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0295 (decision 10), ADR 0079, ADR 0252, ADR 0256
+ * Governing contract: ADR 0294 (decision 19; as amended by programming model v3.1, AGENTS.md: the
+ *                     Base alias), ADR 0295 (decision 10), ADR 0079, ADR 0252, ADR 0256
  */
 import type { DriverName } from "@stackra/container";
-import { QueryConfig, QueryScope } from "@stackra/query";
+import { QueryConfig as BaseQueryConfig, QueryScope } from "@stackra/query";
 import type { QueueLeader } from "@stackra/query/contracts";
 
 /** Server state on the client: the persisted query cache and the offline mutation queue. */
-export class ConsoleQueryConfig extends QueryConfig {
+export class QueryConfig extends BaseQueryConfig {
   /** Key cache and queue by tenant so a switch never shows another tenant's data. */
   override scope: QueryScope = QueryScope.Tenant;
 

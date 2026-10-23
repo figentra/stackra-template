@@ -43,7 +43,7 @@ export class SignInRoute extends Route({
   path: "/login",
   layout: PublicLayout,
   auth: false,
-  title: I18n.console.login.title,
+  title: I18n.pages.login.title,
 }) {
   /** `returnTo` defaults to the panel root and never leaves the origin; signed out → the BFF. */
   override async loader(ctx: RouteContext<this>) {

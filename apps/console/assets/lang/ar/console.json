@@ -1,5 +1,5 @@
 {
-  "$comment": "Stackra file contract — Purpose: the console's own strings (namespace `console::`); Boundary: keys referenced by this app only, every other namespace comes from the consumed services; the derived keys of its own declarations (shortcuts, enums, documents) sit under their kind segment and authored keys never do; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the console's chrome strings (namespace `console::`): the shell, the palette, the switchers, the offline banner, the queue, the inbox, the realtime chip, errors and risk labels; Boundary: keys this app's components reference; page copy is `pages::`, document copy `documents::`, derived shortcut, enum and menu labels have their own namespaces; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
   "shell": {
     "brand": "وحدة تحكم Acme",
     "top_bar": "الشريط العلوي",
@@ -8,44 +8,6 @@
     "navigation": "التنقل الرئيسي",
     "account": "الحساب",
     "loading_session": "جارٍ تحميل الجلسة"
-  },
-  "shortcuts": {
-    "open_palette": {
-      "label": "لوحة الأوامر"
-    },
-    "toggle_sidebar": {
-      "label": "تبديل الشريط الجانبي"
-    },
-    "cycle_theme": {
-      "label": "تبديل السمة"
-    },
-    "open_pending_changes": {
-      "label": "التغييرات المعلّقة"
-    },
-    "sign_out": {
-      "label": "تسجيل الخروج"
-    }
-  },
-  "manifest": {
-    "name": "وحدة تحكم Acme",
-    "short_name": "وحدة التحكم",
-    "description": "الطلبات والكتالوج والمخزون لمتجرك، متصلًا أو دون اتصال.",
-    "shortcuts": {
-      "quick_order": {
-        "name": "طلب سريع",
-        "short_name": "طلب",
-        "description": "أنشئ طلبًا لعميل ببضع نقرات."
-      }
-    }
-  },
-  "pages": {
-    "dashboard": "لوحة التحكم",
-    "settings": "الإعدادات"
-  },
-  "documents": {
-    "welcome": {
-      "title": "مرحبًا"
-    }
   },
   "palette": {
     "placeholder": "اكتب أمرًا أو صفحة أو ما تريد فعله…",
@@ -72,7 +34,6 @@
     "member": "عضو"
   },
   "locale": {
-    "switch": "تبديل اللغة",
     "current": "اللغة: {name}"
   },
   "theme": {
@@ -83,10 +44,7 @@
   },
   "offline": {
     "title": "أنت غير متصل",
-    "body": "{count, plural, zero {ستتم مزامنة تغييراتك عند عودة الاتصال.} one {تغيير واحد بانتظار المزامنة.} two {تغييران بانتظار المزامنة.} few {# تغييرات بانتظار المزامنة.} many {# تغييرًا بانتظار المزامنة.} other {# تغيير بانتظار المزامنة.}}",
-    "page_title": "أنت غير متصل",
-    "page_body": "لم تُحفظ هذه الصفحة للاستخدام دون اتصال. أعد الاتصال وحاول مجددًا.",
-    "retry": "حاول مجددًا"
+    "body": "{count, plural, zero {ستتم مزامنة تغييراتك عند عودة الاتصال.} one {تغيير واحد بانتظار المزامنة.} two {تغييران بانتظار المزامنة.} few {# تغييرات بانتظار المزامنة.} many {# تغييرًا بانتظار المزامنة.} other {# تغيير بانتظار المزامنة.}}"
   },
   "queue": {
     "title": "التغييرات المعلّقة",
@@ -111,70 +69,31 @@
     "discard_confirm_body": "يُحذف التغيير الذي أجريته دون اتصال ولن يصل إلى الخادم أبدًا.",
     "discard_keep": "الإبقاء عليه"
   },
-  "dashboard": {
-    "today": "اليوم",
-    "orders_today": "طلبات اليوم",
-    "loading": "جارٍ تحميل أرقام اليوم"
+  "attach": {
+    "images": "{count, plural, zero {لا صور للإرفاق} one {صورة واحدة للإرفاق} two {صورتان للإرفاق} few {# صور للإرفاق} many {# صورة للإرفاق} other {# صورة للإرفاق}}",
+    "product": "المنتج",
+    "product_hint": "ابحث برمز SKU أو بالاسم؛ تُرفق الصور بمنتج المتغير الذي تختاره.",
+    "alt": "وصف لقارئات الشاشة",
+    "submit": "إرفاق بالمنتج",
+    "done": "{count, plural, zero {لم تُرفق أي صورة} one {أُرفقت صورة واحدة} two {أُرفقت صورتان} few {أُرفقت # صور} many {أُرفقت # صورة} other {أُرفقت # صورة}}",
+    "failed": "تعذّر إرفاق {name}. احتُفظ بالصور الأخرى.",
+    "unsupported": "{name} ليس صورة تقبلها وحدة التحكم."
   },
-  "welcome": {
-    "title": "مرحبًا بك في وحدة التحكم",
-    "body": "كل ما أعلنته خدماتك موجود هنا: المنتجات والطلبات والمخزون. ابدأ بطلب سريع.",
-    "cta": "أنشئ طلبك الأول",
-    "loading": "جارٍ تحميل صفحة الترحيب",
-    "empty_title": "لم تُنشر صفحة ترحيب بعد",
-    "empty_body": "يمكن لمسؤول المستأجر بناؤها في منشئ الصفحات.",
-    "open_builder": "فتح منشئ الصفحات"
-  },
-  "login": {
-    "title": "جارٍ تسجيل دخولك",
-    "body": "يتم نقلك إلى صفحة تسجيل الدخول.",
-    "redirecting": "جارٍ إعادة التوجيه",
-    "continue": "المتابعة إلى تسجيل الدخول"
-  },
-  "settings": {
-    "tabs": "أقسام الإعدادات",
-    "device": "هذا الجهاز",
-    "tenant": "المستأجر",
-    "scheme": "السمة",
-    "locale": "اللغة",
-    "density": "كثافة الجداول",
-    "local_notifications": "إشعارات سطح المكتب",
-    "local_notifications_hint": "تظهر أثناء فتح وحدة التحكم.",
-    "save": "حفظ",
-    "saved_device": "تم حفظ إعدادات الجهاز",
-    "privacy": "الخصوصية",
-    "analytics_consent": "مشاركة إحصاءات الاستخدام",
-    "analytics_consent_hint": "تساعدنا على معرفة الشاشات المهمة. لا يُرسل شيء حتى تفعّل هذا الخيار.",
-    "notification_preferences": "تفضيلات الإشعارات"
-  },
-  "enums": {
-    "density": {
-      "comfortable": "مريحة",
-      "compact": "مضغوطة"
-    }
+  "loyalty": {
+    "title": "رصيد الولاء",
+    "points": "{count, plural, zero {لا نقاط} one {نقطة واحدة} two {نقطتان} few {# نقاط} many {# نقطة} other {# نقطة}}",
+    "next_expiry": "تنتهي أقدم النقاط في {date}",
+    "no_expiry": "لا توجد نقاط على وشك الانتهاء"
   },
   "capabilities": {
     "permission_denied": "لم يسمح المتصفح بالإشعارات.",
     "unavailable": "لا يمكن لهذا الجهاز عرض الإشعارات."
-  },
-  "quick_order": {
-    "variant_required": "اختر متغيرًا"
   },
   "risk": {
     "l0": "آمن",
     "l1": "منخفض",
     "l2": "متوسط",
     "l3": "مرتفع"
-  },
-  "menu": {
-    "file": "ملف",
-    "view": "عرض",
-    "go": "انتقال",
-    "help": "مساعدة",
-    "docs": "التوثيق"
-  },
-  "tray": {
-    "show": "إظهار وحدة التحكم"
   },
   "errors": {
     "retry": "حاول مجددًا",

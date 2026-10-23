@@ -12,10 +12,10 @@
  */
 import type { ActionInput } from "@stackra/clients";
 import { Int, PickType } from "@stackra/validation";
-import { Commerce } from "#stackra/clients";
+import { type CreateOrderAction, CreateOrderInput } from "#stackra/clients/commerce";
 
 /** The order lines and the points to redeem; zero points means "no loyalty extension". */
-export class QuickOrderForm extends PickType(Commerce.schemas.CreateOrderInput, ["lines"]) {
+export class QuickOrderForm extends PickType(CreateOrderInput, ["lines"]) {
   /** Points to redeem against this order; zero sends no loyalty extension. */
   @Int({ min: 0 })
   redeemPoints = 0;
@@ -24,7 +24,7 @@ export class QuickOrderForm extends PickType(Commerce.schemas.CreateOrderInput, 
    * `extensions.loyalty` is sent only when points are entered, so a tenant without loyalty never
    * sends the key.
    */
-  static toInput(values: QuickOrderForm): ActionInput<typeof Commerce.actions.CreateOrder> {
+  static toInput(values: QuickOrderForm): ActionInput<typeof CreateOrderAction> {
     const loyalty =
       values.redeemPoints > 0 ? { loyalty: { redeemPoints: values.redeemPoints } } : {};
     return { lines: values.lines, extensions: loyalty };

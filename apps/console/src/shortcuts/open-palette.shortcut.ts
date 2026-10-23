@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: `console.open_palette`: opens the palette. The same key works in the renderer and as
- *          the macOS menu item (AppMenu references this class).
+ * Purpose: `console.open_palette`: opens the palette. The same key works in the renderer and as the
+ *          macOS menu item (AppMenu references this class).
  * Boundary: the options are the declaration (keys, group); the key and the label
  *           (`console::shortcuts.open_palette.label`) are derived; `run` is behaviour. Navigation
  *           entries and action intents are generated from the manifests, never written here.

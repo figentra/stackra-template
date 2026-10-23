@@ -1,11 +1,12 @@
 /**
  * Stackra file contract:
  * Purpose: one boolean for "can we reach the API", from the platform's network probe, not
- *          `navigator.onLine` alone (which is true on a captive portal). The offline banner's own
- *          hook, beside it in its folder.
+ *          `navigator.onLine` alone (which is true on a captive portal). Read by the shell's
+ *          offline banner and by the offline page, so it sits in the app's `hooks/` group.
  * Boundary: reads the network capability of `@stackra/platform`; no side effects.
  * Runtime: browser
- * Governing contract: ADR 0250 (capability ports)
+ * Governing contract: ADR 0250 (capability ports), ADR 0294 decision 14 (`hooks/` holds a hook with
+ *                     two or more importers)
  */
 import { usePlatform } from "@stackra/platform/react";
 import { useSignal } from "@stackra/state/react";

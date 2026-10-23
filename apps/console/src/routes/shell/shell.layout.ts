@@ -7,8 +7,8 @@
  *           child loader, so a protected loader never sees a sessionless request. Links point down:
  *           routes name this layout, the layout never imports a route (it redirects by key,
  *           `Routes.sign_in`). The bottom tabs of a phone-sized PWA are the routes that declare
- *           `tab`, built by gen into `#stackra/navigation`. An error below it bubbles to
- *           `src/app.error.tsx`.
+ *           `tab`, built by gen into `#stackra/navigation`. An error below it bubbles to the root
+ *           boundary `@stackra/navigation` owns.
  * Runtime: browser
  * Governing contract: ADR 0294 (decisions 14 and 16), ADR 0164 (panel shell), ADR 0214
  *                     (gate-filtered navigation), ADR 0241 (session check)

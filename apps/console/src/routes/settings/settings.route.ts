@@ -7,16 +7,16 @@
  * Boundary: the loader is composite (prefs plus, when allowed, tenant values); `submit` writes the
  *           tenant values and maps a locked key to its field. The device and privacy tabs never
  *           reach the server. The user's notification preferences are the generated
- *           `/settings/messages` page. The title reuses the page heading's key.
+ *           `/settings/messages` page. The title is the page's `pages::settings.title`.
  * Runtime: browser
- * Governing contract: ADR 0294 (decisions 14 and 16), ADR 0213 (cascade, locks, revisions), ADR
- *                     0250, ADR 0256 (prefs)
+ * Governing contract: ADR 0294 (decisions 14 and 16; as amended by programming model v3.1,
+ *                     AGENTS.md: client classes and icon names), ADR 0213 (cascade, locks,
+ *                     revisions), ADR 0250, ADR 0256 (prefs)
  */
 import { Route, type RouteContext } from "@stackra/navigation";
 import { SettingScope } from "@stackra/settings";
-import { Icons } from "@stackra/ui/icons";
 import { validate } from "@stackra/validation";
-import { Platform } from "#stackra/clients";
+import { SetSettingValuesAction, SettingValuePermissions } from "#stackra/clients/platform";
 import { I18n } from "#stackra/i18n";
 import { ShellLayout } from "#src/routes/shell/shell.layout";
 import { DevicePrefs } from "#src/schemas/device-prefs.schema";
@@ -26,10 +26,10 @@ import { TenantSettings } from "#src/schemas/tenant-settings.schema";
 export class SettingsRoute extends Route({
   path: "/settings",
   layout: ShellLayout,
-  title: I18n.console.pages.settings,
+  title: I18n.pages.settings.title,
   tab: {
     order: 3,
-    icon: Icons.Gear,
+    icon: "settings",
   },
 }) {
   /**
@@ -37,7 +37,7 @@ export class SettingsRoute extends Route({
    * `locked`) for an actor who may manage settings, `null` for anyone else.
    */
   override async loader(ctx: RouteContext<this>) {
-    const canManage = ctx.actor.can(Platform.permissions.Settings.manage);
+    const canManage = ctx.actor.can(SettingValuePermissions.manage);
     const [device, tenant] = await Promise.all([
       ctx.prefs.read(DevicePrefs),
       canManage ? ctx.settings.read(TenantSettings, { scope: SettingScope.Tenant }) : null,
@@ -49,7 +49,7 @@ export class SettingsRoute extends Route({
   override async submit(ctx: RouteContext<this>) {
     const parsed = validate(TenantSettings, await ctx.formData());
     if (!parsed.success) return ctx.fieldErrors(parsed.error);
-    const result = await ctx.action(Platform.actions.SetSettingValues, {
+    const result = await ctx.action(SetSettingValuesAction, {
       scope: SettingScope.Tenant,
       values: parsed.data,
     });

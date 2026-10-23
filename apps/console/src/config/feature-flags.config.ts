@@ -7,18 +7,24 @@
  *           are a separate gate). Expiry and removal issues are on the Flag classes of the consumed
  *           modules; routes and menu items name them as `Flags.orders.quick_order` from
  *           `#stackra/flags`. The flags context `createApp` mounts targets the signed-in user, the
- *           active tenant and the client target. The PostHog key is the env class's.
+ *           active tenant and the client target. The PostHog key comes from
+ *           `EnvConfig.featureFlagsPosthogKey`. The class keeps the base's name and imports the
+ *           base as `BaseFeatureFlagsConfig`; a second override of the same base fails gen.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0213 d3 (flags are a settings kind), ADR 0231
- *                     (driver names are checked literals)
+ * Governing contract: ADR 0294 (decision 19; as amended by programming model v3.1, AGENTS.md: the
+ *                     Base alias), ADR 0213 d3 (flags are a settings kind), ADR 0231 (driver names
+ *                     are checked literals)
  */
 import type { DriverName } from "@stackra/container";
 import { Duration } from "@stackra/contracts";
-import { FeatureFlagsConfig, FlagTargeting } from "@stackra/feature-flags";
+import {
+  FeatureFlagsConfig as BaseFeatureFlagsConfig,
+  FlagTargeting,
+} from "@stackra/feature-flags";
 import type { FlagProvider } from "@stackra/feature-flags/contracts";
 
 /** Feature flags on the console: provider driver, build-time defaults and targeting. */
-export class ConsoleFeatureFlagsConfig extends FeatureFlagsConfig {
+export class FeatureFlagsConfig extends BaseFeatureFlagsConfig {
   /** `config` reads values from this file and runway (dev, on-prem); `posthog` is SaaS. */
   override provider: DriverName<FlagProvider> = "config";
 
