@@ -1,8 +1,9 @@
 /**
  * Stackra file contract:
  * Purpose: what the console is: its name, build targets, API area, the env contract, and the facts
- *          only build tools read: the web manifest's presentation keys (`pwa`), the desktop
- *          installers (`electron`) and the e2e projects. Read by `stackra gen`, `stackra dev`,
+ *          only build tools read: the web manifest's presentation keys (`pwa`), the mobile app's
+ *          universal-link association (`appLinks`), the desktop installers (`electron`) and the e2e
+ *          projects. Read by `stackra gen`, `stackra dev`,
  *          `stackra build`, `stackra test` and `stackra validate` from the syntax tree.
  * Boundary: static data only: enum values, literals and tokens, never a function or an environment
  *           read. The member key (`console`) comes from the package name; the console writes no
@@ -72,6 +73,15 @@ export default defineApp({
       prefer_related_applications: false,
     },
   },
+  /**
+   * The apps whose universal links this origin vouches for (mobile's `EnvConfig.appOrigin` is the
+   * console's domain). Gen writes `/.well-known/apple-app-site-association` (`<teamId>.<bundleId>`)
+   * and `/.well-known/assetlinks.json` (the Android package and the Play app-signing SHA-256) from
+   * each app's own stackra.config.ts and the root runway (`providers.apple.teamId`,
+   * `providers.google.appSigningSha256`, resolved at deploy, never written here), served as
+   * `application/json` with no redirect. `MobileLinkRoute` answers the same paths in a browser.
+   */
+  appLinks: [{ app: "@acme/mobile", paths: ["/m", "/m/*"] }],
   /**
    * electron-builder: the bundle identifier (the reverse of the product domain, stable across
    * releases), the copyright line and the installers per platform; runway's

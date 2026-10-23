@@ -13,6 +13,7 @@
  */
 import { routeRef } from "@stackra/navigation";
 import type { DashboardRoute } from "#src/routes/dashboard/dashboard.route";
+import type { MobileLinkRoute } from "#src/routes/mobile-link/mobile-link.route";
 import type { NotFoundRoute } from "#src/routes/not-found/not-found.route";
 import type { OfflineRoute } from "#src/routes/offline/offline.route";
 import type { OpenRoute } from "#src/routes/open/open.route";
@@ -33,6 +34,7 @@ export const Routes = {
   open: routeRef<typeof OpenRoute>("open"),
   share: routeRef<typeof ShareRoute>("share"),
   open_file: routeRef<typeof OpenFileRoute>("open_file"),
+  mobile_link: routeRef<typeof MobileLinkRoute>("mobile_link"),
   offline: routeRef<typeof OfflineRoute>("offline"),
   not_found: routeRef<typeof NotFoundRoute>("not_found"),
 } as const;

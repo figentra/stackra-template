@@ -35,6 +35,8 @@ import { prefixes } from "#stackra/i18n";
 import { CustomerPortalPanel } from "#src/panels/customer-portal.panel";
 import { DashboardRoute } from "#src/routes/dashboard/dashboard.route";
 import { Dashboard } from "#src/routes/dashboard/dashboard";
+import { MobileLinkRoute } from "#src/routes/mobile-link/mobile-link.route";
+import { MobileLink } from "#src/routes/mobile-link/mobile-link";
 import { NotFoundRoute } from "#src/routes/not-found/not-found.route";
 import { NotFound } from "#src/routes/not-found/not-found";
 import { OfflineRoute } from "#src/routes/offline/offline.route";
@@ -80,7 +82,10 @@ export const routes: RouteObject[] = toRoot({ prefixes }, [
     // the PWA share target (the worker redirects its POST here) and the file handler
     toRoute(ShareRoute, { component: Share }),
     toRoute(OpenFileRoute, { component: OpenFile }),
+    // the mobile app's universal links without the app: redirects, or the notice page
+    toRoute(MobileLinkRoute, { component: MobileLink }),
     ...toResource(Resources.Product), // /catalogue/products, /:id, /:id/edit, /new
+    ...toResource(Resources.ProductCollection), // /catalogue/collections, /:id/edit, /new
     ...toResource(Resources.Order), // /orders/orders, /:id
     ...toResource(Resources.LoyaltyAccount), // /loyalty/accounts, /:id, /new
     ...toResource(Resources.AccessLogEntry), // /access-log/entries

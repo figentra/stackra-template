@@ -33,17 +33,18 @@ apps/console
 ├── assets/lang/<locale>/    one file per namespace: console, shortcuts, manifest, pages, documents, menus, enums, devices;
 │                            en and ar complete, en-US and ar-SA overlays with only the keys that differ
 ├── .stackra/                GENERATED (see .stackra/README.md); the entries live in .stackra/entry/
-└── src/                     no root module: nothing to say that gen cannot derive, so the member is one module
+└── src/                     no root module: nothing to say that gen cannot derive, so the member is one module;
+    │                        src/README.md and a README in each group folder say what lives there
     ├── panels/              tenant-admin (/, admin area), customer-portal (/portal, app area)
-    ├── config/              one class per fact: env (every VITE_* value) and telemetry are the console's own,
-    │                        `Config({ schema, env })`; i18n, theming, pwa, desktop, csp, query, state, identity,
+    ├── config/              one class per fact: env (every VITE_* value) is the console's own, `Config({ schema,
+    │                        env })`; i18n, theming, pwa, desktop, csp, query, state, identity, telemetry,
     │                        feature-flags, analytics, consent, peripherals override a package's (`extends BaseX`)
     ├── routes/<name>/       <name>.route.ts or <name>.layout.ts and <name>.tsx (its class page) bound by name, __tests__/:
-    │                        dashboard, quick-order, settings, welcome, sign-in, open, share, open-file, offline,
-    │                        not-found; the shell and public layouts
+    │                        dashboard, quick-order, settings, welcome, sign-in, open, share, open-file,
+    │                        mobile-link (/m/*), offline, not-found; the shell and public layouts
     ├── components/<name>/   one class component per folder, its <name>.props.ts, its own hook, its __tests__/:
     │                        connection-indicator, notification-inbox, pending-changes, pending-changes-list, palette,
-    │                        offline-banner, tenant-switcher, attach-images, empty-view, error-state, …
+    │                        offline-banner, tenant-switcher, attach-images, image-previews, empty-view, …
     ├── hooks/               hooks with two or more importers: use-online-status, use-variant-search
     ├── types/               the result types of the console's hooks, one per file
     ├── overrides/<owner>/   shadows of code the console does not own, at the owner's own path:
@@ -51,9 +52,9 @@ apps/console
     ├── shortcuts/           Shortcut classes the palette, the keyboard and the menus share
     ├── stores/              Store classes: ui (persisted), palette
     ├── menus/               app and tray (desktop only, by their kind; a PWA has no OS menu bar)
-    ├── enums/               app-local enums: density
-    ├── schemas/             shape classes: the env and telemetry options, quick-order-form (derived), attach-images-form,
-    │                        device-prefs, tenant-settings, the nested telemetry objects, the welcome hero's action
+    ├── enums/               app-local enums: density, settings-tab
+    ├── schemas/             shape classes: the env options, quick-order-form (derived), attach-images-form,
+    │                        device-prefs, tenant-settings, the welcome hero's action
     ├── blocks/<name>/       one folder per page-builder block (<name>.block.ts, <name>.tsx, __tests__/): welcome-hero
     ├── documents/           Document classes: welcome
     └── styles/app.css       Tailwind v4, HeroUI v3, the @stackra/tokens faces and the @acme/theme `acme` theme
@@ -84,7 +85,8 @@ classes and the menus appear when their target or feature is added.
 Config is read with `useConfig(X)` in components and hooks and through the constructor in route,
 shortcut and menu classes; never as a static. The environment is read in one place, `EnvConfig`: a
 field named after a package config field feeds that field (`analyticsPosthogKey` →
-`analytics.posthogKey`), so no override reads env.
+`analytics.posthogKey`, `telemetryDsn` → `telemetry.dsn`), so no override reads env. Every config
+override is wired as `{ key, provide: BaseX, override: X }` in `.stackra/gen/wiring.ts`.
 
 ## Locales
 
@@ -110,6 +112,19 @@ share target (`/share`), the file handler (`/open-file`, PNG, JPEG, WebP), the p
 When even the cached shell is missing, the worker serves the React offline page (`routes/offline/`)
 that gen prerendered for the request's locale.
 
+## Universal links
+
+The console's domain is the mobile app's `appOrigin`. `stackra.config.ts` `appLinks` names
+`@acme/mobile` and its paths (`/m`, `/m/*`); gen writes
+`.stackra/public/.well-known/apple-app-site-association` and `.well-known/assetlinks.json` from the
+mobile app's bundle id and package and the root runway's `providers.apple.teamId` and
+`providers.google.appSigningSha256`. Those two values are runway references (`${providers.*}`) that
+the deploy step resolves into the built files; neither is ever a literal in the repository. Both
+files are served as `application/json` with no redirect (`public/_headers`), and the service worker
+never intercepts `/.well-known/`. A browser without the app lands on `MobileLinkRoute`
+(`routes/mobile-link/`), which redirects each mobile path to the console page that shows the same
+thing and shows a notice with a way to the dashboard for a screen the console does not have.
+
 ## Desktop
 
 `desktop.config.ts` `devices` declares the point-of-sale set (camera, microphone, USB, Bluetooth,
@@ -132,6 +147,7 @@ Electron fuse is listed in `.stackra/desktop/fuses.json`.
 | CSP additions                                               | `src/config/csp.config.ts`                            | the Electron main, the web targets' headers                                              |
 | Cache scope and age, queue replay and leader                | `src/config/query.config.ts`                          | the query context, `gen/wiring.ts`                                                       |
 | Analytics driver and consent                                | `src/config/analytics.config.ts`, `consent.config.ts` | `gen/wiring.ts`, the settings page's privacy tab                                         |
+| Error reporting, replay, vitals, field and bundle budgets   | `src/config/telemetry.config.ts` (`logger.telemetry`) | the reporter driver in `gen/wiring.ts`, `vite.config.ts` budgets                         |
 | Panels                                                      | `src/panels/`                                         | `gen/panels.ts` in every member, `routes.tsx`                                            |
 | Screens                                                     | `src/routes/<name>/`                                  | `.stackra/routes.tsx`, `gen/routes.ts`                                                   |
 | Default documents                                           | `src/documents/*.document.ts`                         | the `document:` routes; a published tenant document wins                                 |
@@ -149,17 +165,19 @@ Electron fuse is listed in `.stackra/desktop/fuses.json`.
 | `routes/*/__tests__/*.e2e.test.ts`                    | e2e  | `@stackra/testing/e2e`          | shell, resources, palette, offline and the per-locale offline page, desktop    |
 
 Client fakes take one shape everywhere: `fakeClient((fake) => fake.on(OrderKpisQuery).returns(…))`,
-asserted with `client.called(OrderKpisQuery)`.
+asserted with `client.called(OrderKpisQuery)`. A failure is a real error class, never `new Error`: a
+refusal with `.throws(refusal(InsufficientStockError))`, a lost connection with
+`.throws(TransportError.create({ reason: "network" }))` (`TransportError` from `@stackra/clients`).
 
 ## Catalog entries this member needs (root `pnpm-workspace.yaml`)
 
 Runtime dependencies:
-`@stackra/{actions,analytics,app,assets,clients,config,consent,container,contracts,coordinator,csp,errors,experience,feature-flags,filesystem,i18n,iam,icons,identity,media,navigation,panel,peripherals,platform,query,realtime,settings,shortcuts,state,storage,tenancy,theming,tokens,ui,validation}`
-and `@stackra-pro/ui` (HeroUI Pro, ADR 0113) in `catalog:stackra` (`@acme/theme`, the `acme` theme,
-and `@acme/loyalty-kit`, whose react entry ships the renderers of its two Custom widgets, are
-workspace packages); `react`, `react-dom`, `react-router` and `zod` (the generated schemas import
-it) in the default catalog; `@heroui/styles` in `catalog:ui`; `tailwindcss` and `workbox-*` in
-`catalog:frontend`.
+`@stackra/{actions,analytics,app,assets,clients,config,consent,container,contracts,coordinator,csp,errors,experience,feature-flags,filesystem,i18n,iam,icons,identity,logger,media,navigation,panel,peripherals,platform,query,realtime,settings,shortcuts,state,storage,tenancy,theming,tokens,ui,validation}`
+in `catalog:stackra` (`@acme/theme`, the `acme` theme, and `@acme/loyalty-kit`, whose react entry
+ships the renderers of its two Custom widgets, are workspace packages); `react`, `react-dom`,
+`react-router`, `zod` (the generated schemas import it) and `@heroui-pro/react` (HeroUI Pro, Stackra
+ADR 0197 as amended (stackra#127)) in the default catalog; `@heroui/styles` in `catalog:ui`;
+`tailwindcss` and `workbox-*` in `catalog:frontend`.
 
 Development dependencies: `@stackra/{cli,gen,runway,testing,vite-plugin}` in `catalog:stackra`
 (`@stackra/gen` brings `classComponents()` for Vite); the workspace presets
@@ -167,3 +185,17 @@ Development dependencies: `@stackra/{cli,gen,runway,testing,vite-plugin}` in `ca
 `electron`, `typescript` and `vite` in `catalog:build`; `@playwright/test`, `jsdom`, `oxfmt`,
 `oxlint` and `vitest` in `catalog:quality`. electron-builder is a dependency of `@stackra/platform`,
 which runs it for `stackra build --target desktop`.
+
+### HeroUI Pro licence
+
+The shell (`AppLayout`, `Navbar`, `Sidebar`), the palette (`Command`), the inbox and pending-changes
+sheets (`Sheet`), the empty and offline states (`EmptyState`), and the dashboard and PointsBalance
+tiles (`KPI`) use HeroUI Pro directly from `@heroui-pro/react` (Stackra ADR 0197 as amended
+(stackra#127)); every other primitive is the free HeroUI behind `@stackra/ui`. Installing therefore
+needs a HeroUI Pro licence. The token is `HEROUI_PERSONAL_TOKEN` in Infisical: locally
+`pnpm install:pro`, and in CI the OIDC step of `release.yml`, hand it to the package's postinstall
+as `HEROUI_AUTH_TOKEN`; the root guard `.github/scripts/heroui-pro.mjs`, which both run, stops early
+with a clear message when the token or the installed package is missing. It never sits in a file or
+in the repository; the root README section "HeroUI Pro licence" has the details. A team that copies
+this template needs its own HeroUI Pro licence, or replaces those components with free `@stackra/ui`
+ones.

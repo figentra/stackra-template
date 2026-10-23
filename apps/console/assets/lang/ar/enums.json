@@ -3,5 +3,10 @@
   "density": {
     "comfortable": "مريحة",
     "compact": "مضغوطة"
+  },
+  "settings_tab": {
+    "device": "هذا الجهاز",
+    "privacy": "الخصوصية",
+    "tenant": "المستأجر"
   }
 }

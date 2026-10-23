@@ -8,10 +8,10 @@
  *           string. A class component; gen compiles it to a function component.
  * Runtime: browser
  * Governing contract: ADR 0294 (decision 23: palette entries are shortcuts), ADR 0245, ADR 0197
- *                     (HeroUI Pro in our own apps), ADR 0294 (as amended by programming model v3.1,
- *                     AGENTS.md: class components)
+ *                     as amended (HeroUI Pro from `@heroui-pro/react`), ADR 0294 (as amended by
+ *                     programming model v3.1, AGENTS.md: class components)
  */
-import { Command, EmptyState } from "@stackra-pro/ui";
+import { Command, EmptyState } from "@heroui-pro/react";
 import { Tone } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
 import { useTranslation } from "@stackra/i18n/react";
@@ -36,16 +36,16 @@ export class Palette extends Component {
       <Command>
         <Command.Backdrop isOpen={isOpen} onOpenChange={setOpen}>
           <Command.Container>
-            <Command.Dialog aria-label={t(I18n.shortcuts.open_palette.label)}>
+            <Command.Dialog
+              aria-label={t(I18n.shortcuts.open_palette.label)}
+              inputValue={query}
+              onInputChange={setQuery}
+            >
               <Command.InputGroup>
                 <Command.InputGroup.Prefix>
                   <Icon name="search" aria-hidden />
                 </Command.InputGroup.Prefix>
-                <Command.InputGroup.Input
-                  value={query}
-                  onChange={setQuery}
-                  placeholder={t(I18n.console.palette.placeholder)}
-                />
+                <Command.InputGroup.Input placeholder={t(I18n.console.palette.placeholder)} />
                 <Command.InputGroup.ClearButton aria-label={t(I18n.console.palette.clear)} />
                 <Command.InputGroup.Suffix>
                   <Kbd>
@@ -54,8 +54,8 @@ export class Palette extends Component {
                 </Command.InputGroup.Suffix>
               </Command.InputGroup>
               <Command.List
-                emptyState={
-                  <EmptyState>
+                renderEmptyState={() => (
+                  <EmptyState size="sm">
                     <EmptyState.Header>
                       <EmptyState.Title>{t(I18n.console.palette.no_match)}</EmptyState.Title>
                       <EmptyState.Description>
@@ -63,11 +63,12 @@ export class Palette extends Component {
                       </EmptyState.Description>
                     </EmptyState.Header>
                   </EmptyState>
-                }
+                )}
               >
                 {intent && (
                   <Command.Group heading={t(I18n.console.palette.group_intent)}>
-                    <Command.Item textValue={query} onAction={confirmIntent} forceMount>
+                    {/* its text is the query itself, so the dialog's filter always keeps it */}
+                    <Command.Item textValue={query} onAction={confirmIntent}>
                       <Icon name="sparkles" aria-hidden />
                       <span>{t(intent.label)}</span>
                       <Chip

@@ -5,7 +5,69 @@
   },
   "resources": {
     "product": {
-      "title": "Products"
+      "title": "Products",
+      "columns": {
+        "title": "Title",
+        "slug": "Slug",
+        "status": "Status",
+        "variants": "Variants"
+      },
+      "filters": {
+        "status": "Status"
+      },
+      "views": {
+        "on_sale": "On sale",
+        "drafts": "Drafts",
+        "archived": "Archived"
+      },
+      "steps": {
+        "basics": "Basics",
+        "media": "Images",
+        "variants": "Variants",
+        "seo": "Search engines"
+      },
+      "fields": {
+        "title": "Title",
+        "slug": "Slug",
+        "collections": "Collections",
+        "images": "Images",
+        "variants": "Variants",
+        "sku": "SKU",
+        "barcode": "Barcode",
+        "track_inventory": "Track stock",
+        "seo": "Custom search listing"
+      },
+      "sections": {
+        "summary": "Summary",
+        "variants": "Variants"
+      },
+      "entries": {
+        "variants_id": "Variant",
+        "variants_sku": "SKU"
+      },
+      "empty": {
+        "heading": "No products yet"
+      },
+      "no_results": {
+        "heading": "No products match these filters"
+      }
+    },
+    "product_collection": {
+      "title": "Collections",
+      "columns": {
+        "title": "Title",
+        "slug": "Slug"
+      },
+      "fields": {
+        "title": "Title",
+        "slug": "Slug"
+      },
+      "empty": {
+        "heading": "No collections yet"
+      },
+      "no_results": {
+        "heading": "No collections match these filters"
+      }
     }
   },
   "enums": {
@@ -20,7 +82,13 @@
       "read": "View products",
       "create": "Create products",
       "update": "Edit products",
-      "archive": "Archive products"
+      "archive": "Archive products",
+      "import": "Import products"
+    },
+    "product_collection": {
+      "read": "View collections",
+      "create": "Create collections",
+      "update": "Edit collections"
     }
   },
   "actions": {
@@ -32,21 +100,19 @@
       },
       "attach_image": {
         "success": "Image added"
-      }
-    }
-  },
-  "queries": {
-    "variant": {
-      "search": {
-        "intents": ["find item by sku", "look up a product at the till"]
       },
+      "import": {
+        "success": "Import started; we will notify you when it finishes."
+      }
+    },
+    "variant": {
       "get_by_barcode": {
         "intents": ["what is this barcode", "scan item"]
+      },
+      "search": {
+        "intents": ["find item by sku", "look up a product at the till"]
       }
     }
-  },
-  "product": {
-    "images": "Images"
   },
   "errors": {
     "variant_unavailable": {

@@ -1,9 +1,6 @@
 {
-  "$comment": "Stackra file contract — Purpose: the ar-SA overlay of `pages::`: the establishment wording of the tenant tab and the Saudi rule that sales are invoiced VAT-inclusive through e-invoicing; Boundary: an overlay holds differing keys only; every other key falls back along ar-SA → ar → en; Runtime: browser; Governing contract: ADR 0080, ADR 0192, ADR 0234 d9",
+  "$comment": "Stackra file contract — Purpose: the ar-SA overlay of `pages::`: the Saudi rule that sales are invoiced VAT-inclusive through e-invoicing; Boundary: an overlay holds differing keys only; every other key falls back along ar-SA → ar → en; Runtime: browser; Governing contract: ADR 0080, ADR 0192, ADR 0234 d9",
   "dashboard": {
     "revenue_note": "الإيرادات شاملة ضريبة القيمة المضافة كما تظهر في الفواتير الإلكترونية."
-  },
-  "settings": {
-    "tenant": "المنشأة"
   }
 }

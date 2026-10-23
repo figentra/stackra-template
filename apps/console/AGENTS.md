@@ -18,7 +18,18 @@ Governing contract: root AGENTS.md
   to function components by gen; never `Component` from `react`. One exported declaration per file:
   Props in `<name>.props.ts`, hook results in `src/types/`. Icons are `IconName` strings.
 - Code the console does not own is shadowed only under `src/overrides/<owner>/` at the owner's path;
-  a config override stays in `src/config/` as `extends BaseX`.
+  a config override stays in `src/config/` as `extends BaseX` (telemetry included: it overrides
+  `@stackra/logger`'s config, and `EnvConfig` is the only config class the console defines).
+- A side effect in a component (an object URL, a subscription) starts in `mount()` and ends in
+  `unmount()`, never in a field initializer; tests throw a refusal or `TransportError`, never
+  `new Error`.
+- HeroUI Pro components (`AppLayout`, `Navbar`, `Sidebar`, `Command`, `Sheet`, `EmptyState`, `KPI`)
+  come directly from `@heroui-pro/react` (Stackra ADR 0197 as amended (stackra#127)); every other
+  primitive is `@stackra/ui`. Installing needs a HeroUI Pro licence: `HEROUI_PERSONAL_TOKEN` in
+  Infisical, handed to the postinstall as `HEROUI_AUTH_TOKEN` by `pnpm install:pro` (local) and the
+  OIDC step of `release.yml` (CI), never from a file. A team copying the template needs its own
+  licence or replaces these with free `@stackra/ui` components.
+- Every `src/` group folder has a README; a new group or file updates its table.
 - Strings live in `assets/lang/<locale>/<namespace>.json`; `en` and `ar` are complete, `en-US` and
   `ar-SA` hold only keys that differ.
 - `.stackra/` holds generated samples; change `stackra.config.ts` or `src/` and rerun `stackra gen`,

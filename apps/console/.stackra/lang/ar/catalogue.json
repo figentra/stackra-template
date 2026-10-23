@@ -5,7 +5,69 @@
   },
   "resources": {
     "product": {
-      "title": "المنتجات"
+      "title": "المنتجات",
+      "columns": {
+        "title": "العنوان",
+        "slug": "المعرّف في الرابط",
+        "status": "الحالة",
+        "variants": "الأصناف"
+      },
+      "filters": {
+        "status": "الحالة"
+      },
+      "views": {
+        "on_sale": "معروضة للبيع",
+        "drafts": "مسودات",
+        "archived": "مؤرشفة"
+      },
+      "steps": {
+        "basics": "الأساسيات",
+        "media": "الصور",
+        "variants": "الأصناف",
+        "seo": "محركات البحث"
+      },
+      "fields": {
+        "title": "العنوان",
+        "slug": "المعرّف في الرابط",
+        "collections": "المجموعات",
+        "images": "الصور",
+        "variants": "الأصناف",
+        "sku": "رمز المنتج",
+        "barcode": "الباركود",
+        "track_inventory": "تتبع المخزون",
+        "seo": "عرض مخصص في نتائج البحث"
+      },
+      "sections": {
+        "summary": "الملخص",
+        "variants": "الأصناف"
+      },
+      "entries": {
+        "variants_id": "الصنف",
+        "variants_sku": "رمز المنتج"
+      },
+      "empty": {
+        "heading": "لا توجد منتجات بعد"
+      },
+      "no_results": {
+        "heading": "لا توجد منتجات تطابق هذه المرشحات"
+      }
+    },
+    "product_collection": {
+      "title": "المجموعات",
+      "columns": {
+        "title": "العنوان",
+        "slug": "المعرّف في الرابط"
+      },
+      "fields": {
+        "title": "العنوان",
+        "slug": "المعرّف في الرابط"
+      },
+      "empty": {
+        "heading": "لا توجد مجموعات بعد"
+      },
+      "no_results": {
+        "heading": "لا توجد مجموعات تطابق هذه المرشحات"
+      }
     }
   },
   "enums": {
@@ -20,7 +82,13 @@
       "read": "عرض المنتجات",
       "create": "إنشاء المنتجات",
       "update": "تعديل المنتجات",
-      "archive": "أرشفة المنتجات"
+      "archive": "أرشفة المنتجات",
+      "import": "استيراد المنتجات"
+    },
+    "product_collection": {
+      "read": "عرض المجموعات",
+      "create": "إنشاء المجموعات",
+      "update": "تعديل المجموعات"
     }
   },
   "actions": {
@@ -32,21 +100,19 @@
       },
       "attach_image": {
         "success": "تمت إضافة الصورة"
-      }
-    }
-  },
-  "queries": {
-    "variant": {
-      "search": {
-        "intents": ["ابحث عن منتج برمز SKU", "ابحث عن منتج عند نقطة البيع"]
       },
+      "import": {
+        "success": "بدأ الاستيراد، وسنبلغك عند انتهائه."
+      }
+    },
+    "variant": {
       "get_by_barcode": {
-        "intents": ["ما هذا الرمز الشريطي", "امسح المنتج"]
+        "intents": ["ما هذا الباركود", "امسح المنتج"]
+      },
+      "search": {
+        "intents": ["ابحث عن منتج برمزه", "ابحث عن منتج عند الصندوق"]
       }
     }
-  },
-  "product": {
-    "images": "الصور"
   },
   "errors": {
     "variant_unavailable": {

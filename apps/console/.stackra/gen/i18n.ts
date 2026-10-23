@@ -25,7 +25,16 @@ export type { I18nKey };
 /** `I18n.<namespace>.<path>`; `_` holds the leaves of a branch that also has children. */
 export const I18n = keys({
   console: {
-    shell: ["brand", "top_bar", "menu", "sidebar", "navigation", "account", "loading_session"],
+    shell: [
+      "brand",
+      "top_bar",
+      "menu",
+      "sidebar",
+      "navigation",
+      "account",
+      "loading_session",
+      "close",
+    ],
     palette: [
       "placeholder",
       "clear",
@@ -112,12 +121,10 @@ export const I18n = keys({
   },
   pages: {
     dashboard: ["title", "today", "orders", "revenue", "change", "revenue_note", "loading"],
+    mobile_link: ["title", "heading", "body", "dashboard", "link"],
     settings: [
       "title",
       "tabs",
-      "device",
-      "privacy",
-      "tenant",
       "scheme",
       "locale",
       "density",
@@ -125,6 +132,9 @@ export const I18n = keys({
       "local_notifications_hint",
       "analytics_consent",
       "analytics_consent_hint",
+      "crash_replay_consent",
+      "crash_replay_consent_hint",
+      "necessary_consent_hint",
       "notification_preferences",
       "save",
       "saved_device",
@@ -157,6 +167,7 @@ export const I18n = keys({
   },
   enums: {
     density: ["comfortable", "compact"],
+    settings_tab: ["device", "privacy", "tenant"],
   },
   devices: {
     camera: ["reason"],
@@ -167,77 +178,271 @@ export const I18n = keys({
   },
   catalogue: {
     nav: ["catalogue"],
-    resources: { product: ["title"] },
-    enums: { product_status: ["draft", "active", "archived"] },
-    actions: {
-      product: { archive: ["confirm", "success", "intents"], attach_image: ["success"] },
+    resources: {
+      product: {
+        _: ["title"],
+        columns: ["title", "slug", "status", "variants"],
+        filters: ["status"],
+        views: ["on_sale", "drafts", "archived"],
+        steps: ["basics", "media", "variants", "seo"],
+        fields: [
+          "title",
+          "slug",
+          "collections",
+          "images",
+          "variants",
+          "sku",
+          "barcode",
+          "track_inventory",
+          "seo",
+        ],
+        sections: ["summary", "variants"],
+        entries: ["variants_id", "variants_sku"],
+        empty: ["heading"],
+        no_results: ["heading"],
+      },
+      product_collection: {
+        _: ["title"],
+        columns: ["title", "slug"],
+        fields: ["title", "slug"],
+        empty: ["heading"],
+        no_results: ["heading"],
+      },
     },
-    queries: { variant: { search: ["intents"], get_by_barcode: ["intents"] } },
-    product: ["images"],
+    enums: {
+      product_status: ["draft", "active", "archived"],
+    },
+    permissions: {
+      product: ["read", "create", "update", "archive", "import"],
+      product_collection: ["read", "create", "update"],
+    },
+    actions: {
+      product: {
+        archive: ["confirm", "success", "intents"],
+        attach_image: ["success"],
+        import: ["success"],
+      },
+      variant: {
+        get_by_barcode: ["intents"],
+        search: ["intents"],
+      },
+    },
     errors: {
       variant_unavailable: ["message"],
       variant_not_found: ["message"],
       product_not_found: ["message"],
     },
+    entitlements: {
+      product_limit: ["label"],
+    },
   },
   inventory: {
-    settings: { inventory: ["title", "low_stock_threshold", "allow_backorders"] },
-    widgets: { low_stock: ["title"] },
-    enums: { stock_adjust_reason: ["count", "delivery", "damage"] },
-    errors: { insufficient_stock: ["message"] },
+    nav: ["stock"],
+    permissions: {
+      stock: ["read", "manage"],
+    },
+    settings: {
+      _: ["title"],
+      low_stock_threshold: ["label", "help"],
+      allow_backorders: ["label", "help"],
+    },
+    widgets: {
+      low_stock: ["title", "description", "empty"],
+    },
+    enums: {
+      stock_adjust_reason: ["count", "delivery", "damage"],
+    },
+    errors: {
+      insufficient_stock: ["message"],
+    },
   },
   orders: {
     nav: ["sales", "orders"],
-    resources: { order: ["title"] },
+    resources: {
+      order: {
+        _: ["title"],
+        columns: [
+          "id",
+          "status",
+          "customer_id",
+          "totals_total_minor",
+          "lines",
+          "created_at",
+          "paid_at",
+        ],
+        filters: ["status", "created_at", "paid_at", "customer_id"],
+        views: ["awaiting_payment", "paid_today", "closed"],
+        sections: ["summary", "totals"],
+        entries: [
+          "totals_subtotal_minor",
+          "totals_adjustments",
+          "totals_total_minor",
+        ],
+        relations: [
+          "lines",
+          "sku",
+          "quantity",
+          "unit_price_minor",
+          "track_inventory",
+        ],
+        empty: ["heading"],
+        no_results: ["heading"],
+      },
+    },
     enums: {
       order_status: ["pending_payment", "paid", "cancelled", "expired"],
       cancel_reason: ["customer", "staff", "expired", "payment_failed"],
     },
+    permissions: {
+      order: ["create", "read", "cancel", "expire", "export"],
+    },
     settings: {
-      orders: ["title", "auto_cancel_after_minutes", "customers_may_cancel", "accepting_orders"],
+      _: ["title"],
+      accepting_orders: ["label", "help"],
+      daily_revenue_target_minor: ["label", "help"],
+      cancellation: {
+        _: ["title"],
+        auto_cancel_after_minutes: ["label", "help"],
+        max_auto_cancel_after_minutes: ["label", "help"],
+        customers_may_cancel: ["label", "help"],
+      },
     },
     actions: {
-      order: { create: ["success", "queued", "intents"], cancel: ["confirm", "success"] },
+      order: {
+        create: ["success", "queued", "intents"],
+        cancel: ["confirm", "success", "bulk_partial"],
+        list: ["intents"],
+        kpis: ["intents"],
+        export: ["success"],
+      },
     },
-    queries: { order: { list: ["intents"] } },
     order: ["lines_count"],
-    widgets: { order_kpis: ["title"] },
-    documents: { sales_overview: ["title"], my_orders: ["title"] },
+    widgets: {
+      order_kpis: {
+        _: ["title", "description", "empty"],
+        revenue: ["label"],
+        orders: ["label"],
+      },
+      awaiting_payment: ["title", "description"],
+    },
+    documents: {
+      sales_overview: ["title"],
+      my_orders: ["title"],
+    },
     quick_order: ["title", "variant", "quantity", "submit"],
-    flags: { quick_order: ["label"] },
-    errors: { order_not_payable: ["message"], orders_paused: ["message"] },
+    order_placed: {
+      mail: ["subject", "body", "cta"],
+    },
+    order_receipt: {
+      mail: ["subject", "intro"],
+    },
+    errors: {
+      order_not_payable: ["message"],
+      orders_paused: ["message"],
+    },
+    flags: {
+      quick_order: ["label"],
+    },
   },
   loyalty_kit: {
     nav: ["loyalty"],
     enums: {
       loyalty_tier: ["bronze", "silver", "gold"],
-      entry_kind: ["earn", "redeem", "expire", "adjust"],
+      entry_kind: ["earn", "redeem", "expire", "adjust", "hold", "release"],
     },
-    resources: { loyalty_account: ["title"] },
-    widgets: { points_issued: ["title"], points_balance: ["title"] },
-    documents: { loyalty_overview: ["title"] },
-    overview: ["redeem_title", "expiry_note"],
-    settings: { loyalty_kit: ["title", "expiry_months", "silver_from", "gold_from"] },
-    permissions: { loyalty_account: ["read", "enroll", "freeze", "redeem", "expire"] },
-    actions: { account: { enroll: ["success"], freeze: ["confirm", "success"] } },
+    resources: {
+      loyalty_account: ["title"],
+    },
+    widgets: {
+      points_issued: ["title"],
+      points_balance: ["title", "expiry_note"],
+    },
+    documents: {
+      loyalty_overview: ["title"],
+    },
+    settings: {
+      _: ["title"],
+      expiry_months: ["label", "help"],
+      tiers: {
+        _: ["label", "help"],
+        silver_from: ["label"],
+        gold_from: ["label"],
+      },
+    },
+    permissions: {
+      loyalty_account: ["read", "enroll", "freeze", "redeem", "expire"],
+    },
+    actions: {
+      account: {
+        enroll: ["success", "intents"],
+        freeze: ["confirm", "success"],
+      },
+      points: {
+        balance: ["intents"],
+      },
+    },
     account: ["frozen_badge"],
     adjustment: ["points"],
     errors: {
       insufficient_points: ["message"],
       not_a_member: ["message"],
+      account_frozen: ["message"],
       not_own_principal: ["message"],
     },
   },
   access_log: {
     nav: ["audit", "access_log"],
-    resources: { access_log_entry: ["title"] },
-    enums: { data_classification: ["personal", "financial", "health", "pseudonymous"] },
+    resources: {
+      access_log_entry: ["title"],
+    },
+    enums: {
+      data_classification: ["personal", "financial", "health", "pseudonymous"],
+    },
+    permissions: {
+      access_log_entry: ["read", "purge"],
+    },
+    errors: {
+      access_log_write_failed: ["message"],
+    },
   },
   messages: {
-    enums: { inbox_message_kind: ["order_paid"] },
-    errors: { inbox_message_not_found: ["message"] },
+    permissions: {
+      message: ["send", "read"],
+      inbox_message: ["read", "update"],
+      resend: ["read", "connect", "disconnect"],
+    },
+    enums: {
+      message_status: ["queued", "sent", "failed"],
+      inbox_message_kind: ["order_paid"],
+      mail_auth_result: ["pass", "fail", "gray", "processing_failed", "unknown"],
+    },
+    errors: {
+      inbox_message_not_found: ["message"],
+    },
     settings: {
-      messages: ["title", "order_updates", "order_receipts", "product_updates", "marketing"],
+      _: ["title"],
+      orders: {
+        _: ["title"],
+        updates: ["label", "help"],
+        receipts: ["label", "help"],
+      },
+      promotions: {
+        _: ["title"],
+        product_updates: ["label", "help"],
+        marketing: ["label", "help"],
+      },
+    },
+    integrations: {
+      resend: ["label", "description"],
+    },
+    connections: {
+      resend: {
+        fields: {
+          api_key: ["label", "help"],
+          from_address: ["label", "help"],
+          webhook_secret: ["label", "help"],
+        },
+      },
     },
   },
   queue: { nav: ["failed_jobs"], resource: ["failed_jobs"] },
@@ -276,6 +481,7 @@ export const loaders = {
   enums: {
     en: () => import("#assets/lang/en/enums.json"),
     ar: () => import("#assets/lang/ar/enums.json"),
+    "ar-SA": () => import("#assets/lang/ar-SA/enums.json"),
   },
   devices: {
     en: () => import("#assets/lang/en/devices.json"),

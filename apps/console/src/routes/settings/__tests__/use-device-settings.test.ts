@@ -1,8 +1,8 @@
 /**
  * Stackra file contract:
- * Purpose: proves saving device prefs applies the scheme at once, records the analytics consent,
- *          and a refused notification capability flips the switch back with the typed refusal's
- *          toast instead of persisting a permission the device will not honour.
+ * Purpose: proves saving device prefs applies the scheme at once, records the analytics and
+ *          crash-replay consents, and a refused notification capability flips the switch back with
+ *          the typed refusal's toast instead of persisting a permission the device will not honour.
  * Boundary: unit tier, jsdom; prefs, platform, consent and toasts are the testing fakes.
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0250, ADR 0007
@@ -23,6 +23,7 @@ const PREFS = {
   density: Density.Compact,
   localNotifications: false,
   analyticsConsent: true,
+  crashReplayConsent: false,
 };
 
 /** Guards per-device preferences that apply immediately and persist locally. */
@@ -39,6 +40,7 @@ describe(useDeviceSettings, () => {
     expect(document.documentElement.getAttribute("data-theme")).toBe(ColorScheme.Dark);
     expect(prefs.get("console.device_prefs")).toMatchObject({ density: Density.Compact });
     expect(consent.status(ConsentCategory.Analytics)).toBe("granted");
+    expect(consent.status(ConsentCategory.CrashReplay)).toBe("denied");
   });
 
   /**

@@ -5,7 +5,8 @@
  * Purpose: the renderer container wiring of @acme/console for the active target (this sample: the
  *          `desktop` renderer; `web` and `pwa` swap the storage, platform and session candidates):
  *          the derived root module (the console writes none), bindings with their dependencies,
- *          each config override bound in place of its base (the app class keeps the base's name),
+ *          the config classes (each package base with the override that replaces it; the app class
+ *          keeps the base's name),
  *          the contexts `createApp` mounts in graph order, and the driver candidates.
  * Boundary: renderer only. The Electron main process has its own wiring (`../desktop/wiring.ts`:
  *           menus, package bridges, file system, peripherals); a bridge is the only path between
@@ -21,11 +22,13 @@ import { AnalyticsDriver } from "@stackra/analytics/contracts";
 import { ConsentConfig as BaseConsentConfig } from "@stackra/consent";
 import { ConsentStore } from "@stackra/consent/contracts";
 import { CspConfig as BaseCspConfig } from "@stackra/csp";
+import { ErrorReporter } from "@stackra/errors/contracts";
 import { FeatureFlagsConfig as BaseFeatureFlagsConfig } from "@stackra/feature-flags";
 import { FlagProvider } from "@stackra/feature-flags/contracts";
 import { I18nConfig as BaseI18nConfig } from "@stackra/i18n";
 import { IdentityConfig as BaseIdentityConfig } from "@stackra/identity";
 import { SessionStore } from "@stackra/identity/contracts";
+import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
 import { DesktopConfig as BaseDesktopConfig, PwaConfig as BasePwaConfig } from "@stackra/platform";
 import { Platform } from "@stackra/platform/contracts";
 import { QueryConfig as BaseQueryConfig } from "@stackra/query";
@@ -62,6 +65,7 @@ declare module "@stackra/container" {
     "query.QueueLeader": "broadcast_channel" | "memory";
     "feature_flags.FlagProvider": "config" | "posthog";
     "analytics.AnalyticsDriver": "posthog" | "none" | "memory";
+    "errors.ErrorReporter": "sentry" | "memory";
   }
 }
 
@@ -82,6 +86,8 @@ export const wiring = {
         "feature_flags",
         "analytics",
         "consent",
+        "logger",
+        "errors",
         "realtime",
         "platform",
         "navigation",
@@ -101,20 +107,32 @@ export const wiring = {
     { module: "console", provide: OpenPendingChangesShortcut, kind: "shortcut", deps: [] },
     { module: "console", provide: SignOutShortcut, kind: "shortcut", deps: [] },
     { module: "console", provide: ToggleSidebarShortcut, kind: "shortcut", deps: [UiStore] },
-    { module: "console", provide: OpenRoute, kind: "route", deps: [BasePwaConfig, BaseDesktopConfig] },
-    { module: "console", provide: BaseAnalyticsConfig, config: AnalyticsConfig },
-    { module: "console", provide: BaseConsentConfig, config: ConsentConfig },
-    { module: "console", provide: BaseCspConfig, config: CspConfig },
-    { module: "console", provide: BaseDesktopConfig, config: DesktopConfig },
-    { module: "console", provide: EnvConfig, config: EnvConfig },
-    { module: "console", provide: BaseFeatureFlagsConfig, config: FeatureFlagsConfig },
-    { module: "console", provide: BaseI18nConfig, config: I18nConfig },
-    { module: "console", provide: BaseIdentityConfig, config: IdentityConfig },
-    { module: "console", provide: BasePwaConfig, config: PwaConfig },
-    { module: "console", provide: BaseQueryConfig, config: QueryConfig },
-    { module: "console", provide: BaseStateConfig, config: StateConfig },
-    { module: "console", provide: TelemetryConfig, config: TelemetryConfig },
-    { module: "console", provide: BaseThemingConfig, config: ThemingConfig },
+    {
+      module: "console",
+      provide: OpenRoute,
+      kind: "route",
+      deps: [BasePwaConfig, BaseDesktopConfig],
+    },
+  ],
+  /**
+   * Config classes: the app's own, then each package base (imported as `Base<Name>`) with the
+   * override that replaces it across the app; a package's context reads its base and gets the
+   * override. `EnvConfig`'s package-named fields feed the overrides after their defaults.
+   */
+  config: [
+    { key: "console.env", provide: EnvConfig },
+    { key: "analytics", provide: BaseAnalyticsConfig, override: AnalyticsConfig },
+    { key: "consent", provide: BaseConsentConfig, override: ConsentConfig },
+    { key: "csp", provide: BaseCspConfig, override: CspConfig },
+    { key: "platform.desktop", provide: BaseDesktopConfig, override: DesktopConfig },
+    { key: "feature_flags", provide: BaseFeatureFlagsConfig, override: FeatureFlagsConfig },
+    { key: "i18n", provide: BaseI18nConfig, override: I18nConfig },
+    { key: "identity", provide: BaseIdentityConfig, override: IdentityConfig },
+    { key: "platform.pwa", provide: BasePwaConfig, override: PwaConfig },
+    { key: "query", provide: BaseQueryConfig, override: QueryConfig },
+    { key: "state", provide: BaseStateConfig, override: StateConfig },
+    { key: "logger.telemetry", provide: BaseTelemetryConfig, override: TelemetryConfig },
+    { key: "theming", provide: BaseThemingConfig, override: ThemingConfig },
   ],
   /** Mounted by `createApp` outermost first, from the config classes in the module graph. */
   contexts: [
@@ -129,7 +147,7 @@ export const wiring = {
     "i18n",
     "consent",
     "analytics",
-    "console.telemetry",
+    "logger.telemetry",
     "ui",
   ],
   drivers: [
@@ -193,6 +211,13 @@ export const wiring = {
       },
     },
     {
+      // started by the telemetry override; an empty `EnvConfig.telemetryDsn` reports nothing
+      port: ErrorReporter,
+      candidates: {
+        sentry: () => import("@stackra/errors/web").then((m) => m.SentryErrorReporterDriver),
+      },
+    },
+    {
       port: RealtimeTransport,
       candidates: {
         websocket: () =>
@@ -208,7 +233,7 @@ export const wiring = {
     unexportedInjections: "none",
     unresolvedTypes: "none",
     configsRead: "all",
-    overrides: "11 config overrides, each of one base; 2 shadows of @acme/loyalty-kit",
+    overrides: "12 config overrides, each of one base; 2 shadows of @acme/loyalty-kit",
     providers: "none (no Module wrap)",
     capabilities: "all required present",
     mainImports: "none",

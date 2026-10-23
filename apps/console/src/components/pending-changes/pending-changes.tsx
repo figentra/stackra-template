@@ -9,9 +9,9 @@
  * Governing contract: ADR 0252, ADR 0294 (as amended by programming model v3.1, AGENTS.md: class
  *                     components)
  */
-import { Sheet } from "@stackra-pro/ui";
+import { Sheet } from "@heroui-pro/react";
 import { Tone } from "@stackra/contracts";
-import { useTranslation } from "@stackra/i18n/react";
+import { useLocale, useTranslation } from "@stackra/i18n/react";
 import { useMutationQueue } from "@stackra/query/react";
 import { Badge, Button, Component, Icon } from "@stackra/ui";
 import { I18n } from "#stackra/i18n";
@@ -25,6 +25,9 @@ export class PendingChanges extends Component {
   /** The offline mutation queue. */
   queue = useMutationQueue();
 
+  /** The writing direction, so the sheet slides in from the inline end in both directions. */
+  locale = useLocale();
+
   /** Queued entries plus conflicts: everything that still needs the user or the network. */
   get total() {
     return this.queue.items.length + this.queue.conflicts.length;
@@ -36,7 +39,7 @@ export class PendingChanges extends Component {
     const queue = this.queue;
     const total = this.total;
     return (
-      <Sheet>
+      <Sheet placement={this.locale.direction === "rtl" ? "left" : "right"}>
         <Sheet.Trigger>
           <Button
             variant="tertiary"
@@ -52,14 +55,19 @@ export class PendingChanges extends Component {
             </Badge>
           </Button>
         </Sheet.Trigger>
-        <Sheet.Content side="end" aria-label={t(I18n.console.queue.title)}>
-          <Sheet.Header>
-            <Sheet.Title>{t(I18n.console.queue.title)}</Sheet.Title>
-          </Sheet.Header>
-          <Sheet.Body>
-            <PendingChangesList />
-          </Sheet.Body>
-        </Sheet.Content>
+        <Sheet.Backdrop>
+          <Sheet.Content>
+            <Sheet.Dialog>
+              <Sheet.CloseTrigger aria-label={t(I18n.console.shell.close)} />
+              <Sheet.Header>
+                <Sheet.Heading>{t(I18n.console.queue.title)}</Sheet.Heading>
+              </Sheet.Header>
+              <Sheet.Body>
+                <PendingChangesList />
+              </Sheet.Body>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
       </Sheet>
     );
   }

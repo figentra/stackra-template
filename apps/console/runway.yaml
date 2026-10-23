@@ -81,7 +81,7 @@ environments:
       VITE_POSTHOG_KEY: ""
     # the last config layer (ADR 0146): every trace in dev, no install prompt, no analytics
     config:
-      console.telemetry:
+      logger.telemetry:
         traces:
           sampleRate: 1
       platform.pwa:
@@ -113,7 +113,7 @@ environments:
       VITE_WEB_PUSH_VAPID_PUBLIC_KEY: ref:push.vapidPublic.staging
       VITE_POSTHOG_KEY: ref:posthog.key.console
     config:
-      console.telemetry:
+      logger.telemetry:
         traces:
           sampleRate: 0.5
     workers:

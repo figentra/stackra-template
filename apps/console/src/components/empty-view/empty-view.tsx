@@ -9,7 +9,7 @@
  * Governing contract: ADR 0080 decision 1 (keys, never literals), ADR 0128, ADR 0294 (as amended by
  *                     programming model v3.1, AGENTS.md: class components)
  */
-import { EmptyState } from "@stackra-pro/ui";
+import { EmptyState } from "@heroui-pro/react";
 import { useTranslation } from "@stackra/i18n/react";
 import { Component, Icon } from "@stackra/ui";
 import type { EmptyViewProps } from "./empty-view.props";
@@ -25,8 +25,8 @@ export class EmptyView extends Component<EmptyViewProps> {
   render() {
     const { title, description, icon = "inbox", action, compact = false } = this.props;
     return (
-      <EmptyState className={compact ? "py-2" : "py-12"}>
-        <EmptyState.Media>
+      <EmptyState size={compact ? "sm" : "md"}>
+        <EmptyState.Media variant="icon">
           <Icon name={icon} aria-hidden />
         </EmptyState.Media>
         <EmptyState.Header>

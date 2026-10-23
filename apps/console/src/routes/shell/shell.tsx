@@ -4,9 +4,11 @@
  *          navigation, the top bar (palette trigger, realtime indicator, inbox, pending changes,
  *          locale, theme, account), the offline banner and the outlet.
  * Boundary: layout only. Navigation items are data from `#stackra/navigation`, gate-filtered by the
- *           navigation package (permission, entitlement, flag, module). The shell owns no business
+ *           navigation package (permission, entitlement, flag, module), each with its localised
+ *           `href` and `isCurrent`; the sidebar's items navigate through the app layout's
+ *           `navigate`, so the router changes pages without a reload. The shell owns no business
  *           logic; the session check is `ShellLayout.loader`, so by the time this renders a session
- *           exists. HeroUI Pro's `AppLayout` and `Sidebar` because this is our own app (ADR 0197).
+ *           exists. HeroUI Pro's `AppLayout`, `Navbar` and `Sidebar` from `@heroui-pro/react`.
  *           Keyboard shortcuts have one owner each, the Shortcut classes: the layout's own `mod+b`
  *           binding is off, and every key hint is drawn by the shortcuts package with the
  *           platform's modifier (⌘ on Apple devices, Ctrl elsewhere). A class component; layouts
@@ -14,17 +16,17 @@
  * Runtime: browser
  * Governing contract: ADR 0294 (decisions 7 and 14; as amended by programming model v3.1,
  *                     AGENTS.md: class components), ADR 0164 (panel shell), ADR 0214 (gate-filtered
- *                     navigation), ADR 0197 (HeroUI Pro)
+ *                     navigation), ADR 0197 as amended (HeroUI Pro)
  */
-import { AppLayout, Navbar, Sidebar } from "@stackra-pro/ui";
+import { AppLayout, Navbar, Sidebar } from "@heroui-pro/react";
 import { Tone } from "@stackra/contracts";
-import { useTranslation } from "@stackra/i18n/react";
+import { useLocale, useTranslation } from "@stackra/i18n/react";
 import { useSession } from "@stackra/identity/react";
-import { Link, NavLink, Outlet, useNavigate, useNavigation } from "@stackra/navigation/react";
+import { Link, Outlet, useHref, useNavigate, useNavigation } from "@stackra/navigation/react";
 import { PanelShell, useBreadcrumbs } from "@stackra/panel/react";
 import { ShortcutKeys, useShortcut } from "@stackra/shortcuts/react";
 import { useStore } from "@stackra/state/react";
-import { Avatar, Breadcrumbs, Button, Component, Dropdown, Icon, Separator } from "@stackra/ui";
+import { Avatar, Breadcrumbs, Button, Component, Dropdown, Icon } from "@stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { Navigation } from "#stackra/navigation";
 import { Panels } from "#stackra/panels";
@@ -43,8 +45,9 @@ import { UiStore } from "#src/stores/ui.store";
 
 /**
  * The sidebar state lives in `UiStore` so the keyboard shortcut, the rail button and the desktop
- * menu all move the same value; `main` carries the density class so the panel's tables inherit
- * it. Breadcrumbs come from the matched routes' titles and the panel's resource labels.
+ * menu all move the same value; the content element carries the density class so the panel's
+ * tables inherit it. Breadcrumbs come from the matched routes' titles and the panel's resource
+ * labels. The sidebar is an `<aside>`, so the menu sits in a `<nav>` landmark of its own.
  */
 export class Shell extends Component {
   /** The translator of the active locale. */
@@ -53,8 +56,14 @@ export class Shell extends Component {
   /** The session; the layout's loader guarantees one. */
   session = useSession();
 
-  /** The router's navigate, handed to the app layout's links. */
+  /** The router's navigate; the app layout hands it to the sidebar and the top bar's links. */
   navigate = useNavigate();
+
+  /** The writing direction: the sidebar sits on the inline start, the right in Arabic. */
+  locale = useLocale();
+
+  /** The settings page's URL in the active locale, for the sidebar footer's link. */
+  settingsHref = useHref(Routes.settings);
 
   /** The generated navigation, gate-filtered for this actor. */
   groups = useNavigation(Navigation);
@@ -84,6 +93,7 @@ export class Shell extends Component {
     return (
       <PanelShell panel={Panels.TenantAdmin}>
         <AppLayout
+          sidebarSide={this.locale.direction === "rtl" ? "right" : "left"}
           sidebarCollapsible="icon"
           sidebarOpen={!ui.sidebarCollapsed}
           onSidebarOpenChange={(open) => ui.setSidebarCollapsed(!open)}
@@ -94,7 +104,7 @@ export class Shell extends Component {
               <Navbar.Header>
                 <AppLayout.MenuToggle aria-label={t(I18n.console.shell.menu)} />
                 <Sidebar.Trigger aria-label={t(I18n.console.shell.sidebar)} />
-                <Separator orientation="vertical" />
+                <Navbar.Separator />
                 <Breadcrumbs>
                   {this.breadcrumbs.map((crumb) => (
                     <Breadcrumbs.Item key={crumb.to} href={crumb.to}>
@@ -102,6 +112,8 @@ export class Shell extends Component {
                     </Breadcrumbs.Item>
                   ))}
                 </Breadcrumbs>
+              </Navbar.Header>
+              <Navbar.Content>
                 <Navbar.Spacer />
                 <Button variant="tertiary" size="sm" onPress={this.openPalette}>
                   <Icon name="search" aria-hidden />
@@ -130,44 +142,59 @@ export class Shell extends Component {
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
-              </Navbar.Header>
+              </Navbar.Content>
             </Navbar>
           }
           sidebar={
             <>
-              <Sidebar aria-label={t(I18n.console.shell.navigation)}>
+              <Sidebar>
                 <Sidebar.Header>
                   <TenantSwitcher />
                 </Sidebar.Header>
                 <Sidebar.Main>
-                  <Sidebar.Menu>
-                    {this.groups.map((group) => (
-                      <Sidebar.MenuSection key={group.group} title={t(group.group)}>
-                        {group.items.map((item) => (
-                          <Sidebar.MenuItem key={item.label} textValue={t(item.label)}>
-                            <NavLink to={item.to}>
+                  <nav aria-label={t(I18n.console.shell.navigation)}>
+                    <Sidebar.Menu aria-label={t(I18n.console.shell.navigation)}>
+                      {this.groups.map((group) => (
+                        <Sidebar.MenuSection key={group.group}>
+                          <Sidebar.MenuHeader>{t(group.group)}</Sidebar.MenuHeader>
+                          {group.items.map((item) => (
+                            <Sidebar.MenuItem
+                              key={item.label}
+                              id={item.label}
+                              href={item.href}
+                              isCurrent={item.isCurrent}
+                              textValue={t(item.label)}
+                              tooltip={t(item.label)}
+                            >
                               <Sidebar.MenuIcon>
                                 <Icon name={item.icon} aria-hidden />
                               </Sidebar.MenuIcon>
                               <Sidebar.MenuItemContent>
                                 <Sidebar.MenuLabel>{t(item.label)}</Sidebar.MenuLabel>
                               </Sidebar.MenuItemContent>
-                            </NavLink>
-                          </Sidebar.MenuItem>
-                        ))}
-                      </Sidebar.MenuSection>
-                    ))}
-                  </Sidebar.Menu>
+                            </Sidebar.MenuItem>
+                          ))}
+                        </Sidebar.MenuSection>
+                      ))}
+                    </Sidebar.Menu>
+                  </nav>
                 </Sidebar.Main>
                 <Sidebar.Footer>
-                  <Sidebar.MenuItem textValue={t(I18n.pages.settings.title)}>
-                    <NavLink to={Routes.settings}>
+                  <Sidebar.Menu aria-label={t(I18n.pages.settings.title)}>
+                    <Sidebar.MenuItem
+                      id={Routes.settings.name}
+                      href={this.settingsHref}
+                      textValue={t(I18n.pages.settings.title)}
+                      tooltip={t(I18n.pages.settings.title)}
+                    >
                       <Sidebar.MenuIcon>
                         <Icon name="settings" aria-hidden />
                       </Sidebar.MenuIcon>
-                      <Sidebar.MenuLabel>{t(I18n.pages.settings.title)}</Sidebar.MenuLabel>
-                    </NavLink>
-                  </Sidebar.MenuItem>
+                      <Sidebar.MenuItemContent>
+                        <Sidebar.MenuLabel>{t(I18n.pages.settings.title)}</Sidebar.MenuLabel>
+                      </Sidebar.MenuItemContent>
+                    </Sidebar.MenuItem>
+                  </Sidebar.Menu>
                 </Sidebar.Footer>
                 <Sidebar.Rail />
               </Sidebar>
@@ -176,9 +203,10 @@ export class Shell extends Component {
           }
         >
           <OfflineBanner />
-          <main id="main" className={ui.densityClass} tabIndex={-1}>
+          {/* AppLayout renders the <main> landmark; this is the skip link's target */}
+          <div id="main" className={ui.densityClass} tabIndex={-1}>
             <Outlet />
-          </main>
+          </div>
         </AppLayout>
         <Palette />
       </PanelShell>

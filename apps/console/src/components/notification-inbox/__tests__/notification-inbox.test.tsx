@@ -8,6 +8,7 @@
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0007
  */
+import { TransportError } from "@stackra/clients";
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen, userEvent } from "@stackra/testing/react";
@@ -62,12 +63,12 @@ describe(NotificationInbox, () => {
     expect(screen.queryByRole("button", { name: "Load more" })).toBeNull();
   });
 
-  /** A refused mark-read must be said, not swallowed, and the entry stays unread. */
+  /** A mark-read lost to the network must be said, not swallowed; the entry stays unread. */
   it("shows a toast when marking read fails", async () => {
     const page = { items: [UNREAD], hasMore: false, unread: 1 };
     const notifications = fakeClient((fake) => {
       fake.on(ListInboxMessagesQuery).returns(page);
-      fake.on(MarkInboxMessageReadAction).throws(new Error("network"));
+      fake.on(MarkInboxMessageReadAction).throws(TransportError.create({ reason: "network" }));
     });
     render(<NotificationInbox />, { locale: "en", clients: [notifications] });
     await userEvent.click(await screen.findByRole("button", { name: "Notifications: 1 unread" }));

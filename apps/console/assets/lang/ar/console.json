@@ -7,7 +7,8 @@
     "sidebar": "تبديل الشريط الجانبي",
     "navigation": "التنقل الرئيسي",
     "account": "الحساب",
-    "loading_session": "جارٍ تحميل الجلسة"
+    "loading_session": "جارٍ تحميل الجلسة",
+    "close": "إغلاق"
   },
   "palette": {
     "placeholder": "اكتب أمرًا أو صفحة أو ما تريد فعله…",

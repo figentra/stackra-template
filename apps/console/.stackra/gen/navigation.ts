@@ -29,6 +29,11 @@ export const Navigation = navigation(Panels.TenantAdmin, [
     group: I18n.catalogue.nav.catalogue,
     items: [
       { label: I18n.catalogue.resources.product.title, to: Resources.Product, icon: "package" },
+      {
+        label: I18n.catalogue.resources.product_collection.title,
+        to: Resources.ProductCollection,
+        icon: "folders",
+      },
     ],
   },
   {
@@ -56,19 +61,19 @@ export const Navigation = navigation(Panels.TenantAdmin, [
   {
     group: I18n.pages.settings.title,
     items: [
-      { label: I18n.orders.settings.orders.title, to: SettingsPages.orders, icon: "settings" },
+      { label: I18n.orders.settings.title, to: SettingsPages.orders, icon: "settings" },
       {
-        label: I18n.inventory.settings.inventory.title,
+        label: I18n.inventory.settings.title,
         to: SettingsPages.inventory,
         icon: "settings",
       },
       {
-        label: I18n.loyalty_kit.settings.loyalty_kit.title,
+        label: I18n.loyalty_kit.settings.title,
         to: SettingsPages.loyalty_kit,
         icon: "settings",
       },
       {
-        label: I18n.messages.settings.messages.title,
+        label: I18n.messages.settings.title,
         to: SettingsPages.messages,
         icon: "bell",
       },

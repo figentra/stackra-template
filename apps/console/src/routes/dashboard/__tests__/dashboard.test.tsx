@@ -6,6 +6,7 @@
  * Runtime: browser
  * Governing contract: ADR 0022, ADR 0164
  */
+import { TransportError } from "@stackra/clients";
 import { fakeClient } from "@stackra/clients/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { render, screen } from "@stackra/testing/react";
@@ -19,7 +20,9 @@ const SESSION = { permissions: ["orders.order.read"] };
 describe(Dashboard, () => {
   /** A failed KPI query is the error state with a retry, never an empty KPI row. */
   it("shows the error state with a retry when today's KPIs fail", async () => {
-    const commerce = fakeClient((fake) => fake.on(OrderKpisQuery).throws(new Error("network")));
+    const commerce = fakeClient((fake) =>
+      fake.on(OrderKpisQuery).throws(TransportError.create({ reason: "network" })),
+    );
     render(<Dashboard />, { locale: "en", clients: [commerce], session: SESSION });
     expect(screen.getByRole("heading", { level: 1, name: "Dashboard" })).toBeTruthy();
     expect(await screen.findByRole("button", { name: "Try again" })).toBeTruthy();

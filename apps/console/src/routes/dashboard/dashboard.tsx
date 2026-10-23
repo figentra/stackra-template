@@ -16,7 +16,7 @@
  * Governing contract: ADR 0294 (decisions 7 and 14; as amended by programming model v3.1,
  *                     AGENTS.md: class components), ADR 0164, ADR 0225 (broadcast)
  */
-import { KPI } from "@stackra-pro/ui";
+import { KPI } from "@heroui-pro/react/kpi";
 import { useQuery } from "@stackra/clients/react";
 import { useMoney, useNumber, useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
@@ -45,6 +45,12 @@ export class Dashboard extends Component<RouteProps<typeof DashboardRoute>> {
   /** Today's KPIs, warm from the loader. */
   kpis = useQuery(OrderKpisQuery, { range: TimeRange.Today });
 
+  /** The direction of the change against the previous period, for the trend chip's colour. */
+  trend(value: number | null, previous: number | null) {
+    if (value === null || previous === null || value === previous) return "neutral";
+    return value > previous ? "up" : "down";
+  }
+
   /** The change against the previous period as a signed percentage, or null without one. */
   change(value: number | null, previous: number | null) {
     if (value === null || previous === null || previous === 0) return null;
@@ -63,6 +69,8 @@ export class Dashboard extends Component<RouteProps<typeof DashboardRoute>> {
     const kpis = this.kpis;
     const revenue = kpis.data?.revenue;
     const orders = kpis.data?.orders;
+    const revenueChange = revenue ? this.change(revenue.value, revenue.previous) : null;
+    const ordersChange = orders ? this.change(orders.value, orders.previous) : null;
     return (
       <div className="flex flex-col gap-6">
         <h1 className="sr-only">{t(I18n.pages.dashboard.title)}</h1>
@@ -75,8 +83,17 @@ export class Dashboard extends Component<RouteProps<typeof DashboardRoute>> {
                 <KPI.Header>
                   <KPI.Title>{t(I18n.pages.dashboard.revenue)}</KPI.Title>
                 </KPI.Header>
-                <KPI.Value>{this.money(revenue.value ?? 0, revenue.currency)}</KPI.Value>
-                <KPI.Trend>{this.change(revenue.value, revenue.previous)}</KPI.Trend>
+                <KPI.Content>
+                  {/* minor units: the house formatter knows each currency's exponent */}
+                  <KPI.Value value={revenue.value ?? 0}>
+                    {() => this.money(revenue.value ?? 0, revenue.currency)}
+                  </KPI.Value>
+                  {revenueChange && (
+                    <KPI.Trend trend={this.trend(revenue.value, revenue.previous)}>
+                      {revenueChange}
+                    </KPI.Trend>
+                  )}
+                </KPI.Content>
                 {revenue.series && (
                   <KPI.Chart
                     data={revenue.series.map((value, hour) => ({ hour, value }))}
@@ -89,8 +106,17 @@ export class Dashboard extends Component<RouteProps<typeof DashboardRoute>> {
                 <KPI.Header>
                   <KPI.Title>{t(I18n.pages.dashboard.orders)}</KPI.Title>
                 </KPI.Header>
-                <KPI.Value>{this.number(orders.value ?? 0)}</KPI.Value>
-                <KPI.Trend>{this.change(orders.value, orders.previous)}</KPI.Trend>
+                <KPI.Content>
+                  {/* the console's numerals setting, not the browser's default digits */}
+                  <KPI.Value value={orders.value ?? 0}>
+                    {() => this.number(orders.value ?? 0)}
+                  </KPI.Value>
+                  {ordersChange && (
+                    <KPI.Trend trend={this.trend(orders.value, orders.previous)}>
+                      {ordersChange}
+                    </KPI.Trend>
+                  )}
+                </KPI.Content>
               </KPI>
             </div>
             <Description>{t(I18n.pages.dashboard.revenue_note)}</Description>

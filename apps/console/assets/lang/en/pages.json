@@ -12,9 +12,6 @@
   "settings": {
     "title": "Settings",
     "tabs": "Settings sections",
-    "device": "This device",
-    "privacy": "Privacy",
-    "tenant": "Tenant",
     "scheme": "Theme",
     "locale": "Language",
     "density": "Table density",
@@ -22,6 +19,9 @@
     "local_notifications_hint": "Shown while the console is open.",
     "analytics_consent": "Share usage analytics",
     "analytics_consent_hint": "Helps us see which screens matter. Nothing is sent until you turn this on.",
+    "crash_replay_consent": "Replay my session when something breaks",
+    "crash_replay_consent_hint": "Records the moments before an error so we can fix it. Off until you turn it on; text you type is masked.",
+    "necessary_consent_hint": "Keeps you signed in and remembers this device's choices. Always on.",
     "notification_preferences": "Notification preferences",
     "save": "Save",
     "saved_device": "Device settings saved"
@@ -62,5 +62,12 @@
     "body": "Attach the images you opened with the console to a product.",
     "empty_title": "No image was opened",
     "empty_body": "Open a PNG, JPEG or WebP image with Acme Console to attach it to a product."
+  },
+  "mobile_link": {
+    "title": "Open in the Acme app",
+    "heading": "This screen is in the Acme app",
+    "body": "The link opens a screen of the Acme mobile app that the console does not have. Open it on a phone with the app installed, or carry on in the console.",
+    "dashboard": "Go to the dashboard",
+    "link": "Link:"
   }
 }

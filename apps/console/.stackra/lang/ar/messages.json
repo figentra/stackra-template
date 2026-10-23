@@ -8,6 +8,11 @@
     "inbox_message": {
       "read": "عرض الإشعارات الخاصة",
       "update": "تحديد الإشعارات الخاصة كمقروءة"
+    },
+    "resend": {
+      "read": "عرض اتصال Resend",
+      "connect": "ربط Resend",
+      "disconnect": "فصل Resend"
     }
   },
   "enums": {
@@ -22,30 +27,63 @@
     "mail_auth_result": {
       "pass": "ناجح",
       "fail": "فاشل",
-      "soft_fail": "فشل جزئي",
-      "none": "لا شيء"
+      "gray": "بلا نتيجة",
+      "processing_failed": "تعذر التحقق",
+      "unknown": "غير معروف"
     }
   },
   "errors": {
-    "mail_provider_unavailable": {
-      "message": "مزوّد البريد غير متاح؛ سنعيد المحاولة."
-    },
     "inbox_message_not_found": {
       "message": "لم يُعثر على هذا الإشعار."
     }
   },
   "settings": {
-    "messages": {
-      "title": "الإشعارات",
-      "order_updates": "تحديثات الطلبات",
-      "order_receipts": "إيصالات الطلبات في التطبيق",
-      "product_updates": "تحديثات المنتجات",
-      "marketing": "الرسائل التسويقية"
+    "title": "الإشعارات",
+    "orders": {
+      "title": "الطلبات",
+      "updates": {
+        "label": "تحديثات الطلبات",
+        "help": "تغيّر حالة طلباتك داخل التطبيق."
+      },
+      "receipts": {
+        "label": "إيصالات الطلبات في التطبيق",
+        "help": "نسخة من كل إيصال في صندوق الوارد."
+      }
+    },
+    "promotions": {
+      "title": "الأخبار والعروض",
+      "product_updates": {
+        "label": "تحديثات المنتجات",
+        "help": "عودة توفر المنتجات التي اشتريتها وانخفاض أسعارها."
+      },
+      "marketing": {
+        "label": "الرسائل التسويقية",
+        "help": "العروض والإعلانات."
+      }
     }
   },
   "integrations": {
     "resend": {
-      "label": "Resend"
+      "label": "Resend",
+      "description": "أرسل بريد هذا المتجر عبر حساب Resend ونطاقه الخاصين به."
+    }
+  },
+  "connections": {
+    "resend": {
+      "fields": {
+        "api_key": {
+          "label": "مفتاح الواجهة البرمجية",
+          "help": "يكفي مفتاح للإرسال فقط."
+        },
+        "from_address": {
+          "label": "عنوان المرسل",
+          "help": "عنوان على نطاق موثّق في Resend."
+        },
+        "webhook_secret": {
+          "label": "سر توقيع الإشعارات",
+          "help": "مطلوب. من الإشعار الذي أنشأته في Resend؛ لا يقبل هذا الاتصال إلا الأحداث الموقّعة به."
+        }
+      }
     }
   }
 }

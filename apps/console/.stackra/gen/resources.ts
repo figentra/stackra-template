@@ -43,6 +43,7 @@ import {
   AttachProductImageAction,
   CancelOrderAction,
   CreateProductAction,
+  CreateProductCollectionAction,
   DataClassification,
   EnrollMemberAction,
   FreezeAccountAction,
@@ -54,6 +55,7 @@ import {
   ListLoyaltyAccountsQuery,
   ListOrderLinesQuery,
   ListOrdersQuery,
+  ListProductCollectionsQuery,
   ListProductsQuery,
   LowStockWidget,
   LoyaltyAccountPermissions,
@@ -63,13 +65,17 @@ import {
   OrderStatus,
   PointsBalanceWidget,
   PointsIssuedWidget,
+  ProductCollectionPermissions,
   ProductPermissions,
   ProductStatus,
   StockPermissions,
   UpdateProductAction,
+  UpdateProductCollectionAction,
 } from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
-import { PointsBalance } from "#src/overrides/@acme/loyalty-kit/src/react/points-balance/points-balance";
+import {
+  PointsBalance,
+} from "#src/overrides/@acme/loyalty-kit/src/react/points-balance/points-balance";
 import { Panels } from "#stackra/panels";
 import { Slots } from "#stackra/slots";
 
@@ -82,6 +88,13 @@ export const Resources = {
     create: CreateProductAction,
     update: UpdateProductAction,
     permission: ProductPermissions.read,
+  }),
+  ProductCollection: resource("catalogue.product_collection", {
+    base: "/catalogue/collections",
+    list: ListProductCollectionsQuery,
+    create: CreateProductCollectionAction,
+    update: UpdateProductCollectionAction,
+    permission: ProductCollectionPermissions.read,
   }),
   Order: resource("orders.order", {
     base: "/orders/orders",
@@ -157,7 +170,7 @@ export const widgets = [
     permission: LoyaltyAccountPermissions.read,
     roles: [SystemRole.Owner, SystemRole.Manager],
   }),
-  // placed by src/overrides/@acme/loyalty-kit/src/node/resources/loyalty-account/points-balance.widget.ts
+  // placed by the console's shadow of the kit's widget (the `placedBy` path below)
   widget(PointsBalanceWidget, {
     slot: Slots.Dashboard.Main,
     order: 40,
@@ -171,9 +184,9 @@ export const widgets = [
 
 /**
  * Every resource screen: its panel, navigation, table contract (columns, filters, default sort,
- * estimated count), views, form or infolist, relations and action placements. The commerce
- * entries mirror its v3.1 resources: one `actions` list, placement by the action's input shape;
- * inventory declares no resource, only LowStockWidget.
+ * estimated count), views, form or infolist, relations and action placements. Every entry mirrors
+ * its v3.1 resource class: one `actions` list, placement by the action's input shape, the sort as
+ * `{ key, direction }`; inventory declares no resource, only LowStockWidget.
  */
 export const resources = {
   // Resource<Product, ProductView>: keys are paths of ProductView (the generated list's row)
@@ -205,7 +218,19 @@ export const resources = {
     ],
     form: {
       steps: [
-        Step.of("basics", [Field.from("title", { span: 2 }), Field.from("slug")], { grid: 2 }),
+        Step.of(
+          "basics",
+          [
+            Field.from("title", { span: 2 }),
+            Field.from("slug"),
+            // ids of catalogue.product_collection, picked from the collections' list query
+            Field.from("collections", {
+              options: ListProductCollectionsQuery,
+              optionLabel: "title",
+            }),
+          ],
+          { grid: 2 },
+        ),
         Step.of("media", [
           Field.upload("images", {
             action: AttachProductImageAction,
@@ -247,6 +272,25 @@ export const resources = {
       }),
       Placement.create({ then: ResourcePage.View }),
     ],
+  },
+  // Resource<ProductCollection>: the row is the model; no get operation, so no View page
+  "catalogue.product_collection": {
+    label: I18n.catalogue.resources.product_collection.title,
+    panels: [Panels.TenantAdmin],
+    navigation: {
+      group: I18n.catalogue.nav.catalogue,
+      icon: "folders",
+      order: 20,
+    },
+    table: {
+      columns: [Column.from("title"), Column.from("slug", { copyable: true, sortable: true })],
+      defaultSort: { key: "slug", direction: SortDirection.Asc },
+      count: Count.Estimated,
+    },
+    form: {
+      grid: 2,
+      fields: [Field.from("title", { span: 2 }), Field.from("slug")],
+    },
   },
   // Resource<Order, OrderView>: keys are paths of OrderView (the list query's row)
   "orders.order": {
@@ -333,83 +377,96 @@ export const resources = {
       }),
     ],
   },
+  // Resource<LoyaltyAccount, LoyaltyAccountView>: keys are paths of LoyaltyAccountView (the list's
+  // row); form keys are paths of EnrollMemberInput (the create operation's input)
   "loyalty_kit.loyalty_account": {
     label: I18n.loyalty_kit.resources.loyalty_account.title,
     panels: [Panels.TenantAdmin],
+    navigation: {
+      group: I18n.loyalty_kit.nav.loyalty,
+      icon: "star",
+      order: 30,
+    },
     table: {
       columns: [
-        Column.text("memberId", { copyable: true, searchable: true }),
-        Column.enum("tier", { enum: LoyaltyTier, sortable: true }),
-        Column.boolean("isFrozen", { trueLabel: I18n.loyalty_kit.account.frozen_badge }),
-        Column.count("entries", { sortable: true }),
-        Column.dateTime("frozenAt", { toggleable: { hiddenByDefault: true } }),
-        Column.dateTime("createdAt", { sortable: true }),
+        Column.from("memberId", { copyable: true }),
+        Column.from("tier", { enum: LoyaltyTier, sortable: true }),
+        Column.from("isFrozen"),
+        Column.from("frozenAt", { hidden: true }),
+        Column.from("createdAt", { sortable: true }),
       ],
       filters: [
-        Filter.select("tier", { enum: LoyaltyTier }),
-        Filter.boolean("isFrozen"),
-        Filter.dateRange("createdAt"),
+        Filter.from("tier", { enum: LoyaltyTier }),
+        Filter.from("isFrozen"),
+        Filter.from("createdAt"),
         Filter.trashed(),
       ],
-      defaultSort: { createdAt: SortDirection.Desc },
-      rowActions: [FreezeAccountAction],
-      bulkActions: [FreezeAccountAction],
+      search: true,
+      defaultSort: { key: "createdAt", direction: SortDirection.Desc },
+      count: Count.Estimated,
     },
     form: {
-      fields: [
-        Field.text("principalId", { required: true }),
-        Field.enum("tier", { enum: LoyaltyTier }),
-      ],
+      fields: [Field.from("principalId"), Field.from("tier", { enum: LoyaltyTier })],
     },
     infolist: {
       entries: [
-        Entry.text("memberId"),
-        Entry.enum("tier", { enum: LoyaltyTier }),
-        Entry.boolean("isFrozen"),
-        Entry.dateTime("frozenAt"),
-        Entry.keyValue("notes"),
-        Entry.relation("entries", { columns: ["kind", "points", "reference", "at"] }),
+        Entry.from("memberId"),
+        Entry.from("tier", { enum: LoyaltyTier }),
+        Entry.from("isFrozen"),
+        Entry.from("frozenAt"),
+        Entry.from("createdAt"),
       ],
     },
+    actions: [
+      Placement.run(FreezeAccountAction, {
+        places: [ActionPlace.Row, ActionPlace.View, ActionPlace.Bulk],
+      }),
+    ],
   },
+  // Resource<AccessLogEntry>: the row is the model, so keys are its fields; List and View only
   "access_log.access_log_entry": {
     label: I18n.access_log.resources.access_log_entry.title,
     panels: [Panels.TenantAdmin],
     create: false,
+    navigation: {
+      group: I18n.access_log.nav.audit,
+      icon: "shield",
+      order: 90,
+    },
     table: {
       columns: [
-        Column.dateTime("at", { sortable: true }),
-        Column.text("target", { searchable: true }),
-        Column.enum("classification", { enum: DataClassification, sortable: true }),
-        Column.text("callId", { copyable: true, toggleable: { hiddenByDefault: true } }),
+        Column.from("at", { sortable: true }),
+        Column.from("target"),
+        Column.from("classification", { enum: DataClassification, sortable: true }),
+        Column.from("callId", { copyable: true, hidden: true }),
       ],
-      filters: [
-        Filter.select("classification", { enum: DataClassification }),
-        Filter.dateRange("at"),
-      ],
-      defaultSort: { at: SortDirection.Desc },
+      filters: [Filter.from("classification", { enum: DataClassification }), Filter.from("at")],
+      search: true,
+      defaultSort: { key: "at", direction: SortDirection.Desc },
+      count: Count.Estimated,
     },
     infolist: {
       entries: [
-        Entry.dateTime("at"),
-        Entry.text("target"),
-        Entry.enum("classification", { enum: DataClassification }),
-        Entry.keyValue("actor"),
-        Entry.list("subjects"),
+        Entry.from("at"),
+        Entry.from("target"),
+        Entry.from("classification", { enum: DataClassification }),
+        Entry.from("actor"),
+        Entry.from("subjects"),
       ],
     },
   },
+  // the @stackra/queue package's own resource: the failed jobs, newest first, never created here
   "queue.failed_job": {
     label: I18n.queue.resource.failed_jobs,
     panels: [Panels.TenantAdmin],
     create: false,
     table: {
       columns: [
-        Column.text("queue"),
-        Column.text("job"),
-        Column.dateTime("failedAt", { sortable: true }),
+        Column.from("queue"),
+        Column.from("job"),
+        Column.from("failedAt", { sortable: true }),
       ],
-      defaultSort: { failedAt: SortDirection.Desc },
+      defaultSort: { key: "failedAt", direction: SortDirection.Desc },
     },
   },
 } as const;

@@ -6,7 +6,49 @@
   },
   "resources": {
     "order": {
-      "title": "Orders"
+      "title": "Orders",
+      "columns": {
+        "id": "Order",
+        "status": "Status",
+        "customer_id": "Customer",
+        "totals_total_minor": "Total",
+        "lines": "Items",
+        "created_at": "Placed",
+        "paid_at": "Paid"
+      },
+      "filters": {
+        "status": "Status",
+        "created_at": "Placed",
+        "paid_at": "Paid",
+        "customer_id": "Customer"
+      },
+      "views": {
+        "awaiting_payment": "Awaiting payment",
+        "paid_today": "Paid today",
+        "closed": "Closed"
+      },
+      "sections": {
+        "summary": "Summary",
+        "totals": "Totals"
+      },
+      "entries": {
+        "totals_subtotal_minor": "Subtotal",
+        "totals_adjustments": "Adjustments",
+        "totals_total_minor": "Total"
+      },
+      "relations": {
+        "lines": "Lines",
+        "sku": "SKU",
+        "quantity": "Quantity",
+        "unit_price_minor": "Unit price",
+        "track_inventory": "Stock tracked"
+      },
+      "empty": {
+        "heading": "No orders yet"
+      },
+      "no_results": {
+        "heading": "No orders match these filters"
+      }
     }
   },
   "enums": {
@@ -28,15 +70,34 @@
       "create": "Place orders",
       "read": "View orders",
       "cancel": "Cancel orders",
-      "expire": "Expire unpaid orders"
+      "expire": "Expire unpaid orders",
+      "export": "Export orders"
     }
   },
   "settings": {
-    "orders": {
-      "title": "Orders",
-      "auto_cancel_after_minutes": "Cancel unpaid orders after (minutes)",
-      "customers_may_cancel": "Customers may cancel unpaid orders",
-      "accepting_orders": "Accept new orders"
+    "title": "Orders",
+    "accepting_orders": {
+      "label": "Accept new orders",
+      "help": "Off pauses ordering; cancels and reads go on."
+    },
+    "daily_revenue_target_minor": {
+      "label": "Daily revenue target",
+      "help": "The sales band compares paid revenue with this goal. Leave empty for none."
+    },
+    "cancellation": {
+      "title": "Cancellation",
+      "auto_cancel_after_minutes": {
+        "label": "Cancel unpaid orders after (minutes)",
+        "help": "At most the platform ceiling below."
+      },
+      "max_auto_cancel_after_minutes": {
+        "label": "Longest allowed window (minutes)",
+        "help": "Set by the platform for every store."
+      },
+      "customers_may_cancel": {
+        "label": "Customers may cancel unpaid orders",
+        "help": "The platform may lock this off."
+      }
     }
   },
   "actions": {
@@ -44,18 +105,21 @@
       "create": {
         "success": "Order placed",
         "queued": "Order saved offline; it is sent when you are back online",
-        "intents": ["order two of SKU-123", "buy these items"]
+        "intents": ["order two of SKU-123", "buy these items", "place an order"]
       },
       "cancel": {
         "confirm": "Cancel this order? Reserved stock is released.",
-        "success": "Order cancelled"
-      }
-    }
-  },
-  "queries": {
-    "order": {
+        "success": "Order cancelled",
+        "bulk_partial": "{done} of {total} orders cancelled. {failed, plural, one {# order could not be cancelled} other {# orders could not be cancelled}}."
+      },
       "list": {
         "intents": ["show my orders", "list recent orders"]
+      },
+      "kpis": {
+        "intents": ["how are sales doing", "revenue today", "how many orders were paid this month"]
+      },
+      "export": {
+        "success": "Your export is being prepared; we will notify you when it is ready."
       }
     }
   },
@@ -64,7 +128,19 @@
   },
   "widgets": {
     "order_kpis": {
-      "title": "Orders and revenue"
+      "title": "Sales",
+      "description": "Paid revenue and paid orders against the previous period.",
+      "empty": "No paid orders in this period",
+      "revenue": {
+        "label": "Revenue"
+      },
+      "orders": {
+        "label": "Paid orders"
+      }
+    },
+    "awaiting_payment": {
+      "title": "Awaiting payment",
+      "description": "The newest orders not paid yet."
     }
   },
   "documents": {

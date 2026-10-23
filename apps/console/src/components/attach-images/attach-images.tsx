@@ -7,8 +7,9 @@
  *           `AttachProductImageAction`, so permission, the Idempotency-Key and the declared success
  *           text apply; one failed image is a toast and the others still go. Only PNG, JPEG and
  *           WebP are accepted, the same types pwa.config.ts declares for the share target and the
- *           file handler; anything else is listed and skipped. Preview URLs are revoked when the
- *           form unmounts. A class component; gen compiles it to a function component.
+ *           file handler; anything else is listed and skipped. The previews are an ImagePreviews
+ *           grid keyed by the accepted set, so a new `files` prop remounts it and its object URLs
+ *           always match `images`. A class component; gen compiles it to a function component.
  * Runtime: browser
  * Governing contract: ADR 0255 (share target, file handlers), ADR 0165 (form adapters), ADR 0294
  *                     (as amended by programming model v3.1, AGENTS.md: class components)
@@ -20,6 +21,7 @@ import { Button, Component, Description, toast } from "@stackra/ui";
 import { Field, Form, useSchemaForm } from "@stackra/ui/form";
 import { AttachProductImageAction } from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
+import { ImagePreviews } from "#src/components/image-previews";
 import { useVariantSearch } from "#src/hooks/use-variant-search";
 import { AttachImagesForm } from "#src/schemas/attach-images-form.schema";
 import type { AttachImagesProps } from "./attach-images.props";
@@ -41,14 +43,14 @@ export class AttachImages extends Component<AttachImagesProps> {
   /** True while a run is in flight; the button shows its pending state. */
   isAttaching = false;
 
-  /** Object URLs of the accepted images, made once for the files the form received. */
-  previews: readonly string[] = this.props.files
-    .filter((file) => ACCEPTED_TYPES.has(file.type))
-    .map((file) => URL.createObjectURL(file));
-
   /** The accepted images, in the order received. */
   get images() {
     return this.props.files.filter((file) => ACCEPTED_TYPES.has(file.type));
+  }
+
+  /** Identifies the accepted set; a different set remounts the previews with fresh URLs. */
+  get imagesKey() {
+    return this.images.map((file) => `${file.name}:${file.size}:${file.lastModified}`).join("/");
   }
 
   /** The files that are not an accepted image. */
@@ -74,11 +76,6 @@ export class AttachImages extends Component<AttachImagesProps> {
     this.props.onAttached?.(attached);
   }
 
-  /** Frees the preview URLs; the browser keeps an object URL alive until it is revoked. */
-  unmount() {
-    for (const url of this.previews) URL.revokeObjectURL(url);
-  }
-
   /** The previews, the skipped files and the form. */
   render() {
     const { t } = this.i18n;
@@ -92,17 +89,7 @@ export class AttachImages extends Component<AttachImagesProps> {
         className="flex max-w-xl flex-col gap-4"
       >
         <p>{t(I18n.console.attach.images, { count: this.images.length })}</p>
-        <ul className="grid grid-cols-3 gap-2">
-          {this.previews.map((url, index) => (
-            <li key={url}>
-              <img
-                src={url}
-                alt={this.images[index]?.name ?? ""}
-                className="aspect-square w-full rounded object-cover"
-              />
-            </li>
-          ))}
-        </ul>
+        <ImagePreviews key={this.imagesKey} images={this.images} />
         {this.rejected.map((file) => (
           <Description key={file.name} role="note">
             {t(I18n.console.attach.unsupported, { name: file.name })}

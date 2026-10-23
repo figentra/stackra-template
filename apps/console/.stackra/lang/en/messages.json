@@ -8,6 +8,11 @@
     "inbox_message": {
       "read": "View own notifications",
       "update": "Mark own notifications read"
+    },
+    "resend": {
+      "read": "View the Resend connection",
+      "connect": "Connect Resend",
+      "disconnect": "Disconnect Resend"
     }
   },
   "enums": {
@@ -22,30 +27,63 @@
     "mail_auth_result": {
       "pass": "Pass",
       "fail": "Fail",
-      "soft_fail": "Soft fail",
-      "none": "None"
+      "gray": "No result",
+      "processing_failed": "Check failed",
+      "unknown": "Unknown"
     }
   },
   "errors": {
-    "mail_provider_unavailable": {
-      "message": "The mail provider is unavailable; we will retry."
-    },
     "inbox_message_not_found": {
       "message": "This notification was not found."
     }
   },
   "settings": {
-    "messages": {
-      "title": "Notifications",
-      "order_updates": "Order updates",
-      "order_receipts": "Order receipts in the app",
-      "product_updates": "Product updates",
-      "marketing": "Marketing messages"
+    "title": "Notifications",
+    "orders": {
+      "title": "Orders",
+      "updates": {
+        "label": "Order updates",
+        "help": "Status changes of your orders in the app."
+      },
+      "receipts": {
+        "label": "Order receipts in the app",
+        "help": "A copy of each receipt in your inbox."
+      }
+    },
+    "promotions": {
+      "title": "News and offers",
+      "product_updates": {
+        "label": "Product updates",
+        "help": "Restocks and price drops of products you bought."
+      },
+      "marketing": {
+        "label": "Marketing messages",
+        "help": "Offers and announcements."
+      }
     }
   },
   "integrations": {
     "resend": {
-      "label": "Resend"
+      "label": "Resend",
+      "description": "Send this store's mail through its own Resend account and domain."
+    }
+  },
+  "connections": {
+    "resend": {
+      "fields": {
+        "api_key": {
+          "label": "API key",
+          "help": "A sending-only key is enough."
+        },
+        "from_address": {
+          "label": "From address",
+          "help": "An address on a domain verified in Resend."
+        },
+        "webhook_secret": {
+          "label": "Webhook signing secret",
+          "help": "Required. From the webhook you created in Resend; this connection accepts only events signed with it."
+        }
+      }
     }
   }
 }

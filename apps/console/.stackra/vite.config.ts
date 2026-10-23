@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) =>
       additionalManifestEntries: "prerender",
     },
     desktop: { base: "./", outDir: "dist/renderer" },
-    // telemetry.config.ts bundle; gzipped; build fails over budget
+    // telemetry.config.ts budgets.entryKb/routeKb; gzipped; build fails over budget
     budgets: { entryKb: 200, routeKb: 100 },
     // hidden: maps are uploaded to Sentry and never served
     build: { target: "safari17", sourcemap: "hidden", assetsInlineLimit: 0 },

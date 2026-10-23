@@ -28,6 +28,9 @@
         "catalogue.product.attach_image@1",
         "catalogue.product.get@1",
         "catalogue.product.list@1",
+        "catalogue.product_collection.list@1",
+        "catalogue.product_collection.create@1",
+        "catalogue.product_collection.update@1",
         "catalogue.variant.search@1",
         "catalogue.variant.get_by_barcode@1",
         "inventory.stock.list_low@1",
@@ -222,6 +225,19 @@
         "manifest": "file_handlers"
       },
       {
+        "key": "mobile_link",
+        "class": "MobileLinkRoute",
+        "file": "src/routes/mobile-link/mobile-link.route.ts",
+        "path": "/m/*",
+        "layout": "shell",
+        "component": "src/routes/mobile-link/mobile-link.tsx",
+        "title": "pages::mobile_link.title",
+        "universalLinks": {
+          "for": "@acme/mobile",
+          "files": [".well-known/apple-app-site-association", ".well-known/assetlinks.json"]
+        }
+      },
+      {
         "key": "offline",
         "class": "OfflineRoute",
         "file": "src/routes/offline/offline.route.ts",
@@ -251,6 +267,15 @@
           "/catalogue/products/:id",
           "/catalogue/products/:id/edit",
           "/catalogue/products/new"
+        ],
+        "layout": "shell"
+      },
+      {
+        "from": "commerce catalogue.product_collection (resource, admin)",
+        "paths": [
+          "/catalogue/collections",
+          "/catalogue/collections/:id/edit",
+          "/catalogue/collections/new"
         ],
         "layout": "shell"
       },
@@ -377,6 +402,12 @@
         "group": "catalogue::nav.catalogue"
       },
       {
+        "key": "navigate.catalogue.collections",
+        "from": "commerce catalogue.product_collection (resource navigation)",
+        "permission": "catalogue.product_collection.read",
+        "group": "catalogue::nav.catalogue"
+      },
+      {
         "key": "navigate.orders.sales_overview",
         "from": "commerce orders.sales_overview (document navigation)",
         "permission": "orders.order.read",
@@ -387,6 +418,12 @@
         "from": "commerce orders.order (resource navigation)",
         "permission": "orders.order.read",
         "group": "orders::nav.sales"
+      },
+      {
+        "key": "navigate.loyalty_kit.accounts",
+        "from": "commerce loyalty_kit.loyalty_account (resource navigation)",
+        "permission": "loyalty_kit.loyalty_account.read",
+        "group": "loyalty_kit::nav.loyalty"
       },
       {
         "key": "navigate.settings.orders",
@@ -519,17 +556,11 @@
       },
       "feeds": {
         "realtimeOrigin": "realtime.origin",
-        "telemetryDsn": "telemetry.dsn",
+        "telemetryDsn": "logger.telemetry.dsn",
         "pushVapidPublicKey": "platform.push.vapidPublicKey",
         "analyticsPosthogKey": "analytics.posthogKey",
         "featureFlagsPosthogKey": "feature_flags.posthogKey"
       }
-    },
-    {
-      "key": "console.telemetry",
-      "class": "TelemetryConfig",
-      "file": "src/config/telemetry.config.ts",
-      "schema": "console.TelemetryOptions"
     },
     {
       "key": "analytics",
@@ -609,6 +640,13 @@
       "base": "BaseStateConfig"
     },
     {
+      "key": "logger.telemetry",
+      "class": "TelemetryConfig",
+      "overrides": "@stackra/logger#TelemetryConfig",
+      "file": "src/config/telemetry.config.ts",
+      "base": "BaseTelemetryConfig"
+    },
+    {
       "key": "theming",
       "class": "ThemingConfig",
       "overrides": "@stackra/theming#ThemingConfig",
@@ -626,7 +664,7 @@
       "pages": ["en", "ar", "en-US", "ar-SA"],
       "documents": ["en", "ar"],
       "menus": ["en", "ar"],
-      "enums": ["en", "ar"],
+      "enums": ["en", "ar", "ar-SA"],
       "devices": ["en", "ar"]
     },
     "public": ["console::public/logo.svg"],
@@ -646,7 +684,14 @@
   "schemas": {
     "console.DevicePrefs": {
       "type": "object",
-      "required": ["scheme", "locale", "density", "localNotifications", "analyticsConsent"],
+      "required": [
+        "scheme",
+        "locale",
+        "density",
+        "localNotifications",
+        "analyticsConsent",
+        "crashReplayConsent"
+      ],
       "properties": {
         "scheme": {
           "$ref": "@stackra/theming#/schemas/ColorScheme",
@@ -665,6 +710,10 @@
           "default": false
         },
         "analyticsConsent": {
+          "type": "boolean",
+          "default": false
+        },
+        "crashReplayConsent": {
           "type": "boolean",
           "default": false
         }
@@ -721,81 +770,6 @@
         }
       }
     },
-    "console.TelemetryErrors": {
-      "type": "object",
-      "required": ["enabled", "sampleRate", "replayOnError", "replayConsent"],
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "sampleRate": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "replayOnError": {
-          "type": "boolean"
-        },
-        "replayConsent": {
-          "$ref": "@stackra/consent#/schemas/ConsentCategory"
-        }
-      }
-    },
-    "console.VitalsBudgets": {
-      "type": "object",
-      "required": ["lcpMs", "inpMs", "cls"],
-      "properties": {
-        "lcpMs": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "inpMs": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "cls": {
-          "type": "number",
-          "minimum": 0
-        }
-      }
-    },
-    "console.TelemetryVitals": {
-      "type": "object",
-      "required": ["enabled", "budgets"],
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "budgets": {
-          "$ref": "#/schemas/console.VitalsBudgets"
-        }
-      }
-    },
-    "console.BundleBudgets": {
-      "type": "object",
-      "required": ["entryKb", "routeKb"],
-      "properties": {
-        "entryKb": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "routeKb": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
-    },
-    "console.TelemetryTraces": {
-      "type": "object",
-      "required": ["sampleRate"],
-      "properties": {
-        "sampleRate": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        }
-      }
-    },
     "console.EnvOptions": {
       "type": "object",
       "required": [],
@@ -832,24 +806,6 @@
         }
       }
     },
-    "console.TelemetryOptions": {
-      "type": "object",
-      "required": [],
-      "properties": {
-        "errors": {
-          "$ref": "#/schemas/console.TelemetryErrors"
-        },
-        "vitals": {
-          "$ref": "#/schemas/console.TelemetryVitals"
-        },
-        "bundle": {
-          "$ref": "#/schemas/console.BundleBudgets"
-        },
-        "traces": {
-          "$ref": "#/schemas/console.TelemetryTraces"
-        }
-      }
-    },
     "console.AttachImagesForm": {
       "type": "object",
       "required": ["productId"],
@@ -873,6 +829,13 @@
       "file": "src/enums/density.enum.ts",
       "codes": ["comfortable", "compact"],
       "labels": "enums::density.<code>"
+    },
+    {
+      "key": "console.settings_tab",
+      "class": "SettingsTab",
+      "file": "src/enums/settings-tab.enum.ts",
+      "codes": ["device", "privacy", "tenant"],
+      "labels": "enums::settings_tab.<code>"
     }
   ]
 }

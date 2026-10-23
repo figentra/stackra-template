@@ -14,7 +14,7 @@ import { ColorScheme } from "@stackra/theming";
 import { Schema } from "@stackra/validation";
 import { Density } from "#src/enums/density.enum";
 
-/** Theme, language, density, local notifications and analytics consent on this device. */
+/** Theme, language, density, local notifications and the consent switches on this device. */
 export class DevicePrefs extends Schema {
   /** The colour scheme; `system` follows the operating system. */
   scheme: ColorScheme = ColorScheme.System;
@@ -30,4 +30,7 @@ export class DevicePrefs extends Schema {
 
   /** Share usage analytics; saving records the consent decision from it. */
   analyticsConsent = false;
+
+  /** Replay the session around an error; saving records the crash-replay consent from it. */
+  crashReplayConsent = false;
 }

@@ -18,7 +18,7 @@
  */
 import { isExpiringSoon } from "@acme/loyalty-kit";
 import type { PointsBalanceProps } from "@acme/loyalty-kit/react";
-import { KPI } from "@stackra-pro/ui";
+import { KPI } from "@heroui-pro/react/kpi";
 import { useDateTime, useNumber, useTranslation } from "@stackra/i18n/react";
 import { Chip, Component, Description } from "@stackra/ui";
 import { I18n } from "#stackra/i18n";
@@ -65,13 +65,19 @@ export class PointsBalance extends Component<PointsBalanceProps> {
             </Chip>
           )}
         </KPI.Header>
-        <KPI.Value>
-          {data ? t(I18n.console.loyalty.points, { count: this.number(data.balance) }) : null}
-        </KPI.Value>
         {data && (
-          <Description className={this.expiresSoon ? "text-warning" : undefined}>
-            {this.expiry}
-          </Description>
+          <KPI.Content>
+            <KPI.Value value={data.balance}>
+              {() => t(I18n.console.loyalty.points, { count: this.number(data.balance) })}
+            </KPI.Value>
+          </KPI.Content>
+        )}
+        {data && (
+          <KPI.Footer>
+            <Description className={this.expiresSoon ? "text-warning" : undefined}>
+              {this.expiry}
+            </Description>
+          </KPI.Footer>
         )}
       </KPI>
     );

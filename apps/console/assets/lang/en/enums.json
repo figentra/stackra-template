@@ -3,5 +3,10 @@
   "density": {
     "comfortable": "Comfortable",
     "compact": "Compact"
+  },
+  "settings_tab": {
+    "device": "This device",
+    "privacy": "Privacy",
+    "tenant": "Tenant"
   }
 }

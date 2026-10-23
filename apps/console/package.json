@@ -41,8 +41,8 @@
   "dependencies": {
     "@acme/loyalty-kit": "workspace:*",
     "@acme/theme": "workspace:*",
+    "@heroui-pro/react": "catalog:",
     "@heroui/styles": "catalog:ui",
-    "@stackra-pro/ui": "catalog:stackra",
     "@stackra/actions": "catalog:stackra",
     "@stackra/analytics": "catalog:stackra",
     "@stackra/app": "catalog:stackra",
@@ -62,6 +62,7 @@
     "@stackra/iam": "catalog:stackra",
     "@stackra/icons": "catalog:stackra",
     "@stackra/identity": "catalog:stackra",
+    "@stackra/logger": "catalog:stackra",
     "@stackra/media": "catalog:stackra",
     "@stackra/navigation": "catalog:stackra",
     "@stackra/panel": "catalog:stackra",

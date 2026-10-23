@@ -6,7 +6,8 @@
  *          pending-changes section (the queue list itself, the anchor the pending-changes shortcut
  *          jumps to).
  * Boundary: labels, bounds and defaults of the tenant fields come from the generated settings
- *           metadata; option lists come from the enums (labels are their derived i18n keys) and
+ *           metadata; tab ids and labels come from SettingsTab, option lists from the enums (labels
+ *           are their derived i18n keys) and
  *           `#stackra/i18n` locales, never hand-typed. Field names are paths of the form's schema,
  *           checked by its type. A class component typed by its route (`RouteProps<typeof
  *           SettingsRoute>`), so it needs no props file; gen compiles it to a function component.
@@ -25,13 +26,11 @@ import { I18n, locales } from "#stackra/i18n";
 import { Settings as SettingKeys, SettingsPages } from "#stackra/settings";
 import { PendingChangesList } from "#src/components/pending-changes-list";
 import { Density } from "#src/enums/density.enum";
+import { SettingsTab } from "#src/enums/settings-tab.enum";
 import type { SettingsRoute } from "#src/routes/settings/settings.route";
 import { DevicePrefs } from "#src/schemas/device-prefs.schema";
 import { TenantSettings } from "#src/schemas/tenant-settings.schema";
 import { useDeviceSettings } from "./use-device-settings";
-
-/** Tab ids; the tenant tab is absent when the loader returned no tenant values. */
-const TAB = { Device: "device", Privacy: "privacy", Tenant: "tenant" } as const;
 
 /** The four tenant keys the tenant tab edits, in display order. */
 const TENANT_KEYS = [
@@ -92,11 +91,13 @@ export class Settings extends Component<RouteProps<typeof SettingsRoute>> {
         <h1 className="text-xl font-semibold">{t(I18n.pages.settings.title)}</h1>
         <Tabs aria-label={t(I18n.pages.settings.tabs)}>
           <Tabs.List>
-            <Tabs.Tab id={TAB.Device}>{t(I18n.pages.settings.device)}</Tabs.Tab>
-            <Tabs.Tab id={TAB.Privacy}>{t(I18n.pages.settings.privacy)}</Tabs.Tab>
-            {data.tenant && <Tabs.Tab id={TAB.Tenant}>{t(I18n.pages.settings.tenant)}</Tabs.Tab>}
+            <Tabs.Tab id={SettingsTab.Device}>{t(I18n.enums.settings_tab.device)}</Tabs.Tab>
+            <Tabs.Tab id={SettingsTab.Privacy}>{t(I18n.enums.settings_tab.privacy)}</Tabs.Tab>
+            {data.tenant && (
+              <Tabs.Tab id={SettingsTab.Tenant}>{t(I18n.enums.settings_tab.tenant)}</Tabs.Tab>
+            )}
           </Tabs.List>
-          <Tabs.Panel id={TAB.Device}>
+          <Tabs.Panel id={SettingsTab.Device}>
             <Form
               form={deviceForm}
               onSubmit={deviceForm.handleSubmit(save)}
@@ -126,7 +127,7 @@ export class Settings extends Component<RouteProps<typeof SettingsRoute>> {
               <Button type="submit">{t(I18n.pages.settings.save)}</Button>
             </Form>
           </Tabs.Panel>
-          <Tabs.Panel id={TAB.Privacy}>
+          <Tabs.Panel id={SettingsTab.Privacy}>
             <Form
               form={deviceForm}
               onSubmit={deviceForm.handleSubmit(save)}
@@ -137,6 +138,11 @@ export class Settings extends Component<RouteProps<typeof SettingsRoute>> {
                 label={t(I18n.pages.settings.analytics_consent)}
                 description={t(I18n.pages.settings.analytics_consent_hint)}
               />
+              <Field.Switch
+                name="crashReplayConsent"
+                label={t(I18n.pages.settings.crash_replay_consent)}
+                description={t(I18n.pages.settings.crash_replay_consent_hint)}
+              />
               <Button type="submit">{t(I18n.pages.settings.save)}</Button>
             </Form>
             <Link to={SettingsPages.messages} className="link mt-4 inline-block">
@@ -144,7 +150,7 @@ export class Settings extends Component<RouteProps<typeof SettingsRoute>> {
             </Link>
           </Tabs.Panel>
           {data.tenant && provenance && (
-            <Tabs.Panel id={TAB.Tenant}>
+            <Tabs.Panel id={SettingsTab.Tenant}>
               <Form form={tenantForm} submit={this.submit} className="flex flex-col gap-4">
                 {TENANT_KEYS.map((key) => (
                   <Field.Setting key={key.path} setting={key} provenance={provenance[key.path]} />

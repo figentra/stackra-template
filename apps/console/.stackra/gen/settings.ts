@@ -4,8 +4,8 @@
  * Purpose: the typed setting keys (`Settings.orders.autoCancelAfterMinutes`,
  *          `Settings.messages.orderUpdates`) with their metadata, `Settings.pick`, which turns a
  *          list of keys into a shape class with the declared bounds and defaults, and the
- *          generated settings pages per module. Labels are the derived
- *          `<module>::settings.<module>.<field>` keys.
+ *          generated settings pages per module. Labels and help texts are the declaring module's
+ *          `<module>::settings.<path>.label` and `.help` keys.
  * Boundary: data; values are read and written through the settings actions at runtime; nothing here
  *           is a value. `messages` is user-scoped: its page edits the signed-in user's own
  *           notification preferences.
@@ -25,20 +25,23 @@ export const Settings = settingKeys({
       max: 1440,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
       renamed: ["autoCancelMinutes"],
-      label: I18n.orders.settings.orders.auto_cancel_after_minutes,
+      label: I18n.orders.settings.cancellation.auto_cancel_after_minutes.label,
+      help: I18n.orders.settings.cancellation.auto_cancel_after_minutes.help,
     },
     customersMayCancel: {
       type: SettingType.Boolean,
       default: true,
       lockable: true,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      label: I18n.orders.settings.orders.customers_may_cancel,
+      label: I18n.orders.settings.cancellation.customers_may_cancel.label,
+      help: I18n.orders.settings.cancellation.customers_may_cancel.help,
     },
     acceptingOrders: {
       type: SettingType.Boolean,
       default: true,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      label: I18n.orders.settings.orders.accepting_orders,
+      label: I18n.orders.settings.accepting_orders.label,
+      help: I18n.orders.settings.accepting_orders.help,
     },
   },
   inventory: {
@@ -47,13 +50,15 @@ export const Settings = settingKeys({
       default: 5,
       min: 0,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      label: I18n.inventory.settings.inventory.low_stock_threshold,
+      label: I18n.inventory.settings.low_stock_threshold.label,
+      help: I18n.inventory.settings.low_stock_threshold.help,
     },
     allowBackorders: {
       type: SettingType.Boolean,
       default: false,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      label: I18n.inventory.settings.inventory.allow_backorders,
+      label: I18n.inventory.settings.allow_backorders.label,
+      help: I18n.inventory.settings.allow_backorders.help,
     },
   },
   loyalty_kit: {
@@ -63,14 +68,15 @@ export const Settings = settingKeys({
       min: 1,
       max: 60,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      label: I18n.loyalty_kit.settings.loyalty_kit.expiry_months,
+      label: I18n.loyalty_kit.settings.expiry_months.label,
+      help: I18n.loyalty_kit.settings.expiry_months.help,
     },
     silverFrom: {
       type: SettingType.Integer,
       default: 1000,
       min: 0,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      label: I18n.loyalty_kit.settings.loyalty_kit.silver_from,
+      label: I18n.loyalty_kit.settings.tiers.silver_from.label,
     },
     goldFrom: {
       type: SettingType.Integer,
@@ -78,7 +84,7 @@ export const Settings = settingKeys({
       min: 0,
       lockable: true,
       scopes: [SettingScope.Platform, SettingScope.Tenant],
-      label: I18n.loyalty_kit.settings.loyalty_kit.gold_from,
+      label: I18n.loyalty_kit.settings.tiers.gold_from.label,
     },
   },
   messages: {
@@ -86,25 +92,29 @@ export const Settings = settingKeys({
       type: SettingType.Boolean,
       default: true,
       scopes: [SettingScope.User],
-      label: I18n.messages.settings.messages.order_updates,
+      label: I18n.messages.settings.orders.updates.label,
+      help: I18n.messages.settings.orders.updates.help,
     },
     orderReceipts: {
       type: SettingType.Boolean,
       default: true,
       scopes: [SettingScope.User],
-      label: I18n.messages.settings.messages.order_receipts,
+      label: I18n.messages.settings.orders.receipts.label,
+      help: I18n.messages.settings.orders.receipts.help,
     },
     productUpdates: {
       type: SettingType.Boolean,
       default: false,
       scopes: [SettingScope.User],
-      label: I18n.messages.settings.messages.product_updates,
+      label: I18n.messages.settings.promotions.product_updates.label,
+      help: I18n.messages.settings.promotions.product_updates.help,
     },
     marketing: {
       type: SettingType.Boolean,
       default: false,
       scopes: [SettingScope.User],
-      label: I18n.messages.settings.messages.marketing,
+      label: I18n.messages.settings.promotions.marketing.label,
+      help: I18n.messages.settings.promotions.marketing.help,
     },
   },
 });

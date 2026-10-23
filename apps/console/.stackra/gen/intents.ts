@@ -31,7 +31,7 @@ export const Intents = intents([
   },
   {
     ref: ListOrdersQuery,
-    phrases: I18n.orders.queries.order.list.intents,
+    phrases: I18n.orders.actions.order.list.intents,
     icon: "receipt",
     opens: Resources.Order,
   },
@@ -42,13 +42,13 @@ export const Intents = intents([
   },
   {
     ref: GetVariantByBarcodeQuery,
-    phrases: I18n.catalogue.queries.variant.get_by_barcode.intents,
+    phrases: I18n.catalogue.actions.variant.get_by_barcode.intents,
     icon: "barcode",
     opens: Routes.quick_order,
   },
   {
     ref: SearchVariantsQuery,
-    phrases: I18n.catalogue.queries.variant.search.intents,
+    phrases: I18n.catalogue.actions.variant.search.intents,
     icon: "search",
     opens: Routes.quick_order,
   },

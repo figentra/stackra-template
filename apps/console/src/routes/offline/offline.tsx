@@ -14,7 +14,7 @@
  * Governing contract: ADR 0294 (decisions 7 and 14; as amended by programming model v3.1,
  *                     AGENTS.md: class components), ADR 0255 (offline page), ADR 0252, ADR 0080
  */
-import { EmptyState } from "@stackra-pro/ui";
+import { EmptyState } from "@heroui-pro/react";
 import { Tone } from "@stackra/contracts";
 import { useLocale, useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
@@ -63,7 +63,7 @@ export class Offline extends Component<RouteProps<typeof OfflineRoute>> {
     return (
       <section lang={locale} dir={direction} className="flex max-w-md flex-col gap-6">
         <EmptyState>
-          <EmptyState.Media>
+          <EmptyState.Media variant="icon">
             <Icon name={this.isOnline ? "wifi" : "wifi-off"} aria-hidden />
           </EmptyState.Media>
           <EmptyState.Header>
@@ -79,7 +79,8 @@ export class Offline extends Component<RouteProps<typeof OfflineRoute>> {
                   : I18n.pages.offline.status_offline,
               )}
             </Chip>
-            <EmptyState.Title render={<h1 />}>{t(I18n.pages.offline.title)}</EmptyState.Title>
+            {/* the page's one h1; EmptyState.Title is an h3 for empty regions inside a page */}
+            <h1 className="text-lg font-semibold text-foreground">{t(I18n.pages.offline.title)}</h1>
             <EmptyState.Description>{t(I18n.pages.offline.body)}</EmptyState.Description>
             <EmptyState.Description>
               {t(I18n.console.offline.body, { count: this.queue.pending })}

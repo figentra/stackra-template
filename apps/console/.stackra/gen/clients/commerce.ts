@@ -124,8 +124,44 @@ const CreateProductInput$ = z.object({
     .max(200)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   description: z.record(z.string(), z.string().max(200)).nullable().exactOptional(),
-  collections: z.array(z.object({ title: z.string(), slug: z.string() })).exactOptional(),
+  // the product's collections, by id; the form picks them from ListProductCollectionsQuery
+  collections: z
+    .array(publicId("pcl"))
+    .refine((ids) => new Set(ids).size === ids.length, "unique")
+    .exactOptional(),
+  variants: z
+    .array(
+      z.object({
+        sku: z.string().max(64),
+        barcode: z.string().max(14).nullable().exactOptional(),
+        trackInventory: z.boolean().default(true),
+      }),
+    )
+    .exactOptional(),
+  seo: z
+    .object({
+      title: z.string().nullable(),
+      description: z.string().nullable(),
+      noindex: z.boolean(),
+    })
+    .nullable()
+    .exactOptional(),
 });
+
+/** `catalogue.ProductCollection$`: the model is the row; `title` is one value per locale. */
+const ProductCollection$ = z.object({
+  id: publicId("pcl"),
+  title: z.record(z.string(), z.string().max(120)),
+  slug: z
+    .string()
+    .max(64)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  createdAt: z.iso.datetime({ offset: true }),
+  updatedAt: z.iso.datetime({ offset: true }),
+});
+
+/** `catalogue.CreateProductCollectionInput$`: the model's writable fields. */
+const CreateProductCollectionInput$ = ProductCollection$.pick({ title: true, slug: true });
 
 /** `catalogue.UpdateProductInput$`: the partial update, addressed by `productId`. */
 const UpdateProductInput$ = CreateProductInput$.partial().extend({ productId: publicId("prd") });
@@ -151,6 +187,7 @@ const OrderTotals$ = z.object({
 const OrderView$ = z.object({
   id: publicId("ord"),
   status: z.enum(Enum.values(OrderStatus)),
+  customerId: publicId("usr"),
   totals: OrderTotals$,
   lines: z.array(
     z.object({
@@ -160,6 +197,7 @@ const OrderView$ = z.object({
     }),
   ),
   createdAt: z.iso.datetime({ offset: true }),
+  paidAt: z.iso.datetime({ offset: true }).nullable(),
 });
 
 /** `catalogue.VariantHit$`: one row of `catalogue.variant.search@1`. */
@@ -186,6 +224,7 @@ const LoyaltyAccountView$ = z.object({
   memberId: z.string(),
   tier: z.enum(Enum.values(LoyaltyTier)),
   isFrozen: z.boolean(),
+  frozenAt: z.iso.datetime({ offset: true }).nullable(),
   createdAt: z.iso.datetime({ offset: true }),
 });
 
@@ -238,6 +277,12 @@ export class VariantHit extends remoteShape("catalogue.VariantHit", VariantHit$)
 
 /** `catalogue.ProductView`. */
 export class ProductView extends remoteShape("catalogue.ProductView", ProductView$) {}
+
+/** `catalogue.ProductCollection`: one storefront collection, as its resource lists it. */
+export class ProductCollection extends remoteShape(
+  "catalogue.ProductCollection",
+  ProductCollection$,
+) {}
 
 /** `loyalty_kit.LoyaltyAccountView`. */
 export class LoyaltyAccountView extends remoteShape(
@@ -316,6 +361,13 @@ export class ProductPermissions extends permissionRefs("catalogue.product", [
   "create",
   "update",
   "archive",
+]) {}
+
+/** `catalogue.product_collection.*` permissions. */
+export class ProductCollectionPermissions extends permissionRefs("catalogue.product_collection", [
+  "read",
+  "create",
+  "update",
 ]) {}
 
 /** `inventory.stock.*` permissions. */
@@ -430,6 +482,28 @@ export class UpdateProductAction extends actionRef("catalogue.product.update@1",
   http: { method: HttpMethod.Patch, path: "/products/:productId" },
   risk: Risk.L1,
 }) {}
+
+/** `catalogue.product_collection.create@1`: a standard operation of ProductCollectionResource. */
+export class CreateProductCollectionAction extends actionRef(
+  "catalogue.product_collection.create@1",
+  {
+    input: CreateProductCollectionInput$,
+    output: ProductCollection$,
+    http: { method: HttpMethod.Post, path: "/product-collections" },
+    risk: Risk.L1,
+  },
+) {}
+
+/** `catalogue.product_collection.update@1`: the partial update, by `productCollectionId`. */
+export class UpdateProductCollectionAction extends actionRef(
+  "catalogue.product_collection.update@1",
+  {
+    input: CreateProductCollectionInput$.partial().extend({ productCollectionId: publicId("pcl") }),
+    output: ProductCollection$,
+    http: { method: HttpMethod.Patch, path: "/product-collections/:productCollectionId" },
+    risk: Risk.L1,
+  },
+) {}
 
 /** `catalogue.product.attach_image@1`: one uploaded image per call. */
 export class AttachProductImageAction extends actionRef("catalogue.product.attach_image@1", {
@@ -553,6 +627,19 @@ export class ListProductsQuery extends queryRef("catalogue.product.list@1", {
   input: pageInput.extend({ search: z.string().max(100).exactOptional() }),
   output: page(ProductView$),
   http: { method: HttpMethod.Get, path: "/products" },
+}) {}
+
+/** `catalogue.product_collection.list@1`: the table's closed input, sorted by slug only. */
+export class ListProductCollectionsQuery extends queryRef("catalogue.product_collection.list@1", {
+  input: z.object({
+    cursor: z.string().exactOptional(),
+    limit: z.union([z.literal(20), z.literal(50), z.literal(100)]).default(20),
+    sort: z
+      .object({ key: z.literal("slug"), direction: z.enum(["asc", "desc"]) })
+      .default({ key: "slug", direction: "asc" }),
+  }),
+  output: page(ProductCollection$),
+  http: { method: HttpMethod.Get, path: "/product-collections" },
 }) {}
 
 /** `inventory.stock.list_low@1`. */

@@ -6,8 +6,9 @@
  * Purpose: the main-process container wiring of @acme/console for the `desktop` target: the menus,
  *          the bridges the packages ship behind their ports (receipt printer, folder picker) and
  *          the Node-side drivers they need (file system, receipt printer, cash drawer, scanner),
- *          plus the config classes main reads, each override bound in place of its base (the app
- *          class keeps the base's name). The derived root module stands in for a module file.
+ *          plus the config classes main reads, each package base (imported as `Base<Name>`) with
+ *          the override that replaces it (the app class keeps the base's name). The derived root
+ *          module stands in for a module file.
  * Boundary: main only. Nothing here reaches the renderer bundle, and nothing in the renderer wiring
  *           (`gen/wiring.ts`: contexts, stores, routes) reaches main; a bridge is the only path
  *           between the two. Derived from the classes and their constructor parameter types at
@@ -19,6 +20,7 @@ import { Lifetime, type Wiring } from "@stackra/container";
 import { CspConfig as BaseCspConfig } from "@stackra/csp";
 import { FileSystem } from "@stackra/filesystem/contracts";
 import { I18nConfig as BaseI18nConfig } from "@stackra/i18n";
+import { TelemetryConfig as BaseTelemetryConfig } from "@stackra/logger";
 import { PeripheralsConfig as BasePeripheralsConfig } from "@stackra/peripherals";
 import { BarcodeScanner, CashDrawer, ReceiptPrinter } from "@stackra/peripherals/contracts";
 import { PrintReceiptBridge } from "@stackra/peripherals/electron";
@@ -70,12 +72,15 @@ export const mainWiring = {
       lifetime: Lifetime.Request,
       deps: [FileSystem],
     },
-    { module: "console", provide: BaseCspConfig, config: CspConfig },
-    { module: "console", provide: BaseDesktopConfig, config: DesktopConfig },
-    { module: "console", provide: BaseI18nConfig, config: I18nConfig },
-    { module: "console", provide: BasePeripheralsConfig, config: PeripheralsConfig },
-    { module: "console", provide: TelemetryConfig, config: TelemetryConfig },
-    { module: "console", provide: BaseThemingConfig, config: ThemingConfig },
+  ],
+  /** The config classes main reads: each package base with the override that replaces it. */
+  config: [
+    { key: "csp", provide: BaseCspConfig, override: CspConfig },
+    { key: "platform.desktop", provide: BaseDesktopConfig, override: DesktopConfig },
+    { key: "i18n", provide: BaseI18nConfig, override: I18nConfig },
+    { key: "peripherals", provide: BasePeripheralsConfig, override: PeripheralsConfig },
+    { key: "logger.telemetry", provide: BaseTelemetryConfig, override: TelemetryConfig },
+    { key: "theming", provide: BaseThemingConfig, override: ThemingConfig },
   ],
   drivers: [
     {
@@ -119,7 +124,7 @@ export const mainWiring = {
     unexportedInjections: "none",
     unresolvedTypes: "none",
     configsRead: "all",
-    overrides: "5 config overrides, each of one base",
+    overrides: "6 config overrides, each of one base",
     bridges: "2 package bridges, 0 app bridges",
     menuItems: "closed verbs only",
     rendererImports: "none",
