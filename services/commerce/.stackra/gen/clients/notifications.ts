@@ -10,7 +10,7 @@
  */
 import { remoteAction, ServiceClient } from "@stackra/clients";
 import { HttpMethod } from "@stackra/contracts";
-import { publicId } from "@stackra/validation/runtime";
+import { publicId } from "@stackra/validation";
 import { z } from "zod";
 
 /** `messages.message.send@1` input: the rendered parts of one message. */

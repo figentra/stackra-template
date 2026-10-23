@@ -64,6 +64,7 @@
     "@stackra/identity": "catalog:stackra",
     "@stackra/logger": "catalog:stackra",
     "@stackra/media": "catalog:stackra",
+    "@stackra/money": "catalog:stackra",
     "@stackra/navigation": "catalog:stackra",
     "@stackra/panel": "catalog:stackra",
     "@stackra/peripherals": "catalog:stackra",

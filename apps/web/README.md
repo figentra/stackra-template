@@ -5,7 +5,7 @@ page-builder pages, on one hostname per site, in English and Arabic with a US En
 Arabic overlay. Every thing with identity is a kind class whose base names its kind and whose path
 names its group (ADR 0294): routes and the site layout, page-builder blocks, menus, flags, the
 analytics event and config. React components are class components too (`extends Component` from
-`@stackra/ui`: fields are state, `use*` fields are hooks, `render()` is the body), which gen
+`#stackra/ui`: fields are state, `use*` fields are hooks, `render()` is the body), which gen
 compiles to function components; each is bound to its route or block by file name and keeps its
 Props in `<name>.props.ts`. The one piece of request logic the app writes is the site resolution in
 the site layout's loader. The member writes no root module: it would say nothing gen does not

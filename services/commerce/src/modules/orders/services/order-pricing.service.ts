@@ -13,7 +13,7 @@
  *                     ADR 0265, ADR 0220 (money)
  */
 import type { ActionContext } from "@stackra/actions";
-import { Service } from "@stackra/app";
+import { Service } from "@stackra/container";
 import type { Logger } from "@stackra/contracts";
 import { Money } from "@stackra/money";
 import type { PricingClient } from "#stackra/clients/pricing";

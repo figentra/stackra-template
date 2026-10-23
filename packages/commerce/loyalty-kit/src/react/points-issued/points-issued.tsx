@@ -13,7 +13,8 @@
  *                     ADR 0080 (typed i18n keys)
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Card, Component, Stat } from "@stackra/ui";
+import { Card, Stat } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import type { PointsIssuedProps } from "#react/points-issued/points-issued.props";
 

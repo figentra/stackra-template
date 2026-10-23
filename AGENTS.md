@@ -148,7 +148,7 @@ Every kind is declared by its base class. "Binding" says whether the container r
 | Factory, seeder            | `extends Factory<Order>`, `extends Seeder`                                                                                                                                                                   | no         |
 | Prompt, skill, facts       | `extends Prompt` or `Prompt({...})`, `extends Skill({ tools })`, `extends Facts<Order>`                                                                                                                      | yes        |
 | Route, layout              | `extends Route({ path, layout, tab, flag })` or `Layout({...})`, with `override loader`, `submit`, `meta`                                                                                                    | yes        |
-| Component                  | `export class X extends Component<XProps>` (`@stackra/ui`, or `@stackra/ui/native`); a page is `Component<RouteProps<typeof XRoute>>`                                                                        | no         |
+| Component                  | `export class X extends Component<XProps>` (`Component` from `#stackra/ui`); a page is `Component<RouteProps<typeof XRoute>>`                                                                                | no         |
 | Panel, menu, shortcut      | `extends Panel({ path, area })`, `Menu({ kind: MenuKind.App })` with `items(m)` (web and native; Electron roles stay in `desktop.config.ts`), `Shortcut({ keys })`                                           | yes        |
 | Store, block, bridge       | `extends Store({ persist })`, `Block({ category, icon })`, `Bridge({ capability })`                                                                                                                          | yes        |
 | Config                     | `extends Config({ schema: XOptions, env: { field: "ENV_NAME" } })`; a host override `X extends BaseX` sets `override` field defaults only                                                                    | token      |
@@ -264,12 +264,14 @@ manifest:
 
 A component is a class; gen compiles it to a plain React function component before the React
 Compiler runs, so Fast Refresh, DevTools names and stack traces point at the class. The compiler is
-wired by the generated tool configs, never by hand: `classComponents()` from `@stackra/gen/vite` in
+wired by the generated tool configs, never by hand: `classComponents()` from `@stackra/gen/node` in
 `.stackra/vite.config.ts`, and `@stackra/gen/metro-transformer` in `.stackra/metro.config.js` (the
 member lists `@stackra/gen` as a `catalog:stackra` devDependency). Import `Component` from
-`@stackra/ui` (web and package `react/` entries) or `@stackra/ui/native` (mobile and package
-`native/` entries), never from `react`. A component without props is `extends Component`; with
-props, `extends Component<XProps>` and `XProps` in `<name>.props.ts`.
+`#stackra/ui` (gen re-exports the facade for each target; ADR 0305 rule 37), never from `react`;
+every other component comes from `@stackra/ui/react` (web and package `react/` entries) or
+`@stackra/ui/native` (mobile and package `native/` entries), never the package root. A component
+without props is `extends Component`; with props, `extends Component<XProps>` and `XProps` in
+`<name>.props.ts`.
 
 ```tsx
 // apps/console/src/components/pending-changes/pending-changes.tsx (abridged)
@@ -333,7 +335,7 @@ imported by name from a per-service subpath, never walked through a namespace:
 
 ```ts
 // apps/mobile/src/mobile.module.ts: kept, because it narrows what the binary ships
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 import { CatalogueModule, OrdersModule } from "#stackra/clients/commerce";
 import { ExperienceModule } from "#stackra/clients/experience";
 import { DevicesModule, IdentityModule } from "#stackra/clients/identity";
@@ -640,9 +642,9 @@ credential works and returns the account label) and optional `subscribe()` and `
 
 **Icons** are `IconName` strings (`icon: "receipt"`, `<Icon name="bell" />`): Lucide 1.54.0 names in
 kebab-case plus Stackra aliases, typed by
-`import type { IconName } from "@stackra/icons/contracts"`. `Icon` comes from `@stackra/ui` (web) or
-`@stackra/ui/native`. Nothing imports an icon component; gen validates names and ships only the
-icons in use. A member's own icons in `assets/icons/` join as `<namespace>::<name>`.
+`import type { IconName } from "@stackra/icons/contracts"`. `Icon` comes from `@stackra/ui/react`
+(web) or `@stackra/ui/native`. Nothing imports an icon component; gen validates names and ships only
+the icons in use. A member's own icons in `assets/icons/` join as `<namespace>::<name>`.
 
 **Lang files** are `assets/lang/<locale>/<namespace>.json`. An app's namespaces are its member key
 plus one per app group that has strings (`shortcuts`, `manifest`, `pages`, `documents`, `menus`,
@@ -661,35 +663,36 @@ boundary; a route adds `<name>.error.tsx` only to customise its own.
 
 ## Single owners (never import these from anywhere else)
 
-`Module`, `Service`, `Controller`, `defineService`, `defineApp` → `@stackra/app` · `Action`,
-`Query`, `Precondition`, `Interceptor`, `ExtensionPoint`, `Extension`, `Idempotency` →
-`@stackra/actions` · `Schema`, `CursorInput`, `Page`, `Enum`, `validate` and the field decorators →
-`@stackra/validation` · `Model`, relation decorators, `Collection`, `Ref`, `Link`, `Index`,
-`Searchable` → `@stackra/model` (traits from `@stackra/model/traits`) · `StateMachine`, `Transition`
-→ `@stackra/state-machine` · `Refusal`, `ErrorKind` → `@stackra/errors` · `Event`, `DomainEvent`,
+`Controller` → `@stackra/app` · `Action`, `Query`, `Precondition`, `Interceptor`, `ExtensionPoint`,
+`Extension`, `Idempotency` → `@stackra/actions` · `Schema`, `CursorInput`, `Page`, `validate` and
+the field decorators → `@stackra/validation` · `Model`, relation decorators, `Collection`, `Ref`,
+`Link`, `Index`, `Searchable` and the traits → `@stackra/model` · `StateMachine`, `Transition` →
+`@stackra/state-machine` · `Refusal`, `ErrorKind` → `@stackra/errors` · `Event`, `DomainEvent`,
 `IntegrationEvent`, `WebhookEvent`, `AnalyticsEvent`, `Listener`, `BroadcastAudience` →
 `@stackra/events` · `Change` → `@stackra/versioning` · `Workflow`, `Signal`, `Step`, `Run` →
 `@stackra/workflow` · `Permissions`, `Permission`, `Policy`, `Role`, `SystemRole` → `@stackra/iam` ·
 `Entitlement` → `@stackra/entitlements` · `Flag` → `@stackra/feature-flags` · `Settings`, `Setting`,
 `SettingScope`, `SettingsReader` → `@stackra/settings` · `CrudService`, `Migration`, `Macro`,
 `Seeder`, `Blueprint`, `SchemaBuilder` → `@stackra/database` (`Factory` from
-`@stackra/database/testing`) · `Cache`, `CacheKey`, `CacheScope` → `@stackra/cache` · `Driver`,
-`Port`, `Lifetime`, `Replaces`, `Named`, `DriverName` → `@stackra/container` · `Config`, `Secret` →
-`@stackra/config` · `Resource`, `Widget`, `Document`, `Panel`, `Table`, `Actions`, `Display`,
-`ActionPlace`, `TimeRange` and the metric types → `@stackra/panel` · `Notification`, `Recipient`,
-`Notifier` → `@stackra/notifications` · `Integration`, `Connection`, `AuthType`, `ConnectionLevel`,
-`IntegrationCategory` → `@stackra/integrations` · `Prompt`, `Skill`, `Facts` → `@stackra/ai` ·
-`Route`, `Layout`, `Menu`, `MenuKind`, `ChromeConfig`, `RouteProps` → `@stackra/navigation` ·
-`Shortcut` → `@stackra/shortcuts` · `Store` → `@stackra/state` · `Component`, `Icon` → `@stackra/ui`
-(`@stackra/ui/native` on mobile) · `IconName` → `@stackra/icons/contracts` · `Bridge` →
-`@stackra/platform/electron` · `Block` → `@stackra/experience` · `PublicId`, `Url`, `Email`,
-`Duration`, `Json`, `Tone`, `Realm`, `ActorKind`, `ApiArea`, `HttpMethod`, `SortDirection`,
-`Target`, `DataClassification` → `@stackra/contracts` · `Money`, `CurrencyCode` → `@stackra/money` ·
-`StorageArea` → `@stackra/storage` · `ColorScheme` → `@stackra/theming` · `NumberingSystem`,
-`Locale` → `@stackra/i18n` · `PromptMoment`, `Capability`, `DesktopMode`, `OverlayStyle`,
-`OverlayAnchor` → `@stackra/platform` · a consumed service's classes → `#stackra/clients/<service>`
-· `Queues`, `Slots`, `Panels`, `Flags`, `Routes`, `I18n`, `Migrations` → `#stackra/*` · a refusal in
-a test is its error class (`refusal(OrderNotPayableError)`), never a code · the theme →
+`@stackra/database/testing`) · `Cache`, `CacheKey`, `CacheScope` → `@stackra/cache` · `Module`,
+`Service`, `Driver`, `Lifetime`, `Replaces`, `Named`, `DriverName` → `@stackra/container` ·
+`Config`, `Secret` → `@stackra/config` · `Resource`, `Widget`, `Document`, `Panel`, `Table`,
+`Actions`, `Display`, `ActionPlace`, `TimeRange` and the metric types → `@stackra/panel` ·
+`Notification`, `Recipient`, `Notifier` → `@stackra/notifications` · `Integration`, `Connection`,
+`AuthType`, `ConnectionLevel`, `IntegrationCategory` → `@stackra/integrations` · `Prompt`, `Skill`,
+`Facts` → `@stackra/ai` · `Route`, `Layout`, `Menu`, `MenuKind`, `ChromeConfig`, `RouteProps` →
+`@stackra/navigation` · `Shortcut` → `@stackra/shortcuts` · `Store` → `@stackra/state` · `Component`
+→ `#stackra/ui` · `Icon` and every other component → `@stackra/ui/react` (`@stackra/ui/native` on
+mobile) · `IconName` → `@stackra/icons/contracts` · `Bridge` → `@stackra/platform/electron` ·
+`Block` → `@stackra/experience` · `PublicId`, `Url`, `Email`, `Duration`, `Json`, `Tone`, `Realm`,
+`ActorKind`, `ApiArea`, `HttpMethod`, `SortDirection`, `Target`, `DataClassification`, `Port`,
+`Enum`, `defineApp`, `defineService`, `definePackage`, `defineWorker`, `MigrationRunner` →
+`@stackra/contracts` · `Money`, `CurrencyCode` → `@stackra/money` · `StorageArea` →
+`@stackra/storage` · `ColorScheme` → `@stackra/theming` · `NumberingSystem`, `Locale` →
+`@stackra/i18n` · `PromptMoment`, `Capability`, `DesktopMode`, `OverlayStyle`, `OverlayAnchor` →
+`@stackra/platform` · a consumed service's classes → `#stackra/clients/<service>` · `Queues`,
+`Slots`, `Panels`, `Flags`, `Routes`, `I18n`, `Migrations` → `#stackra/*` · a refusal in a test is
+its error class (`refusal(OrderNotPayableError)`), never a code · the theme →
 `@acme/theme/themes/acme/web.css` (web) and `@acme/theme/themes/acme/native.css` (mobile) with
 `@stackra/tokens/fonts/fonts.css`; colours are tokens, never literals
 ([Stackra ADR 0302](https://docs.stackra.figentra.com/adr/0302-stackra-design-system-tokens-ui-and-the-playground)).

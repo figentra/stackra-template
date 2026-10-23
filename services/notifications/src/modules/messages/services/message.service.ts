@@ -10,7 +10,7 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 16 and 17), ADR 0136, ADR 0141, ADR 0263, ADR 0134
  */
-import { Service } from "@stackra/app";
+import { Service } from "@stackra/container";
 import type { IdentityResolver } from "@stackra/contracts";
 import { type Repository, UniqueViolation } from "@stackra/database";
 import type { MailTransport } from "@stackra/notifications/contracts";

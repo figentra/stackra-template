@@ -58,6 +58,7 @@
     "@stackra/iam": "catalog:stackra",
     "@stackra/identity": "catalog:stackra",
     "@stackra/logger": "catalog:stackra",
+    "@stackra/money": "catalog:stackra",
     "@stackra/navigation": "catalog:stackra",
     "@stackra/panel": "catalog:stackra",
     "@stackra/platform": "catalog:stackra",

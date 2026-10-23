@@ -11,7 +11,7 @@
  *                     AGENTS.md: class components), ADR 0061, ADR 0080
  */
 import { type RouteProps, useNavigate } from "@stackra/navigation/native";
-import { Component } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { FlatList, RefreshControl, View } from "react-native";
 import { OfflineBanner } from "#src/components/offline-banner";
 import { OrderCard } from "#src/components/order-card";

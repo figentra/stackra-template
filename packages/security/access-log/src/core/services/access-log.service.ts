@@ -11,7 +11,7 @@
  * Governing contract: ADR 0294 (decisions 6 and 16), ADR 0134 (classification), ADR 0184
  *                     (telemetry)
  */
-import { Service } from "@stackra/app";
+import { Service } from "@stackra/container";
 import type { Actor, Clock, Logger } from "@stackra/contracts";
 import type { AccessLogSink } from "#contracts/ports/access-log-sink.port";
 import type { AccessLoggedOptions } from "#contracts/types/access-logged-options.type";

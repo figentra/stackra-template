@@ -14,7 +14,8 @@
  */
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
-import { Button, Card, Component, Spinner } from "@stackra/ui";
+import { Button, Card, Spinner } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import type { SignInRoute } from "#src/routes/sign-in/sign-in.route";
 

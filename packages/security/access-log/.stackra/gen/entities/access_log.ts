@@ -9,7 +9,7 @@
  *           default-value inference.
  * Runtime: node
  */
-import { EntitySchema, type OptionalProps } from "@stackra/database/orm";
+import { EntitySchema, type OptionalProps } from "@stackra/database";
 import { AccessLogEntry } from "#node/models/access-log-entry.model";
 
 /** `access_log.access_log_entry` → `access_log.access_log_entries`. */

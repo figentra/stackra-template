@@ -59,6 +59,7 @@
     "@stackra/identity": "catalog:stackra",
     "@stackra/integrations": "catalog:stackra",
     "@stackra/model": "catalog:stackra",
+    "@stackra/money": "catalog:stackra",
     "@stackra/notifications": "catalog:stackra",
     "@stackra/outbox": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",

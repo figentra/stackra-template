@@ -10,7 +10,8 @@
  *                     v3.1, AGENTS.md: class components), ADR 0110, ADR 0114
  */
 import type { RouteProps } from "@stackra/navigation";
-import { Component, Skeleton } from "@stackra/ui";
+import { Component } from "#stackra/ui";
+import { Skeleton } from "@stackra/ui/react";
 import type { PageRoute } from "#src/routes/page/page.route";
 
 /** What the server sends inside the frame. */

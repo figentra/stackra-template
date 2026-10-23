@@ -68,7 +68,8 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@stackra/app": "catalog:stackra",
+    "@stackra/container": "catalog:stackra",
+    "@stackra/contracts": "catalog:stackra",
     "@stackra/tokens": "catalog:stackra"
   },
   "devDependencies": {

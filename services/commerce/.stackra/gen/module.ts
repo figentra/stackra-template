@@ -12,7 +12,7 @@
  */
 import { AccessLogModule } from "@acme/access-log/node";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 
 /** The commerce service: four feature modules plus the loyalty kit and the access log. */
 export class CommerceModule extends Module({ imports: [LoyaltyKitModule, AccessLogModule] }) {}

@@ -9,7 +9,7 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 12 and 15), ADR 0295 (decisions 1 and 7)
  */
-import { definePackage } from "@stackra/app";
+import { definePackage } from "@stackra/contracts";
 
 /** Read by `stackra gen` and `stackra validate`. */
 export default definePackage({});

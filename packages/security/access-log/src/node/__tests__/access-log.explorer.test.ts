@@ -11,7 +11,7 @@ import { AccessLogConfig, AccessLogged } from "@acme/access-log";
 import { AccessLogSink, DataClassification } from "@acme/access-log/contracts";
 import { AccessLogExplorer, AccessLogModule } from "@acme/access-log/node";
 import "@acme/access-log/testing"; // registers toHaveLoggedAccess
-import { Module, Service } from "@stackra/app";
+import { Module, Service } from "@stackra/container";
 import { createTestingModule } from "@stackra/container/testing";
 import { discoverWithGen } from "@stackra/gen/testing";
 import { actors } from "@stackra/iam/testing";

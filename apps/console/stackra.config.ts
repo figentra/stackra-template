@@ -21,8 +21,7 @@
  *                     three targets), ADR 0255 (PWA), ADR 0254 (desktop release), ADR 0082 (API
  *                     areas)
  */
-import { defineApp } from "@stackra/app";
-import { ApiArea, Target } from "@stackra/contracts";
+import { ApiArea, defineApp, Target } from "@stackra/contracts";
 import { EnvConfig } from "./src/config/env.config";
 
 /** `targets` picks the generated outputs: Vite, the service worker, the manifests and Electron. */

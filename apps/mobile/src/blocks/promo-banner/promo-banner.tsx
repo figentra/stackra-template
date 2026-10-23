@@ -11,7 +11,8 @@
  *                     AGENTS.md: class components), ADR 0110, ADR 0112
  */
 import type { BlockProps } from "@stackra/experience/native";
-import { Button, Component } from "@stackra/ui/native";
+import { Button } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { Text } from "react-native";
 import type { PromoBannerBlock } from "#src/blocks/promo-banner/promo-banner.block";
 import { Glass } from "#src/components/glass";

@@ -13,7 +13,7 @@
 import { useConfig } from "@stackra/config/react";
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 import { CtaBanner } from "#src/blocks/cta-banner/cta-banner";

@@ -11,7 +11,8 @@
  */
 import { EmptyState } from "@heroui-pro/react";
 import { useTranslation } from "@stackra/i18n/react";
-import { Component, Icon } from "@stackra/ui";
+import { Component } from "#stackra/ui";
+import { Icon } from "@stackra/ui/react";
 import type { EmptyViewProps } from "./empty-view.props";
 
 /**

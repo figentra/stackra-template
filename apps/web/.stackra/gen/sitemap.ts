@@ -4,13 +4,13 @@
  * pages.sitemap.get, commerce catalogue.product.list_storefront@1) — do not edit
  * Purpose: the sitemap sources: the marketing routes, the tenant's builder pages and the storefront
  *          products. Each `list` answers one cursor page (or everything, when the query has no
- *          cursor); `@stackra/seo/sitemap` walks the cursors into numbered files and
+ *          cursor); `@stackra/seo` walks the cursors into numbered files and
  *          `route-modules/sitemap.ts` writes the XML.
  * Boundary: data plus the listers bound to the consumed queries; links are built from
  *           `#stackra/routes` keys, so no route module is imported.
  * Runtime: worker
  */
-import type { SitemapSource } from "@stackra/seo/sitemap";
+import type { SitemapSource } from "@stackra/seo";
 import { Changefreq } from "@stackra/seo";
 import type { PublicClients } from "#stackra/clients.server";
 import { ListStorefrontProductsQuery } from "#stackra/clients/commerce";

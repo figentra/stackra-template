@@ -10,7 +10,7 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 12, 15 and 16), ADR 0263 (gen writes the wiring)
  */
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 import { AccessLogService } from "#core/services/access-log.service";
 
 /** Import once in a host's root module; every `@AccessLogged` class is then logged. */

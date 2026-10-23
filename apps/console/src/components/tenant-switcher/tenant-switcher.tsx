@@ -11,7 +11,8 @@
  */
 import type { Key } from "react";
 import { useTranslation } from "@stackra/i18n/react";
-import { Avatar, Component, Dropdown, Icon, toast } from "@stackra/ui";
+import { Avatar, Dropdown, Icon, toast } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n, type I18nKey } from "#stackra/i18n";
 import { EmptyView } from "#src/components/empty-view";
 import { useActiveTenant } from "./use-active-tenant";

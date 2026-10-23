@@ -12,7 +12,7 @@
  * Governing contract: ADR 0294 (decisions 12, 15 and 16, as amended by programming model v3.1,
  *                     AGENTS.md), ADR 0263 (gen writes the wiring)
  */
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 import { LoyaltyService } from "#core/services/loyalty.service";
 import { AccountService } from "#node/services/account.service";
 import { LedgerReconcilerService } from "#node/services/ledger-reconciler.service";

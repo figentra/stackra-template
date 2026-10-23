@@ -12,7 +12,7 @@
  *           so code never reads `import.meta.env` itself.
  * Runtime: isomorphic
  */
-import { hydrateEnv, type BuildFacts, type PublicPart } from "@stackra/config/env";
+import { type BuildFacts, hydrateEnv, type PublicPart } from "@stackra/config";
 import { EnvConfig } from "#src/config/env.config";
 
 /**

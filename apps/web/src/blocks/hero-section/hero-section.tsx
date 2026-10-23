@@ -12,7 +12,8 @@
  *                     typed props), WCAG 2.2 AA (one h1)
  */
 import { Link } from "@stackra/navigation/react";
-import { Button, Component } from "@stackra/ui";
+import { Button } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { Routes } from "#stackra/routes";
 import type { HeroSectionProps } from "./hero-section.props";
 

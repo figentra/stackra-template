@@ -12,17 +12,16 @@
  * Runtime: isomorphic
  */
 import { z } from "zod";
-import { CountMetric$, MoneyMetric$, TimeRangeInput$ } from "@stackra/panel/schemas";
+import { CountMetric$, MoneyMetric$, TimeRangeInput$ } from "@stackra/panel";
 import {
   type Assert,
-  currencyCode,
   type Fields,
   isoDateTime,
   json,
-  money,
   publicId,
   type Same,
-} from "@stackra/validation/runtime";
+} from "@stackra/validation";
+import { currencyCode, money } from "@stackra/money";
 import type { OrderCancelled } from "#modules/orders/events/order-cancelled.event";
 import type { OrderPaid } from "#modules/orders/events/order-paid.event";
 import type { OrderPlaced } from "#modules/orders/events/order-placed.event";

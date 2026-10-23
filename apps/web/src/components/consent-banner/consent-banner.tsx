@@ -14,7 +14,8 @@
  *                     components), ADR 0298 (decisions 1, 2 and 6)
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Button, Component, Surface } from "@stackra/ui";
+import { Button, Surface } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { useAnalyticsConsent } from "./use-analytics-consent";
 

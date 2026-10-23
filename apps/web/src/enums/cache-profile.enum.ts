@@ -9,7 +9,7 @@
  * Governing contract: ADR 0294 (decisions 4 and 16), ADR 0297 (decision 3), ADR 0231 (snake_case
  *                     codes)
  */
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /**
  * How long a query's answer may be served from the Workers cache.

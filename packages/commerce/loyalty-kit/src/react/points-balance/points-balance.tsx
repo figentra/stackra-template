@@ -15,7 +15,8 @@
  *                     ADR 0080 (typed i18n keys)
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Card, Component, Stat, Text } from "@stackra/ui";
+import { Card, Stat, Text } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { isExpiringSoon } from "#core/functions/is-expiring-soon.function";
 import type { PointsBalanceProps } from "#react/points-balance/points-balance.props";

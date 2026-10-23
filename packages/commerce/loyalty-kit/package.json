@@ -126,7 +126,6 @@
   },
   "dependencies": {
     "@stackra/actions": "catalog:stackra",
-    "@stackra/app": "catalog:stackra",
     "@stackra/config": "catalog:stackra",
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",

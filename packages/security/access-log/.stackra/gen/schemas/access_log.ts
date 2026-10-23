@@ -17,7 +17,7 @@ import {
   json,
   publicId,
   type Same,
-} from "@stackra/validation/runtime";
+} from "@stackra/validation";
 import type { AccessLogOptions } from "#core/schemas/access-log-options.schema";
 import type { AccessLogEntry } from "#node/models/access-log-entry.model";
 import type { PurgeAccessLogInput } from "#node/schemas/purge-access-log-input.schema";

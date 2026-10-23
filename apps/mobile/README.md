@@ -6,15 +6,15 @@ Uniwind on the `acme` theme of `@acme/theme`. Built to the Stackra programming m
 amended by v3.1 in the root AGENTS.md): every class states its kind once, in its base class
 (`extends Route({...})`, `extends Menu({ kind })`, `extends Store({ persist })`), and its folder
 says what it is; pages, layouts' screens, blocks' renderers and components are class components
-(`extends Component<Props>` from `@stackra/ui/native`, Props in `<name>.props.ts`), which gen
-compiles to function components; hooks stay functions; one exported declaration per file; nothing is
-referenced by string (permissions, actions, queries, enums, i18n keys and routes are generated
-constants, and titles, labels and keys are derived from names). A mobile "screen" is a route with
-native presentation options, the same term as web and console. Its module set is fixed when the
-binary is built (`src/mobile.module.ts` `imports`). The runtime (the entry, the navigation tree,
-linking, the Expo configuration, EAS profiles, Metro, Maestro) is generated into `.stackra/` (ADR
-0295); Expo's own Babel default compiles it, with gen's class-component pass as Metro's transformer,
-so no Babel config exists.
+(`extends Component<Props>` from `#stackra/ui`, Props in `<name>.props.ts`), which gen compiles to
+function components; hooks stay functions; one exported declaration per file; nothing is referenced
+by string (permissions, actions, queries, enums, i18n keys and routes are generated constants, and
+titles, labels and keys are derived from names). A mobile "screen" is a route with native
+presentation options, the same term as web and console. Its module set is fixed when the binary is
+built (`src/mobile.module.ts` `imports`). The runtime (the entry, the navigation tree, linking, the
+Expo configuration, EAS profiles, Metro, Maestro) is generated into `.stackra/` (ADR 0295); Expo's
+own Babel default compiles it, with gen's class-component pass as Metro's transformer, so no Babel
+config exists.
 
 | Command                                | Does                                                                                              |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------- |

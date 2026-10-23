@@ -10,7 +10,7 @@
  *           inference.
  * Runtime: node
  */
-import { EntitySchema, type OptionalProps } from "@stackra/database/orm";
+import { EntitySchema, type OptionalProps } from "@stackra/database";
 import { LedgerEntry } from "#node/models/ledger-entry.model";
 import { LoyaltyAccount } from "#node/models/loyalty-account.model";
 

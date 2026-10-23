@@ -14,7 +14,8 @@
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
 import { useLaunchedFiles } from "@stackra/platform/react";
-import { Component, Description } from "@stackra/ui";
+import { Component } from "#stackra/ui";
+import { Description } from "@stackra/ui/react";
 import { I18n } from "#stackra/i18n";
 import { AttachImages } from "#src/components/attach-images";
 import { EmptyView } from "#src/components/empty-view";

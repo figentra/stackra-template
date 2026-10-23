@@ -12,7 +12,8 @@
  */
 import { useTranslation } from "@stackra/i18n/react";
 import { useMutationQueue } from "@stackra/query/react";
-import { Alert, Component } from "@stackra/ui";
+import { Alert } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { useOnlineStatus } from "#src/hooks/use-online-status";
 

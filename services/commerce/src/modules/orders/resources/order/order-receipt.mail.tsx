@@ -12,8 +12,8 @@
  *                     v3.1, AGENTS.md), ADR 0223, ADR 0080, ADR 0192
  */
 import { Html, Text } from "@react-email/components";
-import { type MailProps, useMail } from "@stackra/notifications/mail";
-import { Component } from "@stackra/ui";
+import { type MailProps, useMail } from "@stackra/notifications/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import type { OrderReceiptNotification } from "#modules/orders/resources/order/order-receipt.notification";
 

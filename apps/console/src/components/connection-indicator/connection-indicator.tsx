@@ -15,7 +15,8 @@ import { Tone } from "@stackra/contracts";
 import { useTranslation } from "@stackra/i18n/react";
 import { RealtimeStatus } from "@stackra/realtime";
 import { useRealtimeConnection } from "@stackra/realtime/react";
-import { Chip, Component } from "@stackra/ui";
+import { Chip } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n, type I18nKey } from "#stackra/i18n";
 
 /** Status code → label and chip colour; the record type makes a missing case a type error. */

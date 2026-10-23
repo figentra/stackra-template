@@ -12,7 +12,7 @@
  *           `useConfig(X)`. The `env` instance is for generated code outside React (linking).
  * Runtime: react-native
  */
-import { hydrateEnv } from "@stackra/config/env";
+import { hydrateEnv } from "@stackra/config";
 import { EnvConfig } from "#src/config/env.config";
 
 /** Every public value the binary carries, by name; Expo inlines each literal read. */

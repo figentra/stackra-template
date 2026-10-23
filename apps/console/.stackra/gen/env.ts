@@ -9,7 +9,7 @@
  *           derives it for the Electron main.
  * Runtime: browser
  */
-import { hydrateEnv } from "@stackra/config/env";
+import { hydrateEnv } from "@stackra/config";
 import { EnvConfig } from "#src/config/env.config";
 
 /** The parsed env, frozen. */

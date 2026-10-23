@@ -8,7 +8,8 @@
  * Governing contract: ADR 0294 (decision 14, as amended by programming model v3.1, AGENTS.md: class
  *                     components), ADR 0116 CT4 (testimonial is a built-in content type)
  */
-import { Card, Component } from "@stackra/ui";
+import { Card } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import type { TestimonialsProps } from "./testimonials.props";
 
 /**

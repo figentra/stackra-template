@@ -17,8 +17,7 @@
  *                     0295 (decisions 1 to 6), ADR 0297 (decisions 1 and 2), ADR 0165 (React Router
  *                     7 framework mode), ADR 0082 (public area)
  */
-import { defineApp } from "@stackra/app";
-import { ApiArea, Target } from "@stackra/contracts";
+import { ApiArea, defineApp, Target } from "@stackra/contracts";
 import { RenderMode } from "@stackra/navigation";
 import { EnvConfig } from "./src/config/env.config";
 

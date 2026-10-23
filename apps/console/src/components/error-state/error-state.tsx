@@ -17,7 +17,8 @@ import { useEffect } from "react";
 import { ErrorKind, isRefusal } from "@stackra/errors";
 import { useErrorReporter } from "@stackra/errors/react";
 import { useTranslation } from "@stackra/i18n/react";
-import { Alert, Button, Component } from "@stackra/ui";
+import { Alert, Button } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import type { ErrorStateProps } from "./error-state.props";
 

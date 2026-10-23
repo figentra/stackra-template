@@ -11,8 +11,7 @@
  *                     (BelongsToTenant)
  */
 import type { PublicId } from "@stackra/contracts";
-import { Index, Model } from "@stackra/model";
-import { BelongsToTenant, HasPublicId, Timestamps } from "@stackra/model/traits";
+import { BelongsToTenant, HasPublicId, Index, Model, Timestamps } from "@stackra/model";
 import { Str } from "@stackra/validation";
 import { MessageStatus } from "#modules/messages/enums/message-status.enum";
 

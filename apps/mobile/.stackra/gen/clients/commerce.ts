@@ -25,11 +25,11 @@ import {
   remoteShape,
   widgetRef,
 } from "@stackra/clients";
-import { HttpMethod, Tone } from "@stackra/contracts";
+import { Enum, HttpMethod, Tone } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
 import { CountMetric$, MoneyMetric$, TimeRangeInput$ } from "@stackra/panel";
-import { Enum } from "@stackra/validation";
-import { currencyCode, isoDateTime, publicId, tableInput } from "@stackra/validation/runtime";
+import { currencyCode } from "@stackra/money";
+import { isoDateTime, publicId, tableInput } from "@stackra/validation";
 import { z } from "zod";
 import { I18n } from "#stackra/i18n";
 import { Slots } from "#stackra/slots";

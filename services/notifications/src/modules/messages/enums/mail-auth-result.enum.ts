@@ -10,7 +10,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0231 (snake_case codes)
  */
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /** Only a DMARC `pass` lets a mail act for a customer. */
 export const MailAuthResult = Enum.of({

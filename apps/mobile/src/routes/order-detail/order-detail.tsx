@@ -14,8 +14,9 @@
  */
 import { useDateTime, useMoney, useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation/native";
-import { Button, Card, Chip, Component, ListGroup, Separator } from "@stackra/ui/native";
-import { Enum } from "@stackra/validation";
+import { Button, Card, Chip, ListGroup, Separator } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
+import { Enum } from "@stackra/contracts";
 import { Fragment } from "react";
 import { Text } from "react-native";
 import { Screen } from "#src/components/screen";

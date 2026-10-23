@@ -16,7 +16,7 @@ import { ClientAction, ClientQuery, ClientRefusal } from "@stackra/clients";
 import { HttpMethod } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
 import { ColorRole } from "@stackra/tokens/contracts";
-import { currencyCode } from "@stackra/validation/runtime";
+import { currencyCode } from "@stackra/money";
 import { z } from "zod";
 import { I18n } from "#stackra/i18n";
 

@@ -11,7 +11,7 @@
  *                     clients), ADR 0263 (typed constructors)
  */
 import type { QueryContext } from "@stackra/actions";
-import { Service } from "@stackra/app";
+import { Service } from "@stackra/container";
 import type { PricingClient } from "#stackra/clients/pricing";
 import type { StockService } from "#modules/inventory/services/stock.service";
 import type { Product } from "#modules/catalogue/models/product.model";

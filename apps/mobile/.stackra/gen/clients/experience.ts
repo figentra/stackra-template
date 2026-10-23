@@ -11,7 +11,7 @@
  */
 import { moduleRef, queryRef, remoteShape } from "@stackra/clients";
 import { HttpMethod } from "@stackra/contracts";
-import { json } from "@stackra/validation/runtime";
+import { json } from "@stackra/validation";
 import { z } from "zod";
 
 // --- modules -------------------------------------------------------------------------------------

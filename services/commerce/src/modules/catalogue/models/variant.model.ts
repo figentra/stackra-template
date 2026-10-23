@@ -10,8 +10,16 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 4, 11, 20, 27 and 28), ADR 0104 (as amended)
  */
-import { Index, ManyToOne, Model, OnDelete, type Ref } from "@stackra/model";
-import { BelongsToTenant, HasPublicId, Timestamps } from "@stackra/model/traits";
+import {
+  BelongsToTenant,
+  HasPublicId,
+  Index,
+  ManyToOne,
+  Model,
+  OnDelete,
+  type Ref,
+  Timestamps,
+} from "@stackra/model";
 import { Str } from "@stackra/validation";
 import { Product } from "#modules/catalogue/models/product.model";
 

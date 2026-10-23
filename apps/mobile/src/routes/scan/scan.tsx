@@ -15,7 +15,8 @@
 import { useTranslation } from "@stackra/i18n/react";
 import { type RouteProps, useNavigate } from "@stackra/navigation/native";
 import { ScannerView } from "@stackra/platform/react";
-import { Alert, Button, Component, Spinner } from "@stackra/ui/native";
+import { Alert, Button, Spinner } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
 import { Glass } from "#src/components/glass";

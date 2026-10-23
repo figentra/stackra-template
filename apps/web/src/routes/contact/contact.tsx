@@ -17,7 +17,7 @@ import { useEffect } from "react";
 import { useAnalytics } from "@stackra/analytics/react";
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { LeadSubmitted } from "#src/analytics/lead-submitted.analytics-event";
 import { ContactForm } from "#src/components/contact-form";

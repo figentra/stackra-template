@@ -13,8 +13,9 @@
  */
 import { useDateTime, useMoney, useTranslation } from "@stackra/i18n/react";
 import { ContextMenu } from "@stackra/navigation/native";
-import { Card, Chip, Component, PressableFeedback } from "@stackra/ui/native";
-import { Enum } from "@stackra/validation";
+import { Card, Chip, PressableFeedback } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
+import { Enum } from "@stackra/contracts";
 import { Text, View } from "react-native";
 import type { OrderCardProps } from "#src/components/order-card/order-card.props";
 import { OrderCardMenu } from "#src/menus/order-card.menu";

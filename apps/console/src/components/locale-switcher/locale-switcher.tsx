@@ -13,7 +13,8 @@
  *                     amended by programming model v3.1, AGENTS.md: class components)
  */
 import { useLocale, useTranslation } from "@stackra/i18n/react";
-import { Component, Dropdown, Icon } from "@stackra/ui";
+import { Component } from "#stackra/ui";
+import { Dropdown, Icon } from "@stackra/ui/react";
 import { I18n, locales } from "#stackra/i18n";
 
 /**

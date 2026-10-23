@@ -16,21 +16,19 @@
  *                     (Postgres hybrid search)
  */
 import {
+  BelongsToTenant,
   Collection,
+  HasPublicId,
   Index,
   ManyToMany,
   Model,
   OneToMany,
   Searchable,
-  type Translated,
-} from "@stackra/model";
-import {
-  BelongsToTenant,
-  HasPublicId,
   Timestamps,
   Translatable,
+  type Translated,
   Versioned,
-} from "@stackra/model/traits";
+} from "@stackra/model";
 import { Str } from "@stackra/validation";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { ProductCollection } from "#modules/catalogue/models/product-collection.model";

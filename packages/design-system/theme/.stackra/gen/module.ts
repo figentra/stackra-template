@@ -7,7 +7,7 @@
  *           its key, which names the asset namespace of the mark (`theme::public/images/mark.svg`).
  * Runtime: node
  */
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 
 /** The package's module, keyed `theme`. */
 export class ThemeModule extends Module {}

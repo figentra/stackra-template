@@ -9,7 +9,8 @@
  *                     components), ADR 0116 CT4, WCAG 2.2 AA (HeroUI Accordion: buttons with names,
  *                     arrow keys)
  */
-import { Accordion, Component } from "@stackra/ui";
+import { Accordion } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import type { FaqSectionProps } from "./faq-section.props";
 
 /** One expanded at a time; the first stays closed so the page's length is predictable for LCP. */

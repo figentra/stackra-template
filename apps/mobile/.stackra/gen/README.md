@@ -25,6 +25,7 @@ authored code never imports `schemas/`.
 | `slots.ts`             | `Slots`: the panel's slot names                                                                                                          |
 | `flags.ts`             | `Flags`: the consumed feature flags                                                                                                      |
 | `settings.ts`          | `Settings`: the consumed user-scope settings with field schemas and labels                                                               |
+| `ui.ts`                | `Component`, the class-component base, from `@stackra/ui/native`, imported as `#stackra/ui`                                              |
 
 There is no `overrides.ts` (the app shadows no block or Custom widget; its one string override, from
 `src/overrides/commerce/orders/`, is in `i18n.ts`) and no `panels.ts` (the app hosts no panel; its

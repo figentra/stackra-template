@@ -11,7 +11,7 @@
  */
 import { Store } from "@stackra/state";
 import { StorageArea } from "@stackra/storage";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 import { Density } from "#src/enums/density.enum";
 
 /** App-wide console UI state: sidebar collapsed and table density, persisted per device. */

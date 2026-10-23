@@ -17,14 +17,17 @@
  *                     ADR 0159, ADR 0220 (money)
  */
 import type { PublicId } from "@stackra/contracts";
-import { Collection, Index, Model, OneToMany } from "@stackra/model";
 import {
   BelongsToTenant,
+  Collection,
   HasPublicId,
+  Index,
+  Model,
+  OneToMany,
   Timestamps,
   UserStamps,
   Versioned,
-} from "@stackra/model/traits";
+} from "@stackra/model";
 import type { Money } from "@stackra/money";
 import { Str } from "@stackra/validation";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";

@@ -29,14 +29,7 @@ import { QueryConfig$ as BaseQueryConfig$ } from "@stackra/query";
 import { RealtimeConfig$ as BaseRealtimeConfig$ } from "@stackra/realtime";
 import { StateConfig$ as BaseStateConfig$ } from "@stackra/state";
 import { ThemingConfig$ as BaseThemingConfig$ } from "@stackra/theming";
-import {
-  type Assert,
-  duration,
-  type Fields,
-  publicId,
-  type Same,
-  url,
-} from "@stackra/validation/runtime";
+import { type Assert, duration, type Fields, publicId, type Same, url } from "@stackra/validation";
 import { z } from "zod";
 import type { BarcodeScanned } from "#src/analytics/barcode-scanned.analytics-event";
 import type { PromoBannerBlock } from "#src/blocks/promo-banner/promo-banner.block";

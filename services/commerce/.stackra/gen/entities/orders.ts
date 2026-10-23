@@ -11,8 +11,8 @@
  *           written here, so the ORM config turns off its own default-value inference.
  * Runtime: node
  */
-import { EntitySchema, type OptionalProps } from "@stackra/database/orm";
-import { LinkType, MoneySchema } from "@stackra/model/orm";
+import { EntitySchema, type OptionalProps } from "@stackra/database";
+import { LinkType, MoneySchema } from "@stackra/model";
 import { OrderLine } from "#modules/orders/models/order-line.model";
 import { Order } from "#modules/orders/models/order.model";
 

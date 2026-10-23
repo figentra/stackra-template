@@ -13,7 +13,8 @@
 import { remoteQuery, remoteRefusal, ServiceClient } from "@stackra/clients";
 import { HttpMethod } from "@stackra/contracts";
 import { ErrorKind } from "@stackra/errors";
-import { currencyCode, publicId } from "@stackra/validation/runtime";
+import { currencyCode } from "@stackra/money";
+import { publicId } from "@stackra/validation";
 import { z } from "zod";
 
 /** `pricing.price.quote@1` input. */

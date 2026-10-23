@@ -13,7 +13,8 @@
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
 import { Link } from "@stackra/navigation/react";
-import { Button, Component, Description } from "@stackra/ui";
+import { Button, Description } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { Resources } from "#stackra/resources";
 import { AttachImages } from "#src/components/attach-images";

@@ -11,7 +11,8 @@
  *                     amended by programming model v3.1, AGENTS.md: class components)
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Component, Skeleton, Spinner } from "@stackra/ui";
+import { Component } from "#stackra/ui";
+import { Skeleton, Spinner } from "@stackra/ui/react";
 import type { LoadingStateProps } from "./loading-state.props";
 
 /** A busy region with a hidden label. */

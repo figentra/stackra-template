@@ -17,7 +17,7 @@
  * Governing contract: ADR 0294 (decisions 12, 14 and 16, as amended by programming model v3.1,
  *                     AGENTS.md: modules), ADR 0295 (decisions 7 and 10), ADR 0268 (R17), ADR 0263
  */
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 import { CatalogueModule, OrdersModule } from "#stackra/clients/commerce";
 import { ExperienceModule } from "#stackra/clients/experience";
 import { DevicesModule, IdentityModule } from "#stackra/clients/identity";

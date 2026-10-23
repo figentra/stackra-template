@@ -7,7 +7,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0231 (snake_case codes)
  */
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /** A required field of the adjust input, so every count change says why. */
 export const StockAdjustReason = Enum.of({

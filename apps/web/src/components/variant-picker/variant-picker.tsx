@@ -7,7 +7,8 @@
  *                     components), WCAG 2.2 AA (each select labelled with the axis name)
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Component, Select } from "@stackra/ui";
+import { Component } from "#stackra/ui";
+import { Select } from "@stackra/ui/react";
 import { I18n } from "#stackra/i18n";
 import type { VariantPickerProps } from "./variant-picker.props";
 

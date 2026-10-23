@@ -9,7 +9,7 @@
  */
 import { useTranslation } from "@stackra/i18n/react";
 import { Link, useMenu } from "@stackra/navigation/react";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { FooterMenu } from "#src/menus/footer.menu";
 import type { SiteFooterProps } from "./site-footer.props";

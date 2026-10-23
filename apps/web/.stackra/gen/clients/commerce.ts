@@ -14,7 +14,8 @@
  */
 import { ClientQuery, ClientRefusal } from "@stackra/clients";
 import { HttpMethod } from "@stackra/contracts";
-import { currencyCode, publicId } from "@stackra/validation/runtime";
+import { currencyCode } from "@stackra/money";
+import { publicId } from "@stackra/validation";
 import { z } from "zod";
 import { I18n } from "#stackra/i18n";
 

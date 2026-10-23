@@ -9,7 +9,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 16 and 26), ADR 0110, ADR 0112
  */
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /** The verb of a call to action; the renderer maps navigate to the router and action to a call. */
 export const CtaVerb = Enum.of({

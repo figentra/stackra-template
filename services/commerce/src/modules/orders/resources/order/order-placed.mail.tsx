@@ -12,8 +12,8 @@
  *                     v3.1, AGENTS.md), ADR 0223, ADR 0234 (module assets by key)
  */
 import { Button, Html, Img, Text } from "@react-email/components";
-import { type MailProps, useMail } from "@stackra/notifications/mail";
-import { Component } from "@stackra/ui";
+import { type MailProps, useMail } from "@stackra/notifications/react";
+import { Component } from "#stackra/ui";
 import { Assets } from "#stackra/assets";
 import { I18n } from "#stackra/i18n";
 import type { OrderPlacedNotification } from "#modules/orders/resources/order/order-placed.notification";

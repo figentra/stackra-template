@@ -11,7 +11,7 @@
 import { useConfig } from "@stackra/config/react";
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { FaqSection } from "#src/blocks/faq-section/faq-section";
 import { PricingTable } from "#src/blocks/pricing-table/pricing-table";
