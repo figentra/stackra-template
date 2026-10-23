@@ -251,9 +251,9 @@ export const wiring = {
       port: PushTransport,
       selectedBy: "config:platform.push.provider",
       candidates: {
-        expo: () => import("@stackra/platform/expo").then((m) => m.ExpoPushTransportDriver),
+        expo: () => import("@stackra/platform/native").then((m) => m.ExpoPushTransportDriver),
         self_hosted: () =>
-          import("@stackra/platform/expo").then((m) => m.SelfHostedPushTransportDriver),
+          import("@stackra/platform/native").then((m) => m.SelfHostedPushTransportDriver),
       },
     },
     {

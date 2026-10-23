@@ -13,7 +13,7 @@
  *                     test), ADR 0269
  */
 import { Seeder } from "@stackra/database";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 import { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 import { LedgerEntryFactory } from "#node/database/factories/ledger-entry.factory";
 import { LoyaltyAccountFactory } from "#node/database/factories/loyalty-account.factory";

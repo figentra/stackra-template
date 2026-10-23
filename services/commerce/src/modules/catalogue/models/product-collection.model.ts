@@ -12,8 +12,15 @@
  * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27, as amended by programming model
  *                     v3.1, AGENTS.md), ADR 0133 (traits)
  */
-import { Index, Model, type Translated } from "@stackra/model";
-import { BelongsToTenant, HasPublicId, Timestamps, Translatable } from "@stackra/model/traits";
+import {
+  BelongsToTenant,
+  HasPublicId,
+  Index,
+  Model,
+  Timestamps,
+  Translatable,
+  type Translated,
+} from "@stackra/model";
 import { Str } from "@stackra/validation";
 
 /** The slug is unique per tenant (`idx_product_collections_tenant_id_slug`): the filter key. */

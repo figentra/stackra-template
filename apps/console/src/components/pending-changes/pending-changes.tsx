@@ -13,7 +13,8 @@ import { Sheet } from "@heroui-pro/react";
 import { Tone } from "@stackra/contracts";
 import { useLocale, useTranslation } from "@stackra/i18n/react";
 import { useMutationQueue } from "@stackra/query/react";
-import { Badge, Button, Component, Icon } from "@stackra/ui";
+import { Badge, Button, Icon } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { PendingChangesList } from "#src/components/pending-changes-list";
 

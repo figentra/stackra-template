@@ -10,7 +10,7 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 12, 13, 16, 20 and 24), ADR 0263 (gen writes the wiring)
  */
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 import { OrderService } from "#modules/orders/services/order.service";
 
 /** Only OrderService is shared with sibling modules. */

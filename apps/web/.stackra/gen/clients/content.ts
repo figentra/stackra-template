@@ -10,8 +10,7 @@
  */
 import { ClientQuery } from "@stackra/clients";
 import { ContentEntryType } from "@stackra/content";
-import { HttpMethod } from "@stackra/contracts";
-import { Enum } from "@stackra/validation";
+import { Enum, HttpMethod } from "@stackra/contracts";
 import { z } from "zod";
 
 /** `content.Entry$`: one content entry; fields are the content type's plain strings. */

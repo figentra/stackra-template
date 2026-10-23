@@ -11,7 +11,8 @@
  */
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation/native";
-import { Avatar, Card, Chip, Component, ListGroup, Separator, useToast } from "@stackra/ui/native";
+import { Avatar, Card, Chip, ListGroup, Separator, useToast } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { Fragment } from "react";
 import { View } from "react-native";
 import { Screen } from "#src/components/screen";

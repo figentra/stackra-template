@@ -9,7 +9,7 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 16 and 17), ADR 0263
  */
-import { Service } from "@stackra/app";
+import { Service } from "@stackra/container";
 import type { Named } from "@stackra/container";
 import type { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
 import type { MemberId } from "#contracts/types/member-id.type";

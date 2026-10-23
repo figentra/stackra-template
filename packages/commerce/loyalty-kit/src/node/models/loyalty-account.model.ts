@@ -19,14 +19,18 @@
  *                     (BelongsToTenant)
  */
 import { DataClassification } from "@stackra/contracts";
-import { Collection, Index, Model, OneToMany, Searchable } from "@stackra/model";
 import {
   BelongsToTenant,
+  Collection,
   HasPublicId,
+  Index,
+  Model,
+  OneToMany,
+  Searchable,
   SoftDeletes,
   Timestamps,
   Versioned,
-} from "@stackra/model/traits";
+} from "@stackra/model";
 import { Classified, Str } from "@stackra/validation";
 import { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 import { LedgerEntry } from "#node/models/ledger-entry.model";

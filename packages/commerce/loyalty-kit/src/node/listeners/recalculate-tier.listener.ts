@@ -11,7 +11,7 @@
  */
 import { Listener, type ListenerContext } from "@stackra/events";
 import type { SettingsReader } from "@stackra/settings";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 import { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 import type { PointsEarned } from "#node/events/points-earned.event";
 import { LoyaltyKitSettings } from "#node/loyalty-kit.settings";

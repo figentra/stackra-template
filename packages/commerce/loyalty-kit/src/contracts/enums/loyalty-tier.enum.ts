@@ -10,8 +10,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 15, 16 and 20), ADR 0231 (snake_case codes)
  */
-import { Tone } from "@stackra/contracts";
-import { Enum } from "@stackra/validation";
+import { Enum, Tone } from "@stackra/contracts";
 
 /**
  * One case per tier, in rank order; cases are plain codes, so they compare with `===`.
@@ -22,7 +21,7 @@ import { Enum } from "@stackra/validation";
  */
 export const LoyaltyTier = Enum.of({
   Bronze: ["bronze", { tone: Tone.Default, multiplier: 100 }],
-  Silver: ["silver", { tone: Tone.Info, multiplier: 150 }],
+  Silver: ["silver", { tone: Tone.Accent, multiplier: 150 }],
   Gold: ["gold", { tone: Tone.Warning, multiplier: 200 }],
 });
 

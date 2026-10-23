@@ -34,7 +34,7 @@ import { useConfig } from "@stackra/config/react";
 import { CspConfig } from "@stackra/csp";
 import { useNonce } from "@stackra/csp/react";
 import { I18nConfig } from "@stackra/i18n";
-import { RootErrorBoundary, routeContext } from "@stackra/navigation/router";
+import { RootErrorBoundary, routeContext } from "@stackra/navigation/react";
 import { ColorScheme, ThemingConfig } from "@stackra/theming";
 import type { Route } from "./+types/root";
 import appStyles from "#src/styles/app.css?url";

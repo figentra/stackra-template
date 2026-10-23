@@ -8,7 +8,7 @@
  * Governing contract: ADR 0294 (decision 14, as amended by programming model v3.1, AGENTS.md: class
  *                     components), ADR 0061, ADR 0080
  */
-import { Component } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { RefreshControl, ScrollView } from "react-native";
 import type { ScreenProps } from "#src/components/screen/screen.props";
 

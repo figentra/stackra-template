@@ -15,7 +15,8 @@
 import { useConfig } from "@stackra/config/react";
 import { useConsent } from "@stackra/consent/react";
 import { useTranslation } from "@stackra/i18n/react";
-import { Component, ListGroup, Separator, Switch } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
+import { ListGroup, Separator, Switch } from "@stackra/ui/native";
 import { Fragment } from "react";
 import { ConsentConfig } from "#src/config/consent.config";
 import { I18n } from "#stackra/i18n";

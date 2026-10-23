@@ -8,7 +8,7 @@
  *           the tests import it as `#stackra/module`.
  * Runtime: node
  */
-import { Module } from "@stackra/app";
+import { Module } from "@stackra/container";
 
 /** The deployable of delivery, notification preferences, the message log and the in-app inbox. */
 export class NotificationsModule extends Module {}

@@ -9,7 +9,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0231 (snake_case codes), ADR 0192
  */
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /** The kinds of inbox entry this service writes. */
 export const InboxMessageKind = Enum.of({

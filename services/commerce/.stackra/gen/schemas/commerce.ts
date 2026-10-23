@@ -14,15 +14,9 @@ import { AccessLogConfig$ as BaseAccessLogConfig$ } from "@acme/access-log";
 import { LoyaltyKitConfig$ as BaseLoyaltyKitConfig$ } from "@acme/loyalty-kit";
 import { RateLimitConfig$ as BaseRateLimitConfig$ } from "@stackra/actions";
 import { LoggingConfig$ as BaseLoggingConfig$ } from "@stackra/logger";
+import { currencyCode } from "@stackra/money";
 import { RealtimeConfig$ as BaseRealtimeConfig$ } from "@stackra/realtime";
-import {
-  type Assert,
-  currencyCode,
-  duration,
-  type Fields,
-  type Same,
-  url,
-} from "@stackra/validation/runtime";
+import { type Assert, duration, type Fields, type Same, url } from "@stackra/validation";
 import type { AccessLogConfig } from "#config/access-log.config";
 import type { LoggingConfig } from "#config/logging.config";
 import type { LoyaltyKitConfig } from "#config/loyalty-kit.config";

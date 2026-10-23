@@ -8,7 +8,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 15, 16 and 20), ADR 0231 (snake_case codes)
  */
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /** Exactly one case per debit call; `duplicate` and `uncovered` change nothing. */
 export const DebitOutcome = Enum.of({

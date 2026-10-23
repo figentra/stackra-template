@@ -12,7 +12,7 @@
  * Governing contract: ADR 0294 (decisions 15 and 16), ADR 0260 decision 9 (a package needing host
  *                     data defines a port), ADR 0263
  */
-import { Port } from "@stackra/container";
+import { Port } from "@stackra/contracts";
 import type { MemberId } from "#contracts/types/member-id.type";
 
 /** Answers membership questions the kit cannot answer itself. */

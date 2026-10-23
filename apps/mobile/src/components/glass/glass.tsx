@@ -8,7 +8,7 @@
  * Governing contract: ADR 0294 (decision 14, as amended by programming model v3.1, AGENTS.md: class
  *                     components), ADR 0061
  */
-import { Component } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { View } from "react-native";
 import type { GlassProps } from "#src/components/glass/glass.props";

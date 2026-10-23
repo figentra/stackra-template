@@ -11,7 +11,7 @@
  * Governing contract: ADR 0294 (decisions 15, 16 and 17), ADR 0263 (ports resolve by type),
  *                     ADR 0260 decision 9
  */
-import { Port } from "@stackra/container";
+import { Port } from "@stackra/contracts";
 import type { DebitOutcome } from "#contracts/enums/debit-outcome.enum";
 import type { MemberId } from "#contracts/types/member-id.type";
 import type { PointsEntry } from "#contracts/types/points-entry.type";

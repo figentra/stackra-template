@@ -15,9 +15,7 @@
  * Governing contract: ADR 0294 (decisions 12 and 20, as amended by programming model
  *                     v3.1, AGENTS.md), ADR 0295 (decisions 1, 4 and 7), ADR 0159, ADR 0190
  */
-import { defineService } from "@stackra/app";
-import { MigrationRunner } from "@stackra/config";
-import { ApiArea } from "@stackra/contracts";
+import { ApiArea, defineService, MigrationRunner } from "@stackra/contracts";
 
 /** Read by `stackra gen`, `stackra dev` and `stackra validate`. */
 export default defineService({

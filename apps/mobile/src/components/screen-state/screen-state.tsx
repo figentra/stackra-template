@@ -11,7 +11,8 @@
  *                     components), ADR 0140, ADR 0080
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Alert, Button, Component, Skeleton } from "@stackra/ui/native";
+import { Alert, Button, Skeleton } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { Text, View } from "react-native";
 import type { ScreenStateProps } from "#src/components/screen-state/screen-state.props";
 import { I18n } from "#stackra/i18n";

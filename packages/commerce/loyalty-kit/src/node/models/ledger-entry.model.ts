@@ -10,8 +10,15 @@
  * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0159, ADR 0239 (tenant column and
  *                     row-level security)
  */
-import { Index, ManyToOne, Model, type Ref } from "@stackra/model";
-import { AppendOnly, BelongsToTenant, HasPublicId } from "@stackra/model/traits";
+import {
+  AppendOnly,
+  BelongsToTenant,
+  HasPublicId,
+  Index,
+  ManyToOne,
+  Model,
+  type Ref,
+} from "@stackra/model";
 import { Int, Str } from "@stackra/validation";
 import type { EntryKind } from "#contracts/enums/entry-kind.enum";
 import { MAX_POINTS_PER_ENTRY } from "#core/constants/max-points-per-entry.constant";

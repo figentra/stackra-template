@@ -11,8 +11,7 @@
  * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0149 (locking)
  */
 import type { PublicId } from "@stackra/contracts";
-import { Index, Model } from "@stackra/model";
-import { BelongsToTenant, HasPublicId, Timestamps, Versioned } from "@stackra/model/traits";
+import { BelongsToTenant, HasPublicId, Index, Model, Timestamps, Versioned } from "@stackra/model";
 import { Int, Str } from "@stackra/validation";
 
 /** One row per tenant, variant and location, enforced by a unique index. */

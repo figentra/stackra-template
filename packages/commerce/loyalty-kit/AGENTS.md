@@ -16,9 +16,9 @@ Governing contract: root AGENTS.md
 - One exported declaration per file: action and query inputs and outputs are
   `src/node/schemas/<name>-input.schema.ts` and `-output.schema.ts`; component Props are
   `<name>.props.ts` beside the component.
-- Renderers are class components (`Component` from `@stackra/ui` in `react/`, from
-  `@stackra/ui/native` in `native/`); a widget with a web renderer that members see on the phone
-  gets a native one with the same Props fields.
+- Renderers are class components (`Component` from `#stackra/ui`; every other component from
+  `@stackra/ui/react` in `react/` and from `@stackra/ui/native` in `native/`); a widget with a web
+  renderer that members see on the phone gets a native one with the same Props fields.
 - Migrations are frozen snapshots: import only `@stackra/database` and `#stackra/migrations`, write
   literals and partner macros, never a `down()`.
 - Never import an app or a service; a package depends only on packages.

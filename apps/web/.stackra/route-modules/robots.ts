@@ -5,13 +5,12 @@
  *          and the sitemap index link, on a live site; disallow everything on a preview host or a
  *          sandbox tenant.
  * Boundary: the groups are the config's, read from the container per request; a rule written for
- *           one crawler never applies to another (`@stackra/seo/robots`). The site is the site
+ *           one crawler never applies to another (`@stackra/seo`). The site is the site
  *           layout's loader, run once for the request. A resource route with no UI and no cookie.
  * Runtime: worker
  */
-import { routeContext } from "@stackra/navigation/router";
-import { SeoConfig } from "@stackra/seo";
-import { robotsTxt } from "@stackra/seo/robots";
+import { routeContext } from "@stackra/navigation/react";
+import { robotsTxt, SeoConfig } from "@stackra/seo";
 import type { Route } from "./+types/robots";
 import { SiteLayout } from "#src/routes/site/site.layout";
 import { routeKeys } from "../context";

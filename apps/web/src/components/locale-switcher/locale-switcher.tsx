@@ -16,7 +16,7 @@ import { useConfig } from "@stackra/config/react";
 import { I18nConfig } from "@stackra/i18n";
 import { useLocale, useLocaleChoice, useTranslation } from "@stackra/i18n/react";
 import { useLocaleHref, useNavigate } from "@stackra/navigation/react";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import type { LocaleSwitcherProps } from "./locale-switcher.props";
 

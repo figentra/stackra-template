@@ -20,7 +20,8 @@ import { isExpiringSoon } from "@acme/loyalty-kit";
 import type { PointsBalanceProps } from "@acme/loyalty-kit/react";
 import { KPI } from "@heroui-pro/react/kpi";
 import { useDateTime, useNumber, useTranslation } from "@stackra/i18n/react";
-import { Chip, Component, Description } from "@stackra/ui";
+import { Chip, Description } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 
 /** The balance as a KPI with the tier chip and the next expiry date. */

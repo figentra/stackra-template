@@ -28,7 +28,7 @@ import {
   toRoot,
   toRoute,
   toSettingsPage,
-} from "@stackra/navigation/router";
+} from "@stackra/navigation/react";
 import { Resources } from "#stackra/resources";
 import { SettingsPages } from "#stackra/settings";
 import { prefixes } from "#stackra/i18n";

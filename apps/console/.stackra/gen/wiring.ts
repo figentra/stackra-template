@@ -154,27 +154,27 @@ export const wiring = {
     {
       port: Storage,
       candidates: {
-        desktop: () => import("@stackra/storage/desktop").then((m) => m.DesktopStorageDriver),
+        desktop: () => import("@stackra/storage/electron").then((m) => m.DesktopStorageDriver),
       },
     },
     {
       port: Platform,
       candidates: {
         electron: () =>
-          import("@stackra/platform/electron/renderer").then((m) => m.ElectronPlatformDriver),
+          import("@stackra/platform/electron").then((m) => m.ElectronPlatformDriver),
       },
     },
     {
       port: SessionStore,
       candidates: {
-        pkce: () => import("@stackra/identity/desktop").then((m) => m.PkceSessionStoreDriver),
+        pkce: () => import("@stackra/identity/electron").then((m) => m.PkceSessionStoreDriver),
       },
     },
     {
       port: QueryPersister,
       candidates: {
         // the key comes from Electron safeStorage through the platform port on desktop
-        indexed_db: () => import("@stackra/query/web").then((m) => m.IndexedDbQueryPersisterDriver),
+        indexed_db: () => import("@stackra/query/browser").then((m) => m.IndexedDbQueryPersisterDriver),
       },
     },
     {
@@ -182,7 +182,7 @@ export const wiring = {
       selectedBy: "config:query.queueLeader",
       candidates: {
         broadcast_channel: () =>
-          import("@stackra/coordinator/web").then((m) => m.BroadcastChannelQueueLeaderDriver),
+          import("@stackra/coordinator/browser").then((m) => m.BroadcastChannelQueueLeaderDriver),
         memory: () => import("@stackra/coordinator").then((m) => m.MemoryQueueLeaderDriver),
       },
     },
@@ -192,14 +192,14 @@ export const wiring = {
       candidates: {
         config: () => import("@stackra/feature-flags").then((m) => m.ConfigFlagProviderDriver),
         posthog: () =>
-          import("@stackra/feature-flags/posthog").then((m) => m.PosthogFlagProviderDriver),
+          import("@stackra/feature-flags").then((m) => m.PosthogFlagProviderDriver),
       },
     },
     {
       port: AnalyticsDriver,
       selectedBy: "config:analytics.driver",
       candidates: {
-        posthog: () => import("@stackra/analytics/posthog").then((m) => m.PosthogAnalyticsDriver),
+        posthog: () => import("@stackra/analytics").then((m) => m.PosthogAnalyticsDriver),
         none: () => import("@stackra/analytics").then((m) => m.NoneAnalyticsDriver),
         memory: () => import("@stackra/analytics").then((m) => m.MemoryAnalyticsDriver),
       },
@@ -214,14 +214,14 @@ export const wiring = {
       // started by the telemetry override; an empty `EnvConfig.telemetryDsn` reports nothing
       port: ErrorReporter,
       candidates: {
-        sentry: () => import("@stackra/errors/web").then((m) => m.SentryErrorReporterDriver),
+        sentry: () => import("@stackra/errors/browser").then((m) => m.SentryErrorReporterDriver),
       },
     },
     {
       port: RealtimeTransport,
       candidates: {
         websocket: () =>
-          import("@stackra/realtime/web").then((m) => m.WebsocketRealtimeTransportDriver),
+          import("@stackra/realtime/browser").then((m) => m.WebsocketRealtimeTransportDriver),
       },
     },
   ],

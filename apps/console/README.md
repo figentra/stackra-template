@@ -4,7 +4,7 @@ The web, PWA and desktop console of a Stackra project, from one source tree (ADR
 with identity is a kind class whose base names its kind and whose path names its group (ADR 0294):
 panels, routes and layouts, menus, shortcuts, stores, blocks, documents and config. Components,
 route pages, layouts and block renderers are class components (`extends Component<Props>` from
-`@stackra/ui`): fields are state, a field that calls a `use*` hook is that hook's result, methods
+`#stackra/ui`): fields are state, a field that calls a `use*` hook is that hook's result, methods
 are plain functions, getters are derived values, `mount()` and `unmount()` are the lifecycle and
 `render()` is the body. `stackra gen` compiles each one to a React function component, so React, the
 React Compiler, Fast Refresh and the hooks lint only ever see functions. Resources, widgets,

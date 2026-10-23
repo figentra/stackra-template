@@ -12,7 +12,7 @@
  *                     model v3.1, AGENTS.md: class components and lifecycle)
  */
 import { useRef } from "react";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import type { ImagePreviewsProps } from "./image-previews.props";
 
 /** The preview tiles of one image set. */

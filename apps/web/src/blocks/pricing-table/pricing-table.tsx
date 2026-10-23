@@ -14,8 +14,9 @@
 import type { Key } from "react";
 import { useMoney, useTranslation } from "@stackra/i18n/react";
 import { Link } from "@stackra/navigation/react";
-import { Button, Card, Chip, Component, ToggleButton, ToggleButtonGroup } from "@stackra/ui";
-import { Enum } from "@stackra/validation";
+import { Button, Card, Chip, ToggleButton, ToggleButtonGroup } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
+import { Enum } from "@stackra/contracts";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 import { BillingInterval } from "#src/enums/billing-interval.enum";

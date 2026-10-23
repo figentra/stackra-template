@@ -16,7 +16,7 @@
  */
 import { ACME_THEME } from "@acme/theme";
 import { ColorScheme, ThemingConfig as BaseThemingConfig } from "@stackra/theming";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 import { Assets } from "#stackra/assets";
 
 /** Look of the site: theme, logo source, schemes, theme colours and the tenant override switch. */

@@ -9,17 +9,16 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 15, 16 and 20), ADR 0231 (snake_case codes)
  */
-import { Tone } from "@stackra/contracts";
-import { Enum } from "@stackra/validation";
+import { Enum, Tone } from "@stackra/contracts";
 
 /** One case per kind; cases are plain codes, so they compare with `===`. */
 export const EntryKind = Enum.of({
   Earn: ["earn", { tone: Tone.Success }],
   Redeem: ["redeem", { tone: Tone.Default }],
   Expire: ["expire", { tone: Tone.Warning }],
-  Adjust: ["adjust", { tone: Tone.Info }],
+  Adjust: ["adjust", { tone: Tone.Accent }],
   Hold: ["hold", { tone: Tone.Warning }],
-  Release: ["release", { tone: Tone.Info }],
+  Release: ["release", { tone: Tone.Accent }],
 });
 
 /** One of the codes above. */

@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
  * Purpose: proves the module binds the ledger named by config, lets a test put its own ledger in
- *          the port's place, and refuses to compile without a LoyaltyMembers driver.
+ *          the port's place, and fails to compile without a LoyaltyMembers driver.
  * Boundary: unit tier; nothing but the container; the same checks gen runs at build time. A
  *           replacement is `.override(Port, instance)`, never a provider list.
  * Runtime: node
@@ -13,7 +13,6 @@ import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 import { LoyaltyMembersFake } from "@acme/loyalty-kit/testing";
 import { UnresolvedPortError } from "@stackra/container";
 import { createTestingModule } from "@stackra/container/testing";
-import { refusal } from "@stackra/errors/testing";
 import { describe, expect, it } from "@stackra/testing";
 
 /** A ledger of the kind a host writes for a test: one class extending the port. */
@@ -68,11 +67,12 @@ describe(LoyaltyKitModule, () => {
   });
 
   /**
-   * The port the kit does not implement must be a boot-time failure, never a runtime `undefined`.
+   * The port the kit does not implement must be a boot-time failure, never a runtime `undefined`;
+   * `UnresolvedPortError` is a plain `Error` (a missing binding is a bug, not a refusal).
    */
-  it("refuses to compile without a LoyaltyMembers driver", async () => {
+  it("fails to compile without a LoyaltyMembers driver", async () => {
     await expect(
       createTestingModule(LoyaltyKitModule).useDrivers("memory").compile(),
-    ).rejects.toRefuseWith(refusal(UnresolvedPortError));
+    ).rejects.toThrow(UnresolvedPortError);
   });
 });

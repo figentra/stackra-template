@@ -104,11 +104,11 @@
   },
   "dependencies": {
     "@stackra/actions": "catalog:stackra",
-    "@stackra/app": "catalog:stackra",
     "@stackra/config": "catalog:stackra",
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
     "@stackra/database": "catalog:stackra",
+    "@stackra/errors": "catalog:stackra",
     "@stackra/i18n": "catalog:stackra",
     "@stackra/iam": "catalog:stackra",
     "@stackra/model": "catalog:stackra",
@@ -134,8 +134,7 @@
     "vitest": "catalog:quality"
   },
   "peerDependencies": {
-    "@stackra/testing": "catalog:stackra",
-    "@stackra/ui": "catalog:stackra"
+    "@stackra/testing": "catalog:stackra"
   },
   "peerDependenciesMeta": {
     "@stackra/testing": {

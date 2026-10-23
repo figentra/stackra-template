@@ -19,8 +19,7 @@
  * Governing contract: ADR 0295 (decisions 1 to 6), ADR 0294 (decisions 12 and 20), ADR 0180,
  *                     ADR 0182
  */
-import { defineApp } from "@stackra/app";
-import { ApiArea, Target } from "@stackra/contracts";
+import { ApiArea, defineApp, Target } from "@stackra/contracts";
 import { EnvConfig } from "./src/config/env.config";
 
 /** Read by `stackra gen`, `stackra dev`, `stackra build` and `stackra test`. */

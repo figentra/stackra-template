@@ -26,12 +26,12 @@ import {
   remoteShape,
   widgetRef,
 } from "@stackra/clients";
-import { HttpMethod, Tone } from "@stackra/contracts";
+import { Enum, HttpMethod, Tone } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
 import { Upload } from "@stackra/media";
 import { CountMetric, MoneyMetric, TimeRange, WidgetDisplay, WidgetSize } from "@stackra/panel";
-import { Enum } from "@stackra/validation";
-import { currencyCode, publicId } from "@stackra/validation/runtime";
+import { currencyCode } from "@stackra/money";
+import { publicId } from "@stackra/validation";
 import { z } from "zod";
 import { I18n } from "#stackra/i18n";
 

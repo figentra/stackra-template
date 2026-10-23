@@ -14,9 +14,10 @@ Governing contract: root AGENTS.md
   (`#stackra/clients/<service>`, imported by name), and the session, tenant, query and realtime
   contexts are the packages', mounted from their config classes. The console writes no root module
   (it would say nothing gen cannot derive) and no error boundary (`@stackra/navigation` owns it).
-- Components, pages, layouts and block renderers are class components from `@stackra/ui`, compiled
-  to function components by gen; never `Component` from `react`. One exported declaration per file:
-  Props in `<name>.props.ts`, hook results in `src/types/`. Icons are `IconName` strings.
+- Components, pages, layouts and block renderers are class components (`Component` from
+  `#stackra/ui`, every other component from `@stackra/ui/react`), compiled to function components by
+  gen; never `Component` from `react`. One exported declaration per file: Props in
+  `<name>.props.ts`, hook results in `src/types/`. Icons are `IconName` strings.
 - Code the console does not own is shadowed only under `src/overrides/<owner>/` at the owner's path;
   a config override stays in `src/config/` as `extends BaseX` (telemetry included: it overrides
   `@stackra/logger`'s config, and `EnvConfig` is the only config class the console defines).

@@ -14,7 +14,8 @@
  */
 import { Sheet } from "@heroui-pro/react";
 import { useDateTime, useLocale, useTranslation } from "@stackra/i18n/react";
-import { Badge, Button, Component, Description, Icon, toast } from "@stackra/ui";
+import { Badge, Button, Description, Icon, toast } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { EmptyView } from "#src/components/empty-view";
 import { ErrorState } from "#src/components/error-state";

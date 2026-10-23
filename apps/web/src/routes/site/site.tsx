@@ -22,7 +22,7 @@ import { useTranslation } from "@stackra/i18n/react";
 import { Outlet } from "@stackra/navigation/react";
 import { ThemingConfig } from "@stackra/theming";
 import { defineTheme, InvalidThemeError, renderWebCss } from "@stackra/tokens";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { ConsentBanner } from "#src/components/consent-banner";
 import { LocaleSuggestion } from "#src/components/locale-suggestion";

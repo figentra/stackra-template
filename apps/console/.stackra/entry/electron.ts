@@ -17,7 +17,7 @@
  */
 import { app as electron, protocol } from "electron";
 import { createApp } from "@stackra/app/electron";
-import { devPorts, updateFeed } from "@stackra/runway/ports";
+import { devPorts, updateFeed } from "@stackra/runway";
 import { mainWiring } from "../desktop/wiring";
 
 /** Boots main once; a second instance quits and stops here, so it never races the first. */

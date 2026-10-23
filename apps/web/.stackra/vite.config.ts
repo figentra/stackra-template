@@ -5,7 +5,7 @@
  * Purpose: the Vite config of the web target rendered on the Worker (`RenderMode.Server`), with
  *          `entry/worker.ts` as the Worker entry. `@stackra/vite-plugin` bundles the Cloudflare
  *          Workers runtime for the `ssr` environment, Tailwind v4, React Router framework mode, the
- *          `#stackra/*` virtual modules with HMR, `classComponents()` from `@stackra/gen/vite` (it
+ *          `#stackra/*` virtual modules with HMR, `classComponents()` from `@stackra/gen/node` (it
  *          compiles every `extends Component` class to a function component before the React
  *          Compiler runs, with source maps back to the class), the `.server.ts` browser-import
  *          refusal, hidden sourcemaps uploaded to Sentry, the `safari17` client target and the
@@ -17,9 +17,9 @@
  * Runtime: node
  */
 import { defineConfig } from "vite";
-import { classComponents } from "@stackra/gen/vite";
+import { classComponents } from "@stackra/gen/node";
 import { stackra } from "@stackra/vite-plugin";
-import { definesFor, devServer } from "@stackra/runway/vite";
+import { definesFor, devServer } from "@stackra/runway/node";
 import app from "../stackra.config";
 
 export default defineConfig((env) =>

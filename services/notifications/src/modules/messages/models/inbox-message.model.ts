@@ -11,8 +11,7 @@
  * Governing contract: ADR 0294 (decisions 4, 11, 20, 26 and 27), ADR 0239, ADR 0223
  */
 import type { PublicId } from "@stackra/contracts";
-import { Index, Model } from "@stackra/model";
-import { BelongsToTenant, HasPublicId, Timestamps } from "@stackra/model/traits";
+import { BelongsToTenant, HasPublicId, Index, Model, Timestamps } from "@stackra/model";
 import { Field } from "@stackra/validation";
 import { z } from "zod";
 import type { InboxMessageKind } from "#modules/messages/enums/inbox-message-kind.enum";

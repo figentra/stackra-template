@@ -11,7 +11,8 @@
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
 import { Link } from "@stackra/navigation/react";
-import { Button, Component } from "@stackra/ui";
+import { Button } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 import { EmptyView } from "#src/components/empty-view";

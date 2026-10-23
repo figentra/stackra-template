@@ -2,15 +2,15 @@
 
 Shared presentational components, one flat folder each (ADR 0294 decision 14):
 `<name>/{<name>.tsx, <name>.props.ts?, use-<name>.ts?, index.ts, __tests__/}`, where `index.ts`
-exports the component and its Props only. A component is a class, `extends Component<Props>` from
-`@stackra/ui`: fields are state, a field that calls a hook is a hook field, methods are handlers,
-getters derived values, `mount()` and `unmount()` the lifecycle, `render()` the body; gen compiles
-it to a function component. A side effect (an object URL, a subscription) starts in `mount()` and
-ends in `unmount()`, never in a field initializer. A hook stays a function and its result type lives
-in `src/types/`. A page is not here: it is `<name>.tsx` in its route folder. Every string is a typed
-`I18n` key; every UI primitive comes from `@stackra/ui` (HeroUI Pro pieces from
-`@heroui-pro/react`), never the kit underneath; every colour is a semantic class fed by the `acme`
-theme; layout uses logical classes (`ps-`, `pe-`, `ms-`), never left and right.
+exports the component and its Props only. A component is a class, `extends Component<Props>` with
+`Component` from `#stackra/ui`: fields are state, a field that calls a hook is a hook field, methods
+are handlers, getters derived values, `mount()` and `unmount()` the lifecycle, `render()` the body;
+gen compiles it to a function component. A side effect (an object URL, a subscription) starts in
+`mount()` and ends in `unmount()`, never in a field initializer. A hook stays a function and its
+result type lives in `src/types/`. A page is not here: it is `<name>.tsx` in its route folder. Every
+string is a typed `I18n` key; every other UI primitive comes from `@stackra/ui/react` (HeroUI Pro
+pieces from `@heroui-pro/react`), never the kit underneath; every colour is a semantic class fed by
+the `acme` theme; layout uses logical classes (`ps-`, `pe-`, `ms-`), never left and right.
 
 | Folder                  | Renders                                                                                              |
 | ----------------------- | ---------------------------------------------------------------------------------------------------- |

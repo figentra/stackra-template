@@ -10,7 +10,8 @@
  *                     components), ADR 0059, ADR 0252
  */
 import { useTranslation } from "@stackra/i18n/react";
-import { Alert, Button, Component } from "@stackra/ui/native";
+import { Alert, Button } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { useOfflineBanner } from "#src/components/offline-banner/use-offline-banner";
 import { I18n } from "#stackra/i18n";
 

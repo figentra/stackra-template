@@ -13,7 +13,7 @@
  */
 import { useAction } from "@stackra/clients/react";
 import type { PublicId } from "@stackra/contracts";
-import { useSchemaForm } from "@stackra/ui/native/form";
+import { useSchemaForm } from "@stackra/ui/native";
 import { CreateOrderForm } from "#src/schemas/create-order-form.schema";
 import type { CreateOrderState } from "#src/types/create-order-state.type";
 import {

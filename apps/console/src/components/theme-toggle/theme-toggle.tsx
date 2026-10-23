@@ -13,7 +13,8 @@ import { useTranslation } from "@stackra/i18n/react";
 import { useShortcut } from "@stackra/shortcuts/react";
 import { ColorScheme } from "@stackra/theming";
 import { useColorScheme } from "@stackra/theming/react";
-import { Button, Component, Icon, Tooltip } from "@stackra/ui";
+import { Button, Icon, Tooltip } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { CycleThemeShortcut } from "#src/shortcuts/cycle-theme.shortcut";
 

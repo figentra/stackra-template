@@ -12,13 +12,7 @@
  * Runtime: isomorphic
  */
 import { z } from "zod";
-import {
-  type Assert,
-  type Fields,
-  isoDateTime,
-  publicId,
-  type Same,
-} from "@stackra/validation/runtime";
+import { type Assert, type Fields, isoDateTime, publicId, type Same } from "@stackra/validation";
 import type { BalanceView } from "#core/schemas/balance-view.schema";
 import type { LoyaltyAccountView } from "#core/schemas/loyalty-account-view.schema";
 import type { LoyaltyKitOptions } from "#core/schemas/loyalty-kit-options.schema";

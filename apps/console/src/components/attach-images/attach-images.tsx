@@ -17,8 +17,8 @@
 import { useAction } from "@stackra/clients/react";
 import { useTranslation } from "@stackra/i18n/react";
 import { useUpload } from "@stackra/media/react";
-import { Button, Component, Description, toast } from "@stackra/ui";
-import { Field, Form, useSchemaForm } from "@stackra/ui/form";
+import { Button, Description, Field, Form, toast, useSchemaForm } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { AttachProductImageAction } from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
 import { ImagePreviews } from "#src/components/image-previews";

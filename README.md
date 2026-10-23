@@ -164,7 +164,7 @@ export class QuickOrderRoute extends Route({
 
 A **component** is a class too: fields are state, a field that calls a hook is a hook field, a
 getter is a derived value, `mount()` and `unmount()` are the lifecycle, and gen compiles the class
-to a React function component (`classComponents()` from `@stackra/gen/vite` in the generated Vite
+to a React function component (`classComponents()` from `@stackra/gen/node` in the generated Vite
 config, `@stackra/gen/metro-transformer` in the generated Metro config):
 
 ```tsx
@@ -337,17 +337,17 @@ The template follows the settled package map, not the earlier
 [Stackra ADR 0127](https://docs.stackra.figentra.com/adr/0127-package-categories-including-infrastructure)
 rows. `@stackra/notifications` (it was `@stackra/mail`) holds the notification kinds, the `Notifier`
 port and the mail-body helpers; the notifications service does delivery, the in-app inbox and
-preferences. `@stackra/shortcuts` was `@stackra/kbd`, and shape tooling (`Schema`, `Enum`, the field
-decorators) is `@stackra/validation`, so there is no `@stackra/schema`. There is no `@stackra/forms`
-(forms are `@stackra/ui/form`, `useSchemaForm`), no `@stackra/pwa` or `@stackra/network`
-(`@stackra/platform` owns the targets, the service worker runtime `./sw` and the `platform.network`
-capability; the build half is `@stackra/vite-plugin`), no `@stackra/router`
-(`@stackra/navigation/router`) and no `@stackra/templates` (a mail body is a `.mail.tsx` class
-component beside its notification). `@stackra/connections` is folded into `@stackra/integrations`,
-every event base (`AnalyticsEvent` included) comes from `@stackra/events`, icons are `IconName`
-strings from `@stackra/icons` rendered by `@stackra/ui`'s `Icon` (there is no `@stackra/ui/icons`),
-and the example brand package `@acme/brand` is replaced by the theme package `@acme/theme` in the
-`design-system` category
+preferences. `@stackra/shortcuts` was `@stackra/kbd`, and shape tooling (`Schema`, the field
+decorators) is `@stackra/validation` (`Enum` and `Port` are `@stackra/contracts`), so there is no
+`@stackra/schema`. There is no `@stackra/forms` (forms come from `@stackra/ui/react` and
+`@stackra/ui/native`, `useSchemaForm`), no `@stackra/pwa` or `@stackra/network` (`@stackra/platform`
+owns the targets, the service worker runtime `./sw` and the `platform.network` capability; the build
+half is `@stackra/vite-plugin`), no `@stackra/router` (`@stackra/navigation`) and no
+`@stackra/templates` (a mail body is a `.mail.tsx` class component beside its notification).
+`@stackra/connections` is folded into `@stackra/integrations`, every event base (`AnalyticsEvent`
+included) comes from `@stackra/events`, icons are `IconName` strings from `@stackra/icons` rendered
+by `@stackra/ui`'s `Icon` (there is no `@stackra/ui/icons`), and the example brand package
+`@acme/brand` is replaced by the theme package `@acme/theme` in the `design-system` category
 ([Stackra ADR 0302](https://docs.stackra.figentra.com/adr/0302-stackra-design-system-tokens-ui-and-the-playground)).
 
 ## Which file owns which fact

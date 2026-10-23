@@ -16,7 +16,7 @@
  *                     ADR 0301 (decisions 2, 3 and 7), ADR 0114
  */
 import { OgKind, SeoConfig as BaseSeoConfig } from "@stackra/seo";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /** How the site is found: title template, robots groups, sitemap paging and OG image kinds. */
 export class SeoConfig extends BaseSeoConfig {

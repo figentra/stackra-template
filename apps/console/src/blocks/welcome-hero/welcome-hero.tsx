@@ -15,7 +15,8 @@
 import type { BlockProps } from "@stackra/experience";
 import { useTranslation } from "@stackra/i18n/react";
 import { useNavigate } from "@stackra/navigation/react";
-import { Button, Card, Component } from "@stackra/ui";
+import { Button, Card } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { Routes } from "#stackra/routes";
 import type { WelcomeHeroBlock } from "#src/blocks/welcome-hero/welcome-hero.block";
 

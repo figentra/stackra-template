@@ -13,7 +13,7 @@
  */
 import { DocumentRenderer } from "@stackra/experience/native";
 import { type RouteProps, useNavigate, useRouteReload } from "@stackra/navigation/native";
-import { Component } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { Screen } from "#src/components/screen";
 import type { AnnouncementsRoute } from "#src/routes/announcements/announcements.route";
 import { type RouteKey, Routes } from "#stackra/routes";

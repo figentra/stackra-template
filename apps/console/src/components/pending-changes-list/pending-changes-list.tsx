@@ -12,7 +12,8 @@
  */
 import { Tone } from "@stackra/contracts";
 import { useDateTime, useTranslation } from "@stackra/i18n/react";
-import { AlertDialog, Button, Chip, Component, Description } from "@stackra/ui";
+import { AlertDialog, Button, Chip, Description } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { EmptyView } from "#src/components/empty-view";
 import { usePendingChanges } from "./use-pending-changes";

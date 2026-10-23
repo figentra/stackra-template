@@ -14,7 +14,7 @@
  *           the request's context, so React Router's client build keeps only `default` and `meta`.
  * Runtime: isomorphic
  */
-import { routeAdapter } from "@stackra/navigation/router";
+import { routeAdapter } from "@stackra/navigation/react";
 import type { Route } from "./+types/product";
 import { Product } from "#src/routes/product/product";
 import { ProductRoute } from "#src/routes/product/product.route";

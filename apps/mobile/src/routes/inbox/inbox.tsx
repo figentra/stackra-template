@@ -13,7 +13,8 @@
  */
 import { useDateTime, useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation/native";
-import { Card, Component } from "@stackra/ui/native";
+import { Card } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { FlatList, Text, View } from "react-native";
 import { ScreenState } from "#src/components/screen-state";
 import type { InboxRoute } from "#src/routes/inbox/inbox.route";

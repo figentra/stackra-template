@@ -10,7 +10,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 15, 16 and 17), ADR 0263
  */
-import { Port } from "@stackra/container";
+import { Port } from "@stackra/contracts";
 import type { AccessRecord } from "#contracts/types/access-record.type";
 
 /**

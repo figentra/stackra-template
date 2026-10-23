@@ -14,9 +14,10 @@ Governing contract: root AGENTS.md, ADR 0294, ADR 0295
   generated clients, imported by class name from `#stackra/clients/<service>`. A class states its
   kind in its base class, and its group folder is fixed (ADR 0294 decision 14); a page is the class
   component `<name>.tsx` beside its route class.
-- Components, pages and renderers are `extends Component<Props>` from `@stackra/ui/native` (never
-  `react`); Props in `<name>.props.ts`, a hook's result type in `src/types/<name>.type.ts`, one
-  exported declaration per file. No error boundary here: `@stackra/navigation` owns it.
+- Components, pages and renderers are `extends Component<Props>` with `Component` from `#stackra/ui`
+  and every other component from `@stackra/ui/native` (never `react`); Props in `<name>.props.ts`, a
+  hook's result type in `src/types/<name>.type.ts`, one exported declaration per file. No error
+  boundary here: `@stackra/navigation` owns it.
 - Config: the app's own class is `Config({ schema, env })`; a package override is `X extends BaseX`
   with `override` defaults only. Icons are `IconName` strings.
 - No provider components: each package's context mounts from its config override in `src/config/`.

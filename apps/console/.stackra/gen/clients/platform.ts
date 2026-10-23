@@ -8,10 +8,9 @@
  * Runtime: browser
  */
 import { actionRef, clientModule, permissionRefs, refusalRef } from "@stackra/clients";
-import { HttpMethod } from "@stackra/contracts";
+import { Enum, HttpMethod } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
 import { SettingScope } from "@stackra/settings";
-import { Enum } from "@stackra/validation";
 import { z } from "zod";
 import { I18n } from "#stackra/i18n";
 

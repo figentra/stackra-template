@@ -8,7 +8,7 @@
  *                     declaration per file), ADR 0059, ADR 0139
  */
 import type { PublicId } from "@stackra/contracts";
-import type { SchemaForm } from "@stackra/ui/native/form";
+import type { SchemaForm } from "@stackra/ui/native";
 import type { CreateOrderForm } from "#src/schemas/create-order-form.schema";
 
 /** The result of `useCreateOrder`. */

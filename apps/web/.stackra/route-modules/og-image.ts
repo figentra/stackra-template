@@ -9,9 +9,9 @@
  *           shared caching does not touch the HTML rule.
  * Runtime: worker
  */
-import { routeContext } from "@stackra/navigation/router";
+import { routeContext } from "@stackra/navigation/react";
 import { OgKind, SeoConfig } from "@stackra/seo";
-import { renderOgImage } from "@stackra/seo/og";
+import { renderOgImage } from "@stackra/seo/server";
 import type { Route } from "./+types/og-image";
 import { GetProductBySlugQuery } from "#stackra/clients/commerce";
 import { GetDocumentQuery } from "#stackra/clients/experience";

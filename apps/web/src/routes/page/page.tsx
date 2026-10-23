@@ -10,7 +10,7 @@
  */
 import { DocumentRenderer } from "@stackra/experience/react";
 import type { RouteProps } from "@stackra/navigation";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import type { PageRoute } from "#src/routes/page/page.route";
 
 /** The document, in the browser only. */

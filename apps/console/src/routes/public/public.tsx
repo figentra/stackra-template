@@ -12,7 +12,7 @@
 import { useAsset } from "@stackra/assets/react";
 import { useTranslation } from "@stackra/i18n/react";
 import { Outlet } from "@stackra/navigation/react";
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { Assets } from "#stackra/assets";
 import { I18n } from "#stackra/i18n";
 

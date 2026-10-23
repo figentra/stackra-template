@@ -6,12 +6,11 @@
  *          empty source still lists its first file, which answers a valid empty sitemap.
  * Boundary: a non-indexable site has no sitemap; the index answers 404 there. The paging walks each
  *           source's cursor once per edge-cache lifetime and keeps each file within the protocol's
- *           50,000 URLs (`@stackra/seo/sitemap`).
+ *           50,000 URLs (`@stackra/seo`).
  * Runtime: worker
  */
-import { routeContext } from "@stackra/navigation/router";
-import { SeoConfig } from "@stackra/seo";
-import { sitemapFiles, writeSitemapIndex } from "@stackra/seo/sitemap";
+import { routeContext } from "@stackra/navigation/react";
+import { SeoConfig, sitemapFiles, writeSitemapIndex } from "@stackra/seo";
 import type { Route } from "./+types/sitemap-index";
 import { SiteLayout } from "#src/routes/site/site.layout";
 import { sitemapSources } from "#stackra/sitemap";

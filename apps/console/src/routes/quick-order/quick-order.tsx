@@ -2,7 +2,7 @@
  * Stackra file contract:
  * Purpose: the quick-order page, bound to `QuickOrderRoute` by name: a variant picker over the
  *          generated search query, a quantity and optional points, posted to the route's `submit`.
- * Boundary: the form adapter (`@stackra/ui/form`) binds HeroUI fields to `QuickOrderForm`; field
+ * Boundary: the form adapter (`@stackra/ui/react`) binds HeroUI fields to `QuickOrderForm`; field
  *           names are paths of that schema, checked by its type. The action, the redirect and the
  *           field errors are the route's. The variant search is the app's shared `useVariantSearch`
  *           hook. A class component typed by its route (`RouteProps<typeof QuickOrderRoute>`), so
@@ -14,8 +14,8 @@
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
 import { useSubmit } from "@stackra/navigation/react";
-import { Button, Component } from "@stackra/ui";
-import { Field, Form, useSchemaForm } from "@stackra/ui/form";
+import { Button, Field, Form, useSchemaForm } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { useVariantSearch } from "#src/hooks/use-variant-search";
 import type { QuickOrderRoute } from "#src/routes/quick-order/quick-order.route";

@@ -9,7 +9,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 15, 16 and 17), ADR 0220 (integer minor units)
  */
-import { Service } from "@stackra/app";
+import { Service } from "@stackra/container";
 import type { LoyaltyKitConfig } from "#config/loyalty-kit.config";
 import { DebitOutcome } from "#contracts/enums/debit-outcome.enum";
 import { EntryKind } from "#contracts/enums/entry-kind.enum";

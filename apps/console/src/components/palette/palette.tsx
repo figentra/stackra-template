@@ -16,7 +16,8 @@ import { Tone } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
 import { useTranslation } from "@stackra/i18n/react";
 import { ShortcutKeys } from "@stackra/shortcuts/react";
-import { Chip, Component, Icon, Kbd } from "@stackra/ui";
+import { Chip, Icon, Kbd } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { usePalette } from "./use-palette";
 

@@ -20,7 +20,7 @@ import { usePlatform } from "@stackra/platform/react";
 import { useStore } from "@stackra/state/react";
 import { usePrefs } from "@stackra/storage/react";
 import { useColorScheme } from "@stackra/theming/react";
-import { toast } from "@stackra/ui";
+import { toast } from "@stackra/ui/react";
 import { I18n } from "#stackra/i18n";
 import { DevicePrefs } from "#src/schemas/device-prefs.schema";
 import { UiStore } from "#src/stores/ui.store";

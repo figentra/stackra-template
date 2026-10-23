@@ -8,7 +8,7 @@
  * Governing contract: ADR 0294 (decisions 7 and 14, as amended by programming model v3.1,
  *                     AGENTS.md: class components), ADR 0110 (block with `accepts`)
  */
-import { Component } from "@stackra/ui";
+import { Component } from "#stackra/ui";
 import { ProductCard } from "#src/components/product-card";
 import type { ProductGridProps } from "./product-grid.props";
 

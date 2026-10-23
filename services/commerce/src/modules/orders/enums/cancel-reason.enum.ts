@@ -7,7 +7,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4 and 16), ADR 0231 (snake_case codes)
  */
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 
 /** OrderStateMachine#expire records `Expired`; #cancel records every other case. */
 export const CancelReason = Enum.of({

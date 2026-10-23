@@ -12,7 +12,7 @@
  */
 import { useInfiniteQuery } from "@stackra/clients/react";
 import { useSubscription } from "@stackra/realtime/react";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 import type { OrdersState } from "#src/types/orders-state.type";
 import { ListOrdersQuery, OrderPaid, OrderStatus } from "#stackra/clients/commerce";
 

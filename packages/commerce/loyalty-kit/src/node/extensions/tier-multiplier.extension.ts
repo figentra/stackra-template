@@ -11,7 +11,7 @@
  *                     programming model v3.1, AGENTS.md)
  */
 import { Extension, type ExtensionContext } from "@stackra/actions";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 import { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 import type { EarnDraft } from "#contracts/types/earn-draft.type";
 import type { LoyaltyKitExtensionPoint } from "#node/extensions/loyalty-kit.extension-point";

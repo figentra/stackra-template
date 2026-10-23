@@ -9,7 +9,8 @@
  * Governing contract: ADR 0294 (decisions 7 and 14, as amended by programming model v3.1,
  *                     AGENTS.md: class components and icon names), ADR 0110
  */
-import { Card, Component, Icon } from "@stackra/ui";
+import { Card, Icon } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import type { FeatureGridProps } from "./feature-grid.props";
 
 /** A labelled section so screen readers can jump to it; icons are decorative. */

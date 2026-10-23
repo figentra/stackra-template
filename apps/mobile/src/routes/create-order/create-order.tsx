@@ -3,7 +3,7 @@
  * Purpose: the create-order sheet: variant (typed or scanned), quantity, optional loyalty points,
  *          submit.
  * Boundary: a class component bound to `CreateOrderRoute` by its file name, its props typed
- *           `RouteProps<typeof CreateOrderRoute>`. The form adapter (`@stackra/ui/native/form`)
+ *           `RouteProps<typeof CreateOrderRoute>`. The form adapter (`@stackra/ui/native`)
  *           binds the UI kit's fields to `CreateOrderForm`. On success it replaces itself with the
  *           order; when queued it closes with the queued toast; a refusal stays on the sheet with
  *           the field error from the envelope. The scan button follows the quick-order flag.
@@ -14,8 +14,8 @@
 import { useFlag } from "@stackra/feature-flags/react";
 import { useTranslation } from "@stackra/i18n/react";
 import { type RouteProps, useNavigate } from "@stackra/navigation/native";
-import { Button, Component, useToast } from "@stackra/ui/native";
-import { Field, Form } from "@stackra/ui/native/form";
+import { Button, Field, Form, useToast } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { View } from "react-native";
 import { Screen } from "#src/components/screen";
 import type { CreateOrderRoute } from "#src/routes/create-order/create-order.route";

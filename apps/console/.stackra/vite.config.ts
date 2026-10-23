@@ -21,8 +21,8 @@
  * Runtime: node
  */
 import { defineConfig } from "vite";
-import { classComponents } from "@stackra/gen/vite";
-import { definesFor, devServer } from "@stackra/runway/vite";
+import { classComponents } from "@stackra/gen/node";
+import { definesFor, devServer } from "@stackra/runway/node";
 import { stackra } from "@stackra/vite-plugin";
 import app from "../stackra.config";
 

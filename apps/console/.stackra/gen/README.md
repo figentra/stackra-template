@@ -26,6 +26,7 @@ excerpt.
 | `assets.ts`                 | `Assets.console.public.logo_svg` and the consumed modules' public assets                                    |
 | `capabilities.ts`           | what the active target offers and which file requires which capability                                     |
 | `wiring.ts`                 | the renderer container wiring: bindings, config overrides, contexts, drivers (main's: `../desktop/`)        |
+| `ui.ts`                     | `Component`, the class-component base, from `@stackra/ui/react`, imported as `#stackra/ui`                  |
 
 There is no `overrides.ts`: the two shadows the console keeps (`src/overrides/@acme/loyalty-kit/…`:
 the `PointsBalance` renderer and the `PointsBalanceWidget` placement) are bound where they apply, in

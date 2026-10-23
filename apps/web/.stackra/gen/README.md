@@ -18,6 +18,7 @@ HMR by `@stackra/vite-plugin`; tests and agents read these files. App code impor
 | `sitemap.ts`           | `sitemapSources`: the marketing routes, builder pages, storefront products                                                                                                                                                                                                       |
 | `assets.ts`            | `Assets.web.public.logo_svg`                                                                                                                                                                                                                                                     |
 | `wiring.ts`            | the one module `web`, bindings, config overrides, contexts and driver candidates (lazy imports) for the web target                                                                                                                                                               |
+| `ui.ts`                | `Component`, the class-component base, from `@stackra/ui/react`, imported as `#stackra/ui`                                                                                                                                                                                       |
 
 There is no `overrides.ts`: the site replaces no block or Custom widget renderer, and its two string
 overrides (`src/overrides/marketing/leads/assets/lang/<locale>/leads.json`) are merged into the

@@ -13,7 +13,7 @@
  */
 import type { RouteProps } from "@stackra/navigation/native";
 import { SettingsForm } from "@stackra/settings/native";
-import { Component } from "@stackra/ui/native";
+import { Component } from "#stackra/ui";
 import { Screen } from "#src/components/screen";
 import type { NotificationPreferencesRoute } from "#src/routes/notification-preferences/notification-preferences.route";
 import { SettingsPages } from "#stackra/settings";

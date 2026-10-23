@@ -8,8 +8,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0231 (snake_case codes)
  */
-import { Tone } from "@stackra/contracts";
-import { Enum } from "@stackra/validation";
+import { Enum, Tone } from "@stackra/contracts";
 
 /** `failed` is what the dead-letter path writes; a redrive can still end in `sent`. */
 export const MessageStatus = Enum.of({

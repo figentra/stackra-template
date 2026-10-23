@@ -112,20 +112,20 @@ export const wiring = {
     {
       port: Cache,
       candidates: {
-        workers: () => import("@stackra/cache/workers").then((m) => m.WorkersCacheDriver),
+        workers: () => import("@stackra/cache/worker").then((m) => m.WorkersCacheDriver),
       },
     },
     {
       port: ConsentStore,
       candidates: {
-        cookie: () => import("@stackra/consent/web").then((m) => m.CookieConsentStoreDriver),
+        cookie: () => import("@stackra/consent").then((m) => m.CookieConsentStoreDriver),
       },
     },
     {
       port: AnalyticsDriver,
       selectedBy: "config:analytics.driver",
       candidates: {
-        posthog: () => import("@stackra/analytics/posthog").then((m) => m.PosthogAnalyticsDriver),
+        posthog: () => import("@stackra/analytics").then((m) => m.PosthogAnalyticsDriver),
         none: () => import("@stackra/analytics").then((m) => m.NoneAnalyticsDriver),
         memory: () => import("@stackra/analytics").then((m) => m.MemoryAnalyticsDriver),
       },
@@ -136,7 +136,7 @@ export const wiring = {
       candidates: {
         config: () => import("@stackra/feature-flags").then((m) => m.ConfigFlagProviderDriver),
         posthog: () =>
-          import("@stackra/feature-flags/posthog").then((m) => m.PosthogFlagProviderDriver),
+          import("@stackra/feature-flags").then((m) => m.PosthogFlagProviderDriver),
       },
     },
     {

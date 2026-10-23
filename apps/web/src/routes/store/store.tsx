@@ -13,7 +13,8 @@
 import { useTranslation } from "@stackra/i18n/react";
 import type { RouteProps } from "@stackra/navigation";
 import { Link, RouteForm } from "@stackra/navigation/react";
-import { Component, SearchField } from "@stackra/ui";
+import { Component } from "#stackra/ui";
+import { SearchField } from "@stackra/ui/react";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 import { ProductGrid } from "#src/blocks/product-grid/product-grid";

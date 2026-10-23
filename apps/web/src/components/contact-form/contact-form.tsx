@@ -15,9 +15,15 @@
  */
 import { useTranslation } from "@stackra/i18n/react";
 import { RouteForm, useNavigation } from "@stackra/navigation/react";
-import { Button, Component } from "@stackra/ui";
-import { CheckboxField, TextAreaField, TextField, useSchemaForm } from "@stackra/ui/form";
-import { Turnstile } from "@stackra/ui/turnstile";
+import {
+  Button,
+  CheckboxField,
+  TextAreaField,
+  TextField,
+  Turnstile,
+  useSchemaForm,
+} from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { ContactInput } from "#src/schemas/contact-input.schema";
 import type { ContactFormProps } from "./contact-form.props";

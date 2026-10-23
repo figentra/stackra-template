@@ -11,10 +11,9 @@
  * Runtime: react-native
  */
 import { actionRef, moduleRef, remoteShape } from "@stackra/clients";
-import { HttpMethod } from "@stackra/contracts";
+import { Enum, HttpMethod } from "@stackra/contracts";
 import { Risk } from "@stackra/iam";
-import { Enum } from "@stackra/validation";
-import { publicId } from "@stackra/validation/runtime";
+import { publicId } from "@stackra/validation";
 import { z } from "zod";
 
 // --- modules -------------------------------------------------------------------------------------

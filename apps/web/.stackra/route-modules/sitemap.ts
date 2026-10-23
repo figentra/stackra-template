@@ -10,9 +10,8 @@
  *           sitemaps never disagree.
  * Runtime: worker
  */
-import { routeContext } from "@stackra/navigation/router";
-import { alternates, SeoConfig } from "@stackra/seo";
-import { sitemapPage, writeSitemap } from "@stackra/seo/sitemap";
+import { routeContext } from "@stackra/navigation/react";
+import { alternates, SeoConfig, sitemapPage, writeSitemap } from "@stackra/seo";
 import type { Route } from "./+types/sitemap";
 import { SiteLayout } from "#src/routes/site/site.layout";
 import { sitemapSources } from "#stackra/sitemap";

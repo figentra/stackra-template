@@ -26,7 +26,8 @@ import { Link, Outlet, useHref, useNavigate, useNavigation } from "@stackra/navi
 import { PanelShell, useBreadcrumbs } from "@stackra/panel/react";
 import { ShortcutKeys, useShortcut } from "@stackra/shortcuts/react";
 import { useStore } from "@stackra/state/react";
-import { Avatar, Breadcrumbs, Button, Component, Dropdown, Icon } from "@stackra/ui";
+import { Avatar, Breadcrumbs, Button, Dropdown, Icon } from "@stackra/ui/react";
+import { Component } from "#stackra/ui";
 import { I18n } from "#stackra/i18n";
 import { Navigation } from "#stackra/navigation";
 import { Panels } from "#stackra/panels";

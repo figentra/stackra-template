@@ -165,7 +165,7 @@ array; gen writes the wiring.
 ## Class components
 
 A component is a class, and gen compiles it to a plain function component before the React Compiler
-runs (`classComponents()` from `@stackra/gen/vite` in the generated Vite config,
+runs (`classComponents()` from `@stackra/gen/node` in the generated Vite config,
 `@stackra/gen/metro-transformer` in the generated Metro config):
 
 ```tsx
@@ -203,8 +203,9 @@ assign a new value (`this.items = [...this.items, item]`), never mutate. A const
 `this` and ref forwarding are gen errors. After `this.count++`, `this.count` still reads the
 render's value in the same handler, so write the new value explicitly when you need it. A context is
 read with a hook field or `use(Ctx)`; a provider is a component that renders `<Ctx value={…}>`.
-`Component` comes from `@stackra/ui` (or `@stackra/ui/native`), never from `react`, and an error
-boundary is never a class: `@stackra/navigation` owns it.
+`Component` comes from `#stackra/ui` (other components from `@stackra/ui/react` or
+`@stackra/ui/native`), never from `react`, and an error boundary is never a class:
+`@stackra/navigation` owns it.
 
 ## Derived identities
 

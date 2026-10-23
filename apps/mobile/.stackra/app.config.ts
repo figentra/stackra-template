@@ -21,7 +21,7 @@
  * Runtime: node
  */
 import type { ExpoConfig } from "expo/config";
-import { env } from "@stackra/config/env";
+import { env } from "@stackra/config";
 
 /**
  * runway.yaml environments.dev.vars with the cross-member origins resolved from

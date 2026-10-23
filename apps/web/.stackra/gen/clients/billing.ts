@@ -10,7 +10,7 @@
  */
 import { ClientQuery } from "@stackra/clients";
 import { HttpMethod } from "@stackra/contracts";
-import { currencyCode } from "@stackra/validation/runtime";
+import { currencyCode } from "@stackra/money";
 import { z } from "zod";
 
 /** `billing.Plan$`: one rung of a plan ladder, priced in the request's market. */

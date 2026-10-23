@@ -30,6 +30,7 @@ at the member root.
 | `migrations.ts`        | the typed ids `after:` names (`#stackra/migrations`) and the ordered stream of SQL steps     | "what runs on deploy, in what order?"      |
 | `manifest.ts`          | typed view of the committed `../../stackra.manifest.json`, and the typed refusal refs        | "what does this service expose?"           |
 | `ai.ts`                | MCP tools, facts classes, skills, prompts                                                    | "what can an agent call here?"             |
+| `ui.ts`                | `Component` for the `.mail.tsx` bodies, from `@stackra/ui/react`                             | "what do mail bodies extend?"              |
 
 This template commits the orders module's `schemas/orders.ts` and `entities/orders.ts`, the
 reference module's output; gen writes the same pair for every module that declares shapes or

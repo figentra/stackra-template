@@ -12,7 +12,7 @@
  * Runtime: isomorphic
  */
 import { type InferParams, routeRef } from "@stackra/navigation";
-import { Enum } from "@stackra/validation";
+import { Enum } from "@stackra/contracts";
 import type { AnnouncementsRoute } from "#src/routes/announcements/announcements.route";
 import type { CreateOrderRoute } from "#src/routes/create-order/create-order.route";
 import type { HomeRoute } from "#src/routes/home/home.route";

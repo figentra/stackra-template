@@ -11,10 +11,9 @@
  * Runtime: isomorphic
  */
 import { ClientAction, ClientRefusal } from "@stackra/clients";
-import { HttpMethod } from "@stackra/contracts";
+import { Enum, HttpMethod } from "@stackra/contracts";
 import { Locale } from "@stackra/i18n";
 import { Risk } from "@stackra/iam";
-import { Enum } from "@stackra/validation";
 import { z } from "zod";
 import { I18n } from "#stackra/i18n";
 

@@ -12,7 +12,7 @@
  */
 import { fileURLToPath } from "node:url";
 import { e2ePreset } from "@stackra/testing/e2e";
-import { baseUrlOf } from "@stackra/runway/ports";
+import { baseUrlOf } from "@stackra/runway";
 
 export default e2ePreset({
   root: fileURLToPath(new URL("..", import.meta.url)),
