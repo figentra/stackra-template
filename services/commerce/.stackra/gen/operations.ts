@@ -9,15 +9,18 @@
  *           method `CrudService<Model>` inherits; the list applies the resource table's closed
  *           TableInput through `CrudService.table`. A limit entitlement that counts the model gates
  *           its create. OrderResource sets no operation to `true`, so nothing is written for
- *           orders.
+ *           orders; ProductCollectionResource sets `list`, `create` and `update`.
  * Runtime: node
  */
 import { operationAction, operationQuery } from "@stackra/database";
+import { ProductCollectionPermissions } from "#modules/catalogue/access/product-collection.permissions";
 import { ProductPermissions } from "#modules/catalogue/access/product.permissions";
 import { ProductLimitEntitlement } from "#modules/catalogue/access/product-limit.entitlement";
 import { Product } from "#modules/catalogue/models/product.model";
+import { ProductCollection } from "#modules/catalogue/models/product-collection.model";
 import { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 import { ProductService } from "#modules/catalogue/services/product.service";
+import { ProductCollectionService } from "#modules/catalogue/services/product-collection.service";
 
 /**
  * From `Resource<Product, ProductView>({ operations: { list: true, get: GetProductQuery, create:
@@ -46,5 +49,34 @@ export const ProductOperations = {
     service: ProductService,
     permission: ProductPermissions.read,
     output: ProductView,
+  }),
+} as const;
+
+/**
+ * From `Resource<ProductCollection>({ operations: { list: true, create: true, update: true } })`;
+ * the row is the model, so every output is the model's generated schema.
+ */
+export const ProductCollectionOperations = {
+  /** `catalogue.product_collection.create@1`, `POST /product-collections`. */
+  Create: operationAction(ProductCollection, "create", {
+    service: ProductCollectionService,
+    permission: ProductCollectionPermissions.create,
+    output: ProductCollection,
+  }),
+  /** `catalogue.product_collection.update@1`, `PATCH /product-collections/:productCollectionId`. */
+  Update: operationAction(ProductCollection, "update", {
+    service: ProductCollectionService,
+    permission: ProductCollectionPermissions.update,
+    output: ProductCollection,
+  }),
+  /**
+   * `catalogue.product_collection.list@1`, `GET /product-collections`; its input sorts by slug
+   * (`catalogue.ListProductCollectionsInput`), its output cursor pages
+   * (`catalogue.ProductCollectionPage`).
+   */
+  List: operationQuery(ProductCollection, "list", {
+    service: ProductCollectionService,
+    permission: ProductCollectionPermissions.read,
+    output: ProductCollection,
   }),
 } as const;

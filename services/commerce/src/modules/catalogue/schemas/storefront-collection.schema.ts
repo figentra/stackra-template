@@ -2,9 +2,9 @@
  * Stackra file contract:
  * Purpose: `StorefrontCollection`: one storefront collection a product is listed in, as a title and
  *          a slug.
- * Boundary: a shape class in schemas/ because the Product model (a jsonb element) and the product
- *           page both use it. The pair is denormalised on the product until a collections module
- *           exists.
+ * Boundary: a shape class in schemas/: the wire form of a ProductCollection on the product page,
+ *           its title in the visitor's locale, mapped by StorefrontService from the product's
+ *           populated `collections` relation.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 4, 13 and 26)
  */

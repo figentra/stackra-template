@@ -52,6 +52,23 @@ export const extensions: ExtensionTable = {
       },
     ],
   },
+  "orders.reservePlacement": {
+    kind: "before",
+    owner: "orders",
+    point: "OrderExtensionPoint",
+    declaredIn: "src/modules/orders/extensions/order.extension-point.ts",
+    calledFrom: [
+      "src/modules/orders/workflows/create-order.workflow.ts (CreateOrderWorkflow.createOrder)",
+    ],
+    extensions: [
+      {
+        order: 0,
+        module: "loyalty",
+        class: "HoldPointsExtension",
+        file: "src/modules/loyalty/extensions/hold-points.extension.ts",
+      },
+    ],
+  },
   "loyalty_kit.earnAdjust": {
     kind: "after",
     owner: "loyalty_kit",

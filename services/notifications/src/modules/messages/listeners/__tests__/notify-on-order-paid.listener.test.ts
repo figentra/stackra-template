@@ -3,9 +3,10 @@
  * Purpose: proves a commerce `orders.order.paid.v1` event adds one inbox entry (one call to
  *          commerce) and one `messages.inbox_message.created.v1`, even when redelivered, and none
  *          for a customer who switched order updates off.
- * Boundary: unit tier; the generated commerce client is faked in the one typed form (ADR 0269), the
- *           event is injected through the memory inbox, settings are faked per user. Commerce's ids
- *           are fixed values: no factory here builds another service's records.
+ * Boundary: unit tier; the generated commerce client is faked in the one shape, answered and
+ *           asserted by the query class (ADR 0269); the event is injected through the memory
+ *           inbox, settings are faked per user. Commerce's ids are fixed values: no factory here
+ *           builds another service's records.
  * Runtime: node
  * Governing contract: ADR 0260 d10 (tests override the client), ADR 0269, ADR 0022
  */
@@ -16,7 +17,7 @@ import { actors } from "@stackra/iam/testing";
 import { SettingsReader } from "@stackra/settings";
 import { fakeSettings } from "@stackra/settings/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { CommerceClient, OrderPaid, OrderStatus } from "#stackra/clients/commerce";
+import { CommerceClient, GetOrderQuery, OrderPaid, OrderStatus } from "#stackra/clients/commerce";
 import { NotificationsModule } from "#stackra/module";
 import { InboxMessageCreated } from "#modules/messages/events/inbox-message-created.event";
 import { NotifyOnOrderPaidListener } from "#modules/messages/listeners/notify-on-order-paid.listener";
@@ -26,8 +27,8 @@ import { InboxMessage } from "#modules/messages/models/inbox-message.model";
 /** A booted service whose customer has order updates as given, and the faked client. */
 async function setup(orderUpdates: boolean) {
   const customer = actors.customer();
-  const commerce = fakeClient(CommerceClient, (fake) =>
-    fake.order.get.returns(({ orderId }) => ({
+  const commerce = fakeClient((fake) =>
+    fake.on(GetOrderQuery).returns(({ orderId }) => ({
       id: orderId,
       status: OrderStatus.Paid,
       totals: { currency: "USD", subtotalMinor: 2_000, adjustments: [], totalMinor: 2_000 },
@@ -64,7 +65,7 @@ describe(NotifyOnOrderPaidListener, () => {
     await deliverRemoteEvent(OrderPaid, paid, { id: "evt_1" }); // redelivery
     await drainOutbox();
 
-    expect(commerce.called(commerce.order.get)).toHaveLength(1);
+    expect(commerce.called(GetOrderQuery)).toHaveLength(1);
     const rows = await app.repository(InboxMessage).find({ principalId: paid.customerId });
     expect(rows.map((entry) => entry.data.lines)).toEqual([1]);
     expect(app.events.published().ofType(InboxMessageCreated)).toHaveLength(1);
@@ -77,7 +78,7 @@ describe(NotifyOnOrderPaidListener, () => {
     await deliverRemoteEvent(OrderPaid, paid, { id: "evt_2" });
     await drainOutbox();
 
-    expect(commerce.called(commerce.order.get)).toHaveLength(0);
+    expect(commerce.called(GetOrderQuery)).toHaveLength(0);
     expect(await app.repository(InboxMessage).count({ principalId: paid.customerId })).toBe(0);
   });
 });

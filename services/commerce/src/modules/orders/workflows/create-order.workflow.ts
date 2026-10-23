@@ -12,7 +12,8 @@
  *           never a step of its own here.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 6, 16 and 18, as amended by programming model
- *                     v3.1, AGENTS.md), ADR 0101, ADR 0151, ADR 0152
+ *                     v3.1, AGENTS.md), ADR 0101, ADR 0151, ADR 0152, ADR 0265 (extension
+ *                     points)
  */
 import type { PublicId } from "@stackra/contracts";
 import { Backoff } from "@stackra/queue";
@@ -21,6 +22,7 @@ import type { AuthorizePaymentOutput, PaymentsClient } from "#stackra/clients/pa
 import type { StockService } from "#modules/inventory/services/stock.service";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
+import type { OrderExtensionPoint } from "#modules/orders/extensions/order.extension-point";
 import type { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
 import { CreateOrderOutput } from "#modules/orders/schemas/create-order-output.schema";
 import { PricedOrder } from "#modules/orders/schemas/priced-order.schema";
@@ -35,6 +37,7 @@ export class CreateOrderWorkflow extends Workflow<CreateOrderInput>({ timeout: "
     private readonly stock: StockService,
     private readonly orders: OrderService,
     private readonly payments: PaymentsClient,
+    private readonly extensions: OrderExtensionPoint,
   ) {
     super();
   }
@@ -58,13 +61,24 @@ export class CreateOrderWorkflow extends Workflow<CreateOrderInput>({ timeout: "
     await this.stock.release(run.results.price.draft.lines);
   }
 
-  /** Writes the pending order; `order.placed` leaves through the outbox when this step commits. */
-  async createOrder(run: Run<this>): Promise<PublicId<"ord">> {
+  /**
+   * Writes the pending order and runs `reservePlacement` in the same transaction, so what an
+   * extension holds commits with the order or not at all; `order.placed` leaves through the outbox
+   * when this step commits.
+   * @throws Refusal an extension's (`insufficient_points`), which rolls the order back and starts
+   *         the undo chain.
+   */
+  async createOrder(run: Run<this>, ctx: StepContext): Promise<PublicId<"ord">> {
     const { draft, totals } = run.results.price;
-    return this.orders.createPending(draft, totals).id;
+    const order = this.orders.createPending(draft, totals);
+    await this.extensions.reservePlacement(order.id, run.results.price, ctx);
+    return order.id;
   }
 
-  /** Undoes `createOrder`: the order stays as a cancelled row with reason `payment_failed`. */
+  /**
+   * Undoes `createOrder`: the order stays as a cancelled row with reason `payment_failed`, whose
+   * `order.cancelled` lets each extension release what it reserved.
+   */
   async undoCreateOrder(run: Run<this>): Promise<void> {
     const order = await this.orders.findOneOrFail({ id: run.results.createOrder });
     this.orders.cancel(order, CancelReason.PaymentFailed);

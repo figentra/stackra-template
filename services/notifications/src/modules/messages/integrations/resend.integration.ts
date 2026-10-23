@@ -9,11 +9,14 @@
  *           (ten requests per second per team, one bucket per key actually used), retries (a POST
  *           retries only with the provider's idempotency header), the scheduled health check, and
  *           how inbound webhooks are verified and routed (Svix-signed Standard Webhooks, the event
- *           type at the payload's `type`, each type a `WebhookEvent<ResendIntegration>` class). A
- *           `{field}` placeholder resolves on the tenant's ResendConnection first, then on this
- *           class, so a tenant's own key and webhook secret win over the platform's with no second
- *           mechanism. The `@Secret` fields here are platform secrets (Infisical, synced by runway,
- *           listed in runway.yaml); the connection's are tenant secrets in the connection store.
+ *           type at the payload's `type`, each type a `WebhookEvent<ResendIntegration>` class). An
+ *           `auth` placeholder resolves on the tenant's ResendConnection first, then on this class,
+ *           so a tenant's own key wins over the platform's with no second mechanism. The webhook
+ *           secret has no fallback: ResendConnection declares `webhookSecret` required, so a
+ *           connection's URL verifies only against the tenant's own secret, and the platform
+ *           secret verifies only the platform account's URL. The `@Secret` fields here are platform
+ *           secrets (Infisical, synced by runway, listed in runway.yaml); the connection's are
+ *           tenant secrets in the connection store.
  *           Gen derives the key (`messages.resend`), labels, logo, the `messages.resend.*`
  *           permissions, the webhook path and the egress allowlist, and locks them in the manifest.
  *           Sending stays in ResendMailTransportDriver.
@@ -56,6 +59,8 @@ export class ResendIntegration extends Integration({
   },
   webhooks: {
     scheme: SignatureScheme.StandardWebhooks,
+    // a connection's URL resolves this on the connection only (its field is required): a
+    // platform-signed event replayed to a tenant's URL never verifies
     secret: "{webhookSecret}",
     eventType: { path: "type" },
   },
@@ -67,7 +72,7 @@ export class ResendIntegration extends Integration({
 
   /**
    * The signing secret of the webhooks Resend posts for the platform's own account, among them the
-   * inbound replies to the platform's confirmations; a tenant connection carries its own.
+   * inbound replies to the platform's confirmations; never used for a tenant connection's URL.
    */
   @Secret("RESEND_WEBHOOK_SECRET")
   webhookSecret!: string;

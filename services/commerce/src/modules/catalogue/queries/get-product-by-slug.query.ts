@@ -45,7 +45,7 @@ export class GetProductBySlugQuery extends Query({
   async handle(input: GetProductBySlugInput, ctx: QueryContext): Promise<StorefrontProductView> {
     const product = await this.products.findOne(
       { slug: input.slug, status: ProductStatus.Active },
-      { populate: ["variants"] },
+      { populate: ["variants", "collections"] },
     );
     if (!product) throw ProductNotFoundError.create({ slug: input.slug });
     return this.storefront.toView(product, ctx);

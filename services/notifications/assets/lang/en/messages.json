@@ -80,7 +80,7 @@
         },
         "webhook_secret": {
           "label": "Webhook signing secret",
-          "help": "From the webhook you created in Resend; needed for inbound mail."
+          "help": "Required. From the webhook you created in Resend; this connection accepts only events signed with it."
         }
       }
     }

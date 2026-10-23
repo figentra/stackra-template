@@ -20,6 +20,11 @@ Governing contract: root AGENTS.md
 - Secrets: never in a file. A platform `@Secret` (DeliveryOptions, ResendIntegration) is named in
   runway.yaml and resolved by the secret store; a tenant `@Secret` (ResendConnection) lives in the
   connection store. `@stackra/integrations` is the one package for both kinds.
+- Inbound mail acts for a customer only when it reached the platform's own inbound address and
+  Resend reports DMARC `pass` (the `From` domain aligned with the passing DKIM or SPF domain) for
+  exactly that customer's verified address; SPF and DKIM alone never suffice. Events on a tenant
+  connection's URL verify only against that connection's required `webhookSecret` (no fallback to
+  the platform secret) and never assert a platform customer's identity.
 
 ## PII
 

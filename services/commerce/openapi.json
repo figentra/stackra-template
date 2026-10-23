@@ -362,6 +362,10 @@
               }
             }
           },
+          "403": {
+            "$ref": "#/components/responses/Refusal",
+            "x-stackra-codes": ["not_a_member"]
+          },
           "412": {
             "$ref": "#/components/responses/Refusal",
             "x-stackra-codes": [
@@ -714,6 +718,95 @@
         }
       }
     },
+    "/product-collections": {
+      "get": {
+        "operationId": "catalogue.product_collection.list@1",
+        "x-stackra-permission": "catalogue.product_collection.read",
+        "x-stackra-risk": "L0",
+        "x-stackra-query": {
+          "$ref": "#/components/schemas/catalogue.ListProductCollectionsInput"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/catalogue.ProductCollectionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "catalogue.product_collection.create@1",
+        "x-stackra-permission": "catalogue.product_collection.create",
+        "x-stackra-risk": "L1",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/catalogue.CreateProductCollectionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/catalogue.ProductCollection"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product-collections/{productCollectionId}": {
+      "patch": {
+        "operationId": "catalogue.product_collection.update@1",
+        "x-stackra-permission": "catalogue.product_collection.update",
+        "x-stackra-risk": "L1",
+        "parameters": [
+          {
+            "name": "productCollectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^pcl_[0-9A-Za-z]{26}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/catalogue.UpdateProductCollectionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/catalogue.ProductCollection"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/public/products": {
       "get": {
         "operationId": "catalogue.product.list_storefront@1",
@@ -1016,6 +1109,27 @@
           }
         }
       },
+      "catalogue.CreateProductCollectionInput": {
+        "type": "object",
+        "required": ["title", "slug"],
+        "properties": {
+          "title": {
+            "type": "object",
+            "description": "LocalizedText: locale → text",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "x-stackra-generated-by": "ProductCollectionResource operations.create: the model's writable fields"
+      },
       "catalogue.CreateProductInput": {
         "type": "object",
         "required": ["title", "slug"],
@@ -1046,8 +1160,10 @@
           "collections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/catalogue.StorefrontCollection"
-            }
+              "type": "string",
+              "pattern": "^pcl_[0-9A-Za-z]{26}$"
+            },
+            "uniqueItems": true
           },
           "variants": {
             "type": "array",
@@ -1112,6 +1228,39 @@
             "pattern": "^\\d{8,14}$"
           }
         }
+      },
+      "catalogue.ListProductCollectionsInput": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "enum": [20, 50, 100],
+            "default": 20
+          },
+          "sort": {
+            "type": "object",
+            "required": ["key", "direction"],
+            "properties": {
+              "key": {
+                "type": "string",
+                "enum": ["slug"]
+              },
+              "direction": {
+                "type": "string",
+                "enum": ["asc", "desc"]
+              }
+            },
+            "default": {
+              "key": "slug",
+              "direction": "asc"
+            }
+          }
+        },
+        "x-stackra-table": "ProductCollectionResource",
+        "x-stackra-generated-by": "ProductCollectionResource operations.list: TableInput narrowed to the table"
       },
       "catalogue.ListProductsInput": {
         "type": "object",
@@ -1202,6 +1351,58 @@
             }
           }
         }
+      },
+      "catalogue.ProductCollection": {
+        "type": "object",
+        "required": ["id", "title", "slug", "createdAt", "updatedAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^pcl_[0-9A-Za-z]{26}$"
+          },
+          "title": {
+            "type": "object",
+            "description": "LocalizedText: locale → text",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "x-stackra-generated-by": "ProductCollectionResource: the model is the row"
+      },
+      "catalogue.ProductCollectionPage": {
+        "type": "object",
+        "required": ["items", "hasMore"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/catalogue.ProductCollection"
+            }
+          },
+          "nextCursor": {
+            "type": "string"
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        },
+        "x-stackra-generated-by": "ProductCollectionResource operations.list: Page.of(ProductCollection)"
       },
       "catalogue.ProductPage": {
         "type": "object",
@@ -1480,6 +1681,31 @@
           }
         }
       },
+      "catalogue.UpdateProductCollectionInput": {
+        "type": "object",
+        "required": ["productCollectionId"],
+        "properties": {
+          "productCollectionId": {
+            "type": "string",
+            "pattern": "^pcl_[0-9A-Za-z]{26}$"
+          },
+          "title": {
+            "type": "object",
+            "description": "LocalizedText: locale → text",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "x-stackra-generated-by": "ProductCollectionResource operations.update: partial writable fields"
+      },
       "catalogue.UpdateProductInput": {
         "type": "object",
         "required": ["productId"],
@@ -1514,8 +1740,10 @@
           "collections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/catalogue.StorefrontCollection"
-            }
+              "type": "string",
+              "pattern": "^pcl_[0-9A-Za-z]{26}$"
+            },
+            "uniqueItems": true
           }
         },
         "x-stackra-generated-by": "ProductResource operations.update: partial writable fields"

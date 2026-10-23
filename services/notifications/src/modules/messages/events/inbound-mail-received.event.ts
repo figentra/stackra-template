@@ -5,12 +5,14 @@
  * Boundary: a webhook event of the Resend integration (`WebhookEvent<ResendIntegration>`): it names
  *           only the provider's event type. Verification and routing are declared once on
  *           ResendIntegration: the Standard Webhooks signature (Resend signs through Svix) is
- *           checked against the connection's or the platform's webhook secret before any field is
- *           parsed, so a bad signature is refused and nothing runs (safeguard a), and the `type`
- *           field selects this class. The URL is per connection
- *           (`/webhooks/messages/resend/:connectionId`, the platform's own account included) and
- *           listeners run in that connection's tenant. The fields are Resend's payload;
- *           CancelFromMailListener holds the logic and the other two safeguards. Resend receives
+ *           checked before any field is parsed, so a bad signature is refused and nothing runs
+ *           (safeguard a), and the `type` field selects this class. The URL is per connection
+ *           (`/webhooks/messages/resend/:connectionId`, the platform's own account included):
+ *           a tenant connection's URL verifies only against that connection's own secret and the
+ *           platform account's only against the platform secret, so an event signed for one is
+ *           refused at the other. Listeners run in that connection's tenant. The fields are
+ *           Resend's payload; CancelFromMailListener holds the logic and the other two
+ *           safeguards, and acts only on the platform account's events. Resend receives
  *           2xx for every verified delivery, so it never retries a mail that will never qualify.
  *           The wire key is `messages.resend.email.received`.
  * Runtime: node

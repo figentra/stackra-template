@@ -31,7 +31,7 @@ export class StorefrontService extends Service {
     super();
   }
 
-  /** The product page shape; the variants must be populated. */
+  /** The product page shape; the variants and collections must be populated. */
   async toView(product: Product, ctx: QueryContext): Promise<StorefrontProductView> {
     const lines = product.variants.map((variant) => ({ variantId: variant.id, quantity: 1 }));
     const quote = await this.pricing.price.quote.call({ market: ctx.market, lines });
@@ -58,7 +58,10 @@ export class StorefrontService extends Service {
       description: product.description?.in(ctx.locale) ?? null,
       variants,
       seo: product.seo ?? { title, description: null, noindex: false },
-      collections: product.collections,
+      collections: product.collections.map((collection) => ({
+        title: collection.title.in(ctx.locale),
+        slug: collection.slug,
+      })),
     });
   }
 

@@ -9,9 +9,10 @@
  *           TypeScript checks `handle` against the slot's signature. It runs at order 200 (after
  *           promotions at 100, before gift cards at 300) and adds `extensions.loyalty`
  *           (RedeemPointsRequest) to the input of `orders.order.create@1`; the namespace is this
- *           module's key. Runs inside pricing: no writes and no network. The debit happens after
- *           commit in RedeemOnOrderPlacedListener. Ids cross into the kit as `MemberId` through
- *           `memberId(...)`.
+ *           module's key. Runs inside pricing: no writes and no network. HoldPointsExtension holds
+ *           the points atomically when the order is written, SettleOnOrderPlacedListener settles
+ *           them and ReleaseOnOrderCancelledListener gives them back. Ids cross into the kit as
+ *           `MemberId` through `memberId(...)`.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13 and 16, as amended by programming model
  *                     v3.1, AGENTS.md), ADR 0265 (extension points and typed extensions)

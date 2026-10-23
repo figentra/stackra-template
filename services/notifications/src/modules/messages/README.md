@@ -18,12 +18,12 @@ module.
 | `actions/`      | `mark-inbox-message-read.action.ts`                                  | an idempotent `PUT`, narrowed to the actor; a foreign entry is not found                                  |
 | `queries/`      | `list-inbox-messages.query.ts`                                       | the inbox, narrowed to the actor, cursor-paginated, with the unread count                                 |
 | `listeners/`    | `notify-on-order-paid.listener.ts`                                   | a remote event plus a call, honouring the user's preferences                                              |
-| `listeners/`    | `cancel-from-mail.listener.ts`                                       | reads the mail through the managed client; DKIM, SPF and exact-address checks; a queued call `onBehalfOf` |
+| `listeners/`    | `cancel-from-mail.listener.ts`                                       | platform inbox only; DMARC pass (alignment) and exact-address checks; a queued call `onBehalfOf`          |
 | `constants/`    | `cancel-request.constant.ts`                                         | the cancel pattern, built from commerce's order id prefix in the generated client                         |
 | `events/`       | `inbound-mail-received.event.ts`                                     | `WebhookEvent<ResendIntegration>({ type })`: verified and routed by the integration                       |
 | `events/`       | `message-sent.event.ts`, `inbox-message-created.event.ts`            | integration events; the inbox refresh broadcasts to the principal's own sessions                          |
 | `integrations/` | `resend.integration.ts`                                              | auth, base URL, rate limits, retry, health, webhooks, listing, platform `@Secret` fields                  |
-| `connections/`  | `resend.connection.ts`                                               | `Connection<ResendIntegration>`: tenant `@Secret` fields and a real `check()`                             |
+| `connections/`  | `resend.connection.ts`                                               | `Connection<ResendIntegration>`: tenant `@Secret` fields (webhook secret required) and a real `check()`   |
 | `access/`       | `message.permissions.ts`, `inbox-message.permissions.ts`             | message send and read, inbox message read and update; risk lives here                                     |
 | `enums/`        | `*.enum.ts`                                                          | message status, inbox message kind, mail authentication result                                            |
 | `schemas/`      | `*.schema.ts`                                                        | every Input and Output, the settings sections and Resend's payloads, one per file                         |

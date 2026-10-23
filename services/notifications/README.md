@@ -30,7 +30,7 @@ And the reverse direction: commerce's `notifications` Notifier driver queues
 | `src/modules/messages/actions/mark-inbox-message-read.action.ts` | `messages.inbox_message.mark_read@1`: `PUT /inbox-messages/:inboxMessageId/read`, own entries only                                 |
 | `src/modules/messages/events/inbox-message-created.event.ts`     | `messages.inbox_message.created.v1`, broadcast as a data-free refresh to the principal's own sessions                              |
 | `src/modules/messages/events/inbound-mail-received.event.ts`     | `WebhookEvent<ResendIntegration>({ type: "email.received" })`: verified by the integration, the first inbound-cancel safeguard     |
-| `src/modules/messages/listeners/cancel-from-mail.listener.ts`    | the other two safeguards, then the queued cancel on behalf of the customer                                                         |
+| `src/modules/messages/listeners/cancel-from-mail.listener.ts`    | platform inbox only, DMARC pass and the exact verified address, then the queued cancel on behalf of the customer                   |
 | `src/modules/messages/integrations/`, `connections/`             | Resend as an Integration (auth, limits, retries, webhooks, platform `@Secret`s) and `Connection<ResendIntegration>` with `check()` |
 | `src/modules/messages/drivers/`                                  | `extends Driver(MailTransport)`, named `memory` and `resend`; the resend one sends through the integration's managed client        |
 

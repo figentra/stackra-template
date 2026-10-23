@@ -24,7 +24,11 @@ function connectionWith(domains: () => unknown) {
   );
   return makeConnection(ResendConnection, {
     api,
-    fields: { apiKey: "re_test_key", fromAddress: "orders@shop.acme.example" },
+    fields: {
+      apiKey: "re_test_key",
+      fromAddress: "orders@shop.acme.example",
+      webhookSecret: "test-tenant-signing-secret",
+    },
   });
 }
 

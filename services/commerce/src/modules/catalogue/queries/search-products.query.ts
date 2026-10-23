@@ -42,7 +42,7 @@ export class SearchProductsQuery extends Query({
       },
       cursor: input.cursor,
       limit: input.limit,
-      populate: ["variants"],
+      populate: ["variants", "collections"],
     });
     const items = await Promise.all(
       page.items.map((product) => this.storefront.toCard(product, ctx)),

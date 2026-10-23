@@ -19,7 +19,11 @@ import { drainOutbox } from "@stackra/events/testing";
 import { actors } from "@stackra/iam/testing";
 import { beforeAll, describe, expect, freezeClock, freezeIds, it } from "@stackra/testing";
 import { StepStatus, WorkflowRunStatus } from "@stackra/workflow";
-import { CardDeclinedError, PaymentsClient } from "#stackra/clients/payments";
+import {
+  AuthorizePaymentAction,
+  CardDeclinedError,
+  PaymentsClient,
+} from "#stackra/clients/payments";
 import { CommerceModule } from "#stackra/module";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
@@ -43,8 +47,8 @@ describe(CreateOrderWorkflow, () => {
 
   /** Steps complete up to the payment, which is refused; the engine undoes two steps in reverse. */
   it("undoes the earlier steps in reverse when payment authorization fails", async () => {
-    const payments = fakeClient(PaymentsClient, (fake) =>
-      fake.payment.authorize.throws(refusal(CardDeclinedError)),
+    const payments = fakeClient((fake) =>
+      fake.on(AuthorizePaymentAction).throws(refusal(CardDeclinedError)),
     );
     const app = await createTestingModule(CommerceModule)
       .useDrivers({

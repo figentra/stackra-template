@@ -5,9 +5,9 @@
  *          an unavailable variant before any side effect, and refuses every order while the tenant
  *          has paused ordering.
  * Boundary: unit tier through the real pipeline (`run`) with memory drivers (the memory workflow
- *           engine runs the steps in process); the pricing and payments clients are faked by class,
- *           the orders settings by `fakeSettings`. Every id comes from a factory. The undo chain is
- *           covered by the workflow's integration test.
+ *           engine runs the steps in process); the pricing and payments clients are the one fake
+ *           shape, answered by the query class, the orders settings by `fakeSettings`. Every id
+ *           comes from a factory. The undo chain is covered by the workflow's integration test.
  * Runtime: node
  * Governing contract: ADR 0098 (one pipeline), ADR 0137 (refusal codes), ADR 0138 (as amended: the
  *                     precondition step), ADR 0022
@@ -22,7 +22,7 @@ import { SettingsReader } from "@stackra/settings";
 import { fakeSettings } from "@stackra/settings/testing";
 import { describe, expect, it } from "@stackra/testing";
 import { PaymentsClient } from "#stackra/clients/payments";
-import { PricingClient } from "#stackra/clients/pricing";
+import { PricingClient, QuotePriceQuery } from "#stackra/clients/pricing";
 import { CommerceModule } from "#stackra/module";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
@@ -40,8 +40,8 @@ import { GetOrderQuery } from "#modules/orders/queries/get-order.query";
  * `paused`, the orders settings say the tenant has switched `acceptingOrders` off.
  */
 async function setup({ paused = false } = {}) {
-  const pricing = fakeClient(PricingClient, (fake) =>
-    fake.price.quote.returns(({ lines }) => ({
+  const pricing = fakeClient((fake) =>
+    fake.on(QuotePriceQuery).returns(({ lines }) => ({
       currency: "SAR",
       lines: lines.map((line) => ({ ...line, unitPriceMinor: 1_000 })),
     })),
@@ -49,7 +49,7 @@ async function setup({ paused = false } = {}) {
   const module = createTestingModule(CommerceModule)
     .useDrivers("memory")
     .override(PricingClient, pricing)
-    .override(PaymentsClient, fakeClient(PaymentsClient));
+    .override(PaymentsClient, fakeClient());
   const pausedSettings = fakeSettings([[OrdersSettings, { acceptingOrders: false }]]);
   const app = await (paused ? module.override(SettingsReader, pausedSettings) : module).compile();
   const product = await ProductFactory.new().has(VariantFactory.new()).create();

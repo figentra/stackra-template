@@ -1,19 +1,29 @@
 /**
  * Stackra file contract:
  * Purpose: the Product model: what is sold, in which variants and in which state, with the
- *          storefront fields the merchant edits (description, images, collections, seo).
+ *          storefront fields the merchant edits (description, images, seo) and the collections it
+ *          is listed in.
  * Boundary: data, relations, indexes and the search facet. Key `catalogue.product`, table
  *           `catalogue.products` (the module's Postgres schema), public ids `prd_…`. No price (the
  *           pricing service) and no stock (inventory). `status` moves only through
- *           ProductStateMachine. `@Searchable` declares the hybrid index the storefront and the POS
- *           query: `stackra db diff` writes its columns and the Postgres search driver keeps it in
- *           step with the unit of work. Rows are built by factories or CrudService, never with
- *           `new`.
+ *           ProductStateMachine. Collections are a same-module many-to-many (`ProductCollection`,
+ *           pivot `catalogue.product_collection_items`), never copied onto the row. `@Searchable`
+ *           declares the hybrid index the storefront and the POS query: `stackra db diff` writes
+ *           its columns and the Postgres search driver keeps it in step with the unit of work.
+ *           Rows are built by factories or CrudService, never with `new`.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 4, 6, 11, 20 and 27), ADR 0133 (traits), ADR 0221
  *                     (Postgres hybrid search)
  */
-import { Collection, Index, Model, OneToMany, Searchable, type Translated } from "@stackra/model";
+import {
+  Collection,
+  Index,
+  ManyToMany,
+  Model,
+  OneToMany,
+  Searchable,
+  type Translated,
+} from "@stackra/model";
 import {
   BelongsToTenant,
   HasPublicId,
@@ -23,8 +33,8 @@ import {
 } from "@stackra/model/traits";
 import { Str } from "@stackra/validation";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
+import { ProductCollection } from "#modules/catalogue/models/product-collection.model";
 import { Variant } from "#modules/catalogue/models/variant.model";
-import type { StorefrontCollection } from "#modules/catalogue/schemas/storefront-collection.schema";
 import type { StorefrontImage } from "#modules/catalogue/schemas/storefront-image.schema";
 import type { StorefrontSeo } from "#modules/catalogue/schemas/storefront-seo.schema";
 
@@ -63,11 +73,9 @@ export class Product extends Model.with(
   /** Storefront images in display order; the first is the card image. */
   images: StorefrontImage[] = [];
 
-  /**
-   * The storefront collections the product is listed in. shortcut: denormalised title and slug
-   * pairs, replace with a `Link` to a collections module's model once one exists.
-   */
-  collections: StorefrontCollection[] = [];
+  /** The storefront collections the product is listed in; the store filters on their slug. */
+  @ManyToMany(() => ProductCollection, { pivotTable: "product_collection_items" })
+  collections = new Collection<ProductCollection>(this);
 
   /** Merchant overrides of the page title and meta description; null derives both from it. */
   seo: StorefrontSeo | null = null;

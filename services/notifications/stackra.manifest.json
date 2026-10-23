@@ -339,6 +339,7 @@
       "file": "src/modules/messages/connections/resend.connection.ts",
       "integration": "messages.resend",
       "fields": ["apiKey", "fromAddress", "webhookSecret"],
+      "required": ["apiKey", "fromAddress", "webhookSecret"],
       "secrets": {
         "apiKey": "RESEND_TENANT_API_KEY",
         "webhookSecret": "RESEND_TENANT_WEBHOOK_SECRET"
@@ -739,7 +740,8 @@
         "listeners": ["CancelFromMailListener"],
         "safeguards": [
           "signature",
-          "dkim_spf_pass_and_exact_verified_email",
+          "platform_inbox_only",
+          "dmarc_pass_and_exact_verified_email",
           "on_behalf_of_customer"
         ]
       }

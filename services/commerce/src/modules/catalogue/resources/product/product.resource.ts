@@ -90,7 +90,9 @@ export class ProductResource extends Resource<Product, ProductView>({
   override form(f: Form<CreateInput<Product>>) {
     return f.fields((x) => [
       x.steps("product", [
-        x.step("basics", [x.grid(2, [x.from("title").span(2), x.from("slug")])]),
+        x.step("basics", [
+          x.grid(2, [x.from("title").span(2), x.from("slug"), x.from("collections")]),
+        ]),
         x.step("media", [x.upload("images", { action: AttachProductImageAction })]),
         x.step("variants", [
           x.repeater("variants", (v) => [

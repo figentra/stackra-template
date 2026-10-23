@@ -28,6 +28,7 @@
       "fields": {
         "title": "Title",
         "slug": "Slug",
+        "collections": "Collections",
         "images": "Images",
         "variants": "Variants",
         "sku": "SKU",
@@ -49,6 +50,23 @@
       "no_results": {
         "heading": "No products match these filters"
       }
+    },
+    "product_collection": {
+      "title": "Collections",
+      "columns": {
+        "title": "Title",
+        "slug": "Slug"
+      },
+      "fields": {
+        "title": "Title",
+        "slug": "Slug"
+      },
+      "empty": {
+        "heading": "No collections yet"
+      },
+      "no_results": {
+        "heading": "No collections match these filters"
+      }
     }
   },
   "enums": {
@@ -65,6 +83,11 @@
       "update": "Edit products",
       "archive": "Archive products",
       "import": "Import products"
+    },
+    "product_collection": {
+      "read": "View collections",
+      "create": "Create collections",
+      "update": "Edit collections"
     }
   },
   "actions": {

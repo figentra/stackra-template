@@ -9,9 +9,11 @@
  *           synced by runway, read back to a screen or logged; the console's connection form is
  *           generated from the fields and writes them. `check()` runs at connect (nothing is stored
  *           if it throws), from the console's Test button and on the integration's health schedule.
- *           A sending-only key is accepted and encouraged (least privilege); delivery webhooks need
- *           the signing secret pasted from Resend's dashboard. Without a connection, the platform's
- *           key on ResendIntegration and the sender from DeliveryConfig apply.
+ *           A sending-only key is accepted and encouraged (least privilege). The webhook signing
+ *           secret, pasted from Resend's dashboard, is required: the connection's webhook URL
+ *           verifies only against it and never falls back to the platform's secret, so a
+ *           platform-signed event replayed to a tenant's URL is refused. Without a connection, the
+ *           platform's key on ResendIntegration and the sender from DeliveryConfig apply.
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 3, 4, 13, 19 and 20, as amended by programming model
  *                     v3.1, AGENTS.md), ADR 0107, ADR 0173 (secrets), ADR 0231 (secret names)
@@ -36,11 +38,9 @@ export class ResendConnection extends Connection<ResendIntegration> {
   /** The verified From address on the tenant's own domain. */
   fromAddress!: Email;
 
-  /**
-   * The signing secret of the tenant's Resend webhooks; without it no inbound event is accepted.
-   */
+  /** The signing secret of the tenant's Resend webhooks; the only secret its URL accepts. */
   @Secret("RESEND_TENANT_WEBHOOK_SECRET")
-  webhookSecret?: string;
+  webhookSecret!: string;
 
   /**
    * A full-access key must own a verified domain for `fromAddress`. A sending-only key answers 401

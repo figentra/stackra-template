@@ -22,8 +22,24 @@ export const Products = table("catalogue.products", {
   status: "status",
   description: "description",
   images: "images",
-  collections: "collections",
   seo: "seo",
+});
+
+/** catalogue.product_collection → `catalogue.product_collections` */
+export const ProductCollections = table("catalogue.product_collections", {
+  id: "id",
+  tenantId: "tenant_id",
+  createdAt: "created_at",
+  updatedAt: "updated_at",
+  title: "title",
+  slug: "slug",
+});
+
+/** the pivot of `Product.collections` → `catalogue.product_collection_items` */
+export const ProductCollectionItems = table("catalogue.product_collection_items", {
+  tenantId: "tenant_id",
+  product: "product_id",
+  productCollection: "product_collection_id",
 });
 
 /** catalogue.variant → `catalogue.variants` */

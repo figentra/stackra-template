@@ -3,8 +3,9 @@
  * Purpose: proves `order.cancel` refuses a stranger, releases stock and records the event for the
  *          owner, queues a payment void after commit only, and lets a service cancel only on behalf
  *          of the owning customer, with an access record naming that customer.
- * Boundary: unit tier through the real pipeline (`run`), memory drivers, the payments client faked
- *           by class. Every id comes from a factory, never a literal.
+ * Boundary: unit tier through the real pipeline (`run`), memory drivers, the payments client in
+ *           the one fake shape, asserted by the action class. Every id comes from a factory, never
+ *           a literal.
  * Runtime: node
  * Governing contract: ADR 0098 (one pipeline), ADR 0132 (policy), ADR 0022, ADR 0007 (test
  *                     docblocks)
@@ -18,7 +19,7 @@ import { ForbiddenError } from "@stackra/errors";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { PaymentsClient } from "#stackra/clients/payments";
+import { PaymentsClient, VoidPaymentAction } from "#stackra/clients/payments";
 import { CommerceModule } from "#stackra/module";
 import { StockLevelFactory } from "#modules/inventory/database/factories/stock-level.factory";
 import { StockLevel } from "#modules/inventory/models/stock-level.model";
@@ -75,7 +76,7 @@ describe(CancelOrderAction, () => {
    * The void must never be sent for a rolled-back cancel, so it is asserted as queued after commit.
    */
   it("queues a void for an order with an authorized payment, after commit only", async () => {
-    const payments = fakeClient(PaymentsClient);
+    const payments = fakeClient();
     await createTestingModule(CommerceModule)
       .useDrivers("memory")
       .override(PaymentsClient, payments)
@@ -84,7 +85,7 @@ describe(CancelOrderAction, () => {
 
     await run(CancelOrderAction, { orderId: order.id }, { as: actors.staff() });
 
-    expect(payments.queued(payments.payment.void)).toEqual([{ paymentId: order.paymentId }]);
+    expect(payments.queued(VoidPaymentAction)).toEqual([{ paymentId: order.paymentId }]);
   });
 
   /**

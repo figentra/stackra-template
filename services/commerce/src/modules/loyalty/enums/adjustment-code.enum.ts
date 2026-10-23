@@ -11,7 +11,7 @@
  */
 import { Enum } from "@stackra/validation";
 
-/** Written by RedeemPointsExtension, found again by RedeemOnOrderPlacedListener. */
+/** Written by RedeemPointsExtension, found again by HoldPointsExtension. */
 export const AdjustmentCode = Enum.of({
   LoyaltyPoints: "loyalty_points",
 });

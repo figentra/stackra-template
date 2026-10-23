@@ -3,7 +3,8 @@
  * Purpose: proves the public product read returns the storefront projection (price from the faked
  *          pricing client, stock from inventory) and hides a draft slug.
  * Boundary: unit tier through the pipeline, memory drivers, factories for the product, its variants
- *           and their stock, a fake pricing client in the one typed form (ADR 0269).
+ *           and their stock, the pricing client in the one fake shape, answered by its query class
+ *           (ADR 0269).
  * Runtime: node
  * Governing contract: ADR 0098, ADR 0082 (public area), ADR 0269, ADR 0022
  */
@@ -14,7 +15,7 @@ import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { PricingClient } from "#stackra/clients/pricing";
+import { PricingClient, QuotePriceQuery } from "#stackra/clients/pricing";
 import { CommerceModule } from "#stackra/module";
 import { ProductFactory } from "#modules/catalogue/database/factories/product.factory";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
@@ -23,8 +24,8 @@ import { GetProductBySlugQuery } from "#modules/catalogue/queries/get-product-by
 import { StockLevelFactory } from "#modules/inventory/database/factories/stock-level.factory";
 
 /** Every quoted line costs 4 500 minor units of SAR. */
-const pricing = fakeClient(PricingClient, (fake) =>
-  fake.price.quote.returns(({ lines }) => ({
+const pricing = fakeClient((fake) =>
+  fake.on(QuotePriceQuery).returns(({ lines }) => ({
     currency: "SAR",
     lines: lines.map((line) => ({ ...line, unitPriceMinor: 4_500 })),
   })),

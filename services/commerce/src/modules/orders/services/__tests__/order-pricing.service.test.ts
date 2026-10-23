@@ -2,9 +2,9 @@
  * Stackra file contract:
  * Purpose: proves totals are subtotal plus every `adjustTotals` adjustment, in implementer order,
  *          clamped at zero.
- * Boundary: unit tier; the pricing client and catalogue are faked by class, the two extensions of
- *           the `adjustTotals` slot are registered inline. The variant id comes from a factory,
- *           never a literal.
+ * Boundary: unit tier; the pricing client is the one fake shape and the catalogue is
+ *           overridden by class; the two extensions of the `adjustTotals` slot are registered
+ *           inline. The variant id comes from a factory, never a literal.
  * Runtime: node
  * Governing contract: ADR 0265 (extension points: after and before slots), ADR 0263 (override by
  *                     class), ADR 0022, ADR 0269
@@ -14,7 +14,7 @@ import { fakeClient } from "@stackra/clients/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { actors } from "@stackra/iam/testing";
 import { describe, expect, it } from "@stackra/testing";
-import { PricingClient } from "#stackra/clients/pricing";
+import { PricingClient, QuotePriceQuery } from "#stackra/clients/pricing";
 import { VariantFactory } from "#modules/catalogue/database/factories/variant.factory";
 import { ProductService } from "#modules/catalogue/services/product.service";
 import { OrderExtensionPoint } from "#modules/orders/extensions/order.extension-point";
@@ -34,8 +34,8 @@ const adjust = (code: string, amountMinor: number) => (totals: OrderTotals) =>
 describe(OrderPricingService, () => {
   /** Two inline extensions at orders 10 and 20; the second alone would take the total negative. */
   it("applies adjustments in order and never goes below zero", async () => {
-    const pricing = fakeClient(PricingClient, (fake) =>
-      fake.price.quote.returns(({ lines }) => ({
+    const pricing = fakeClient((fake) =>
+      fake.on(QuotePriceQuery).returns(({ lines }) => ({
         currency: "USD",
         lines: lines.map((line) => ({ ...line, unitPriceMinor: 1_000 })),
       })),

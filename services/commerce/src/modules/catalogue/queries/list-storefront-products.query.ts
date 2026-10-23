@@ -54,16 +54,14 @@ export class ListStorefrontProductsQuery extends Query({
           },
           cursor: input.cursor,
           limit: input.limit,
-          populate: ["variants"],
+          populate: ["variants", "collections"],
         })
       : await this.products.page(
           {
             status: ProductStatus.Active,
-            ...(input.collection
-              ? { collections: { $contains: [{ slug: input.collection }] } }
-              : {}),
+            ...(input.collection ? { collections: { slug: input.collection } } : {}),
           },
-          { cursor: input.cursor, limit: input.limit, populate: ["variants"] },
+          { cursor: input.cursor, limit: input.limit, populate: ["variants", "collections"] },
         );
     const items = await Promise.all(
       page.items.map((product) => this.storefront.toCard(product, ctx)),

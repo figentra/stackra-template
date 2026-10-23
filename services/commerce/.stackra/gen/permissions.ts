@@ -35,6 +35,18 @@ export const permissions = {
     policy: "ProductPolicy.archive",
   },
   "catalogue.product.import": { risk: Risk.L1, usedBy: ["ProductResource import"] },
+  "catalogue.product_collection.read": {
+    risk: Risk.L0,
+    usedBy: ["catalogue.product_collection.list@1"],
+  },
+  "catalogue.product_collection.create": {
+    risk: Risk.L1,
+    usedBy: ["catalogue.product_collection.create@1"],
+  },
+  "catalogue.product_collection.update": {
+    risk: Risk.L1,
+    usedBy: ["catalogue.product_collection.update@1"],
+  },
   "inventory.stock.read": {
     risk: Risk.L1,
     usedBy: ["inventory.stock.list_low@1"],

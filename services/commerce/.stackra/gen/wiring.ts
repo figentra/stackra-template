@@ -50,17 +50,21 @@ import { ListStorefrontProductsQuery } from "#modules/catalogue/queries/list-sto
 import { SearchProductsQuery } from "#modules/catalogue/queries/search-products.query";
 import { SearchVariantsQuery } from "#modules/catalogue/queries/search-variants.query";
 import { ProductResource } from "#modules/catalogue/resources/product/product.resource";
+import { ProductCollectionResource } from "#modules/catalogue/resources/product-collection/product-collection.resource";
 import { ProductService } from "#modules/catalogue/services/product.service";
+import { ProductCollectionService } from "#modules/catalogue/services/product-collection.service";
 import { StorefrontService } from "#modules/catalogue/services/storefront.service";
 import { StockPolicy } from "#modules/inventory/access/stock.policy";
 import { AdjustStockAction } from "#modules/inventory/actions/adjust-stock.action";
 import { ListLowStockQuery } from "#modules/inventory/queries/list-low-stock.query";
 import { StockService } from "#modules/inventory/services/stock.service";
 import { CommerceLoyaltyMembersDriver } from "#modules/loyalty/drivers/commerce-loyalty-members.driver";
+import { HoldPointsExtension } from "#modules/loyalty/extensions/hold-points.extension";
 import { RedeemPointsExtension } from "#modules/loyalty/extensions/redeem-points.extension";
 import { VerifyPointsBalanceExtension } from "#modules/loyalty/extensions/verify-points-balance.extension";
 import { EarnOnOrderPaidListener } from "#modules/loyalty/listeners/earn-on-order-paid.listener";
-import { RedeemOnOrderPlacedListener } from "#modules/loyalty/listeners/redeem-on-order-placed.listener";
+import { ReleaseOnOrderCancelledListener } from "#modules/loyalty/listeners/release-on-order-cancelled.listener";
+import { SettleOnOrderPlacedListener } from "#modules/loyalty/listeners/settle-on-order-placed.listener";
 import { AcceptingOrdersPrecondition } from "#modules/orders/access/accepting-orders.precondition";
 import { OrderPolicy } from "#modules/orders/access/order.policy";
 import { CancelOrderAction } from "#modules/orders/actions/cancel-order.action";
@@ -86,7 +90,7 @@ import { NotificationsClient } from "./clients/notifications";
 import { PaymentsClient } from "./clients/payments";
 import { PricingClient } from "./clients/pricing";
 import { CommerceModule } from "./module";
-import { ProductOperations } from "./operations";
+import { ProductCollectionOperations, ProductOperations } from "./operations";
 
 /**
  * Driver names gen found (`extends Driver(Port)`, named by the file prefix), keyed by the port's
@@ -173,6 +177,13 @@ export const wiring = {
     {
       module: "catalogue",
       kind: "service",
+      provide: ProductCollectionService,
+      lifetime: Lifetime.Singleton,
+      deps: [],
+    },
+    {
+      module: "catalogue",
+      kind: "service",
       provide: StorefrontService,
       lifetime: Lifetime.Singleton,
       deps: [PricingClient, StockService],
@@ -197,6 +208,27 @@ export const wiring = {
       provide: ProductOperations.List,
       lifetime: Lifetime.Singleton,
       deps: [ProductService],
+    },
+    {
+      module: "catalogue",
+      kind: "action",
+      provide: ProductCollectionOperations.Create,
+      lifetime: Lifetime.Singleton,
+      deps: [ProductCollectionService],
+    },
+    {
+      module: "catalogue",
+      kind: "action",
+      provide: ProductCollectionOperations.Update,
+      lifetime: Lifetime.Singleton,
+      deps: [ProductCollectionService],
+    },
+    {
+      module: "catalogue",
+      kind: "query",
+      provide: ProductCollectionOperations.List,
+      lifetime: Lifetime.Singleton,
+      deps: [ProductCollectionService],
     },
     {
       module: "catalogue",
@@ -265,6 +297,13 @@ export const wiring = {
       module: "catalogue",
       kind: "resource",
       provide: ProductResource,
+      lifetime: Lifetime.Singleton,
+      deps: [],
+    },
+    {
+      module: "catalogue",
+      kind: "resource",
+      provide: ProductCollectionResource,
       lifetime: Lifetime.Singleton,
       deps: [],
     },
@@ -365,7 +404,7 @@ export const wiring = {
       kind: "workflow",
       provide: CreateOrderWorkflow,
       lifetime: Lifetime.Singleton,
-      deps: [OrderPricingService, StockService, OrderService, PaymentsClient],
+      deps: [OrderPricingService, StockService, OrderService, PaymentsClient, OrderExtensionPoint],
     },
     {
       module: "orders",
@@ -426,6 +465,13 @@ export const wiring = {
     },
     {
       module: "loyalty",
+      kind: "extension",
+      provide: HoldPointsExtension,
+      lifetime: Lifetime.Singleton,
+      deps: [LoyaltyService],
+    },
+    {
+      module: "loyalty",
       kind: "listener",
       provide: EarnOnOrderPaidListener,
       lifetime: Lifetime.Singleton,
@@ -434,9 +480,16 @@ export const wiring = {
     {
       module: "loyalty",
       kind: "listener",
-      provide: RedeemOnOrderPlacedListener,
+      provide: SettleOnOrderPlacedListener,
       lifetime: Lifetime.Singleton,
-      deps: [LoyaltyService, OrderService],
+      deps: [LoyaltyService],
+    },
+    {
+      module: "loyalty",
+      kind: "listener",
+      provide: ReleaseOnOrderCancelledListener,
+      lifetime: Lifetime.Singleton,
+      deps: [LoyaltyService],
     },
     {
       module: "loyalty",
@@ -462,6 +515,7 @@ export const wiring = {
       slots: {
         adjustTotals: { kind: "after", extensions: [RedeemPointsExtension] },
         verifyPlacement: { kind: "before", extensions: [VerifyPointsBalanceExtension] },
+        reservePlacement: { kind: "before", extensions: [HoldPointsExtension] },
       },
     },
   ],
