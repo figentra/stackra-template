@@ -1,12 +1,41 @@
 {
-  "$comment": "Stackra file contract — Purpose: the mobile app's own strings (namespace `mobile::`). Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails; other modules' strings are overrides under src/overrides/<module>/lang/. Runtime: react-native. Governing contract: ADR 0192, ADR 0234",
-  "tabs": {
-    "home": "الرئيسية",
-    "orders": "الطلبات",
-    "settings": "الإعدادات"
+  "$comment": "Stackra file contract — Purpose: the mobile app's own strings (namespace `mobile::`). Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails. Derived keys sit under their kind segment and are never authored elsewhere: `routes.<route>.title` (also the tab label), `documents.<document>.title`, `enums.<enum>.<code>`, `errors.<code>.message`; every other key is authored. Other modules' strings are overrides under assets/overrides/<namespace>/. Runtime: react-native. Governing contract: ADR 0294 (decision 20), ADR 0192, ADR 0234",
+  "routes": {
+    "home": {
+      "title": "الرئيسية"
+    },
+    "orders": {
+      "title": "الطلبات"
+    },
+    "settings": {
+      "title": "الإعدادات"
+    },
+    "order_detail": {
+      "title": "الطلب"
+    },
+    "create_order": {
+      "title": "طلب جديد"
+    },
+    "scan": {
+      "title": "مسح"
+    },
+    "announcements": {
+      "title": "الإعلانات"
+    },
+    "inbox": {
+      "title": "صندوق الوارد"
+    },
+    "notification_preferences": {
+      "title": "تفضيلات الإشعارات"
+    },
+    "profile": {
+      "title": "الملف الشخصي"
+    },
+    "sign_in": {
+      "title": "تسجيل الدخول"
+    }
   },
   "home": {
-    "title": "الرئيسية",
     "quick_actions": "إجراءات سريعة",
     "new_order": "طلب جديد",
     "scan": "مسح",
@@ -14,13 +43,11 @@
     "inbox": "صندوق الوارد"
   },
   "orders": {
-    "title": "الطلبات",
     "empty": "لا توجد طلبات بعد",
     "empty_hint": "أنشئ طلبًا من الرئيسية أو امسح رمزًا شريطيًا.",
     "error": "تعذّر تحميل الطلبات."
   },
   "order": {
-    "title": "الطلب",
     "lines": "العناصر",
     "total": "الإجمالي",
     "cancel": "إلغاء الطلب",
@@ -28,7 +55,6 @@
     "open": "فتح الطلب"
   },
   "create_order": {
-    "title": "طلب جديد",
     "variant": "المتغير",
     "variant_hint": "اكتب معرّف المتغير أو امسح رمزه الشريطي.",
     "quantity": "الكمية",
@@ -40,14 +66,12 @@
     }
   },
   "scan": {
-    "title": "مسح",
     "hint": "وجّه الكاميرا نحو الرمز الشريطي.",
     "permission": "يحتاج Acme إلى الكاميرا لقراءة الرموز الشريطية.",
     "unavailable": "المسح غير متاح على هذا الجهاز.",
     "found": "تم العثور على {title}"
   },
-  "settings": {
-    "title": "الإعدادات",
+  "app_settings": {
     "language": "اللغة",
     "notifications": "الإشعارات",
     "notification_preferences": "تفضيلات الإشعارات",
@@ -61,24 +85,16 @@
   },
   "consent": {
     "title": "الخصوصية",
-    "necessary": "ضرورية",
     "necessary_hint": "تسجيل الدخول وجلستك والطلبات دون اتصال. مفعّلة دائمًا.",
-    "analytics": "تحليلات المنتج",
     "analytics_hint": "أحداث استخدام مجهولة تساعدنا على تحسين التطبيق.",
-    "crash_replay": "تسجيلات الأعطال",
     "crash_replay_hint": "تسجيل للشاشة عند تعطّل التطبيق، يُرسل مع تقرير العطل."
   },
   "inbox": {
-    "title": "صندوق الوارد",
     "empty": "لا توجد إشعارات بعد",
     "empty_hint": "تظهر هنا تحديثات الطلبات ورسائل مساحة عملك.",
     "unread": "{count, plural, zero {لا توجد إشعارات غير مقروءة} one {إشعار واحد غير مقروء} two {إشعاران غير مقروءين} few {# إشعارات غير مقروءة} many {# إشعارًا غير مقروء} other {# إشعار غير مقروء}}"
   },
-  "notification_preferences": {
-    "title": "تفضيلات الإشعارات"
-  },
   "profile": {
-    "title": "الملف الشخصي",
     "tenant": "مساحة العمل",
     "roles": "الأدوار",
     "switch_tenant": "تبديل مساحة العمل",
@@ -99,7 +115,6 @@
     "button": "تسجيل الدخول"
   },
   "announcements": {
-    "title": "الإعلانات",
     "headline": "مرحبًا بك في مساحة عملك",
     "body": "الطلبات التي تنشئها هنا تصل إلى لوحة التحكم فورًا، حتى لو كنت غير متصل.",
     "cta": "أنشئ طلبًا"
@@ -110,10 +125,28 @@
     "retry": "إعادة المحاولة",
     "empty": "لا شيء هنا بعد"
   },
-  "permissions": {
+  "usage": {
     "camera": "يمسح Acme الرموز الشريطية للمنتجات لإضافتها إلى الطلب."
   },
-  "refusals": {
-    "session_required": "تحتاج هذه الشاشة إلى تسجيل الدخول."
+  "documents": {
+    "announcements": {
+      "title": "الإعلانات"
+    }
+  },
+  "enums": {
+    "consent_category": {
+      "necessary": "ضرورية",
+      "analytics": "تحليلات المنتج",
+      "crash_replay": "تسجيلات الأعطال"
+    },
+    "cta_verb": {
+      "navigate": "فتح شاشة",
+      "action": "تنفيذ إجراء"
+    }
+  },
+  "errors": {
+    "session_required": {
+      "message": "تحتاج هذه الشاشة إلى تسجيل الدخول."
+    }
   }
 }

@@ -6,7 +6,7 @@
  *          styles and writes the theme type file. `#src/*` and `#stackra/*` subpath imports resolve
  *          through package.json (Metro ≥ 0.81); no alias lives here.
  * Boundary: build tooling only. No dev port here: Expo CLI ignores `server.port`, so `stackra dev`
- *           passes `--port` from runway.yaml `environments.dev.mobile.metroPort` plus the worktree
+ *           passes `--port` from runway.yaml `environments.dev.port` plus the worktree
  *           lane offset.
  * Runtime: node
  */

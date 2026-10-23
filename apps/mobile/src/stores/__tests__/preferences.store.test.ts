@@ -4,7 +4,7 @@
  *          choice never leaks into another's.
  * Boundary: unit tier; the storage fake is in memory; `createStore` hydrates from it.
  * Runtime: isomorphic
- * Governing contract: ADR 0022, ADR 0079, ADR 0256
+ * Governing contract: ADR 0022, ADR 0079, ADR 0256, ADR 0294 (decision 16)
  */
 import { createStore } from "@stackra/state/testing";
 import { fakeStorage } from "@stackra/storage/testing";

@@ -1,40 +1,47 @@
 /**
  * Stackra file contract:
- * Purpose: one fact: how the app authenticates (the app variant of identity config): the callback
- *          path under the app scheme, the scopes and the idle rule for the PKCE flow in the system
- *          browser against ZITADEL.
- * Boundary: a native client has exactly one flow, authorization code with PKCE, so there is no flow
- *           switch. The issuer and client id are the public env (`MobileEnv`), never here; no
- *           secret exists on a native client. The deep-link scheme is `release.config.ts`. There is
- *           no login UI: the sign-in page opens the hosted page. Tokens live in the secure-store
- *           session store with a rotated refresh token.
+ * Purpose: this app's override of @stackra/identity's configuration: how the app authenticates.
+ *          The ZITADEL issuer and native client, the callback path under the app scheme, the scopes
+ *          and the idle rule of the authorization-code flow with PKCE in the system browser.
+ * Boundary: an override declares `override` members only and inherits the base's key; its presence
+ *           mounts the session context (tokens in the secure-store session store, refresh token
+ *           rotated by the package), so the app writes no session provider. A native client has
+ *           exactly one flow, so there is no flow switch, and it holds no client credential: the
+ *           issuer and the public client id are env values. The scheme is `stackra.config.ts`
+ *           `scheme`; gen writes `<scheme>://<nativeRedirectPath>` as the redirect URI and filters
+ *           it out of navigation. There is no login UI: the sign-in page opens the hosted page.
  * Runtime: isomorphic
- * Governing contract: ADR 0206, ADR 0241
+ * Governing contract: ADR 0294 (decision 19), ADR 0295 (decision 10), ADR 0206, ADR 0241
  */
-import { Config } from "@stackra/config";
-import { Bool, Int, List, Str } from "@stackra/validation";
+import { Env } from "@stackra/config";
+import type { Url } from "@stackra/contracts";
+import { IdentityConfig } from "@stackra/identity";
 
-/**
- * Gen writes `<release.scheme>://<nativeRedirectPath>` as the redirect URI and filters it out of
- * navigation.
- */
-@Config("mobile.identity")
-export class IdentityConfig {
-  /**
-   * The custom-scheme redirect path, registered on the ZITADEL native app. @defaultValue
-   * "auth/callback"
-   */
-  @Str({ pattern: /^[a-z][a-z0-9/-]*$/ }) nativeRedirectPath = "auth/callback";
-  /** Scopes requested at login; the roles scope feeds the IAM claims (ADR 0208). */
-  @List(Str) scopes: string[] = [
+/** PKCE against the project's ZITADEL; a shared device signs out after half an hour idle. */
+export class MobileIdentityConfig extends IdentityConfig {
+  /** ZITADEL issuer; the PKCE flow discovers its endpoints from it. */
+  @Env("EXPO_PUBLIC_ZITADEL_ISSUER")
+  override issuer!: Url;
+
+  /** ZITADEL native-app client id: a public client, PKCE, no client credential. */
+  @Env("EXPO_PUBLIC_ZITADEL_CLIENT_ID")
+  override clientId!: string;
+
+  /** The custom-scheme redirect path, registered on the ZITADEL native app. */
+  override nativeRedirectPath = "auth/callback";
+
+  /** Scopes requested at sign-in; the roles scope feeds the IAM claims (ADR 0208). */
+  override scopes = [
     "openid",
     "profile",
     "email",
     "offline_access",
     "urn:zitadel:iam:org:projects:roles",
   ];
-  /** Minutes of inactivity before a forgotten shared device signs out. @defaultValue 30 */
-  @Int({ min: 5 }) idleMinutes = 30;
-  /** Refresh the access token when the app returns to the foreground. @defaultValue true */
-  @Bool() refreshOnForeground = true;
+
+  /** Minutes of inactivity before a forgotten shared device signs out; the queue only pauses. */
+  override idleMinutes = 30;
+
+  /** Refresh the access token when the app returns to the foreground. */
+  override refreshOnForeground = true;
 }

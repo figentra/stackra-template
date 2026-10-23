@@ -1,16 +1,21 @@
 # src/schemas
 
-Schema classes (`class X extends Schema(z.object(…)) {}`): value and type under one name, never
-`new`-ed. Shared by the routes (`params`), the form adapters, the page hooks and the block registry,
-so a shape is declared once. Zod is visible here on purpose: wire DTOs need its composition;
-hydrated classes (config) use field decorators instead.
+Schema classes (`class X extends Schema`, or a subclass of a generated client shape): the field
+types are the rules, the initializers the defaults, and gen compiles each class to one Zod schema in
+`#stackra/schemas` (ADR 0294 decisions 4 and 26), so no Zod is written here. A shape is built with
+`X.create({...})` and checked with `validate(X, raw)`, never `new`-ed. Shared by the routes
+(`params`), the form adapter, the page hooks and the block's nested props, so each shape is declared
+once. A union of shapes is a union of classes with an enum case as the discriminant.
 
-| File                            | Used by                                                                                      |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| `order-detail-params.schema.ts` | `routes/order-detail.route.ts` `params`                                                      |
-| `create-order-params.schema.ts` | `routes/create-order.route.ts` `params`                                                      |
-| `orders-filter.schema.ts`       | `routes/orders.route.ts` `params` (over the producer's `OrderStatus` enum codec)             |
-| `create-order.schema.ts`        | the create-order form, derived from `Commerce.actions.CreateOrder.input` (never re-declared) |
-| `promo-banner.schema.ts`        | `blocks/promo-banner` props; a navigate verb holds a `RouteKey`                              |
+| File                            | Class               | Used by                                                                           |
+| ------------------------------- | ------------------- | --------------------------------------------------------------------------------- |
+| `order-detail-params.schema.ts` | `OrderDetailParams` | `routes/order-detail/order-detail.route.ts` `params`                              |
+| `create-order-params.schema.ts` | `CreateOrderParams` | `routes/create-order/create-order.route.ts` `params`                              |
+| `orders-filter.schema.ts`       | `OrdersFilter`      | `routes/orders/orders.route.ts` `params` (over the producer's `OrderStatus`)      |
+| `create-order-form.schema.ts`   | `CreateOrderForm`   | the create-order form, extending the action's `RequestedLine` (never re-declared) |
+| `promo-banner-cta.schema.ts`    | `PromoBannerCta`    | `blocks/promo-banner` `cta`: a label and `NavigateEvent \| ActionEvent`           |
+| `navigate-event.schema.ts`      | `NavigateEvent`     | the navigate verb (`CtaVerb.Navigate`) holding a generated `RouteKey`             |
+| `action-event.schema.ts`        | `ActionEvent`       | the action verb (`CtaVerb.Action`) holding an action key                          |
 
-Tests: `__tests__/<name>.schema.test.ts`, pure, no DOM.
+The block's own props are fields of `PromoBannerBlock`, not a schema here. Tests:
+`__tests__/<name>.schema.test.ts`, pure, no DOM.

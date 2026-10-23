@@ -1,28 +1,27 @@
 # src
 
-| Folder / file         | Owns                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mobile.app.ts`       | the `@App` root: the theme, the provider stack in mount order, the root layout, the panel; its header lists the provider folders           |
-| `config/`             | one `@Config` class per fact: env, i18n, theming, identity, query, state, telemetry, push, release, realtime, analytics, consent, flags    |
-| `enums/`              | class enums only this app uses (`ConsentCategory`)                                                                                         |
-| `errors/`             | `AppError` subclasses this app raises (`SessionRequiredError`)                                                                             |
-| `analytics/`          | `@AnalyticsEvent` classes (`BarcodeScanned`)                                                                                               |
-| `menus/`              | `@Menu` classes: the order card's context menu                                                                                             |
-| `routes/`             | `@Route` classes (`*.route.ts`) and `@Layout` classes (`*.layout.ts`); `__tests__/` holds loader/guard tests and the Maestro `*.flow.yaml` |
-| `components/ui/`      | shared presentational components, folder shape of ADR 0128 d2                                                                              |
-| `components/pages/`   | one page-level component per route, with its own `use-<name>.ts` hook and `__tests__/`                                                     |
-| `blocks/`             | `@Block` classes with their components (the promo banner)                                                                                  |
-| `documents/`          | `@Document` defaults for L2 documents (was `pages/`)                                                                                       |
-| `providers/`          | one folder per provider: `<name>.provider.ts` (only when it runs code before mount), `<name>.context.tsx`, at most one hook                |
-| `stores/`             | `@Store` classes on `@stackra/state`, persisted through `@stackra/storage`                                                                 |
-| `schemas/`            | `Schema(z)` classes: route params, the form, the block props                                                                               |
-| `overrides/<module>/` | `@Override` classes that change another module's components (its strings: `assets/overrides/<namespace>/`)                                 |
-| `assets/`             | `lang/<locale>/mobile.json`, `public/logo.svg`                                                                                             |
-| `styles/global.css`   | the one stylesheet entry                                                                                                                   |
-| `__tests__/`          | the app root boot test                                                                                                                     |
+The groups of an app (ADR 0294 decision 14); a group folder appears with its first file.
 
-No `features/` (a feature is a module or a page component), no `screens/`, `layouts/` or `pages/`
-(routes, routes and documents), no `hooks/` yet (it appears with the first hook two components
-share; today every hook has one owner and sits beside it). `menus/` holds context menus only: a
-phone has no application menu. No entry, no navigator, no linking, no Expo config here: `.stackra/`
-holds them, generated from `stackra.config.ts`, `runway.yaml`, `config/` and the decorated classes.
+| Folder / file        | Owns                                                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| `mobile.module.ts`   | the root module: the remote modules compiled into the binary; everything else is discovered by folder     |
+| `config/`            | config classes: overrides of the packages' configs (their presence mounts each context) and `MobileEnv`   |
+| `routes/<name>/`     | one folder per route or layout: `<name>.route.ts` or `.layout.ts`, the page `<name>.tsx`, its hook, tests |
+| `components/<name>/` | shared presentational components                                                                          |
+| `blocks/<name>/`     | page-builder blocks: the declaration (its props as fields) and its renderer                               |
+| `documents/`         | default documents the routes render until a tenant publishes its own                                      |
+| `menus/`             | the order card's context menu and the tab bar                                                             |
+| `stores/`            | client state classes, persisted through `@stackra/storage`                                                |
+| `schemas/`           | shape classes: route params, the form, the block's call to action                                         |
+| `enums/`             | enums only this app uses (`ConsentCategory`, `CtaVerb`)                                                   |
+| `errors/`            | refusals this app raises (`SessionRequiredError`)                                                         |
+| `analytics/`         | analytics events (`BarcodeScanned`)                                                                       |
+| `styles/global.css`  | the one stylesheet entry                                                                                  |
+| `__tests__/`         | the root module's boot test                                                                               |
+
+No `providers/`: every context this app needs is a package's, mounted from its config class; the
+folder would appear only for a `Module({ wrap })` component no package ships. No `overrides/`: the
+app overrides no block or Custom widget, and its one string override lives in
+`assets/overrides/orders/`. No `hooks/` yet: it appears with the first hook two components share. No
+entry, navigator, linking, Expo, EAS or Metro configuration here: gen writes them into `.stackra/`
+from `stackra.config.ts`, runway.yaml, `config/` and the classes above.

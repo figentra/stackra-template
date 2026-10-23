@@ -1,6 +1,10 @@
 {
-  "$comment": "Stackra file contract — Purpose: this app's override of the `orders::` strings, shorter for a phone screen; gen merges it key by key over the orders module's own lang files. Boundary: only keys the orders module declares, the same keys in every locale (gen fails otherwise). Runtime: react-native. Governing contract: ADR 0192, ADR 0234 d9 (string overrides live in `assets/overrides/<namespace>/`)",
-  "order": {
-    "cancel_confirm": "إلغاء هذا الطلب؟"
+  "$comment": "Stackra file contract — Purpose: this app's override of the `orders::` strings, shorter for a phone screen; gen merges it key by key over the orders module's own lang files. Boundary: only keys the orders module defines, its derived keys included (`actions.order.cancel.confirm` is the cancel action's confirmation), the same keys in every locale (gen fails otherwise). Runtime: react-native. Governing contract: ADR 0192, ADR 0234 d9 (string overrides live in `assets/overrides/<namespace>/`), ADR 0294 (decisions 20 and 23: an override swaps an asset file's strings by path)",
+  "actions": {
+    "order": {
+      "cancel": {
+        "confirm": "إلغاء هذا الطلب؟"
+      }
+    }
   }
 }

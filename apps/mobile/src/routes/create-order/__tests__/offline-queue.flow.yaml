@@ -1,0 +1,25 @@
+# Stackra file contract:
+# Purpose: offline, an order is queued (toast, banner count); online again, the queue drains and the
+#          banner clears.
+# Boundary: one journey; airplane mode is Maestro's, so this flow runs on Android in the gate and is
+#           advisory on iOS. Sign-in is the sign-in route's flow, run first.
+# Runtime: node
+# Governing contract: ADR 0059, ADR 0252, ADR 0022, ADR 0294 (decision 14)
+appId: ${APP_ID}
+name: offline-queue
+tags: [gate, android]
+---
+- runFlow: ../../sign-in/__tests__/sign-in-and-home.flow.yaml
+- setAirplaneMode: enabled
+- tapOn: { id: "home-new-order" }
+- tapOn: { id: "field-variant" }
+- inputText: "var_01JA0000000000000000000001"
+- hideKeyboard
+- tapOn: { id: "create-order-submit" }
+- assertVisible:
+    text: "back online|عودة الاتصال"
+- assertVisible: { id: "offline-banner" }
+- setAirplaneMode: disabled
+- assertNotVisible: { id: "offline-banner", timeout: 20000 }
+- tapOn: { id: "tab-orders" }
+- assertVisible: { id: "orders-list" }

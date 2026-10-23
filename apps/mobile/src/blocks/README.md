@@ -1,14 +1,15 @@
 # src/blocks
 
-`@Block` classes and their components (every app that contributes page-builder blocks has a
-`blocks/`). A block is data-addressable code: tenants place it in L2 documents by key, the
-experience service validates its props on publish, the renderer re-validates on render and refuses a
-key nobody registers (ADR 0110 d6). Folder shape:
-`<name>/{<name>.block.ts, <name>.tsx, index.ts, __tests__/}`.
+Page-builder blocks this app contributes. A block is data-addressable code: tenants place it in
+documents by key, the experience service validates its props on publish, and the renderer
+re-validates on render and refuses a key nobody registers (ADR 0110 decision 6). Folder shape (ADR
+0294 decision 14): `<name>/{<name>.block.ts, <name>.tsx, __tests__/}`, with an optional
+`<name>.native.tsx` when a block also has a web renderer. The declaration's fields are the props;
+the renderer is bound by file name, so neither imports the other's file.
 
-| Folder          | Key                   | Props schema                     | Renders                                             |
-| --------------- | --------------------- | -------------------------------- | --------------------------------------------------- |
-| `promo-banner/` | `mobile.promo_banner` | `schemas/promo-banner.schema.ts` | a headline, body and one closed-verb call to action |
+| Folder          | Class              | Key                   | Renders                                                    |
+| --------------- | ------------------ | --------------------- | ---------------------------------------------------------- |
+| `promo-banner/` | `PromoBannerBlock` | `mobile.promo_banner` | a headline, body and one call to action (`PromoBannerCta`) |
 
-Gen lists every block in `.stackra/app-manifest.json` (`blocks`) so the page builder offers it, and
+Gen lists every block in `stackra.manifest.json` (`blocks`) so the page builder offers it, and
 checks that every document in `documents/` references registered blocks by class.

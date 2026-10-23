@@ -1,12 +1,41 @@
 {
-  "$comment": "Stackra file contract — Purpose: the mobile app's own strings (namespace `mobile::`). Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails; other modules' strings are overrides under src/overrides/<module>/lang/. Runtime: react-native. Governing contract: ADR 0192, ADR 0234",
-  "tabs": {
-    "home": "Home",
-    "orders": "Orders",
-    "settings": "Settings"
+  "$comment": "Stackra file contract — Purpose: the mobile app's own strings (namespace `mobile::`). Boundary: same keys in every locale (gen fails otherwise); every Arabic plural carries all six CLDR categories (zero, one, two, few, many, other) or gen fails. Derived keys sit under their kind segment and are never authored elsewhere: `routes.<route>.title` (also the tab label), `documents.<document>.title`, `enums.<enum>.<code>`, `errors.<code>.message`; every other key is authored. Other modules' strings are overrides under assets/overrides/<namespace>/. Runtime: react-native. Governing contract: ADR 0294 (decision 20), ADR 0192, ADR 0234",
+  "routes": {
+    "home": {
+      "title": "Home"
+    },
+    "orders": {
+      "title": "Orders"
+    },
+    "settings": {
+      "title": "Settings"
+    },
+    "order_detail": {
+      "title": "Order"
+    },
+    "create_order": {
+      "title": "New order"
+    },
+    "scan": {
+      "title": "Scan"
+    },
+    "announcements": {
+      "title": "Announcements"
+    },
+    "inbox": {
+      "title": "Inbox"
+    },
+    "notification_preferences": {
+      "title": "Notification preferences"
+    },
+    "profile": {
+      "title": "Profile"
+    },
+    "sign_in": {
+      "title": "Sign in"
+    }
   },
   "home": {
-    "title": "Home",
     "quick_actions": "Quick actions",
     "new_order": "New order",
     "scan": "Scan",
@@ -14,13 +43,11 @@
     "inbox": "Inbox"
   },
   "orders": {
-    "title": "Orders",
     "empty": "No orders yet",
     "empty_hint": "Place one from Home or scan a barcode.",
     "error": "Orders could not be loaded."
   },
   "order": {
-    "title": "Order",
     "lines": "Items",
     "total": "Total",
     "cancel": "Cancel order",
@@ -28,7 +55,6 @@
     "open": "Open order"
   },
   "create_order": {
-    "title": "New order",
     "variant": "Variant",
     "variant_hint": "Type the variant id or scan its barcode.",
     "quantity": "Quantity",
@@ -40,14 +66,12 @@
     }
   },
   "scan": {
-    "title": "Scan",
     "hint": "Point the camera at a barcode.",
     "permission": "Acme needs the camera to read barcodes.",
     "unavailable": "Scanning is not available on this device.",
     "found": "Found {title}"
   },
-  "settings": {
-    "title": "Settings",
+  "app_settings": {
     "language": "Language",
     "notifications": "Notifications",
     "notification_preferences": "Notification preferences",
@@ -61,24 +85,16 @@
   },
   "consent": {
     "title": "Privacy",
-    "necessary": "Necessary",
     "necessary_hint": "Sign-in, your session and offline orders. Always on.",
-    "analytics": "Product analytics",
     "analytics_hint": "Anonymous usage events that help us improve the app.",
-    "crash_replay": "Crash replays",
     "crash_replay_hint": "A recording of the screen when the app crashes, sent with the crash report."
   },
   "inbox": {
-    "title": "Inbox",
     "empty": "No notifications yet",
     "empty_hint": "Order updates and messages from your workspace appear here.",
     "unread": "{count, plural, one {# unread notification} other {# unread notifications}}"
   },
-  "notification_preferences": {
-    "title": "Notification preferences"
-  },
   "profile": {
-    "title": "Profile",
     "tenant": "Workspace",
     "roles": "Roles",
     "switch_tenant": "Switch tenant",
@@ -99,7 +115,6 @@
     "button": "Sign in"
   },
   "announcements": {
-    "title": "Announcements",
     "headline": "Welcome to your workspace",
     "body": "Orders you place here reach the console at once, even when you were offline.",
     "cta": "Place an order"
@@ -110,10 +125,28 @@
     "retry": "Retry",
     "empty": "Nothing here yet"
   },
-  "permissions": {
+  "usage": {
     "camera": "Acme scans product barcodes to add them to an order."
   },
-  "refusals": {
-    "session_required": "This screen needs you to be signed in."
+  "documents": {
+    "announcements": {
+      "title": "Announcements"
+    }
+  },
+  "enums": {
+    "consent_category": {
+      "necessary": "Necessary",
+      "analytics": "Product analytics",
+      "crash_replay": "Crash replays"
+    },
+    "cta_verb": {
+      "navigate": "Open a screen",
+      "action": "Run an action"
+    }
+  },
+  "errors": {
+    "session_required": {
+      "message": "This screen needs you to be signed in."
+    }
   }
 }
