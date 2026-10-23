@@ -1,17 +1,18 @@
 /**
  * Stackra file contract:
- * Purpose: this service's host layer over @acme/loyalty-kit's defaults (package → host → env →
- *          runway).
- * Boundary: only what differs from the package. The ledger stays the kit's default (`postgres`;
- *           runway sets `memory` in dev); the members port has one candidate, commerce's own
- *           driver, so nothing selects it (ADR 0263, ADR 0266). A custom class would be
- *           `@Replaces`.
+ * Purpose: this service's override of @acme/loyalty-kit's configuration: a lower redemption cap.
+ * Boundary: an override declares `override` members only and no new field; it inherits the base's
+ *           key (`loyalty_kit`) and replaces the base across the whole host. The ledger stays the
+ *           kit's default driver (`postgres`; runway sets `memory` in dev), and the members port
+ *           has one candidate, commerce's own driver, so nothing selects it. A custom driver class
+ *           would be bound with `@Replaces(LoyaltyLedger)`.
  * Runtime: node
- * Governing contract: ADR 0146, ADR 0263 d9 (config is data),
- *                     guides/programming-model.mdx#config-files, ADR 0266
+ * Governing contract: ADR 0294 (decision 19), ADR 0146 (config layers), ADR 0263
  */
-import { override } from "@stackra/config";
 import { LoyaltyKitConfig } from "@acme/loyalty-kit";
 
-/** A lower redemption cap than the kit's 50 %: points may cover at most 30 % of an order. */
-export default override(LoyaltyKitConfig, { maxRedeemPercent: 30 });
+/** Points may cover at most 30 % of an order, below the kit's 50 %. */
+export class CommerceLoyaltyKitConfig extends LoyaltyKitConfig {
+  /** Largest share of an order total points may cover, as a whole percentage. */
+  override maxRedeemPercent = 30;
+}

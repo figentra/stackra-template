@@ -2,20 +2,24 @@
   "nav": {
     "sales": "Sales"
   },
-  "resource": {
-    "orders": "Orders"
+  "resources": {
+    "order": {
+      "title": "Orders"
+    }
   },
-  "status": {
-    "pending_payment": "Pending payment",
-    "paid": "Paid",
-    "cancelled": "Cancelled",
-    "expired": "Expired"
-  },
-  "cancel_reason": {
-    "customer": "Cancelled by customer",
-    "staff": "Cancelled by staff",
-    "expired": "Expired unpaid",
-    "payment_failed": "Payment failed"
+  "enums": {
+    "order_status": {
+      "pending_payment": "Pending payment",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "cancel_reason": {
+      "customer": "Cancelled by customer",
+      "staff": "Cancelled by staff",
+      "expired": "Expired unpaid",
+      "payment_failed": "Payment failed"
+    }
   },
   "permissions": {
     "order": {
@@ -26,23 +30,37 @@
     }
   },
   "settings": {
-    "title": "Orders",
-    "auto_cancel_after_minutes": "Cancel unpaid orders after (minutes)",
-    "customers_may_cancel": "Customers may cancel unpaid orders",
-    "accepting_orders": "Accept new orders"
+    "orders": {
+      "title": "Orders",
+      "auto_cancel_after_minutes": "Cancel unpaid orders after (minutes)",
+      "customers_may_cancel": "Customers may cancel unpaid orders",
+      "accepting_orders": "Accept new orders"
+    }
+  },
+  "actions": {
+    "order": {
+      "create": {
+        "success": "Order placed",
+        "queued": "Order saved offline; it is sent when you are back online"
+      },
+      "cancel": {
+        "confirm": "Cancel this order? Reserved stock is released.",
+        "success": "Order cancelled"
+      }
+    }
   },
   "order": {
-    "placed": "Order placed",
-    "queued": "Order saved offline; it is sent when you are back online",
-    "cancel_confirm": "Cancel this order? Reserved stock is released.",
-    "cancelled": "Order cancelled",
     "lines_count": "{count, plural, one {# item} other {# items}}"
   },
   "widgets": {
-    "revenue_today": "Revenue today"
+    "revenue_today": {
+      "title": "Revenue today"
+    }
   },
   "documents": {
-    "sales_today": "Sales today"
+    "sales_today": {
+      "title": "Sales today"
+    }
   },
   "quick_order": {
     "title": "Quick order",
@@ -50,22 +68,30 @@
     "quantity": "Quantity",
     "submit": "Place order"
   },
-  "mail": {
-    "order_placed": {
+  "order_placed": {
+    "mail": {
       "subject": "Your order {id}",
       "body": "Thank you for your order. Total: {total}. It is being prepared.",
       "cta": "View your order"
-    },
-    "order_receipt": {
+    }
+  },
+  "order_receipt": {
+    "mail": {
       "subject": "Receipt for order {id}",
       "intro": "Thanks, your order {id} is paid."
     }
   },
-  "refusals": {
-    "order_not_payable": "This order can no longer take a payment.",
-    "orders_paused": "This store is not taking orders right now. Please try again later."
+  "errors": {
+    "order_not_payable": {
+      "message": "This order can no longer take a payment."
+    },
+    "orders_paused": {
+      "message": "This store is not taking orders right now. Please try again later."
+    }
   },
   "flags": {
-    "quick_order": "Quick order screen"
+    "quick_order": {
+      "label": "Quick order screen"
+    }
   }
 }

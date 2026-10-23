@@ -1,18 +1,20 @@
 /**
  * Stackra file contract:
- * Purpose: `orders.order.create`: the only public way to place an order (HTTP, MCP, clients).
- * Boundary: the action is the contract (key, schemas, permission, UX, offline policy); the work
- *           runs in CreateOrderWorkflow because it crosses modules, calls the payments service and
- *           must compensate (ADR 0101). Callers never see the workflow. A service never names an
- *           app route: `UxAfter.OpenRecord` lets each client open its own order route
- *           (guides/programming-model.mdx#routes).
+ * Purpose: `orders.order.create@1`: the only public way to place an order (HTTP, MCP, clients).
+ * Boundary: the action is the contract: key, input and output (the types of `handle`), the
+ *           precondition, idempotency, rate limit, offline policy and UX. The work runs in
+ *           CreateOrderWorkflow because it crosses modules, calls the payments service and must
+ *           compensate; callers never see the workflow. The permission is derived from the key
+ *           (`OrderPermissions.create`, L1) and the endpoint is derived (`POST /orders`). A service
+ *           never names an app route: `UxAfter.OpenRecord` lets each client open its own order
+ *           route.
  * Runtime: node
- * Governing contract: ADR 0098, 0101, 0136, 0139, guides/programming-model.mdx#actions, ADR 0252
+ * Governing contract: ADR 0294 (decisions 3, 4, 5, 16 and 21), ADR 0098, ADR 0101, ADR 0136,
+ *                     ADR 0138 (as amended), ADR 0139, ADR 0252
  */
 import {
   Action,
-  AsEndpoint,
-  AsTool,
+  type ActionContext,
   ConflictResolution,
   Idempotency,
   IdMinting,
@@ -20,32 +22,26 @@ import {
   OfflinePrecondition,
   UxAfter,
 } from "@stackra/actions";
-import { ActorKind, HttpMethod } from "@stackra/contracts";
-import { I18n } from "#stackra/i18n";
-import { OrderPermissions } from "#modules/orders/permissions/order.permission";
-import { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
-import { CreateOrderOutput } from "#modules/orders/schemas/create-order-output.schema";
+import { ActorKind } from "@stackra/contracts";
+import { AcceptingOrdersPrecondition } from "#modules/orders/access/accepting-orders.precondition";
+import type { CreateOrderInput } from "#modules/orders/schemas/create-order-input.schema";
+import type { CreateOrderOutput } from "#modules/orders/schemas/create-order-output.schema";
 import { CreateOrderWorkflow } from "#modules/orders/workflows/create-order.workflow";
-import { AcceptingOrdersGuard } from "#modules/orders/guards/accepting-orders.guard";
 
 /**
- * Places an order for the acting customer. No `handle`: `runs` hands the validated input to the
- * workflow and returns its output through the same pipeline (guards, permission, idempotency,
- * rate limit, audit, UX). Its risk is `OrderPermissions.create`'s (ADR 0132). Offline clients may
- * queue it with a client-minted id for 72 hours; a conflict on replay is shown to the person, never
- * merged.
+ * Places an order for the acting customer. The pipeline runs tenancy, the permission, the
+ * precondition (refuses while the tenant has paused ordering), idempotency (clients send
+ * Idempotency-Key; the pipeline stores key, hash and result) and the rate limit before `handle`.
+ * Offline clients may queue it with a client-minted id for 72 hours; a conflict on replay is shown
+ * to the person, never merged. Agents may place orders for their user; L1, so no approval.
  */
-@Action({
-  key: "order.create", // gen prefixes the module key: `orders.order.create`
-  input: CreateOrderInput,
-  output: CreateOrderOutput,
-  permission: OrderPermissions.create,
+export class CreateOrderAction extends Action({
+  key: "order.create",
   actors: [ActorKind.User, ActorKind.Agent],
-  guards: [AcceptingOrdersGuard], // refuses while the tenant has paused ordering
-  // clients send Idempotency-Key; the pipeline stores key + hash + result
+  preconditions: [AcceptingOrdersPrecondition],
   idempotency: Idempotency.Required,
   rateLimit: { perMinute: 20 },
-  runs: CreateOrderWorkflow,
+  tool: true,
   intents: ["order two of SKU-123", "buy these items"],
   offline: {
     mode: OfflineMode.Queue,
@@ -54,13 +50,10 @@ import { AcceptingOrdersGuard } from "#modules/orders/guards/accepting-orders.gu
     retention: "72h",
     onConflict: [ConflictResolution.ServerWins, ConflictResolution.Manual],
   },
-  // `queued` is the toast a client shows when it stores the call offline instead of sending it
-  ux: {
-    success: I18n.orders.order.placed,
-    queued: I18n.orders.order.queued,
-    after: [UxAfter.OpenRecord],
-  },
-})
-@AsEndpoint({ method: HttpMethod.Post, path: "/orders" })
-@AsTool() // agents may place orders for their user; L1, so no approval
-export class CreateOrderAction {}
+  ux: { after: [UxAfter.OpenRecord] },
+}) {
+  /** Hands the validated input to the workflow and returns its output through the same pipeline. */
+  async handle(input: CreateOrderInput, ctx: ActionContext): Promise<CreateOrderOutput> {
+    return ctx.run(CreateOrderWorkflow, input);
+  }
+}

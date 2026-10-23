@@ -1,27 +1,26 @@
 /**
  * Stackra file contract:
- * Purpose: proves a redelivered command opens one message, returns the same id, and leads to one
- *          delivery; the memory transport keeps the same contract the resend driver does.
+ * Purpose: proves a redelivered queued call opens one message, returns the same id, and leads to
+ *          one delivery; the memory transport keeps the same contract the resend driver does.
  * Boundary: unit tier through the pipeline; identity faked; memory drivers (the config default
  *           binds the memory transport); the delivery job runs when the memory queue is drained.
  * Runtime: node
- * Governing contract: ADR 0136 (idempotency step), 0260 d4, ADR 0022,
- *                     guides/programming-model.mdx#tests
+ * Governing contract: ADR 0136 (idempotency step), ADR 0260 d4, ADR 0022
  */
-import { describe, expect, it } from "@stackra/testing";
-import { actors } from "@stackra/iam/testing";
-import { createTestingModule } from "@stackra/container/testing";
 import { run } from "@stackra/actions/testing";
+import { createTestingModule } from "@stackra/container/testing";
 import { IdentityResolver } from "@stackra/contracts";
+import { actors } from "@stackra/iam/testing";
 import { fakeIdentity } from "@stackra/identity/testing";
+import { MailTransport } from "@stackra/notifications/contracts";
 import { drainQueue } from "@stackra/queue/testing";
+import { describe, expect, it } from "@stackra/testing";
 import { NotificationsModule } from "#src/notifications.module";
-import { MailTransport } from "#modules/messages/contracts/mail-transport.port";
-import type { MemoryMailTransport } from "#modules/messages/drivers/memory-mail-transport.driver";
 import { SendMessageAction } from "#modules/messages/actions/send-message.action";
+import type { MemoryMailTransportDriver } from "#modules/messages/drivers/memory-mail-transport.driver";
 import { MessageSent } from "#modules/messages/events/message-sent.event";
 
-/** Guards message sending, where a retry must not email a customer twice. */
+/** Guards message sending, where a retry must not mail a customer twice. */
 describe(SendMessageAction, () => {
   /** Same key twice: one row, one delivery job, one transport call, one event, the same output. */
   it("sends once per idempotency key and records once", async () => {
@@ -48,7 +47,7 @@ describe(SendMessageAction, () => {
 
     expect(second.output).toEqual(first.output);
     expect(app.events.published().ofType(MessageSent)).toHaveLength(1);
-    const transport = app.get(MailTransport) as MemoryMailTransport;
+    const transport = app.get(MailTransport) as MemoryMailTransportDriver;
     expect(transport.sent()).toHaveLength(1);
     expect(transport.sent()[0]?.html).toContain("شكراً");
   });

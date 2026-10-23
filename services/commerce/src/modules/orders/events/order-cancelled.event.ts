@@ -1,20 +1,24 @@
 /**
  * Stackra file contract:
- * Purpose: the fact that an order left its lifecycle; `reason` says who or what ended it. Public:
- *          `orders.order.cancelled.v1`.
- * Boundary: one event per class; recorded by the End transition only. The reason is the enum's
- *           codec, so consumers receive the snake_case code and this service's listeners receive
- *           the case.
+ * Purpose: the fact that an order left its lifecycle unpaid; `reason` says who or what ended it.
+ *          Leaves through the outbox as `orders.order.cancelled.v1`.
+ * Boundary: an integration event recorded by OrderStateMachine#cancel and #expire only. The reason
+ *           is a CancelReason code, so every consumer receives the snake_case code.
  * Runtime: isomorphic
- * Governing contract: ADR 0141, ADR 0078, guides/programming-model.mdx#events
+ * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078
  */
-import { Event, IntegrationEvent, z } from "@stackra/events";
-import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
+import type { PublicId } from "@stackra/contracts";
+import { IntegrationEvent } from "@stackra/events";
+import type { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
 
-/**
- * Recorded for a customer, staff, expiry or payment-failed end alike; the reason tells them apart.
- */
-@Event({ name: "order.cancelled", public: true })
-export class OrderCancelled extends IntegrationEvent(
-  z.object({ orderId: z.string(), customerId: z.string(), reason: CancelReason.schema }),
-) {}
+/** Recorded for every kind of end (customer, staff, expiry, failed payment); `reason` says which. */
+export class OrderCancelled extends IntegrationEvent({ name: "order.cancelled" }) {
+  /** The order that ended. */
+  orderId!: PublicId<"ord">;
+
+  /** The customer who placed it. */
+  customerId!: PublicId<"usr">;
+
+  /** Who or what ended it. */
+  reason!: CancelReason;
+}

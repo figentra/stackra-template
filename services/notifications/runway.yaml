@@ -1,30 +1,30 @@
 # yaml-language-server: $schema=../../schemas/runway-service.schema.json
 # Stackra file contract:
-# Purpose: how and where the notifications service runs, per environment. The root runway holds the
-#          destinations.
-# Boundary: what it needs (database `notifications`, queues `delivery` and `inbox`, three secrets)
-#           is derived into the manifest `infra`; this file sizes it. No secret value, no business
-#           value, no identity (stackra.config.ts). Health checks are declared in stackra.config.ts;
-#           this file tunes thresholds only (ADR 0190). The `delivery` dead-letter queue is what
-#           DeliverMessageAction's `deadLetter: true` lands in. Validated by
-#           `@stackra/runway/schema/service.json`.
+# Purpose: WHAT the notifications member needs per environment beyond what gen derives from
+#          stackra.manifest.json: the secret names it reads, the sizes of its own stores (database,
+#          queues), whether crons run, health thresholds, and the config values that set its config
+#          classes, driver choices included. The member is the folder that holds this file, so the
+#          file does not name it.
+# Boundary: never WHERE it runs or how it is packed: deployables, groups, `isolate`, cpu, memory,
+#           instances and worker splits are the root runway's topology (staging groups it with
+#           commerce, production gives it its own group). No secret value (Stackra ADR 0173), no
+#           business value (src/config/*, settings). Every resource here is shared, so there is no
+#           `requires` block. Health checks are declared in stackra.config.ts; this file tunes only
+#           their thresholds (Stackra ADR 0190). The `delivery` dead-letter queue is where
+#           DeliverMessageAction's `deadLetter: true` lands.
 # Runtime: node
-# Governing contract: ADR 0168; ADR 0169, 0238, 0266, 0173, ADR 0223 (notifications is the one
-#                     delivery layer, web push included)
+# Governing contract: Stackra ADR 0296 (member runway), ADR 0168 (as amended), ADR 0173, ADR 0190,
+#                     ADR 0238 (one logical database per service), ADR 0294 (config keys), ADR 0223
+#                     (notifications is the one delivery layer, web push included)
 $schema: "@stackra/runway/schema/service.json"
-version: 2
-# must equal stackra.config.ts `key`
-member: notifications
+version: 3
 
-# Every @Secret of src/config/*, by name; values live in Infisical and runway syncs them on deploy.
-# The Web Push private key lives here, not in a client: this service signs the pushes, and the
-# console holds only the public half (`VITE_WEB_PUSH_VAPID_PUBLIC_KEY`).
-secrets:
-  RESEND_API_KEY: {}
-  RESEND_INBOUND_SIGNING_SECRET: {}
-  WEB_PUSH_VAPID_PRIVATE_KEY: {}
+# Every @Secret of src/config/* and the WebhookEvent's signing secret; gen fails on a missing one.
+# Names only. The Web Push private key lives here, not in a client: this service signs the pushes,
+# and the console holds only the public half (`VITE_WEB_PUSH_VAPID_PUBLIC_KEY`).
+secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
 
-# thresholds only; the path and checks are stackra.config.ts `health`
+# Thresholds only; the path and the checks are stackra.config.ts `health`.
 health:
   readiness:
     requireMigrations: true
@@ -34,47 +34,35 @@ health:
 
 environments:
   dev:
+    # the service's own listener when run standalone; under `encore run` the gateway fronts it
     port: 4002
-    host: localhost
-    devConsolePort: 4902
-    deployable: core
-    drivers:
-      queue: memory
-      events: memory
-      workflow: native
-      webhooks: memory
+    # one logical database `notifications` per lane, one Postgres schema (`messages`) inside it
     database:
       extensions: []
-    config:
-      notifications.service:
-        transport: memory
+    # `encore run` does not run crons; the dev console triggers them
     crons:
       enabled: false
+    # the last config layer: per-environment values, keyed by config key; the queue, events,
+    # workflow and webhooks drivers come from the root runway's `defaults.service.config`
+    config:
+      notifications.delivery:
+        transport: memory
 
   preview:
-    deployable: core
     database:
       plan: shared
-    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
     # previews never mail a real address
     config:
-      notifications.service:
+      notifications.delivery:
         transport: memory
 
   staging:
-    # grouped with commerce: both clients call in-process
-    deployable: core
-    isolate: false
-    resources:
-      cpu: 0.25
-      memory: 512Mi
-      instances:
-        min: 1
-        max: 2
-    poolBudget: 10
     database:
       storageGb: 10
       extensions: []
+      # connections this member may hold on the shared server
+      poolBudget: 10
+    # queue names come from the manifest (the delivery job, the inbox listener); sizes here
     queues:
       delivery:
         visibilityTimeoutSeconds: 120
@@ -84,36 +72,16 @@ environments:
         dlq: true
     crons:
       enabled: true
-    drivers:
-      queue: encore-pubsub
-      events: encore-pubsub
-      workflow: native
-      webhooks: native
-    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
     config:
-      notifications.service:
+      notifications.delivery:
         transport: resend
-    workers:
-      split: false
 
   production:
-    # split: the same code reaches commerce over RPC
-    deployable: notifications
-    isolate: false
-    resources:
-      cpu: 0.5
-      memory: 1Gi
-      instances:
-        min: 2
-        max: 6
-      scaling:
-        metric: cpu
-        target: 60
-    poolBudget: 20
     database:
       storageGb: 20
       extensions: []
       readReplica: false
+      poolBudget: 20
     queues:
       delivery:
         visibilityTimeoutSeconds: 120
@@ -123,14 +91,6 @@ environments:
         dlq: true
     crons:
       enabled: true
-    drivers:
-      queue: encore-pubsub
-      events: encore-pubsub
-      workflow: native
-      webhooks: native
-    secrets: [RESEND_API_KEY, RESEND_INBOUND_SIGNING_SECRET, WEB_PUSH_VAPID_PRIVATE_KEY]
     config:
-      notifications.service:
+      notifications.delivery:
         transport: resend
-    workers:
-      split: false

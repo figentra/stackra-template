@@ -1,21 +1,19 @@
 /**
  * Stackra file contract:
  * Purpose: the refusal when no active product has a variant with the scanned barcode.
- * Boundary: a typed AppError; never reveals whether the barcode exists on an archived product (ADR
- *           0140).
+ * Boundary: a refusal class: kind `NotFound`, code derived from the class name
+ *           (`variant_not_found`). It never reveals whether the barcode belongs to an archived
+ *           product.
  * Runtime: isomorphic
- * Governing contract: ADR 0140, ADR 0232, guides/programming-model.mdx#errors
+ * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0140 (envelope and kinds), ADR 0232
  */
-import { AppError, ErrorCategory } from "@stackra/errors";
+import { ErrorKind, Refusal } from "@stackra/errors";
 
-/** `not_found` / `variant_not_found`. */
-export class VariantNotFoundError extends AppError {
-  constructor(barcode: string) {
-    super({
-      category: ErrorCategory.NotFound,
-      code: "variant_not_found",
-      retryable: false,
-      details: { barcode },
-    });
-  }
+/** Not retryable: scanning the same code again finds the same nothing. */
+export class VariantNotFoundError extends Refusal({
+  kind: ErrorKind.NotFound,
+  retryable: false,
+}) {
+  /** The digits the scanner delivered. */
+  barcode!: string;
 }

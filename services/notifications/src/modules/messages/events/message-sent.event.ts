@@ -1,15 +1,24 @@
 /**
  * Stackra file contract:
- * Purpose: the transport accepted a message; public so analytics can count deliveries without a
- *          call.
- * Boundary: one event per class; recorded on the Message by MessageService.send, once.
+ * Purpose: the fact that the transport accepted a message. Leaves through the outbox as
+ *          `messages.message.sent.v1`, so analytics can count deliveries without a call.
+ * Boundary: an integration event recorded on the Message by MessageService#deliver, once. It
+ *           carries the template key so consumers can count per kind; never the address or the
+ *           body.
  * Runtime: isomorphic
- * Governing contract: ADR 0141, 0078, guides/programming-model.mdx#events
+ * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078, ADR 0134
  */
-import { Event, IntegrationEvent, z } from "@stackra/events";
+import type { PublicId } from "@stackra/contracts";
+import { IntegrationEvent } from "@stackra/events";
 
-/** `messages.message.sent.v1`; carries the mail key so consumers can count per kind. */
-@Event({ name: "message.sent", public: true })
-export class MessageSent extends IntegrationEvent(
-  z.object({ messageId: z.string(), principalId: z.string(), mail: z.string() }),
-) {}
+/** Recorded after the transport returned its message id. */
+export class MessageSent extends IntegrationEvent({ name: "message.sent" }) {
+  /** The message's public id. */
+  messageId!: PublicId<"msg">;
+
+  /** The principal it was sent to. */
+  principalId!: PublicId<"usr">;
+
+  /** The producer's template key. */
+  mail!: string;
+}

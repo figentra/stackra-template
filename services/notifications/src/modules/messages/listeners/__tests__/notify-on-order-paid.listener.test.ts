@@ -1,27 +1,27 @@
 /**
  * Stackra file contract:
- * Purpose: proves a commerce `order.paid` event adds one inbox entry (one call to commerce) and one
- *          `notification.created` broadcast, even when redelivered, and none for a customer who
- *          switched order updates off.
+ * Purpose: proves a commerce `orders.order.paid.v1` event adds one inbox entry (one call to
+ *          commerce) and one `messages.notification.created.v1`, even when redelivered, and none
+ *          for a customer who switched order updates off.
  * Boundary: unit tier; the generated commerce client is faked in the one typed form (ADR 0269), the
  *           event is injected through the memory inbox, settings are faked per user. Commerce's ids
  *           are fixed values: no factory here builds another service's records.
  * Runtime: node
- * Governing contract: ADR 0260 d10 (tests override the client), ADR 0022, ADR 0269
+ * Governing contract: ADR 0260 d10 (tests override the client), ADR 0269, ADR 0022
  */
-import { describe, expect, it } from "@stackra/testing";
-import { actors } from "@stackra/iam/testing";
+import { fakeClient } from "@stackra/clients/testing";
 import { createTestingModule } from "@stackra/container/testing";
 import { deliverRemoteEvent, drainOutbox } from "@stackra/events/testing";
-import { fakeClient } from "@stackra/clients/testing";
+import { actors } from "@stackra/iam/testing";
 import { SettingsReader } from "@stackra/settings";
 import { fakeSettings } from "@stackra/settings/testing";
+import { describe, expect, it } from "@stackra/testing";
 import { Commerce, CommerceClient } from "#stackra/clients";
 import { NotificationsModule } from "#src/notifications.module";
-import { NotifyOnOrderPaidListener } from "#modules/messages/listeners/notify-on-order-paid.listener";
-import { Notification } from "#modules/messages/models/notification.model";
 import { NotificationCreated } from "#modules/messages/events/notification-created.event";
-import { NotificationPreferences } from "#modules/messages/settings/notification-preferences.setting";
+import { NotifyOnOrderPaidListener } from "#modules/messages/listeners/notify-on-order-paid.listener";
+import { MessagesSettings } from "#modules/messages/messages.settings";
+import { Notification } from "#modules/messages/models/notification.model";
 
 /** A booted service whose customer has `orderUpdates` as given, and the faked client. */
 async function setup(orderUpdates: boolean) {
@@ -29,16 +29,16 @@ async function setup(orderUpdates: boolean) {
   const commerce = fakeClient(CommerceClient, (fake) =>
     fake.order.get.returns(({ orderId }) => ({
       id: orderId,
-      status: Commerce.enums.OrderStatus.Paid,
+      status: Commerce.OrderStatus.Paid,
       totals: { currency: "USD", subtotalMinor: 2_000, adjustments: [], totalMinor: 2_000 },
       lines: [{ variantId: "var_00000000000000000000000001", quantity: 1, unitPriceMinor: 2_000 }],
-      createdAt: "2026-10-21T09:00:00Z",
+      createdAt: new Date("2026-10-21T09:00:00Z"),
     })),
   );
   const app = await createTestingModule(NotificationsModule)
     .useDrivers("memory")
     .override(CommerceClient, commerce)
-    .override(SettingsReader, fakeSettings([[NotificationPreferences, { orderUpdates }]]))
+    .override(SettingsReader, fakeSettings([[MessagesSettings, { orderUpdates }]]))
     .compile();
   // commerce's ids: this service has no factory for another service's records
   const paid = {
@@ -57,21 +57,21 @@ describe(NotifyOnOrderPaidListener, () => {
   it("adds one inbox entry per paid order", async () => {
     const { app, commerce, paid } = await setup(true);
 
-    await deliverRemoteEvent(Commerce.events.OrderPaid, paid, { id: "evt_1" });
-    await deliverRemoteEvent(Commerce.events.OrderPaid, paid, { id: "evt_1" }); // redelivery
+    await deliverRemoteEvent(Commerce.OrderPaid, paid, { id: "evt_1" });
+    await deliverRemoteEvent(Commerce.OrderPaid, paid, { id: "evt_1" }); // redelivery
     await drainOutbox();
 
     expect(commerce.called(commerce.order.get)).toHaveLength(1);
     const rows = await app.repository(Notification).find({ principalId: paid.customerId });
-    expect(rows.map((n) => n.data.lines)).toEqual([1]);
-    expect(app.events.published.ofType(NotificationCreated)).toHaveLength(1);
+    expect(rows.map((entry) => entry.data.lines)).toEqual([1]);
+    expect(app.events.published().ofType(NotificationCreated)).toHaveLength(1);
   });
 
   /** A customer who switched order updates off gets no entry and costs no call. */
   it("respects the customer's preference", async () => {
     const { app, commerce, paid } = await setup(false);
 
-    await deliverRemoteEvent(Commerce.events.OrderPaid, paid, { id: "evt_2" });
+    await deliverRemoteEvent(Commerce.OrderPaid, paid, { id: "evt_2" });
     await drainOutbox();
 
     expect(commerce.called(commerce.order.get)).toHaveLength(0);

@@ -1,21 +1,22 @@
 /**
  * Stackra file contract:
  * Purpose: on-hand and reserved units of one variant at one location.
- * Boundary: references a catalogue variant by public id; a cross-module read would go through a
- *           @Link (ADR 0104). `Versioned` gives optimistic locking; StockService adds an advisory
- *           lock around reservations.
+ * Boundary: data, the index and two derived reads. Key `inventory.stock_level`, table
+ *           `inventory.stock_levels` (the module's Postgres schema), public ids `stk_…`. The
+ *           variant belongs to catalogue and is held as its public id, not as a relation, so
+ *           inventory never reads catalogue's table. `Versioned` gives optimistic locking;
+ *           StockService adds an advisory lock around reservations. No constructor-made state: a
+ *           getter and a static are computed, never stored.
  * Runtime: node
- * Governing contract: ADR 0095, 0104, 0133, guides/programming-model.mdx#models
+ * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0149
+ *                     (locking)
  */
-import { Index, Int, Model, Str } from "@stackra/model";
+import type { PublicId } from "@stackra/contracts";
+import { Index, Model } from "@stackra/model";
 import { BelongsToTenant, HasPublicId, Timestamps, Versioned } from "@stackra/model/traits";
+import { Int, Str } from "@stackra/validation";
 
-/**
- * Key `inventory.stock_level`, table `stock_levels`; one row per (tenant, variant, location).
- * Public ids are `stk_…`.
- */
-@Model()
-// → idx_stock_levels_tenant_id_variant_id_location_id
+/** One row per tenant, variant and location, enforced by a unique index. */
 @Index(["tenantId", "variantId", "locationId"], { unique: true })
 export class StockLevel extends Model.with(
   HasPublicId("stk"),
@@ -23,14 +24,20 @@ export class StockLevel extends Model.with(
   Timestamps,
   Versioned,
 ) {
-  /** Public id (`var_…`) of the catalogue variant; catalogue owns the variant row. */
-  @Str({ max: 64 }) variantId!: string;
+  /** Public id of the catalogue variant; catalogue owns the variant row. */
+  variantId!: PublicId<"var">;
+
   /** Public id of the warehouse or shop. */
-  @Str({ max: 64 }) locationId!: string;
-  /** Physical units counted at the location, set by `stock.adjust`. */
-  @Int({ min: 0 }) onHand!: number;
+  @Str({ max: 64 })
+  locationId!: string;
+
+  /** Physical units counted at the location, set by `inventory.stock.adjust`. */
+  @Int({ min: 0 })
+  onHand = 0;
+
   /** Units held for pending orders; raised by reserve, lowered by release. */
-  @Int({ min: 0 }) reserved!: number;
+  @Int({ min: 0 })
+  reserved = 0;
 
   /** Units still sellable. Invariant: never negative while backorders are off. */
   get available(): number {
@@ -38,10 +45,10 @@ export class StockLevel extends Model.with(
   }
 
   /**
-   * The advisory-lock key StockService.reserve takes per variant, so two orders for the same
+   * The advisory-lock key StockService#reserve takes per variant, so two orders for the same
    * variant serialise while orders for different variants run in parallel (ADR 0149).
    */
-  static lockKey(variantId: string): string {
+  static lockKey(variantId: PublicId<"var">): string {
     return `inventory.stock_level:${variantId}`;
   }
 }

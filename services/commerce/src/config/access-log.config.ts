@@ -1,13 +1,16 @@
 /**
  * Stackra file contract:
- * Purpose: this service's host layer over @acme/access-log's package defaults.
- * Boundary: only what differs from the package. The sink stays the package's default driver
- *           (`postgres`; runway sets `memory` in dev), so no driver name is restated here .
+ * Purpose: this service's override of @acme/access-log's configuration: the retention period.
+ * Boundary: an override declares `override` members only and no new field; it inherits the base's
+ *           key (`access_log`) and replaces the base across the whole host. The sink stays the
+ *           package default (`postgres`; runway sets `memory` in dev), so no driver is named here.
  * Runtime: node
- * Governing contract: ADR 0146, ADR 0263 d9, ADR 0266
+ * Governing contract: ADR 0294 (decision 19), ADR 0146 (config layers)
  */
-import { override } from "@stackra/config";
 import { AccessLogConfig } from "@acme/access-log";
 
 /** Commerce keeps access records for the legal minimum of its market; the purge job honours it. */
-export default override(AccessLogConfig, { retentionDays: 365 });
+export class CommerceAccessLogConfig extends AccessLogConfig {
+  /** Days a record is kept before the purge job removes it. */
+  override retentionDays = 365;
+}

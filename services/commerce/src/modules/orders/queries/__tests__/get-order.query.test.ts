@@ -4,24 +4,24 @@
  *          service acting for the owner reads it too.
  * Boundary: unit tier through the pipeline; memory drivers; records from the factory.
  * Runtime: node
- * Governing contract: ADR 0098, ADR 0132 d4, ADR 0022, guides/programming-model.mdx#queries
+ * Governing contract: ADR 0098, ADR 0132 d4, ADR 0022
  */
-import { describe, expect, it } from "@stackra/testing";
-import { actors } from "@stackra/iam/testing";
-import { createTestingModule } from "@stackra/container/testing";
 import { run } from "@stackra/actions/testing";
+import { createTestingModule } from "@stackra/container/testing";
 import { refusal } from "@stackra/errors/testing";
+import { actors } from "@stackra/iam/testing";
+import { describe, expect, it } from "@stackra/testing";
 import { Refusals } from "#stackra/manifest";
 import { CommerceModule } from "#src/commerce.module";
+import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { GetOrderQuery } from "#modules/orders/queries/get-order.query";
-import { OrderFactory } from "#modules/orders/factories/order.factory";
 
-/** Guards the one-order read, where OrderPolicy.read narrows customers to their own orders. */
+/** Guards the one-order read, where OrderPolicy#read narrows customers to their own orders. */
 describe(GetOrderQuery, () => {
   /** Owner allowed, stranger refused, the notifications service on behalf of the owner allowed. */
-  it("applies OrderPolicy.read per record", async () => {
-    const app = await createTestingModule(CommerceModule).useDrivers("memory").compile();
-    const [order, other] = await new OrderFactory(app.em).createMany(2);
+  it("applies OrderPolicy#read per record", async () => {
+    await createTestingModule(CommerceModule).useDrivers("memory").compile();
+    const [order, other] = await OrderFactory.new().count(2).create();
     const input = { orderId: order.id };
     const relay = actors.service("notifications", {
       onBehalfOf: actors.customer(order.customerId),

@@ -1,18 +1,20 @@
 /**
  * Stackra file contract:
- * Purpose: `StorefrontImage`: one product image; `alt` is null when the merchant left it empty (the
- *          renderer falls back to the title).
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `StorefrontImage`: one product image as stored on the product and as the storefront
+ *          renders it.
+ * Boundary: a shape class in schemas/ because the Product model (a jsonb element), the product page
+ *           and the grid card all use it. `alt` is null when the merchant left it empty, and the
+ *           renderer falls back to the title.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0082 (public area), ADR 0221 (hybrid search),
- *                     guides/programming-model.mdx#schemas; apps/web product and store routes
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26)
  */
-import { Schema, z } from "@stackra/schema";
+import { Schema } from "@stackra/validation";
 
-/**
- * One product image; `alt` is null when the merchant left it empty (the renderer falls back to the
- * title).
- */
-export class StorefrontImage extends Schema(
-  z.object({ url: z.string(), alt: z.string().nullable() }),
-) {}
+/** The image's public URL and its alternative text. */
+export class StorefrontImage extends Schema {
+  /** The public URL @stackra/media returned when the upload was claimed. */
+  url!: string;
+
+  /** The text a screen reader announces; null falls back to the product title. */
+  alt!: string | null;
+}

@@ -1,37 +1,43 @@
 /**
  * Stackra file contract:
- * Purpose: the message lifecycle: create the dedup row for a command, deliver it through the
+ * Purpose: the message lifecycle: open the dedup row for a queued call, deliver it through the
  *          transport port, and mark it failed when delivery is dead-lettered.
- * Boundary: the only writer of Message. No rendering here: producers render (ADR 0223). The body is
- *           never stored (ADR 0134): it travels in the delivery job's payload only.
+ * Boundary: the only writer of Message. It extends `Service` and injects the generic Message
+ *           repository, because opening a row needs an immediate insert that the unique index can
+ *           refuse in a race. No rendering here: producers render (ADR 0223). The body is never
+ *           stored (ADR 0134): it travels in the delivery job's payload only. `message.sent` is
+ *           recorded on the aggregate and reaches the outbox at flush.
  * Runtime: node
- * Governing contract: ADR 0136, 0141 (the aggregate records), 0263, ADR 0134,
- *                     guides/programming-model.mdx#services
+ * Governing contract: ADR 0294 (decisions 13, 16 and 17), ADR 0136, ADR 0141, ADR 0263, ADR 0134
  */
+import { Service } from "@stackra/app";
 import type { IdentityResolver } from "@stackra/contracts";
-import type { Repository } from "@stackra/database";
-import { UniqueViolation } from "@stackra/database";
-import type { NotificationsConfig } from "#config/notifications.config";
-import type { MailTransport } from "#modules/messages/contracts/mail-transport.port";
-import type { Message } from "#modules/messages/models/message.model";
-import { MessageSent } from "#modules/messages/events/message-sent.event";
+import { type Repository, UniqueViolation } from "@stackra/database";
+import type { MailTransport } from "@stackra/notifications/contracts";
+import type { DeliveryConfig } from "#config/delivery.config";
 import { MessageStatus } from "#modules/messages/enums/message-status.enum";
-import type { SendMessageInput } from "#modules/messages/schemas/send-message-input.schema";
+import { MessageSent } from "#modules/messages/events/message-sent.event";
+import type { Message } from "#modules/messages/models/message.model";
 import type { DeliverMessageInput } from "#modules/messages/schemas/deliver-message-input.schema";
+import type { SendMessageInput } from "#modules/messages/schemas/send-message-input.schema";
 
 /** The whole message path; the two actions are thin shells over it. */
-export class MessageService {
+export class MessageService extends Service {
   /**
+   * @param messages - the generic repository of Message.
    * @param transport - the driver named by config `transport`, bound by gen.
    * @param identity - resolves a principal to its verified address at send time, so no address is
    *                   ever stored here.
+   * @param config - the platform sender.
    */
   constructor(
     private readonly messages: Repository<Message>,
     private readonly transport: MailTransport,
     private readonly identity: IdentityResolver,
-    private readonly config: NotificationsConfig,
-  ) {}
+    private readonly config: DeliveryConfig,
+  ) {
+    super();
+  }
 
   /**
    * Finds or creates the row for `commandKey`. The unique index on (tenant, commandKey) decides a
@@ -46,9 +52,6 @@ export class MessageService {
         principalId: input.to.principalId,
         mail: input.mail,
         subject: input.subject,
-        status: MessageStatus.Queued,
-        providerId: null,
-        sentAt: null,
       });
     } catch (error) {
       if (error instanceof UniqueViolation) return this.messages.findOneOrFail({ commandKey });
@@ -75,7 +78,7 @@ export class MessageService {
     message.status = MessageStatus.Sent;
     message.sentAt = at;
     message.record(
-      new MessageSent({
+      MessageSent.create({
         messageId: message.id,
         principalId: message.principalId,
         mail: message.mail,
@@ -85,7 +88,7 @@ export class MessageService {
   }
 
   /** Marks a message whose delivery job was dead-lettered, so support sees it in the console. */
-  async markFailed(messageId: string): Promise<void> {
+  async markFailed(messageId: Message["id"]): Promise<void> {
     const message = await this.messages.findOneOrFail({ id: messageId });
     if (message.status !== MessageStatus.Sent) message.status = MessageStatus.Failed;
   }

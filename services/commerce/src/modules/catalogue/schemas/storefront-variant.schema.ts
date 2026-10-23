@@ -1,24 +1,30 @@
 /**
  * Stackra file contract:
- * Purpose: `StorefrontVariant`: a sellable variant with its price now, its option values (`{ size:
- *          "M" }`) and whether stock covers one unit.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `StorefrontVariant`: a sellable variant with its price now, its option values
+ *          (`{ size: "M" }`) and whether stock covers one unit.
+ * Boundary: a shape class; the element type of `StorefrontProductView.variants`. The price is
+ *           integer minor units in the page's currency (ADR 0220).
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0082 (public area), ADR 0221 (hybrid search),
- *                     guides/programming-model.mdx#schemas; apps/web product and store routes
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26), ADR 0220 (integer minor units)
  */
-import { Schema, z } from "@stackra/schema";
+import type { PublicId } from "@stackra/contracts";
+import { Int, Schema } from "@stackra/validation";
 
-/**
- * A sellable variant with its price now, its option values (`{ size: "M" }`) and whether stock
- * covers one unit.
- */
-export class StorefrontVariant extends Schema(
-  z.object({
-    id: z.string(),
-    sku: z.string(),
-    priceMinor: z.number().int(),
-    inStock: z.boolean(),
-    options: z.record(z.string(), z.string()),
-  }),
-) {}
+/** One choice in the storefront's variant picker. */
+export class StorefrontVariant extends Schema {
+  /** The variant's public id. */
+  id!: PublicId<"var">;
+
+  /** The merchant's stock-keeping unit. */
+  sku!: string;
+
+  /** Price of one unit for the request's market, in minor units. */
+  @Int
+  priceMinor!: number;
+
+  /** Whether one unit can be sold now; always true for a variant that tracks no stock. */
+  inStock!: boolean;
+
+  /** The option values the picker shows. */
+  options!: Record<string, string>;
+}

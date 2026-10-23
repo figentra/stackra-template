@@ -1,18 +1,23 @@
 /**
  * Stackra file contract:
- * Purpose: `OrderAdjustment`: one amount a hook implementer added to or took off an order.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `OrderAdjustment`: one amount an `adjustTotals` extension added to or took off an
+ *          order.
+ * Boundary: a shape class; stored as an element of the order's `adjustments` jsonb column and sent
+ *           inside OrderTotals. Integer minor units (ADR 0220).
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0220 (integer minor units),
- *                     guides/programming-model.mdx#schemas
+ * Governing contract: ADR 0294 (decisions 4 and 26), ADR 0220 (integer minor units)
  */
-import { Schema, z } from "@stackra/schema";
+import { Int, Schema } from "@stackra/validation";
 
-/**
- * One amount a hook implementer added to or took off an order. `code` is owned by the module that
- * added it (an enum
- * value, e.g. `loyalty_points`); `label` is an i18n key; `amountMinor` is negative for a discount.
- */
-export class OrderAdjustment extends Schema(
-  z.object({ code: z.string(), label: z.string(), amountMinor: z.number().int() }),
-) {}
+/** `amountMinor` is negative for a discount. */
+export class OrderAdjustment extends Schema {
+  /** A code owned by the module that added it, such as `loyalty_points`. */
+  code!: string;
+
+  /** The i18n key of the line a person reads. */
+  label!: string;
+
+  /** The amount added, in minor units of the order's currency. */
+  @Int
+  amountMinor!: number;
+}

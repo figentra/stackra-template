@@ -1,44 +1,55 @@
 /**
  * Stackra file contract:
- * Purpose: `catalogue.product.search`, PUBLIC area: storefront full-text search over Active
- *          products through the product search index, ranked, as storefront cards, cursor-paged.
- * Boundary: read only. Distinct from `catalogue.product.list_storefront` (the unranked grid) and
- *           from `catalogue.variant.search` (the POS lookup, app area). Public paths start with
- *           `/public` (ADR 0231); market and locale come from the request.
+ * Purpose: `catalogue.product.search@1`, public area: storefront full-text search over active
+ *          products through the product's search index, ranked, as storefront cards, cursor-paged.
+ * Boundary: read only. Distinct from `catalogue.product.list_storefront@1` (the unranked grid) and
+ *           from `catalogue.variant.search@1` (the POS lookup, app area). The permission is derived
+ *           (`ProductPermissions.read`) and so is the endpoint (`GET /public/products/search`);
+ *           market and locale come from the request.
  * Runtime: node
- * Governing contract: ADR 0098, 0082, 0221, http conventions (cursor pagination), ADR 0231;
- *                     apps/web `routes/store.route.ts`
+ * Governing contract: ADR 0294 (decisions 2, 16 and 21), ADR 0098, ADR 0082 (public area),
+ *                     ADR 0221 (hybrid search), cursor pagination in the HTTP conventions
  */
-import { AsEndpoint, Query, type QueryContext } from "@stackra/actions";
-import { ActorKind, ApiArea, HttpMethod } from "@stackra/contracts";
+import { Query, type QueryContext } from "@stackra/actions";
+import { ActorKind, ApiArea } from "@stackra/contracts";
 import type { Search } from "@stackra/search";
-import type { StorefrontService } from "#modules/catalogue/services/storefront.service";
-import { ProductPermissions } from "#modules/catalogue/permissions/product.permission";
-import { ProductSearch } from "#modules/catalogue/search/product.search";
-import { SearchProductsInput } from "#modules/catalogue/schemas/search-products-input.schema";
-import { StorefrontProductPage } from "#modules/catalogue/schemas/storefront-product-page.schema";
+import { CursorInput, Str } from "@stackra/validation";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
+import { Product } from "#modules/catalogue/models/product.model";
+import { StorefrontProductPage } from "#modules/catalogue/schemas/storefront-product-page.schema";
+import type { StorefrontService } from "#modules/catalogue/services/storefront.service";
 
-/** One index page plus one quote per product on the page; `limit` caps at 100. */
-@Query({
+/** `cursor` and `limit` (1–100, default 20) come from CursorInput. */
+export class SearchProductsInput extends CursorInput {
+  /** The search phrase, 2 to 64 characters. */
+  @Str({
+    min: 2,
+    max: 64,
+  })
+  q!: string;
+
+  /** A collection slug to search within. */
+  @Str({ max: 200 })
+  collection?: string;
+}
+
+/** One index page plus one quote per product on the page. */
+export class SearchProductsQuery extends Query({
   key: "product.search",
   area: ApiArea.Public,
-  input: SearchProductsInput,
-  output: StorefrontProductPage,
-  permission: ProductPermissions.read,
   actors: [ActorKind.Anonymous, ActorKind.User, ActorKind.Agent, ActorKind.Service],
-})
-@AsEndpoint({ method: HttpMethod.Get, path: "/public/products/search" })
-export class SearchProductsQuery {
-  /** @param search - the @stackra/search reader; `in(ProductSearch)` queries the declared index. */
+}) {
+  /** @param search - the @stackra/search reader; `in(Product)` queries the model's index. */
   constructor(
     private readonly storefront: StorefrontService,
     private readonly search: Search,
-  ) {}
+  ) {
+    super();
+  }
 
-  /** Ranks Active products for the phrase, optionally inside one collection, then prices the cards. */
+  /** Ranks active products for the phrase, optionally inside one collection, then prices them. */
   async handle(input: SearchProductsInput, ctx: QueryContext): Promise<StorefrontProductPage> {
-    const page = await this.search.in(ProductSearch).page(input.q, {
+    const page = await this.search.in(Product).page(input.q, {
       filters: {
         status: ProductStatus.Active,
         ...(input.collection ? { "collections.slug": input.collection } : {}),
@@ -47,8 +58,9 @@ export class SearchProductsQuery {
       limit: input.limit,
       populate: ["variants"],
     });
-    const at = { locale: ctx.locale, market: ctx.market };
-    const items = await Promise.all(page.items.map((p) => this.storefront.toCard(p, at)));
-    return { ...page, items };
+    const items = await Promise.all(
+      page.items.map((product) => this.storefront.toCard(product, ctx)),
+    );
+    return StorefrontProductPage.create({ ...page, items });
   }
 }

@@ -2,13 +2,17 @@
   "nav": {
     "catalogue": "Catalogue"
   },
-  "resource": {
-    "products": "Products"
+  "resources": {
+    "product": {
+      "title": "Products"
+    }
   },
-  "status": {
-    "draft": "Draft",
-    "active": "Active",
-    "archived": "Archived"
+  "enums": {
+    "product_status": {
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived"
+    }
   },
   "permissions": {
     "product": {
@@ -18,18 +22,34 @@
       "archive": "Archive products"
     }
   },
+  "actions": {
+    "product": {
+      "archive": {
+        "confirm": "Archive this product? It stops selling now.",
+        "success": "Product archived"
+      },
+      "attach_image": {
+        "success": "Image added"
+      }
+    }
+  },
   "product": {
-    "archive_confirm": "Archive this product? It stops selling now.",
-    "archived": "Product archived",
-    "image_attached": "Image added",
     "images": "Images"
   },
-  "refusals": {
-    "variant_unavailable": "One of the items is no longer available.",
-    "variant_not_found": "No product matches this barcode.",
-    "product_not_found": "Product not found."
+  "errors": {
+    "variant_unavailable": {
+      "message": "One of the items is no longer available."
+    },
+    "variant_not_found": {
+      "message": "No product matches this barcode."
+    },
+    "product_not_found": {
+      "message": "Product not found."
+    }
   },
   "entitlements": {
-    "product_limit": "Products"
+    "product_limit": {
+      "label": "Products"
+    }
   }
 }

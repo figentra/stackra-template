@@ -1,20 +1,25 @@
 /**
  * Stackra file contract:
  * Purpose: the refusal when a reservation asks for more than is available and backorders are off.
- * Boundary: a typed AppError naming the first variant that cannot be covered.
+ * Boundary: a refusal class: kind `FailedPrecondition` (category `precondition_failed`), code
+ *           derived from the class name (`insufficient_stock`). It names the first variant that
+ *           cannot be covered.
  * Runtime: isomorphic
- * Governing contract: ADR 0140, ADR 0232, guides/programming-model.mdx#errors
+ * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0140 (envelope and kinds), ADR 0232
  */
-import { AppError, ErrorCategory } from "@stackra/errors";
+import type { PublicId } from "@stackra/contracts";
+import { ErrorKind, Refusal } from "@stackra/errors";
+import { Int } from "@stackra/validation";
 
-/** `precondition_failed` / `insufficient_stock`; not retryable. */
-export class InsufficientStockError extends AppError {
-  constructor(variantId: string, available: number) {
-    super({
-      category: ErrorCategory.PreconditionFailed,
-      code: "insufficient_stock",
-      retryable: false,
-      details: { variantId, available },
-    });
-  }
+/** Raised by StockService#reserve before anything is held; not retryable. */
+export class InsufficientStockError extends Refusal({
+  kind: ErrorKind.FailedPrecondition,
+  retryable: false,
+}) {
+  /** The first variant the reservation could not cover. */
+  variantId!: PublicId<"var">;
+
+  /** The units it had available when the reservation was refused. */
+  @Int
+  available!: number;
 }

@@ -1,49 +1,45 @@
 # orders
 
-Places, cancels and expires orders. The reference module: every kind of the programming model
-appears once. Tests sit in a `__tests__/` folder beside their subject's kind folder (ADR 0022),
-carry intent docblocks (ADR 0007) and read the ids factories return instead of typing them.
+Places, cancels and expires orders. The reference module: each kind of the programming model appears
+once, in its group folder. A file's path says its kind (`<group>/<name>.<kind>.ts`), its class
+extends exactly one kind base, and identities (keys, permissions, events, tables, i18n keys) are
+derived from names and locked in the member's `stackra.manifest.json` (Stackra ADR 0294). Tests sit
+in a `__tests__/` folder beside their subject (ADR 0022) and read the ids factories return instead
+of typing them.
 
-| Kind           | File                                                                              | Read it for                                                                          |
-| -------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| model          | `models/order.model.ts`, `models/order-line.model.ts`                             | `@Model()`, `Model.with(traits)`, every index as `@Index` (ADR 0159)                 |
-| state          | `states/order.state.ts`                                                           | the state family on `@stackra/state-machine`: `canCancel`, recording transitions     |
-| enum           | `enums/order-status.enum.ts`, `enums/cancel-reason.enum.ts`                       | class enums: cases with i18n labels, `schema` codec, identity comparison             |
-| schema         | `schemas/*.schema.ts`                                                             | one schema per file (ADR 0006): `CreateOrderInput`, `CreateOrderOutput`, `OrderView` |
-| error          | `errors/*.error.ts`                                                               | `AppError` subclasses with an `ErrorCategory`; codes are snake_case                  |
-| permission     | `permissions/order.permission.ts`                                                 | `@Permissions({ resource })`; risk lives here only (ADR 0132)                        |
-| event          | `events/*.event.ts`                                                               | one `@Event` per file; `OrderPaid`'s broadcast declares `read`, outbound webhook     |
-| hook point     | `hooks/order.hook-point.ts`                                                       | a `@HookPoint` class: `adjustTotals` (transform), `verifyPlacement` (verify)         |
-| repository     | `repositories/order.repository.ts`                                                | `@RepositoryOf(Order)`: named reads, no behaviour                                    |
-| service        | `./services/order.service.ts`, `./services/order-pricing.service.ts`              | `@Crud`, transitions, `@AccessLogged`, `Money` arithmetic, the `Logger` port         |
-| policy         | `policies/order.policy.ts`                                                        | a method per verb; a `Service` actor is judged as the customer it acts for           |
-| guard          | `guards/accepting-orders.guard.ts`                                                | `extends Guard` on `order.create`: refuses while ordering is paused (a setting)      |
-| action         | `actions/create-order.action.ts`                                                  | `runs: CreateOrderWorkflow`, `idempotency`, `offline`, `UxAfter.OpenRecord`          |
-| action         | `actions/cancel-order.action.ts`                                                  | inline action, `ctx.authorize`, queued command after commit, `onBehalfOf`            |
-| job            | `actions/expire-unpaid-orders.action.ts`                                          | `@AsJob` + `@Cron`; `actors: [ActorKind.System]`, `time.subMinutes`                  |
-| query          | `queries/get-order.query.ts`, `queries/list-orders.query.ts`                      | reads; the list is cursor-paginated and narrows customers                            |
-| query          | `queries/orders-today.query.ts`                                                   | `cache: { ttl, invalidateOn: [OrderPaid] }`                                          |
-| query          | `queries/list-order-lines.query.ts`                                               | `GraphQuery.through(Link)` across a module boundary                                  |
-| link           | `links/order-line-variant.link.ts`                                                | `@Link` with relation properties: the one place a sibling's model is named           |
-| workflow       | `workflows/create-order.workflow.ts`                                              | `@Workflow`, `@Step<W>` with a typed `compensate`, `Backoff.Exponential`             |
-| listener       | `listeners/send-order-confirmation.listener.ts`, `send-order-receipt.listener.ts` | the producer renders, the `Mailer` port delivers (ADR 0223)                          |
-| listener       | `listeners/mark-order-paid.listener.ts`                                           | `@OnEvent(Payments.events.PaymentCaptured)`, filtered by `Order.idPrefix`            |
-| module         | `orders.module.ts`                                                                | `@Module({ key, exports })`                                                          |
-| migration      | `migrations/*.migration.ts`                                                       | `stackra db diff` output from the models; immutable once committed                   |
-| factory        | `factories/*.factory.ts`                                                          | `Factory<Order>` with `definition(faker)` and named states                           |
-| seed           | `seeds/demo.seed.ts`                                                              | seeder key `orders.demo`; its ids declared once in `static ids` for docs and e2e     |
-| resource       | `resources/order.resource.ts`                                                     | `@Resource(Order)` with `table(t)` and `infolist(i)`                                 |
-| setting, flag  | `settings/order.setting.ts`, `settings/quick-order.flag.ts`                       | `@Settings` with `SettingScope` cases; `@Flag` is a settings kind                    |
-| widget         | `widgets/revenue-today.widget.ts`                                                 | `@Widget` bound to a query and an override point, `WidgetSize`, `SystemRole` roles   |
-| document       | `documents/sales-today.document.ts`                                               | `@Document`: an L2 page composed of this module's widget and a table                 |
-| mail           | `mails/order-placed.mail.tsx`, `mails/order-receipt.mail.tsx`                     | `@Mail` React Email templates; the receipt shows an ICU plural                       |
-| override point | `override-points/*.point.ts`                                                      | `@OverridePoint` declarations an app binds with `@Override` (ADR 0264)               |
-| version        | `versions/order-view-2027-03.change.ts`                                           | a dated `@Change` response transform (no `@n` in keys)                               |
-| ai             | `ai/order.facts.ts`, `ai/*.prompt.ts`, `ai/*.skill.ts`                            | `@Facts`, `@Prompt`, `@Skill`; tools referenced by class                             |
-| assets         | member root `assets/lang/<locale>/orders.json`, `assets/ai/orders/*`              | `I18n.orders.*` and `Assets.orders.*` are generated from these                       |
+| Group         | Files                                                                                 | Read it for                                                                       |
+| ------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| (root)        | `orders.module.ts`, `orders.settings.ts`                                              | `extends Module({ exports })`; `extends Settings({ scopes })`, `@Renamed`         |
+| `models/`     | `order.model.ts`, `order-line.model.ts`                                               | `Model.with(traits)`, `Money`, `Ref<Order>` (foreign key), `Link<Variant>`        |
+| `models/`     | `order.state-machine.ts`                                                              | `StateMachine(Order, { field })` with `@Transition` methods that record events    |
+| `actions/`    | `create-order.action.ts`                                                              | `preconditions`, `idempotency`, `offline`, `ctx.run(CreateOrderWorkflow, input)`  |
+| `actions/`    | `cancel-order.action.ts`                                                              | Input and Output companions, `ctx.authorize(order)`, a queued call after commit   |
+| `actions/`    | `expire-unpaid-orders.action.ts`                                                      | a job: the `job` option with its queue and cron; the system actor only            |
+| `queries/`    | `get-order.query.ts`, `list-orders.query.ts`                                          | `CursorInput`, `Page.of(OrderView)`, customer narrowing                           |
+| `queries/`    | `orders-today.query.ts`, `list-order-lines.query.ts`                                  | the `cache` option; `endpoint` overrides; the query graph across a link           |
+| `schemas/`    | `*.schema.ts`                                                                         | type-first shapes: `@Int` on every `number`, `?:` optional, `T \| null` nullable  |
+| `schemas/`    | `order-view-2027-03.change.ts`                                                        | a dated response change beside its subject (`down` only)                          |
+| `enums/`      | `order-status.enum.ts`, `cancel-reason.enum.ts`                                       | `Enum.of({...})` plus the type of the same name; tones as meta                    |
+| `errors/`     | `order-not-payable.error.ts`, `orders-paused.error.ts`                                | `extends Refusal({ kind })`; the code comes from the class name                   |
+| `events/`     | `order-placed.event.ts`, `order-paid.event.ts`, `order-cancelled.event.ts`            | `IntegrationEvent({ name, webhook, broadcast })` with typed fields                |
+| `listeners/`  | `mark-order-paid.listener.ts`                                                         | subscribed by the type of `handle`'s event parameter (`Payments.PaymentCaptured`) |
+| `workflows/`  | `create-order.workflow.ts`                                                            | public async methods are steps; `undo<Step>`; `@Step({ retry })`; `output(run)`   |
+| `access/`     | `order.permissions.ts`, `order.policy.ts`                                             | statics with risk; record rules named after verbs                                 |
+| `access/`     | `accepting-orders.precondition.ts`, `quick-order.flag.ts`                             | `extends Precondition` with `check(ctx)`; `Flag({ default, scopes, expires })`    |
+| `services/`   | `order.service.ts`, `order-pricing.service.ts`                                        | `CrudService(Order)` with named reads; `extends Service`; `Money` arithmetic      |
+| `extensions/` | `order.extension-point.ts`                                                            | `adjustTotals` (transform) and `verifyPlacement` (verify)                         |
+| `resources/`  | `order/order.resource.ts`                                                             | `Resource(Order, { area, navigation, operations })` with `override table(t)`      |
+| `resources/`  | `order/revenue-today.widget.ts`, `order/sales-today.document.ts`                      | a query bound to the built-in Kpi display; a dashboard document                   |
+| `resources/`  | `order/order-placed.notification.ts`, `order/order-receipt.notification.ts`, `*.mail` | triggered by the event parameter; a mail template bound by name                   |
+| `database/`   | `migrations/`, `factories/`, `seeders/demo.seeder.ts`                                 | forward-only migrations numbered per module; Laravel factories; `static ids`      |
+| `ai/`         | `order.facts.ts`, `explain-order.prompt.ts`, `orders-support.skill.ts`                | `Facts(Order)`, `Prompt`, `Skill({ tools })`; assets bound by name                |
 
-Extending orders: implement a point of `hooks/order.hook-point.ts` in your own module (see
-`../loyalty`). A sibling module imports only an exported class, a declaration file (`events/`,
-`hooks/*.hook-point.ts`, `enums/`, `schemas/`, `errors/`, `permissions/`) or, inside `links/`, a
-model (the sibling rule, guides/programming-model.mdx#reaching-a-sibling-module). Never edit these
-files to change pricing.
+The member root holds what the module reads but does not own: `assets/lang/<locale>/orders.json`
+(the `I18n.orders.*` tree) and `assets/ai/orders/*` (the prompt, its evaluation set and the skill
+instructions).
+
+Extending orders: implement a point of `extensions/order.extension-point.ts` in your own module with
+`extends Extension(OrderExtensionPoint, { order })` (see `../loyalty`). A sibling module imports
+only an exported class (`OrderService`), `schemas/`, `enums/`, `events/`, `errors/` and
+`access/order.permissions.ts`, plus `models/` from its own `models/` and `database/` folders for a
+relation (ADR 0294 decision 24). Never edit these files to change pricing.

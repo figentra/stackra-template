@@ -2,22 +2,18 @@
  * Stackra file contract:
  * Purpose: the `messages.resend` integration: Resend as the tenant-facing mail provider, listed in
  *          the console's integrations settings (a generated page) with its connection form.
- * Boundary: a declaration (`@Integration`, @stackra/integrations); it names the connection it needs
- *           and the transport driver it backs. Sending stays in ResendMailTransport; this class
- *           only makes the provider visible and configurable per tenant (one example covers rows 18
- *           and 20 of the coverage table).
+ * Boundary: an integration class; the key (`messages.resend`) and the label
+ *           (`messages::integrations.resend.label`) are derived from the file. It names the
+ *           connection it needs; sending stays in ResendMailTransportDriver, so this class only
+ *           makes the provider visible and configurable per tenant.
  * Runtime: node
- * Governing contract: ADR 0142 (transport behind a port); ADR 0127 rows 18 and 20
+ * Governing contract: ADR 0294 (decisions 11 and 20), ADR 0142 (transport behind a port)
  */
 import { Integration, IntegrationCategory } from "@stackra/integrations";
-import { I18n } from "#stackra/i18n";
 import { ResendConnection } from "#modules/messages/connections/resend.connection";
 
 /** Shown under "Email" in the console; connecting it switches the tenant's mail to its own key. */
-@Integration({
-  key: "resend",
+export class ResendIntegration extends Integration({
   category: IntegrationCategory.Email,
-  label: I18n.messages.integrations.resend,
-  connection: ResendConnection,
-})
-export class ResendIntegration {}
+  connection: () => ResendConnection,
+}) {}

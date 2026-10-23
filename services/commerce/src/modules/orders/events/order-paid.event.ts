@@ -1,47 +1,49 @@
 /**
  * Stackra file contract:
- * Purpose: the fact that an order's payment was captured. Public, so it leaves through the outbox
- *          as `orders.order.paid.v1`; other services consume it from the committed manifest, and
+ * Purpose: the fact that an order's payment was captured. Leaves through the outbox as
+ *          `orders.order.paid.v1`; other services consume it from the committed manifest, and
  *          tenants may subscribe an outbound webhook to it.
- * Boundary: one event per class. Version 1 until `@Version` says otherwise. Recorded by the
- *           MarkPaid transition, never emitted from two places. Its live-tile broadcast declares
- *           `orders.order.read` as the permission a tenant console session needs to receive it,
- *           because the payload carries the paid total and the customer id; enforcing it at
- *           delivery is @stackra/realtime's job. The paid total rides along so loyalty
- *           earns without a second read; `webhook: true` lets @stackra/webhooks deliver it,
- *           signed, to the endpoints a tenant registers (outbound delivery, retries and the log
- *           are the package's).
+ * Boundary: an integration event recorded by OrderStateMachine#markPaid only. Version 1 until a
+ *           breaking change adds `version: 2` and `order-paid-v1.change.ts` beside this file. The
+ *           broadcast declares `orders.order.read` as the permission a session needs to receive the
+ *           data-free refresh on `tenant.{tenantId}.orders`, because the payload carries the paid
+ *           total and the customer id; @stackra/realtime enforces it at delivery. `webhook: true`
+ *           lets @stackra/webhooks deliver it, signed, to the endpoints a tenant registers.
  * Runtime: isomorphic
- * Governing contract: ADR 0141, ADR 0078, ADR 0225 (broadcast),
- *                     guides/programming-model.mdx#events; ADR 0127
+ * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141, ADR 0078, ADR 0225 (broadcast)
  */
-import { Event, IntegrationEvent, z } from "@stackra/events";
-import { OrderPermissions } from "#modules/orders/permissions/order.permission";
+import type { PublicId } from "@stackra/contracts";
+import { IntegrationEvent } from "@stackra/events";
+import type { CurrencyCode } from "@stackra/money";
+import { Int } from "@stackra/validation";
+import { OrderPermissions } from "#modules/orders/access/order.permissions";
 
 /**
- * Recorded once per order when its payment is captured; carries the paid total.
+ * Recorded once per order when its payment is captured; the paid total rides along so loyalty
+ * earns without a second read.
  *
  * @example
- * ```ts
- * order.record(new OrderPaid({ orderId, customerId, paymentId, totalMinor, currency }));
- * @OnEvent(OrderPaid) async handle(event: OrderPaid) { event.data.paymentId }
- * ```
+ * order.record(OrderPaid.create({ orderId, customerId, paymentId, totalMinor, currency }));
+ * async handle(event: OrderPaid) { event.paymentId } // in a listener
  */
-@Event({
+export class OrderPaid extends IntegrationEvent({
   name: "order.paid",
-  public: true,
   webhook: true,
-  broadcast: {
-    channel: (e) => `tenant.${e.meta.tenantId}.orders`,
-    permission: OrderPermissions.read,
-  },
-})
-export class OrderPaid extends IntegrationEvent(
-  z.object({
-    orderId: z.string(),
-    customerId: z.string(),
-    paymentId: z.string(),
-    totalMinor: z.number().int(),
-    currency: z.string().length(3),
-  }),
-) {}
+  broadcast: OrderPermissions.read,
+}) {
+  /** The paid order. */
+  orderId!: PublicId<"ord">;
+
+  /** The customer who paid. */
+  customerId!: PublicId<"usr">;
+
+  /** The payments service's id of the captured payment. */
+  paymentId!: string;
+
+  /** Amount captured, in minor units. */
+  @Int({ min: 0 })
+  totalMinor!: number;
+
+  /** ISO 4217 code of `totalMinor`. */
+  currency!: CurrencyCode;
+}

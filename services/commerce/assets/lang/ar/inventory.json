@@ -1,11 +1,32 @@
 {
-  "permissions": { "stock": { "read": "عرض المخزون", "manage": "تعديل المخزون" } },
-  "settings": {
-    "title": "المخزون",
-    "low_stock_threshold": "حد المخزون المنخفض",
-    "allow_backorders": "السماح بالطلب المسبق"
+  "permissions": {
+    "stock": {
+      "read": "عرض المخزون",
+      "manage": "تعديل المخزون"
+    }
   },
-  "widgets": { "low_stock": "مخزون منخفض" },
-  "adjust_reason": { "count": "جرد", "delivery": "توريد", "damage": "شطب تالف" },
-  "refusals": { "insufficient_stock": "المخزون غير كافٍ." }
+  "settings": {
+    "inventory": {
+      "title": "المخزون",
+      "low_stock_threshold": "حد المخزون المنخفض",
+      "allow_backorders": "السماح بالطلب المسبق"
+    }
+  },
+  "widgets": {
+    "low_stock": {
+      "title": "مخزون منخفض"
+    }
+  },
+  "enums": {
+    "stock_adjust_reason": {
+      "count": "جرد",
+      "delivery": "توريد",
+      "damage": "شطب تالف"
+    }
+  },
+  "errors": {
+    "insufficient_stock": {
+      "message": "المخزون غير كافٍ."
+    }
+  }
 }

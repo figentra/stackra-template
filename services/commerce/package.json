@@ -2,7 +2,7 @@
   "name": "@acme/service-commerce",
   "version": "0.1.0",
   "private": true,
-  "description": "The reference service: catalogue, inventory, orders and loyalty modules as decorated actions, queries, models, workflows and events; stackra gen emits the Encore app into .stackra/.",
+  "description": "The reference service: catalogue, inventory, orders and loyalty modules as kind classes (actions, queries, models, workflows, events) found by their group folders; stackra gen writes the entry, the wiring and the Encore app into .stackra/.",
   "license": "UNLICENSED",
   "type": "module",
   "imports": {
@@ -33,7 +33,6 @@
     ]
   },
   "exports": {
-    "./contracts": "./src/contracts/index.ts",
     "./assets/*": "./assets/*"
   },
   "scripts": {
@@ -67,16 +66,15 @@
     "@stackra/iam": "catalog:stackra",
     "@stackra/locking": "catalog:stackra",
     "@stackra/logger": "catalog:stackra",
-    "@stackra/mail": "catalog:stackra",
     "@stackra/media": "catalog:stackra",
     "@stackra/model": "catalog:stackra",
     "@stackra/money": "catalog:stackra",
+    "@stackra/notifications": "catalog:stackra",
     "@stackra/outbox": "catalog:stackra",
     "@stackra/panel": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
     "@stackra/realtime": "catalog:stackra",
     "@stackra/scheduler": "catalog:stackra",
-    "@stackra/schema": "catalog:stackra",
     "@stackra/search": "catalog:stackra",
     "@stackra/settings": "catalog:stackra",
     "@stackra/state-machine": "catalog:stackra",
@@ -87,7 +85,8 @@
     "@stackra/versioning": "catalog:stackra",
     "@stackra/webhooks": "catalog:stackra",
     "@stackra/workflow": "catalog:stackra",
-    "react": "catalog:"
+    "react": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@stackra/gen": "catalog:stackra",

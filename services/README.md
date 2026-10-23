@@ -3,25 +3,32 @@
 One folder per deployable service (`@acme/service-<name>`, `tier:service`). A service hosts modules
 and owns no behaviour itself (ADR 0111, 0259). Services never import each other: they inject each
 other's generated clients and listen to each other's public events (ADR 0260), both generated from
-the producer's committed `.stackra/app-manifest.json`.
+the producer's committed `stackra.manifest.json`.
 
-Every service is written to the decorator authoring model (ADR 0094): everything with identity is a
-class with a kind decorator, nothing is referenced by string (generated constants from `#stackra/*`
-and the class enums of the owning packages: `Risk`, `ActorKind`, `HttpMethod`, `ApiArea`,
-`ErrorCategory`, `UxAfter`, `SettingScope`, `SystemRole`), drivers register themselves (`@Driver`)
-and one config field picks them (`@DriverOf`), and each member carries its own `stackra.config.ts`
-(what it is) and `runway.yaml` (how and where it runs).
+Every service follows the v3 programming model (ADR 0294): a class states its kind once, in its base
+class (`extends Action({ key })`, `extends CrudService(Order)`); the path says the kind
+(`src/modules/<key>/<group>/<name>.<kind>.ts`); identities such as permission names, event names and
+endpoints are derived from names and locked in the manifest; nothing is referenced by string
+(generated constants from `#stackra/*` and the `Enum.of` values of the owning packages: `ActorKind`,
+`HttpMethod`, `ApiArea`, `UxAfter`, `SettingScope`, `SystemRole`). A driver is named by its file
+prefix, and one config field typed `DriverName<Port>` picks it. Each member carries its own
+`stackra.config.ts` (what it is, `defineService`) and `runway.yaml` (what it needs, per environment,
+ADR 0296); where it runs and how it is packed is the root runway's topology.
 
-| Service         | Shows                                                                                                                                                                                                                        |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commerce`      | the reference: four modules, every file kind of a service once (see `src/modules/orders/README.md`), two package modules hosted, search, media upload, money, entitlements, outbound webhooks                                |
-| `notifications` | the consumer: commerce reached by event, call and `.queue()` command; delivery as a retried job with a dead letter; the in-app inbox; notification preferences; a `@Webhook` receiver; the Resend integration and connection |
+| Service         | Shows                                                                                                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commerce`      | the reference: four modules, every group of a service module once (see `src/modules/orders/README.md`), two package modules hosted, search, media upload, money, entitlements, outbound webhooks                          |
+| `notifications` | the consumer: commerce reached by event, call and queued call; delivery as a retried job with a dead letter; the in-app inbox; notification preferences; an inbound `WebhookEvent`; the Resend integration and connection |
 
 Member layout (both services):
 
 ```text
 services/<name>/
-├── package.json · stackra.config.ts · runway.yaml · turbo.jsonc · tsconfig.json · vitest.config.ts · README.md · .gitignore
-├── .stackra/{app-manifest.json, openapi.json}   # committed; gen/ and migrations/ and encore/ are generated
-└── src/{main.ts, <name>.module.ts, config/, contracts/, __tests__/, modules/<key>/<kind>/}
+├── package.json · stackra.config.ts · runway.yaml · turbo.jsonc · tsconfig.json · README.md · AGENTS.md · .gitignore
+├── stackra.manifest.json · openapi.json        # the committed contract and its projection
+├── .stackra/                                   # generated, gitignored: entry/server.ts, gen/, migrations/, encore/
+└── src/{<name>.module.ts, config/, __tests__/, modules/<key>/<group>/}
 ```
+
+Nobody writes `main.ts`: gen writes `.stackra/entry/server.ts`, which calls
+`createApp(<Name>Module, { wiring })` from `@stackra/app/server` (ADR 0295 decision 7).

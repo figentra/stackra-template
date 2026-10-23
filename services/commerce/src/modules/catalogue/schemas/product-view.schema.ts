@@ -1,24 +1,32 @@
 /**
  * Stackra file contract:
- * Purpose: `ProductView`: a product as the API sees it: public ids, the title in the request
- *          locale, and the variants' ids and SKUs.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `ProductView`: a product as the API and the console see it: public ids, the title in the
+ *          request locale, the status and the variants' ids and SKUs.
+ * Boundary: a shape class (an output view, so `<X>View`); never the model. In schemas/ because the
+ *           service, both actions, the read query and the generated operations return it. Built
+ *           only by ProductService#toView.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0117, guides/programming-model.mdx#schemas
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26)
  */
-import { Schema, z } from "@stackra/schema";
-import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
+import type { PublicId } from "@stackra/contracts";
+import { Schema } from "@stackra/validation";
+import type { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
+import type { VariantSummary } from "#modules/catalogue/schemas/variant-summary.schema";
 
-/**
- * A product as the API sees it: public ids, the title in the request locale, and the variants' ids
- * and SKUs.
- */
-export class ProductView extends Schema(
-  z.object({
-    id: z.string(),
-    title: z.string(),
-    slug: z.string(),
-    status: ProductStatus.schema,
-    variants: z.array(z.object({ id: z.string(), sku: z.string() })),
-  }),
-) {}
+/** The admin-area view; the storefront reads StorefrontProductView instead. */
+export class ProductView extends Schema {
+  /** The product's public id (`prd_…`). */
+  id!: PublicId<"prd">;
+
+  /** The title in the request locale. */
+  title!: string;
+
+  /** The URL segment. */
+  slug!: string;
+
+  /** The sale state. */
+  status!: ProductStatus;
+
+  /** Every variant, by id and SKU. */
+  variants!: VariantSummary[];
+}

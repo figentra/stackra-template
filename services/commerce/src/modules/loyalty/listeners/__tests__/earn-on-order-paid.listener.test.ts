@@ -5,19 +5,19 @@
  * Boundary: unit tier; memory outbox and queue drained by hand, the kit on its memory ledger chosen
  *           by a checked driver-name literal (ADR 0266). Ids come from the factory.
  * Runtime: node
- * Governing contract: ADR 0078 (listeners run once per event id), ADR 0022,
- *                     guides/programming-model.mdx#listeners, ADR 0265
+ * Governing contract: ADR 0078 (listeners run once per event id), ADR 0265, ADR 0022
  */
 import assert from "node:assert/strict";
-import { describe, expect, it } from "@stackra/testing";
-import { createTestingModule } from "@stackra/container/testing";
-import { drainOutbox } from "@stackra/events/testing";
 import { LoyaltyKitConfig } from "@acme/loyalty-kit";
 import { PointsEarned } from "@acme/loyalty-kit/node";
+import { createTestingModule } from "@stackra/container/testing";
+import { drainOutbox } from "@stackra/events/testing";
+import { Money } from "@stackra/money";
+import { describe, expect, it } from "@stackra/testing";
 import { CommerceModule } from "#src/commerce.module";
 import { EarnOnOrderPaidListener } from "#modules/loyalty/listeners/earn-on-order-paid.listener";
+import { OrderFactory } from "#modules/orders/database/factories/order.factory";
 import { OrderService } from "#modules/orders/services/order.service";
-import { OrderFactory } from "#modules/orders/factories/order.factory";
 
 /** Guards points earning on payment, where a replayed event must not double-credit. */
 describe(EarnOnOrderPaidListener, () => {
@@ -27,9 +27,8 @@ describe(EarnOnOrderPaidListener, () => {
       .useDrivers("memory")
       .withConfig(LoyaltyKitConfig, { ledger: "memory", earnPerMinor: 0.1 })
       .compile();
-    const order = await new OrderFactory(app.em)
-      .state("authorized")
-      .createOne({ subtotalMinor: 2_000, totalMinor: 2_000 });
+    const total = Money.ofMinor(2_000, "USD");
+    const order = await OrderFactory.new().authorized().create({ subtotal: total, total });
     const orders = app.get(OrderService);
     const { paymentId } = order;
     assert(paymentId, "an authorized order carries its payment id");

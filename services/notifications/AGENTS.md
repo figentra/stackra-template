@@ -10,13 +10,18 @@ Governing contract: root AGENTS.md
 
 - Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is delivery, preferences, the
   message log and the in-app inbox.
-- Behaviour is decorated actions and queries; never hand-write Encore (`stackra gen` emits it).
+- A file's path says its kind (`<group>/<name>.<kind>.ts`) and its class extends exactly one kind
+  base; there are no kind decorators. Never hand-write Encore, a `main.ts` or a barrel:
+  `stackra gen` writes them into `.stackra/`.
+- Identities are derived and locked in `stackra.manifest.json`; renaming a class, key or field that
+  carries one needs `@Renamed(old)`.
 - Commerce is reached through events and generated clients only, never its source.
-- Secrets: forbidden; secret values come from the project's secret store at run time.
+- Secrets: never in a file; runway.yaml names them and the secret store resolves them at run time.
 
 ## PII
 
-| Data                     | Where                                   | Handling                                                                                              |
-| ------------------------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `principalId`, `subject` | messages (`message.model.ts`)           | The address is resolved from identity at send time and never stored; the subject is kept for support. |
-| `principalId`, `data`    | notifications (`notification.model.ts`) | Inbox entries for one principal; tenant-scoped.                                                       |
+| Data                     | Where                                      | Handling                                                                                              |
+| ------------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `principalId`, `subject` | messages (`message.model.ts`)              | The address is resolved from identity at send time and never stored; the subject is kept for support. |
+| `principalId`, `data`    | inbox entries (`notification.model.ts`)    | Entries for one principal; tenant-scoped; read only by that principal.                                |
+| `apiKey`                 | Resend connection (`resend.connection.ts`) | A tenant credential in the connection store, encrypted, never read back.                              |

@@ -1,19 +1,20 @@
 /**
  * Stackra file contract:
  * Purpose: the adjustment codes loyalty writes onto an order's totals.
- * Boundary: a house enum (class); `value` is the `OrderAdjustment.code`, `label` its i18n key from
- *           the kit's namespace. Singular name : one case is one code; not to be confused with the
- *           `OrderAdjustment` schema that carries it.
+ * Boundary: an `Enum.of` value plus the type of the same name; the code is `OrderAdjustment.code`
+ *           (snake_case), owned by this module. The enum's own labels are the derived i18n keys
+ *           `loyalty::enums.adjustment_code.<code>`; the order line a person reads keeps the kit's
+ *           `loyalty_kit::adjustment.points`. Singular name: one case is one code, not to be
+ *           confused with the `OrderAdjustment` shape that carries it.
  * Runtime: isomorphic
- * Governing contract: ADR 0231 (snake_case codes), guides/programming-model.mdx#enums
+ * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0231 (snake_case codes)
  */
-import { Enum } from "@stackra/schema";
-import { I18n } from "#stackra/i18n";
+import { Enum } from "@stackra/validation";
 
-/** Adjustment codes loyalty writes onto an order's totals. */
-export class AdjustmentCode extends Enum<AdjustmentCode> {
-  /** Points redeemed against the order; always a negative amount. */
-  static readonly LoyaltyPoints = AdjustmentCode.case("loyalty_points", {
-    label: I18n.loyalty_kit.adjustment.points,
-  });
-}
+/** Written by RedeemPointsExtension, found again by RedeemOnOrderPlacedListener. */
+export const AdjustmentCode = Enum.of({
+  LoyaltyPoints: "loyalty_points",
+});
+
+/** One of the codes above. */
+export type AdjustmentCode = Enum.Value<typeof AdjustmentCode>;

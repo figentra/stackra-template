@@ -4,42 +4,39 @@
  *          that `unread` counts the whole inbox, not the page.
  * Boundary: unit tier through the pipeline, memory drivers, rows from the factory.
  * Runtime: node
- * Governing contract: ADR 0098, ADR 0022, ADR 0127
+ * Governing contract: ADR 0098, cursor pagination in the HTTP conventions, ADR 0022
  */
-import { describe, expect, it } from "@stackra/testing";
-import { actors } from "@stackra/iam/testing";
-import { createTestingModule } from "@stackra/container/testing";
 import { run } from "@stackra/actions/testing";
+import { createTestingModule } from "@stackra/container/testing";
+import { actors } from "@stackra/iam/testing";
+import { describe, expect, it } from "@stackra/testing";
 import { NotificationsModule } from "#src/notifications.module";
+import { NotificationFactory } from "#modules/messages/database/factories/notification.factory";
 import { ListNotificationsQuery } from "#modules/messages/queries/list-notifications.query";
-import { NotificationFactory } from "#modules/messages/factories/notification.factory";
 
 /** Guards the inbox, where one customer must never see another's entries. */
 describe(ListNotificationsQuery, () => {
   /** Two entries of mine (one read), one of someone else: all of mine, then only the unread one. */
   it("lists only the actor's entries and filters unread", async () => {
-    const app = await createTestingModule(NotificationsModule).useDrivers("memory").compile();
-    const factory = new NotificationFactory(app.em);
-    const unread = await factory.createOne();
-    await factory.state("read").createOne({ principalId: unread.principalId });
-    await factory.createOne();
+    await createTestingModule(NotificationsModule).useDrivers("memory").compile();
+    const unread = await NotificationFactory.new().create();
+    await NotificationFactory.new().read().create({ principalId: unread.principalId });
+    await NotificationFactory.new().create();
     const me = actors.customer(unread.principalId);
 
     const all = await run(ListNotificationsQuery, {}, { as: me });
     const fresh = await run(ListNotificationsQuery, { unreadOnly: true }, { as: me });
 
     expect(all.output.items).toHaveLength(2);
-    expect(fresh.output.items.map((n) => n.id)).toEqual([unread.id]);
+    expect(fresh.output.items.map((entry) => entry.id)).toEqual([unread.id]);
     expect(all.output.unread).toBe(1);
   });
 
   /** A one-entry page still reports every unread entry the actor has. */
   it("counts unread across the whole inbox, not the page", async () => {
-    const app = await createTestingModule(NotificationsModule).useDrivers("memory").compile();
-    const factory = new NotificationFactory(app.em);
-    const first = await factory.createOne();
-    await factory.createOne({ principalId: first.principalId });
-    await factory.createOne({ principalId: first.principalId });
+    await createTestingModule(NotificationsModule).useDrivers("memory").compile();
+    const first = await NotificationFactory.new().create();
+    await NotificationFactory.new().count(2).create({ principalId: first.principalId });
 
     const page = await run(
       ListNotificationsQuery,

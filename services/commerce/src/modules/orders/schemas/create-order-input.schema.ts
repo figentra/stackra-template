@@ -1,24 +1,26 @@
 /**
  * Stackra file contract:
- * Purpose: `CreateOrderInput`: one to a hundred lines by variant public id; `extensions` is typed
- *          per extender by gen (`loyalty.redeemPoints`).
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `CreateOrderInput`: one to a hundred requested lines and `extensions`, which gen types
+ *          per extending module (`extensions.loyalty.redeemPoints`).
+ * Boundary: a shape class in schemas/ rather than a companion of the action, because the action,
+ *           CreateOrderWorkflow and OrderPricingService all read it. The customer is the actor,
+ *           never a field.
  * Runtime: isomorphic
- * Governing contract: ADR 0095 (Zod), ADR 0136 (actor from context),
- *                     guides/programming-model.mdx#schemas
+ * Governing contract: ADR 0294 (decisions 4, 8 and 13), ADR 0136 (actor from context), ADR 0265
  */
-import { Schema, z } from "@stackra/schema";
+import type { Json } from "@stackra/contracts";
+import { List, Schema } from "@stackra/validation";
+import type { RequestedLine } from "#modules/orders/schemas/requested-line.schema";
 
-/**
- * One to a hundred lines by variant public id; `extensions` is typed per extender by gen
- * (`loyalty.redeemPoints`).
- */
-export class CreateOrderInput extends Schema(
-  z.object({
-    lines: z
-      .array(z.object({ variantId: z.string(), quantity: z.number().int().positive() }))
-      .min(1)
-      .max(100),
-    extensions: z.record(z.string(), z.unknown()).default({}),
-  }),
-) {}
+/** What a caller sends to `orders.order.create`. */
+export class CreateOrderInput extends Schema {
+  /** The variants and quantities to order. */
+  @List({
+    min: 1,
+    max: 100,
+  })
+  lines!: RequestedLine[];
+
+  /** Each extending module's own input, keyed by its module key. */
+  extensions: Record<string, Json> = {};
+}

@@ -1,13 +1,14 @@
 /**
  * Stackra file contract:
- * Purpose: `StorefrontProductPage`: one cursor page of storefront cards, the grid's output.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `StorefrontProductPage`: one cursor page of storefront cards, the output of the
+ *          storefront grid and of the storefront search.
+ * Boundary: a shape class in schemas/ because two queries return it; `items`, `nextCursor` (absent
+ *           on the last page) and `hasMore` come from `Page.of`.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0082 (public area), ADR 0221 (hybrid search),
- *                     guides/programming-model.mdx#schemas; apps/web product and store routes
+ * Governing contract: ADR 0294 (decisions 4, 13 and 26), cursor pagination in the HTTP conventions
  */
-import { Page } from "@stackra/schema";
+import { Page } from "@stackra/validation";
 import { StorefrontProductCard } from "#modules/catalogue/schemas/storefront-product-card.schema";
 
 /** `{ items: StorefrontProductCard[], nextCursor?, hasMore }`. */
-export class StorefrontProductPage extends Page(StorefrontProductCard) {}
+export class StorefrontProductPage extends Page.of(StorefrontProductCard) {}

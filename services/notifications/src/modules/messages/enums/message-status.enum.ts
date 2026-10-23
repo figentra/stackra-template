@@ -1,30 +1,22 @@
 /**
  * Stackra file contract:
- * Purpose: where a message is in its short life.
- * Boundary: a house enum (class); no state family because the only move is queued → sent, done by
- *           MessageService.
+ * Purpose: where a message is in its short life: queued, sent, or failed after its retries.
+ * Boundary: an `Enum.of` value plus the type of the same name; the code is the wire and column
+ *           value, the tone colours it in the console. No state machine: MessageService is the only
+ *           writer and the moves are queued → sent and queued → failed. Labels are the derived i18n
+ *           keys `messages::enums.message_status.<code>`.
  * Runtime: isomorphic
- * Governing contract: guides/programming-model.mdx#enums
+ * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0231 (snake_case codes)
  */
 import { Tone } from "@stackra/contracts";
-import { Enum } from "@stackra/schema";
-import { I18n } from "#stackra/i18n";
+import { Enum } from "@stackra/validation";
 
-/** Lifecycle status of a message. */
-export class MessageStatus extends Enum<MessageStatus> {
-  /** Row created, transport not yet accepted it. */
-  static readonly Queued = MessageStatus.case("queued", {
-    label: I18n.messages.status.queued,
-    color: Tone.Warning,
-  });
-  /** The transport accepted it. */
-  static readonly Sent = MessageStatus.case("sent", {
-    label: I18n.messages.status.sent,
-    color: Tone.Success,
-  });
-  /** Retries exhausted; the delivery job sits in the dead-letter queue until redriven. */
-  static readonly Failed = MessageStatus.case("failed", {
-    label: I18n.messages.status.failed,
-    color: Tone.Danger,
-  });
-}
+/** `failed` is what the dead-letter path writes; a redrive can still end in `sent`. */
+export const MessageStatus = Enum.of({
+  Queued: ["queued", { tone: Tone.Warning }],
+  Sent: ["sent", { tone: Tone.Success }],
+  Failed: ["failed", { tone: Tone.Danger }],
+});
+
+/** One of the codes above. */
+export type MessageStatus = Enum.Value<typeof MessageStatus>;

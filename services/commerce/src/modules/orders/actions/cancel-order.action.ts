@@ -1,49 +1,57 @@
 /**
  * Stackra file contract:
- * Purpose: `orders.order.cancel`: cancel an unpaid order and release its stock.
- * Boundary: single aggregate, so inline in one transaction (ADR 0101). The payment void is a queued
- *           command to the payments service sent after commit, so a payments outage never rolls
- *           back the cancel. A `Service` caller must act on behalf of a customer; the policy then
- *           decides as that customer (the inbound-mail receiver's safeguard c), and every cancel is
- *           access-logged.
+ * Purpose: `orders.order.cancel@1`: cancel an unpaid order and release its stock.
+ * Boundary: one aggregate, so it runs inline in one transaction. The permission is derived from
+ *           the key (`OrderPermissions.cancel`, L2) and OrderPolicy#cancel refines it through
+ *           `ctx.authorize(order)`; the endpoint is derived (`PUT /orders/:orderId/cancel`). The
+ *           payment void is a queued call to the payments service sent after commit, so a payments
+ *           outage never rolls back the cancel. A Service caller must act on behalf of a customer,
+ *           and every cancel is access-logged against the principal it was for.
  * Runtime: node
- * Governing contract: ADR 0098, 0136, 0260 (call, command, event),
- *                     guides/programming-model.mdx#actions
+ * Governing contract: ADR 0294 (decisions 2, 3, 5, 16 and 21), ADR 0098, ADR 0136, ADR 0260
  */
 import { AccessLogged } from "@acme/access-log";
 import { DataClassification } from "@acme/access-log/contracts";
-import { Action, type ActionContext, AsEndpoint, AsTool, UxAfter } from "@stackra/actions";
-import { ActorKind, HttpMethod, Realm, Tone } from "@stackra/contracts";
+import { Action, type ActionContext, UxAfter } from "@stackra/actions";
+import { ActorKind, type PublicId, Realm, Tone } from "@stackra/contracts";
+import { Schema } from "@stackra/validation";
 import type { PaymentsClient } from "#stackra/clients";
-import { I18n } from "#stackra/i18n";
 import type { StockService } from "#modules/inventory/services/stock.service";
-import type { OrderService } from "#modules/orders/services/order.service";
-import { OrderPermissions } from "#modules/orders/permissions/order.permission";
-import { CancelOrderInput } from "#modules/orders/schemas/cancel-order-input.schema";
-import { CancelOrderOutput } from "#modules/orders/schemas/cancel-order-output.schema";
 import { CancelReason } from "#modules/orders/enums/cancel-reason.enum";
+import type { OrderStatus } from "#modules/orders/enums/order-status.enum";
+import type { OrderService } from "#modules/orders/services/order.service";
+
+/** The order to cancel, by public id. */
+export class CancelOrderInput extends Schema {
+  /** The order's public id. */
+  orderId!: PublicId<"ord">;
+}
+
+/** The order after the cancel, with the state it ended in. */
+export class CancelOrderOutput extends Schema {
+  /** The order's public id. */
+  orderId!: PublicId<"ord">;
+
+  /** `cancelled`; the expiry job's path ends in `expired` instead. */
+  status!: OrderStatus;
+}
 
 /**
  * Cancels a pending order: releases its stock, records the reason by the realm of the principal
  * the cancel is for and, if a payment was authorized, queues a void after commit. The console asks
- * for confirmation first (`ux`). The notifications service reaches it as `ActorKind.Service` acting
+ * for confirmation first. The notifications service reaches it as `ActorKind.Service` acting
  * `onBehalfOf` the customer whose verified address sent the cancel request.
  */
-@Action({
+@AccessLogged({ classification: DataClassification.Pseudonymous })
+export class CancelOrderAction extends Action({
   key: "order.cancel",
-  input: CancelOrderInput,
-  output: CancelOrderOutput,
-  permission: OrderPermissions.cancel,
   actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],
+  tool: true,
   ux: {
-    requiresConfirmation: { text: I18n.orders.order.cancel_confirm, color: Tone.Danger },
-    success: I18n.orders.order.cancelled,
+    confirm: Tone.Danger,
     after: [UxAfter.Refresh],
   },
-})
-@AsEndpoint({ method: HttpMethod.Put, path: "/orders/:orderId/cancel" })
-@AsTool()
-export class CancelOrderAction {
+}) {
   /**
    * @param stock - inventory's exported service; gen records the orders → inventory edge from it.
    * @param payments - the generated payments client; only its `.queue()` mode is used here.
@@ -52,34 +60,29 @@ export class CancelOrderAction {
     private readonly orders: OrderService,
     private readonly stock: StockService,
     private readonly payments: PaymentsClient,
-  ) {}
+  ) {
+    super();
+  }
 
   /**
-   * Runs inside one transaction; the void is deferred to `afterCommit` so a rolled-back cancel
-   * never sends it. The access record names the principal the cancel was for, so a cancel that
-   * arrived by mail is traceable to the customer and to the service that relayed it.
-   * @throws AppError `forbidden` when OrderPolicy.cancel denies the principal for this
-   *   record.
+   * Runs inside one transaction; the void waits for `afterCommit`, so a rolled-back cancel never
+   * sends it.
+   * @throws Refusal `forbidden` when OrderPolicy#cancel denies the principal for this order.
    */
-  @AccessLogged({
-    classification: DataClassification.Pseudonymous,
-    subjects: (_input: CancelOrderInput, ctx: ActionContext) => [
-      (ctx.actor.onBehalfOf ?? ctx.actor).id,
-    ],
-  })
   async handle(input: CancelOrderInput, ctx: ActionContext): Promise<CancelOrderOutput> {
     const order = await this.orders.findOneOrFail({ id: input.orderId }, { populate: ["lines"] });
-    await ctx.authorize(OrderPermissions.cancel, order); // OrderPolicy.cancel for this record
+    await ctx.authorize(order);
     await this.stock.release(
-      order.lines.map(({ variantId, quantity }) => ({ variantId, quantity })),
+      order.lines.map((line) => ({ variantId: line.variant.id, quantity: line.quantity })),
     );
-    const byCustomer = (ctx.actor.onBehalfOf ?? ctx.actor).realm === Realm.Customer;
-    await this.orders.cancel(order, byCustomer ? CancelReason.Customer : CancelReason.Staff);
-    if (order.paymentId) {
-      const paymentId = order.paymentId;
-      // a command: at least once, deduplicated by the derived key
-      ctx.afterCommit(() => this.payments.payment.void.queue({ paymentId }));
-    }
-    return { orderId: order.id, status: order.status.value };
+    const subject = ctx.actor.onBehalfOf ?? ctx.actor;
+    this.orders.cancel(
+      order,
+      subject.realm === Realm.Customer ? CancelReason.Customer : CancelReason.Staff,
+    );
+    const { paymentId } = order;
+    // a queued call: at least once, deduplicated by the derived key
+    if (paymentId) ctx.afterCommit(() => this.payments.payment.void.queue({ paymentId }));
+    return CancelOrderOutput.create({ orderId: order.id, status: order.status });
   }
 }

@@ -1,20 +1,38 @@
 /**
  * Stackra file contract:
- * Purpose: `SendMessageInput`: the rendered parts of one mail plus the recipient principal and the
- *          `@Mail` key it came from.
- * Boundary: one schema class and its inferred type (ADR 0006); never the database row.
+ * Purpose: `SendMessageInput`: the rendered parts of one mail, the recipient principal and the
+ *          template key it was rendered from.
+ * Boundary: a shape class in schemas/ rather than a companion of the action, because
+ *           SendMessageAction takes it and MessageService#open reads it. Producers render through
+ *           @stackra/notifications (the `notifications` Notifier driver) and queue it; the body
+ *           travels on to the delivery job and is never stored (ADR 0134).
  * Runtime: isomorphic
- * Governing contract: ADR 0095, 0134, guides/programming-model.mdx#schemas, D.12
+ * Governing contract: ADR 0294 (decisions 4, 8 and 13), ADR 0134, ADR 0223
  */
-import { Schema, z } from "@stackra/schema";
+import { Schema, Str } from "@stackra/validation";
+import type { MessageRecipient } from "#modules/messages/schemas/message-recipient.schema";
 
-/** The rendered parts of one mail plus the recipient principal and the `@Mail` key it came from. */
-export class SendMessageInput extends Schema(
-  z.object({
-    mail: z.string().regex(/^[a-z][a-z0-9_]*$/),
-    to: z.object({ principalId: z.string() }),
-    subject: z.string().min(1).max(200),
-    html: z.string().min(1),
-    text: z.string().min(1),
-  }),
-) {}
+/** What a caller sends to `messages.message.send@1`. */
+export class SendMessageInput extends Schema {
+  /** The producer's template key, snake_case (`order_receipt`). */
+  @Str({ pattern: /^[a-z][a-z0-9_]*$/ })
+  mail!: string;
+
+  /** The recipient. */
+  to!: MessageRecipient;
+
+  /** The rendered subject line. */
+  @Str({
+    min: 1,
+    max: 200,
+  })
+  subject!: string;
+
+  /** The rendered HTML body. */
+  @Str({ min: 1 })
+  html!: string;
+
+  /** The rendered plain-text body. */
+  @Str({ min: 1 })
+  text!: string;
+}
