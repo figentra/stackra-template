@@ -76,7 +76,7 @@ export const LedgerEntrySchema = new EntitySchema<LedgerEntry>({
     },
     memberId: { type: "string", length: 64 },
     points: { type: "integer" },
-    kind: { enum: true, items: ["earn", "redeem", "expire", "adjust"] },
+    kind: { enum: true, items: ["earn", "redeem", "expire", "adjust", "hold", "release"] },
     reference: { type: "string", length: 120 },
     at: { type: "datetime" },
   },

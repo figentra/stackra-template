@@ -19,7 +19,7 @@ export const I18n = keys({
     nav: ["loyalty"],
     enums: {
       loyalty_tier: ["bronze", "silver", "gold"],
-      entry_kind: ["earn", "redeem", "expire", "adjust"],
+      entry_kind: ["earn", "redeem", "expire", "adjust", "hold", "release"],
     },
     resources: { loyalty_account: ["title"] },
     widgets: { points_issued: ["title"], points_balance: ["title", "expiry_note"] },

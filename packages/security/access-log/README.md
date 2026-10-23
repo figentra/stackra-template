@@ -10,8 +10,8 @@ and the conformance test that keeps the Explorer and gen in agreement.
 ## Use
 
 ```ts
-// a host's root module imports the package module once
-export class CommerceModule extends Module({ imports: [AccessLogModule] }) {}
+// a host's package.json lists the package; gen derives the module import from its dependencies
+"dependencies": { "@acme/access-log": "workspace:*" }
 
 // an action: each `handle` call is logged against the principal the call is for
 @AccessLogged({ classification: DataClassification.Pseudonymous })

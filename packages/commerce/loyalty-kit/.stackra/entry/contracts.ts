@@ -7,6 +7,7 @@
  *           schemas a host shape with a tier or an entry kind builds on.
  * Runtime: isomorphic
  */
+export { DebitOutcome } from "#contracts/enums/debit-outcome.enum";
 export { EntryKind } from "#contracts/enums/entry-kind.enum";
 export { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 export { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
@@ -16,4 +17,4 @@ export type { EarnRequest } from "#contracts/types/earn-request.type";
 export type { MemberId } from "#contracts/types/member-id.type";
 export type { PointsEntry } from "#contracts/types/points-entry.type";
 export type { RedemptionQuote } from "#contracts/types/redemption-quote.type";
-export { EntryKind$, LoyaltyTier$ } from "#stackra/schemas/loyalty_kit";
+export { DebitOutcome$, EntryKind$, LoyaltyTier$ } from "#stackra/schemas/loyalty_kit";

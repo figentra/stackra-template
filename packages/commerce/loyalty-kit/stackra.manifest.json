@@ -759,9 +759,13 @@
         }
       }
     },
+    "loyalty_kit.DebitOutcome": {
+      "type": "string",
+      "enum": ["written", "duplicate", "uncovered"]
+    },
     "loyalty_kit.EntryKind": {
       "type": "string",
-      "enum": ["earn", "redeem", "expire", "adjust"]
+      "enum": ["earn", "redeem", "expire", "adjust", "hold", "release"]
     },
     "loyalty_kit.ExpirePointsInput": {
       "type": "object",

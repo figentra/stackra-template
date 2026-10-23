@@ -12,7 +12,9 @@
       "earn": "مكتسبة",
       "redeem": "مستخدمة",
       "expire": "منتهية",
-      "adjust": "معدّلة"
+      "adjust": "معدّلة",
+      "hold": "محجوزة",
+      "release": "مُعادة"
     }
   },
   "resources": {

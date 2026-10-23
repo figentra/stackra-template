@@ -58,9 +58,11 @@ export class RedeemPointsWorkflow extends Workflow<RedeemPointsInput>({ timeout:
   }
 
   /**
-   * Takes the points off the ledger; `points.redeemed` is dispatched when this step's transaction
-   * commits.
+   * Takes the points off the ledger as one covered debit, so a redemption that raced this one since
+   * the quote is refused here instead of overdrawing; `points.redeemed` is dispatched when this
+   * step's transaction commits.
    * @returns the member's balance after the debit.
+   * @throws InsufficientPointsError when the balance no longer covers the quoted points.
    */
   async debit(run: Run<this>, ctx: StepContext): Promise<number> {
     const { memberId: member, points, reference } = run.results.quote;

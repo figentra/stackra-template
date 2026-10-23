@@ -14,8 +14,9 @@ placement. `src/contracts/` is the leaf, `src/core/` the isomorphic code, `src/r
 ## Use
 
 ```ts
-// services/commerce/src/commerce.module.ts: a host imports the module by class
-export class CommerceModule extends Module({ imports: [LoyaltyKitModule] }) {}
+// services/commerce/package.json: a host lists the package; gen derives the module import
+// from its dependencies, so the host writes no module file for it
+"dependencies": { "@acme/loyalty-kit": "workspace:*" }
 
 // services/commerce/src/config/loyalty-kit.config.ts: same name, package class aliased
 import { LoyaltyKitConfig as BaseLoyaltyKitConfig } from "@acme/loyalty-kit";
@@ -35,14 +36,26 @@ export class CommerceLoyaltyMembersDriver extends Driver(LoyaltyMembers) { … }
 // a host extension of one slot: the slot is the indexed type argument, the method is `handle`
 export class VerifyPointsBalanceExtension
   extends Extension<LoyaltyKitExtensionPoint["redeemVerify"]>({ order: 200 }) { … }
+
+// spending points on a purchase: hold inside the purchase's transaction, settle once it exists,
+// release when it ends unpaid
+await this.loyalty.hold(member, points, orderId, ctx.now()); // InsufficientPointsError if uncovered
+await this.loyalty.settle(member, orderId, ctx.now());
+await this.loyalty.release(member, orderId, ctx.now());
 ```
+
+A hold is one covered debit (`LoyaltyLedger#debit`): the balance check and the write are one atomic
+step per member (a conditional update of the journal's running-balance row in postgres, one event
+loop turn in memory), so two concurrent purchases can never spend the same points. Settling is
+balance-neutral (a `Redeem` entry plus the `Release` that offsets the hold), so settle and release
+commute: the points come back exactly once, in either order.
 
 ## Entries
 
 | Entry         | Holds                                                                                                                                                                                                                                          |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.`           | `LoyaltyKitConfig` and its shape `LoyaltyKitOptions`, `LoyaltyService`, `MemoryLoyaltyLedgerDriver`, `memberId`, `isExpiringSoon`, the refusals, the views the renderers share, the constants (isomorphic)                                     |
-| `./contracts` | the ports `LoyaltyLedger` (the kit drives it) and `LoyaltyMembers` (the host implements it), the enums `LoyaltyTier` and `EntryKind`, the types                                                                                                |
+| `./contracts` | the ports `LoyaltyLedger` (the kit drives it) and `LoyaltyMembers` (the host implements it), the enums `LoyaltyTier`, `EntryKind` and `DebitOutcome`, the types                                                                                |
 | `./node`      | `LoyaltyKitModule`, `LoyaltyKitSettings`, the access classes, actions, queries and their input and output schemas, events, the extension point and its extension, listener, models, resources, services, workflow, postgres driver, migrations |
 | `./react`     | the web renderers `PointsBalance` and `PointsIssued` of the kit's two Custom widgets, with `PointsBalanceProps` and `PointsIssuedProps`; never imports `./node` or `./native`                                                                  |
 | `./native`    | the native renderer `PointsBalance` with its `PointsBalanceProps` (same fields as the web Props); never imports `./node` or `./react`                                                                                                          |

@@ -12,7 +12,9 @@
       "earn": "Earned",
       "redeem": "Redeemed",
       "expire": "Expired",
-      "adjust": "Adjusted"
+      "adjust": "Adjusted",
+      "hold": "Held",
+      "release": "Released"
     }
   },
   "resources": {

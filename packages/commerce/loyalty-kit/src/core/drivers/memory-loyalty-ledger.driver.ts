@@ -1,7 +1,7 @@
 /**
  * Stackra file contract:
- * Purpose: an in-memory LoyaltyLedger for tests and `ledger: "memory"`; the same idempotency and
- *          expiry contract as postgres.
+ * Purpose: an in-memory LoyaltyLedger for tests and `ledger: "memory"`; the same idempotency,
+ *          covered-debit and expiry contract as postgres.
  * Boundary: the memory driver every capability ships before its production driver (ADR 0266). Its
  *           name is the file prefix (`memory`); gen writes it as a candidate of the port into
  *           `#stackra/wiring`. Isomorphic, so it lives in core and ships from the `.` entry. The
@@ -14,6 +14,7 @@
  *                     AGENTS.md), ADR 0266 decision 2
  */
 import { Driver } from "@stackra/container";
+import { DebitOutcome } from "#contracts/enums/debit-outcome.enum";
 import { EntryKind } from "#contracts/enums/entry-kind.enum";
 import { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
 import type { MemberId } from "#contracts/types/member-id.type";
@@ -27,9 +28,7 @@ export class MemoryLoyaltyLedgerDriver extends Driver(LoyaltyLedger) {
 
   /** Sums every entry of the member on each call; fine for tests, not a production path. */
   async balance(memberId: MemberId): Promise<number> {
-    let sum = 0;
-    for (const e of this.entries.values()) if (e.memberId === memberId) sum += e.points;
-    return sum;
+    return this.sumOf(memberId);
   }
 
   /**
@@ -41,6 +40,24 @@ export class MemoryLoyaltyLedgerDriver extends Driver(LoyaltyLedger) {
     if (this.entries.has(key)) return false;
     this.entries.set(key, entry);
     return true;
+  }
+
+  /**
+   * Checks the balance and stores the entry with no `await` between them: one turn of the event
+   * loop, so a concurrent debit of the same member always sees this one, as the postgres row lock
+   * makes it there.
+   */
+  async debit(entry: PointsEntry): Promise<DebitOutcome> {
+    const key = `${entry.memberId}|${entry.reference}`;
+    if (this.entries.has(key)) return DebitOutcome.Duplicate;
+    if (this.sumOf(entry.memberId) + entry.points < 0) return DebitOutcome.Uncovered;
+    this.entries.set(key, entry);
+    return DebitOutcome.Written;
+  }
+
+  /** The stored entry under the pair, or null. */
+  async find(memberId: MemberId, reference: string): Promise<PointsEntry | null> {
+    return this.entries.get(`${memberId}|${reference}`) ?? null;
   }
 
   /**
@@ -62,5 +79,12 @@ export class MemoryLoyaltyLedgerDriver extends Driver(LoyaltyLedger) {
       if (written) removed += e.points;
     }
     return removed;
+  }
+
+  /** The synchronous sum `balance` and `debit` share, so a debit checks without yielding. */
+  private sumOf(memberId: MemberId): number {
+    let sum = 0;
+    for (const e of this.entries.values()) if (e.memberId === memberId) sum += e.points;
+    return sum;
   }
 }

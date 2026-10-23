@@ -12,6 +12,7 @@
  *                     ADR 0260 decision 9
  */
 import { Port } from "@stackra/container";
+import type { DebitOutcome } from "#contracts/enums/debit-outcome.enum";
 import type { MemberId } from "#contracts/types/member-id.type";
 import type { PointsEntry } from "#contracts/types/points-entry.type";
 
@@ -26,6 +27,18 @@ export abstract class LoyaltyLedger extends Port {
    *          already applied.
    */
   abstract append(entry: PointsEntry): Promise<boolean>;
+
+  /**
+   * Appends a debit (negative `points`) only while the member's balance covers it. The check and
+   * the write are one atomic step, serialised with every other debit of that member, so two
+   * concurrent debits never overdraw: the second sees the first.
+   * @returns `written`; `uncovered`, changing nothing, when the balance is below `-points`;
+   *          `duplicate`, changing nothing, when that reference was already applied.
+   */
+  abstract debit(entry: PointsEntry): Promise<DebitOutcome>;
+
+  /** The member's entry under `reference`, or null when there is none. */
+  abstract find(memberId: MemberId, reference: string): Promise<PointsEntry | null>;
 
   /**
    * Marks every `earn` entry older than `before` as expired and returns the points removed.

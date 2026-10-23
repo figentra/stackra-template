@@ -7,7 +7,11 @@
  *           a browser bundle. The journal owns the arithmetic every ledger shares (idempotent
  *           append per reference, running balance, set-based reversal); the kit keeps its own
  *           domain port, so a host can still `@Replaces` it. Runs inside whatever transaction the
- *           caller holds. No SQL is written here. `Driver(LoyaltyLedger)` takes the port as a
+ *           caller holds. A covered debit is the journal's floored append: one conditional update
+ *           of the account's running-balance row (`SET balance = balance + :amount WHERE … AND
+ *           balance + :amount >= :floor`), which takes that row's lock, so concurrent debits of one
+ *           member serialise and zero updated rows means the balance did not cover it. No SQL is
+ *           written here. `Driver(LoyaltyLedger)` takes the port as a
  *           value because the driver inherits its abstract members; the call returns the class,
  *           so there is no `defineDriver`.
  * Runtime: node
@@ -15,6 +19,7 @@
  */
 import { Driver } from "@stackra/container";
 import type { Journal } from "@stackra/ledger";
+import { DebitOutcome } from "#contracts/enums/debit-outcome.enum";
 import { EntryKind } from "#contracts/enums/entry-kind.enum";
 import { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
 import type { MemberId } from "#contracts/types/member-id.type";
@@ -53,6 +58,39 @@ export class PostgresLoyaltyLedgerDriver extends Driver(LoyaltyLedger) {
       at: entry.at,
     });
     return written;
+  }
+
+  /**
+   * Appends the debit only while the running balance stays at or above zero, in the same statement
+   * that locks the member's balance row.
+   * @returns `uncovered` when the floor refused it, `duplicate` when the pair already exists.
+   */
+  async debit(entry: PointsEntry): Promise<DebitOutcome> {
+    const { written, belowFloor } = await this.journal.append(
+      {
+        account: entry.memberId,
+        amount: entry.points,
+        kind: entry.kind,
+        reference: entry.reference,
+        at: entry.at,
+      },
+      { floor: 0 },
+    );
+    if (belowFloor) return DebitOutcome.Uncovered;
+    return written ? DebitOutcome.Written : DebitOutcome.Duplicate;
+  }
+
+  /** The journal row under the (member, reference) pair, mapped back to the port's entry. */
+  async find(memberId: MemberId, reference: string): Promise<PointsEntry | null> {
+    const row = await this.journal.find({ account: memberId, reference });
+    if (!row) return null;
+    return {
+      memberId,
+      points: row.amount,
+      kind: row.kind,
+      reference: row.reference,
+      at: row.at,
+    };
   }
 
   /**

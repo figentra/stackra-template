@@ -51,8 +51,11 @@ import type { RedemptionConfirmed } from "#node/workflows/redemption-confirmed.s
 /** enum `LoyaltyTier` (contracts/enums/loyalty-tier.enum.ts), codes in source order. */
 export const LoyaltyTier$ = z.enum(["bronze", "silver", "gold"]);
 
+/** enum `DebitOutcome` (contracts/enums/debit-outcome.enum.ts), codes in source order. */
+export const DebitOutcome$ = z.enum(["written", "duplicate", "uncovered"]);
+
 /** enum `EntryKind` (contracts/enums/entry-kind.enum.ts), codes in source order. */
-export const EntryKind$ = z.enum(["earn", "redeem", "expire", "adjust"]);
+export const EntryKind$ = z.enum(["earn", "redeem", "expire", "adjust", "hold", "release"]);
 
 /** The ledger driver names (`DriverName<LoyaltyLedger>`), from the driver files. */
 const LedgerDriver$ = z.enum(["postgres", "memory"]);

@@ -12,7 +12,10 @@
  */
 export { LoyaltyKitConfig } from "#config/loyalty-kit.config";
 export { EXPIRE_REFERENCE_PREFIX } from "#core/constants/expire-reference-prefix.constant";
+export { HOLD_REFERENCE_PREFIX } from "#core/constants/hold-reference-prefix.constant";
 export { MAX_POINTS_PER_ENTRY } from "#core/constants/max-points-per-entry.constant";
+export { RELEASE_REFERENCE_PREFIX } from "#core/constants/release-reference-prefix.constant";
+export { SETTLE_REFERENCE_PREFIX } from "#core/constants/settle-reference-prefix.constant";
 export { MemoryLoyaltyLedgerDriver } from "#core/drivers/memory-loyalty-ledger.driver";
 export { AccountFrozenError } from "#core/errors/account-frozen.error";
 export { InsufficientPointsError } from "#core/errors/insufficient-points.error";

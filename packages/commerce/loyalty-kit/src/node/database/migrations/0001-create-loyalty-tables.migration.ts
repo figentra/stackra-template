@@ -53,7 +53,7 @@ export class CreateLoyaltyTablesMigration extends Migration {
       t.belongsTo("loyalty_accounts", { column: "account_id" }).nullable().withoutIndex();
       t.string("member_id", 64);
       t.integer("points");
-      t.enum("kind", ["earn", "redeem", "expire", "adjust"]);
+      t.enum("kind", ["earn", "redeem", "expire", "adjust", "hold", "release"]);
       t.string("reference", 120);
       t.timestamp("at");
       // idx_ledger_entries_tenant_id_member_id_reference, unique: one entry per reference

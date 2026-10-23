@@ -18,12 +18,14 @@ import { AccountService } from "#node/services/account.service";
 import { LedgerReconcilerService } from "#node/services/ledger-reconciler.service";
 
 /**
- * A host imports it once (by class, never a namespace walk); values come from the host's
+ * A host takes it by listing the package as a dependency: gen derives the host's module imports
+ * from its dependencies, so the host writes no module file for it; values come from the host's
  * `src/config/loyalty-kit.config.ts` override.
  *
  * @example
- * ```ts
- * export class CommerceModule extends Module({ imports: [LoyaltyKitModule] }) {}
+ * ```jsonc
+ * // services/commerce/package.json
+ * { "dependencies": { "@acme/loyalty-kit": "workspace:*" } }
  * ```
  */
 export class LoyaltyKitModule extends Module({

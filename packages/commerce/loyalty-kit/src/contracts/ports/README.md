@@ -18,5 +18,8 @@ Rules:
 - A port file is a leaf: it imports only `src/contracts/`, so every entry may import it.
 - A driver is named by its file prefix (`postgres-loyalty-ledger.driver.ts` is `postgres`), and a
   `DriverName<LoyaltyLedger>` config field lists exactly those names.
+- A debit that must never overdraw goes through `LoyaltyLedger#debit`: every driver makes its
+  balance check and its write one atomic step per member (postgres by the row lock of a conditional
+  update, memory by doing both in one turn of the event loop).
 - When a package needs data only a host has, it defines a port and the host implements it
   (`LoyaltyMembers`), so the package never imports the host.

@@ -8,7 +8,7 @@
  * Governing contract: ADR 0263 decisions 9 and 12, ADR 0294 (decisions 16 and 17), ADR 0022
  */
 import { LoyaltyKitConfig, MemoryLoyaltyLedgerDriver } from "@acme/loyalty-kit";
-import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
+import { DebitOutcome, LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 import { LoyaltyMembersFake } from "@acme/loyalty-kit/testing";
 import { UnresolvedPortError } from "@stackra/container";
@@ -26,6 +26,16 @@ class HostLedger extends LoyaltyLedger {
   /** Accepts every entry without storing it. */
   async append(): Promise<boolean> {
     return true;
+  }
+
+  /** Holds nothing, so it covers no debit. */
+  async debit(): Promise<DebitOutcome> {
+    return DebitOutcome.Uncovered;
+  }
+
+  /** Stores nothing, so it finds nothing. */
+  async find(): Promise<null> {
+    return null;
   }
 
   /** Has nothing to expire. */
