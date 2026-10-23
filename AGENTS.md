@@ -663,17 +663,17 @@ boundary; a route adds `<name>.error.tsx` only to customise its own.
 
 ## Single owners (never import these from anywhere else)
 
-`Controller` → `@stackra/app` · `Action`, `Query`, `Precondition`, `Interceptor`, `ExtensionPoint`,
-`Extension`, `Idempotency` → `@stackra/actions` · `Schema`, `CursorInput`, `Page`, `validate` and
-the field decorators → `@stackra/validation` · `Model`, relation decorators, `Collection`, `Ref`,
-`Link`, `Index`, `Searchable` and the traits → `@stackra/model` · `StateMachine`, `Transition` →
-`@stackra/state-machine` · `Refusal`, `ErrorKind` → `@stackra/errors` · `Event`, `DomainEvent`,
-`IntegrationEvent`, `WebhookEvent`, `AnalyticsEvent`, `Listener`, `BroadcastAudience` →
-`@stackra/events` · `Change` → `@stackra/versioning` · `Workflow`, `Signal`, `Step`, `Run` →
-`@stackra/workflow` · `Permissions`, `Permission`, `Policy`, `Role`, `SystemRole` → `@stackra/iam` ·
-`Entitlement` → `@stackra/entitlements` · `Flag` → `@stackra/feature-flags` · `Settings`, `Setting`,
-`SettingScope`, `SettingsReader` → `@stackra/settings` · `CrudService`, `Migration`, `Macro`,
-`Seeder`, `Blueprint`, `SchemaBuilder` → `@stackra/database` (`Factory` from
+`Controller`: no package is assigned yet · `Action`, `Query`, `Precondition`, `Interceptor`,
+`ExtensionPoint`, `Extension`, `Idempotency` → `@stackra/actions` · `Schema`, `CursorInput`, `Page`,
+`validate` and the field decorators → `@stackra/validation` · `Model`, relation decorators,
+`Collection`, `Ref`, `Link`, `Index`, `Searchable` and the traits → `@stackra/model` ·
+`StateMachine`, `Transition` → `@stackra/state-machine` · `Refusal`, `ErrorKind` → `@stackra/errors`
+· `Event`, `DomainEvent`, `IntegrationEvent`, `WebhookEvent`, `AnalyticsEvent`, `Listener`,
+`BroadcastAudience` → `@stackra/events` · `Change` → `@stackra/versioning` · `Workflow`, `Signal`,
+`Step`, `Run` → `@stackra/workflow` · `Permissions`, `Permission`, `Policy`, `Role`, `SystemRole` →
+`@stackra/iam` · `Entitlement` → `@stackra/entitlements` · `Flag` → `@stackra/feature-flags` ·
+`Settings`, `Setting`, `SettingScope`, `SettingsReader` → `@stackra/settings` · `CrudService`,
+`Migration`, `Macro`, `Seeder`, `Blueprint`, `SchemaBuilder` → `@stackra/database` (`Factory` from
 `@stackra/database/testing`) · `Cache`, `CacheKey`, `CacheScope` → `@stackra/cache` · `Module`,
 `Service`, `Driver`, `Lifetime`, `Replaces`, `Named`, `DriverName` → `@stackra/container` ·
 `Config`, `Secret` → `@stackra/config` · `Resource`, `Widget`, `Document`, `Panel`, `Table`,
