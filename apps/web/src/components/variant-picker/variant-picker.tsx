@@ -3,40 +3,41 @@
  * Purpose: one Select per option axis (Size, Colour) bound to the variant choice.
  * Boundary: presentation; the choice and the matching are the hook's.
  * Runtime: browser
- * Governing contract: ADR 0294 d14, WCAG 2.2 AA (each select labelled with the axis name)
+ * Governing contract: ADR 0294 (decision 14, as amended by programming model v3.1, AGENTS.md: class
+ *                     components), WCAG 2.2 AA (each select labelled with the axis name)
  */
-import { Select } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";
-import type { VariantChoice } from "#src/types/variant-choice.type";
+import { Component, Select } from "@stackra/ui";
 import { I18n } from "#stackra/i18n";
-
-/** The hook's result, passed down so the page and the picker agree on the variant. */
-export interface VariantPickerProps {
-  /** The choice the product page holds, so the page and the picker agree on the variant. */
-  readonly choice: VariantChoice;
-}
+import type { VariantPickerProps } from "./variant-picker.props";
 
 /** Nothing renders for a single-variant product (no axes). */
-export function VariantPicker({ choice }: VariantPickerProps) {
-  const { t } = useTranslation();
-  const { variant, options, choose } = choice;
-  return (
-    <>
-      {Object.entries(options).map(([axis, values]) => (
-        <Select
-          key={axis}
-          label={t(I18n.web.product.variant_axis, { axis })}
-          className="mt-4"
-          selectedKey={variant.options[axis]}
-          onSelectionChange={(key) => choose(axis, String(key))}
-        >
-          {values.map((value) => (
-            <Select.Item key={value} id={value}>
-              {value}
-            </Select.Item>
-          ))}
-        </Select>
-      ))}
-    </>
-  );
+export class VariantPicker extends Component<VariantPickerProps> {
+  /** The translator of the visitor's locale. */
+  translation = useTranslation();
+
+  /** One labelled Select per axis, showing the chosen variant's value. */
+  render() {
+    const { t } = this.translation;
+    const { variant, options, choose } = this.props.choice;
+    return (
+      <>
+        {Object.entries(options).map(([axis, values]) => (
+          <Select
+            key={axis}
+            label={t(I18n.web.product.variant_axis, { axis })}
+            className="mt-4"
+            selectedKey={variant.options[axis]}
+            onSelectionChange={(key) => choose(axis, String(key))}
+          >
+            {values.map((value) => (
+              <Select.Item key={value} id={value}>
+                {value}
+              </Select.Item>
+            ))}
+          </Select>
+        ))}
+      </>
+    );
+  }
 }

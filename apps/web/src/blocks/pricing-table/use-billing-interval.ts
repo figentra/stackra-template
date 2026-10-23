@@ -15,16 +15,7 @@ import { Money, Rounding } from "@stackra/money";
 import { signal, useSignal } from "@stackra/state/react";
 import { Flags } from "#stackra/flags";
 import { BillingInterval } from "#src/enums/billing-interval.enum";
-
-/** What the hook returns. */
-export interface BillingIntervalState {
-  /** The interval the toggle shows. */
-  readonly interval: BillingInterval;
-  /** Switches every pricing table on the page. */
-  readonly setInterval: (next: BillingInterval) => void;
-  /** A price of the current interval as a per-month amount. */
-  readonly perMonth: (priceMinor: number, currency: string) => Money;
-}
+import type { BillingIntervalState } from "#src/types/billing-interval-state.type";
 
 /** One shared choice; `null` until the visitor picks, so the experiment decides the first view. */
 const chosen = signal<BillingInterval | null>(null);

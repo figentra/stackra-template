@@ -4,20 +4,20 @@
  *          tenant pages.
  * Boundary: the class is the props shape a document may pass, validated on publish and on render;
  *           its renderer is `feature-grid.tsx`, bound by name; the key is derived from the folder.
- *           An icon is an `Icons` case, never SVG markup.
+ *           An icon is a Lucide `IconName`, never SVG markup.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110 (registered coded blocks),
- *                     ADR 0112
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20, as amended by programming model v3.1,
+ *                     AGENTS.md: icon names and client classes), ADR 0110 (registered coded
+ *                     blocks), ADR 0112
  */
 import { Block, BlockCategory, type LocalizedText } from "@stackra/experience";
-import { Icons } from "@stackra/ui/icons";
 import { List } from "@stackra/validation";
 import type { Feature } from "#src/schemas/feature.schema";
 
 /** The heading and three to six features in display order. */
 export class FeatureGridBlock extends Block({
   category: BlockCategory.Marketing,
-  icon: Icons.Grid,
+  icon: "layout-grid",
 }) {
   /** The section heading. */
   title!: LocalizedText;

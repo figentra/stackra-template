@@ -4,13 +4,13 @@
  *          top of a document.
  * Boundary: the class is the props shape a document may pass, validated on publish and on render;
  *           its renderer is `hero-section.tsx`, bound by name; the key is derived from the folder.
- *           Text is `LocalizedText` (one value per locale), actions are route keys.
- *           Published documents name it `web.hero`, so `@Renamed` keeps that key resolving.
+ *           Text is `LocalizedText` (one value per locale), actions are route keys. Published
+ *           documents name it `web.hero`, so `@Renamed` keeps that key resolving.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110 (registered coded blocks)
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20, as amended by programming model v3.1,
+ *                     AGENTS.md: icon names and client classes), ADR 0110 (registered coded blocks)
  */
 import { Block, BlockCategory, type LocalizedText } from "@stackra/experience";
-import { Icons } from "@stackra/ui/icons";
 import { Renamed } from "@stackra/validation";
 import type { CallToAction } from "#src/schemas/call-to-action.schema";
 
@@ -18,7 +18,7 @@ import type { CallToAction } from "#src/schemas/call-to-action.schema";
 @Renamed("web.hero")
 export class HeroSectionBlock extends Block({
   category: BlockCategory.Marketing,
-  icon: Icons.Sparkles,
+  icon: "sparkles",
 }) {
   /** The page's one heading. */
   title!: LocalizedText;

@@ -5,11 +5,13 @@
  * Boundary: a class per event, its fields the payload; the `name` is written once and locked in
  *           `stackra.manifest.json`. Sent only after the visitor granted the analytics consent
  *           category (fired earlier, it waits in the package's queue), and never with the visitor's
- *           name or email (the analytics config strips them too).
+ *           name or email (the analytics config strips them too). The base comes from
+ *           `@stackra/events`, the home of every event base; `@stackra/analytics` delivers it.
  * Runtime: browser
- * Governing contract: ADR 0294 (decisions 5 and 14), ADR 0298 (decision 5)
+ * Governing contract: ADR 0294 (decisions 5 and 14, as amended by programming model v3.1,
+ *                     AGENTS.md: event bases from @stackra/events), ADR 0298 (decision 5)
  */
-import { AnalyticsEvent } from "@stackra/analytics";
+import { AnalyticsEvent } from "@stackra/events";
 
 /** `analytics.track(LeadSubmitted.create({ plan }))` from the contact page. */
 export class LeadSubmitted extends AnalyticsEvent({ name: "lead.submitted" }) {

@@ -23,15 +23,26 @@ describe(LocaleSuggestion, () => {
     vi.restoreAllMocks();
   });
 
-  /** An Arabic browser on the English pricing page is offered `/ar/pricing`, not the home page. */
-  it("offers the preferred locale and opens the same page in it", async () => {
+  /** A Saudi browser on the English pricing page is offered `/ar-sa/pricing`, not the home page. */
+  it("offers the preferred regional locale and opens the same page in its mount", async () => {
     browserPrefers("ar-SA", "en");
     const { router } = render(<LocaleSuggestion locale={Locale.En} />, {
       locale: "en",
       route: "/pricing",
     });
     expect(await screen.findByRole("region", { name: "Language suggestion" })).toBeTruthy();
-    await userEvent.click(screen.getByRole("button", { name: "Switch to العربية" }));
+    await userEvent.click(screen.getByRole("button", { name: /^Switch to العربية/ }));
+    expect(router.state.location.pathname).toBe("/ar-sa/pricing");
+  });
+
+  /** A language-only preference gets the base language, not a region it never asked for. */
+  it("offers the base language for a language-only preference", async () => {
+    browserPrefers("ar");
+    const { router } = render(<LocaleSuggestion locale={Locale.En} />, {
+      locale: "en",
+      route: "/pricing",
+    });
+    await userEvent.click(await screen.findByRole("button", { name: /^Switch to العربية/ }));
     expect(router.state.location.pathname).toBe("/ar/pricing");
   });
 

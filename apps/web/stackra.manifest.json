@@ -4,12 +4,13 @@
   "package": "@acme/web",
   "version": "0.1.0",
   "kind": "app",
-  "targets": ["web", "pwa"],
+  "targets": ["web"],
   "render": "server",
   "area": "public",
   "root": {
-    "class": "WebModule",
-    "file": "src/web.module.ts",
+    "module": "web",
+    "file": null,
+    "$comment": "no root module file: it would state nothing gen does not derive (no exports, client imports or wrap); the member is the one module `web`",
     "wrap": []
   },
   "consumes": [
@@ -56,7 +57,7 @@
     "signingSecret": "GATEWAY_VISITOR_SIGNING_KEY"
   },
   "ui": {
-    "errorBoundary": "src/app.error.tsx",
+    "errorBoundary": "@stackra/navigation",
     "layouts": [
       {
         "key": "site",
@@ -178,7 +179,15 @@
         "from": "i18n.config.ts urlStrategy prefix_except_default",
         "locales": {
           "en": "/",
-          "ar": "/ar"
+          "en-US": "/en-us",
+          "ar": "/ar",
+          "ar-SA": "/ar-sa"
+        },
+        "fallbacks": {
+          "ar-SA": ["ar", "en"],
+          "ar": ["en"],
+          "en-US": ["en"],
+          "en": []
         }
       }
     ],
@@ -187,7 +196,10 @@
         "key": "web.site",
         "class": "SiteMenu",
         "file": "src/menus/site.menu.ts",
-        "kind": "navigation"
+        "kind": "navigation",
+        "deps": ["SiteConfig"],
+        "flags": ["web.help_centre"],
+        "external": ["SiteConfig.docsUrl"]
       },
       {
         "key": "web.footer",
@@ -216,7 +228,7 @@
         "class": "FeatureGridBlock",
         "file": "src/blocks/feature-grid/feature-grid.block.ts",
         "category": "marketing",
-        "icon": "grid",
+        "icon": "layout-grid",
         "renderers": {
           "web": "src/blocks/feature-grid/feature-grid.tsx"
         },
@@ -258,7 +270,7 @@
         "file": "src/blocks/faq-section/faq-section.block.ts",
         "renamedFrom": "web.faq",
         "category": "content",
-        "icon": "question",
+        "icon": "circle-question-mark",
         "accepts": "content.entry.list",
         "renderers": {
           "web": "src/blocks/faq-section/faq-section.tsx"
@@ -298,17 +310,19 @@
     "overrides": [
       {
         "kind": "lang",
+        "owner": "marketing/leads",
         "namespace": "leads",
         "locale": "en",
         "keys": ["refusals.rate_limited", "refusals.captcha_failed"],
-        "file": "assets/overrides/leads/en.json"
+        "file": "src/overrides/marketing/leads/assets/lang/en/leads.json"
       },
       {
         "kind": "lang",
+        "owner": "marketing/leads",
         "namespace": "leads",
         "locale": "ar",
         "keys": ["refusals.rate_limited", "refusals.captcha_failed"],
-        "file": "assets/overrides/leads/ar.json"
+        "file": "src/overrides/marketing/leads/assets/lang/ar/leads.json"
       }
     ]
   },
@@ -320,6 +334,13 @@
       "default": false,
       "expires": "2027-03-31",
       "label": "web::flags.pricing_yearly_first.label"
+    },
+    {
+      "key": "web.help_centre",
+      "class": "HelpCentreFlag",
+      "file": "src/flags/help-centre.flag.ts",
+      "default": false,
+      "label": "web::flags.help_centre.label"
     }
   ],
   "analyticsEvents": [
@@ -344,58 +365,86 @@
   "config": [
     {
       "key": "web.env",
-      "class": "WebEnvConfig",
-      "file": "src/config/env.config.ts"
+      "class": "EnvConfig",
+      "file": "src/config/env.config.ts",
+      "schema": "src/schemas/env-options.schema.ts#EnvOptions",
+      "env": {
+        "analyticsPosthogKey": "VITE_POSTHOG_KEY",
+        "featureFlagsPosthogKey": "VITE_POSTHOG_KEY",
+        "turnstileSiteKey": "VITE_TURNSTILE_SITE_KEY",
+        "apiUrl": "STACKRA_API_URL",
+        "siteUrl": "STACKRA_SITE_URL",
+        "telemetryDsn": "STACKRA_SENTRY_DSN"
+      },
+      "secrets": {
+        "turnstileSecret": "TURNSTILE_SECRET_KEY",
+        "visitorSigningKey": "GATEWAY_VISITOR_SIGNING_KEY"
+      },
+      "feeds": {
+        "analyticsPosthogKey": "analytics.posthogKey",
+        "featureFlagsPosthogKey": "feature_flags.posthogKey",
+        "telemetryDsn": "logger.telemetry.dsn"
+      }
     },
     {
       "key": "web.edge",
       "class": "EdgeConfig",
-      "file": "src/config/edge.config.ts"
+      "file": "src/config/edge.config.ts",
+      "schema": "src/schemas/edge-options.schema.ts#EdgeOptions"
     },
     {
       "key": "web.site",
       "class": "SiteConfig",
-      "file": "src/config/site.config.ts"
+      "file": "src/config/site.config.ts",
+      "schema": "src/schemas/site-options.schema.ts#SiteOptions"
     },
     {
       "key": "web.telemetry",
       "class": "TelemetryConfig",
-      "file": "src/config/telemetry.config.ts"
+      "file": "src/config/telemetry.config.ts",
+      "schema": "src/schemas/telemetry-options.schema.ts#TelemetryOptions"
     },
     {
       "key": "analytics",
-      "class": "WebAnalyticsConfig",
-      "overrides": "@stackra/analytics#AnalyticsConfig"
+      "class": "AnalyticsConfig",
+      "overrides": "@stackra/analytics#AnalyticsConfig",
+      "file": "src/config/analytics.config.ts"
     },
     {
       "key": "consent",
-      "class": "WebConsentConfig",
-      "overrides": "@stackra/consent#ConsentConfig"
+      "class": "ConsentConfig",
+      "overrides": "@stackra/consent#ConsentConfig",
+      "file": "src/config/consent.config.ts"
     },
     {
       "key": "csp",
-      "class": "WebCspConfig",
-      "overrides": "@stackra/csp#CspConfig"
+      "class": "CspConfig",
+      "overrides": "@stackra/csp#CspConfig",
+      "file": "src/config/csp.config.ts"
     },
     {
       "key": "feature_flags",
-      "class": "WebFeatureFlagsConfig",
-      "overrides": "@stackra/feature-flags#FeatureFlagsConfig"
+      "class": "FeatureFlagsConfig",
+      "overrides": "@stackra/feature-flags#FeatureFlagsConfig",
+      "file": "src/config/feature-flags.config.ts"
     },
     {
       "key": "i18n",
-      "class": "WebI18nConfig",
-      "overrides": "@stackra/i18n#I18nConfig"
+      "class": "I18nConfig",
+      "overrides": "@stackra/i18n#I18nConfig",
+      "file": "src/config/i18n.config.ts"
     },
     {
       "key": "seo",
-      "class": "WebSeoConfig",
-      "overrides": "@stackra/seo#SeoConfig"
+      "class": "SeoConfig",
+      "overrides": "@stackra/seo#SeoConfig",
+      "file": "src/config/seo.config.ts"
     },
     {
       "key": "theming",
-      "class": "WebThemingConfig",
-      "overrides": "@stackra/theming#ThemingConfig"
+      "class": "ThemingConfig",
+      "overrides": "@stackra/theming#ThemingConfig",
+      "file": "src/config/theming.config.ts"
     }
   ],
   "hatches": [
@@ -408,7 +457,7 @@
   "secrets": ["TURNSTILE_SECRET_KEY", "GATEWAY_VISITOR_SIGNING_KEY"],
   "assets": {
     "lang": {
-      "web": ["en", "ar"]
+      "web": ["en", "en-US", "ar", "ar-SA"]
     },
     "public": ["web::public/logo.svg"]
   },
@@ -431,7 +480,7 @@
       "required": ["icon", "title", "body"],
       "properties": {
         "icon": {
-          "$ref": "@stackra/ui#/schemas/Icon"
+          "$ref": "@stackra/icons#/schemas/IconName"
         },
         "title": {
           "$ref": "@stackra/experience#/schemas/LocalizedText"

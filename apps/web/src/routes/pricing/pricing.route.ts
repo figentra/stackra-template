@@ -17,7 +17,8 @@ import { ContentEntryType } from "@stackra/content";
 import { Money } from "@stackra/money";
 import { Route, type MetaContext, type RouteContext } from "@stackra/navigation";
 import { OgKind, type Seo } from "@stackra/seo";
-import { Billing, Content } from "#stackra/clients";
+import { ListPlansQuery } from "#stackra/clients/billing";
+import { ListEntriesQuery } from "#stackra/clients/content";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 import type { SiteConfig } from "#src/config/site.config";
@@ -42,9 +43,9 @@ export class PricingRoute extends Route({
   override async loader(ctx: RouteContext<this>) {
     const cache = { cache: CacheProfile.Marketing };
     const [ladder, faq] = await Promise.all([
-      ctx.query(Billing.queries.ListPlans, { product: this.site.product }, cache),
+      ctx.query(ListPlansQuery, { product: this.site.product }, cache),
       ctx.query(
-        Content.queries.ListEntries,
+        ListEntriesQuery,
         { siteId: ctx.site.siteId, type: ContentEntryType.Faq, limit: FAQ_SHOWN },
         cache,
       ),

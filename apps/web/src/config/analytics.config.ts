@@ -2,23 +2,24 @@
  * Stackra file contract:
  * Purpose: the site's override of @stackra/analytics' configuration: the driver by name, the
  *          consent category that gates it, what is captured automatically and the ingest origin.
- * Boundary: an override declares `override` members only and inherits the base's key
- *           (`analytics`), which runway's `config.analytics` layers set per environment. The key is
- *           env (`VITE_POSTHOG_KEY`). No identity is ever attached on the public site, and nothing
- *           is sent before the visitor allows the category: events fired earlier wait in the
- *           package's bounded, ordered queue, are sent in order on acceptance and dropped on
- *           refusal. Fields typed by an enum or a driver name restate their type.
+ * Boundary: an override declares `override` members only and inherits the base's key (`analytics`),
+ *           which runway's `config.analytics` layers set per environment. The key is
+ *           `EnvConfig.analyticsPosthogKey` (`VITE_POSTHOG_KEY`); this override carries no env. No
+ *           identity is ever attached on the public site, and nothing is sent before the visitor
+ *           allows the category: events fired earlier wait in the package's bounded, ordered queue,
+ *           are sent in order on acceptance and dropped on refusal. Fields typed by an enum or a
+ *           driver name restate their type.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0298 (decisions 1 and 5), ADR 0231 (checked
- *                     driver names)
+ * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md: the Base alias),
+ *                     ADR 0298 (decisions 1 and 5), ADR 0231 (checked driver names)
  */
-import { AnalyticsConfig } from "@stackra/analytics";
+import { AnalyticsConfig as BaseAnalyticsConfig } from "@stackra/analytics";
 import type { AnalyticsDriver } from "@stackra/analytics/contracts";
 import { ConsentCategory } from "@stackra/consent";
 import type { DriverName } from "@stackra/container";
 
 /** Product analytics on the public site: driver, gating consent and capture switches. */
-export class WebAnalyticsConfig extends AnalyticsConfig {
+export class AnalyticsConfig extends BaseAnalyticsConfig {
   /** `posthog` in SaaS, `none` in dev (runway), `memory` in tests. */
   override driver: DriverName<AnalyticsDriver> = "posthog";
 

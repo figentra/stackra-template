@@ -6,43 +6,39 @@
  *           `LocalizedText` to the visitor's locale, and the coded landing page passes translated
  *           keys. The button names a route key, so the link lands in the visitor's locale.
  * Runtime: browser
- * Governing contract: ADR 0294 (decisions 7 and 14), ADR 0110
+ * Governing contract: ADR 0294 (decisions 7 and 14, as amended by programming model v3.1,
+ *                     AGENTS.md: class components), ADR 0110
  */
 import { Link } from "@stackra/navigation/react";
-import { Button } from "@stackra/ui";
-import { Routes, type RouteKey } from "#stackra/routes";
-
-/** Copy and the one action. */
-export interface CtaBannerProps {
-  /** The section heading, already in the visitor's language. */
-  readonly title: string;
-  /** One sentence under the heading. */
-  readonly body: string;
-  /** The button's label and the route it opens. */
-  readonly button: { readonly label: string; readonly route: RouteKey };
-}
+import { Button, Component } from "@stackra/ui";
+import { Routes } from "#stackra/routes";
+import type { CtaBannerProps } from "./cta-banner.props";
 
 /**
  * Accent background with the foreground token for contrast, so a tenant's accent still passes AA.
  */
-export function CtaBanner({ title, body, button }: CtaBannerProps) {
-  return (
-    <section
-      aria-labelledby="cta-title"
-      className="my-12 rounded-panel bg-accent px-6 py-12 text-center text-accent-foreground"
-    >
-      <h2 id="cta-title" className="text-3xl font-semibold tracking-tight">
-        {title}
-      </h2>
-      <p className="mx-auto mt-2 max-w-xl">{body}</p>
-      <Button
-        className="mt-6"
-        variant="secondary"
-        size="lg"
-        render={<Link to={Routes[button.route]} />}
+export class CtaBanner extends Component<CtaBannerProps> {
+  /** A labelled section with the heading, the line and the button. */
+  render() {
+    const { title, body, button } = this.props;
+    return (
+      <section
+        aria-labelledby="cta-title"
+        className="my-12 rounded-panel bg-accent px-6 py-12 text-center text-accent-foreground"
       >
-        {button.label}
-      </Button>
-    </section>
-  );
+        <h2 id="cta-title" className="text-3xl font-semibold tracking-tight">
+          {title}
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl">{body}</p>
+        <Button
+          className="mt-6"
+          variant="secondary"
+          size="lg"
+          render={<Link to={Routes[button.route]} />}
+        >
+          {button.label}
+        </Button>
+      </section>
+    );
+  }
 }

@@ -3,11 +3,12 @@
  * page and fallback files bound by name), src/config/i18n.config.ts (locales, urlStrategy) and
  * src/config/seo.config.ts (robots, sitemaps, og) — do not edit
  * Purpose: the full React Router 7 framework-mode route tree: the SEO resource routes at the root,
- *          then the site layout with every route class once per locale (`/` unprefixed for `en`,
- *          `/ar` for `ar`: each locale is a static mount, so the URL alone selects the language),
- *          each with its own route id and one module in `route-modules/` named by its route key.
- *          A route whose path equals its layout's is the index. The splat (`PageRoute`) is last in
- *          every locale. A hand-written route config is banned (ADR 0165).
+ *          then the site layout with every route class once per locale (`/` unprefixed for `en`;
+ *          `/en-us`, `/ar` and `/ar-sa` for the others, the lowercase form of each BCP 47 tag: each
+ *          locale is a static mount, so the URL alone selects the language), each with its own
+ *          route id and one module in `route-modules/` named by its route key. A route whose path
+ *          equals its layout's is the index. The splat (`PageRoute`) is last in every locale. A
+ *          hand-written route config is banned (ADR 0165).
  * Boundary: read by the Vite plugin at build and by the router at run time; never edited. No route
  *           redirects between locales: the locale switcher and the locale suggestion banner
  *           (src/components/locale-suggestion/) open the same route in the other mount (ADR 0297
@@ -17,7 +18,7 @@
 import { index, layout, prefix, route, type RouteConfig } from "@react-router/dev/routes";
 
 /** The pages of one locale mount; the adapters read the locale from the URL. */
-function sitePages(locale: "en" | "ar") {
+function sitePages(locale: "en" | "en-US" | "ar" | "ar-SA") {
   const id = (name: string) => `${locale}/${name}`;
   return layout("./route-modules/site.tsx", { id: id("site") }, [
     // LandingRoute, PricingRoute, ContactRoute: queries cached by the `marketing` profile
@@ -42,7 +43,9 @@ export default [
   route("sitemaps/:file", "./route-modules/sitemap.ts"),
   route("og/:kind/:id", "./route-modules/og-image.ts"), // kinds: site, page, product
 
-  // from i18n.config.ts: defaultLocale en unprefixed, ar prefixed (lowercase BCP 47)
+  // from i18n.config.ts: defaultLocale en unprefixed, every other locale under its lowercase tag
   sitePages("en"),
+  ...prefix("en-us", [sitePages("en-US")]),
   ...prefix("ar", [sitePages("ar")]),
+  ...prefix("ar-sa", [sitePages("ar-SA")]),
 ] satisfies RouteConfig;

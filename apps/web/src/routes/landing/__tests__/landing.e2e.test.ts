@@ -1,15 +1,15 @@
 /**
  * Stackra file contract:
  * Purpose: a visitor lands, sees the ladder, declines analytics (nothing is sent), switches to
- *          Arabic (the page flips to RTL and stays on the same page), with no accessibility
- *          violations on either screen; no GET HTML response anywhere on the site sets a cookie,
- *          varies, or may be kept by a shared cache (`private, no-cache`), so a first visit stores
- *          nothing and the URL alone selects the page; and a `//` path is
- *          redirected to its single-slash form on this site, never to the host it seems to name;
- *          a sitemap file names only a generated source.
+ *          Arabic and then to the Saudi overlay under `/ar-sa/` (the page flips to RTL and stays on
+ *          the same page), with no accessibility violations on either screen; no GET HTML response
+ *          anywhere on the site sets a cookie, varies, or may be kept by a shared cache (`private,
+ *          no-cache`), so a first visit stores nothing and the URL alone selects the page; and a
+ *          `//` path is redirected to its single-slash form on this site, never to the host it
+ *          seems to name; a sitemap file names only a generated source.
  * Boundary: end-to-end tier: the built site on the Worker against the consumed services on memory
- *           drivers with the demo seed. Runs in `chromium`, `chromium-rtl` and `mobile-safari`
- *           (playwright.config.ts).
+ *           drivers with the demo seed. Runs in `chromium`, `chromium-rtl`, `chromium-rtl-ar-sa`
+ *           and `mobile-safari` (playwright.config.ts).
  * Runtime: node
  * Governing contract: ADR 0182, ADR 0183 (axe fails on serious or critical)
  */
@@ -36,10 +36,9 @@ test("landing: ladder, consent, locale switch", async ({ page }) => {
 
   await page.getByRole("button", { name: /only necessary|الضروري فقط/ }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
-  await page
-    .getByRole("link", { name: /pricing|الأسعار/ })
-    .first()
-    .click();
+  // pricing sits in the header's "Shop" group, a disclosure
+  await page.getByText(/^(Shop|تسوّق)$/).click();
+  await page.getByRole("link", { name: /^(Pricing|الأسعار)$/ }).click();
   await expect(page).toHaveURL(/\/pricing$/);
   expect(analyticsCalls, "declined analytics sends nothing").toHaveLength(0);
 
@@ -48,6 +47,13 @@ test("landing: ladder, consent, locale switch", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("أسعار واضحة بلا مفاجآت");
   await expect(await axe(page)).toHaveNoViolations();
+
+  // the Saudi overlay: its own lowercase mount, right to left, falling back to `ar` for the rest
+  await page.getByRole("combobox", { name: /language|اللغة/ }).selectOption("ar-SA");
+  await expect(page).toHaveURL(/\/ar-sa\/pricing$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "ar-SA");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("أسعار واضحة بلا مفاجآت");
 });
 
 /**
@@ -57,7 +63,17 @@ test("landing: ladder, consent, locale switch", async ({ page }) => {
  * by query instead.
  */
 test("no GET HTML response sets a cookie, varies or is shared-cacheable", async ({ request }) => {
-  for (const path of ["/", "/pricing", "/contact", "/store", "/store/demo-tee", "/ar", "/nope"]) {
+  const paths = [
+    "/",
+    "/pricing",
+    "/contact",
+    "/store",
+    "/store/demo-tee",
+    "/ar",
+    "/ar-sa",
+    "/nope",
+  ];
+  for (const path of paths) {
     const response = await request.get(path, { headers: { accept: "text/html" } });
     expect(response.headers()["content-type"], path).toContain("text/html");
     expect(response.headers()["set-cookie"], path).toBeUndefined();
@@ -91,6 +107,8 @@ test("an unknown sitemap source is a 404", async ({ request }) => {
 test("landing: structured data and hreflang are in the rendered HTML", async ({ request }) => {
   const html = await (await request.get("/")).text();
   expect(html).toContain('<link rel="alternate" hreflang="ar" href=');
+  expect(html).toContain('<link rel="alternate" hreflang="ar-SA" href=');
+  expect(html).toContain('<link rel="alternate" hreflang="en-US" href=');
   expect(html).toContain('"@type":"FAQPage"');
   expect(html).toContain('<link rel="canonical"');
 });

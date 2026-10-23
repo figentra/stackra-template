@@ -15,7 +15,7 @@ import { Enum } from "@stackra/validation";
  * How long a query's answer may be served from the Workers cache.
  *
  * @example
- * await ctx.query(Billing.queries.ListPlans, input, { cache: CacheProfile.Marketing });
+ * await ctx.query(ListPlansQuery, input, { cache: CacheProfile.Marketing });
  */
 export const CacheProfile = Enum.of({
   /** Marketing content and plan ladders; they change on deploy or publish. */

@@ -16,7 +16,7 @@ import { isRefusal } from "@stackra/errors";
 import { Route, type MetaContext, type RouteContext } from "@stackra/navigation";
 import type { Seo } from "@stackra/seo";
 import { validate } from "@stackra/validation";
-import { Marketing } from "#stackra/clients";
+import { CreateLeadAction, RateLimitedError } from "#stackra/clients/marketing";
 import { I18n } from "#stackra/i18n";
 import { SiteLayout } from "#src/routes/site/site.layout";
 import { ContactInput } from "#src/schemas/contact-input.schema";
@@ -42,13 +42,13 @@ export class ContactRoute extends Route({
     if (!verified)
       return ctx.data({ formError: I18n.leads.refusals.captcha_failed }, { status: 422 });
 
-    const result = await ctx.action(Marketing.actions.CreateLead, {
+    const result = await ctx.action(CreateLeadAction, {
       ...lead,
       locale: ctx.site.locale,
       captchaToken,
     });
     if (result.ok) return ctx.data({ sent: { name: lead.name, email: lead.email } });
-    if (isRefusal(result.error, Marketing.refusals.rate_limited)) {
+    if (isRefusal(result.error, RateLimitedError)) {
       return ctx.data({ formError: I18n.leads.refusals.rate_limited }, { status: 422 });
     }
     throw result.error; // a transport failure is the error page, with its reference

@@ -21,7 +21,7 @@ import { isRefusal } from "@stackra/errors";
 import { Money } from "@stackra/money";
 import { Route, type MetaContext, type RouteContext } from "@stackra/navigation";
 import { OgKind, type Seo } from "@stackra/seo";
-import { Commerce } from "#stackra/clients";
+import { GetProductBySlugQuery, ProductNotFoundError } from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 import { CacheProfile } from "#src/enums/cache-profile.enum";
@@ -40,14 +40,14 @@ export class ProductRoute extends Route({
   override async loader(ctx: RouteContext<this>) {
     try {
       const product = await ctx.query(
-        Commerce.queries.GetProductBySlug,
+        GetProductBySlugQuery,
         { slug: ctx.params.slug },
         { cache: CacheProfile.Catalogue },
       );
       ctx.redirectToCanonical(product.slug);
       return { product };
     } catch (error) {
-      if (isRefusal(error, Commerce.refusals.product_not_found)) {
+      if (isRefusal(error, ProductNotFoundError)) {
         throw ctx.notFound({ code: error.code });
       }
       throw error;

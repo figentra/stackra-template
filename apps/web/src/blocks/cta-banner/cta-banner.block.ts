@@ -6,16 +6,16 @@
  *           its renderer is `cta-banner.tsx` in this folder, bound by name, and the key is derived
  *           from the folder. Text is `LocalizedText`, the button a route key.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110 (registered coded blocks)
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20, as amended by programming model v3.1,
+ *                     AGENTS.md: icon names and client classes), ADR 0110 (registered coded blocks)
  */
 import { Block, BlockCategory, type LocalizedText } from "@stackra/experience";
-import { Icons } from "@stackra/ui/icons";
 import type { CallToAction } from "#src/schemas/call-to-action.schema";
 
 /** A title, a line and the one button. */
 export class CtaBannerBlock extends Block({
   category: BlockCategory.Marketing,
-  icon: Icons.Megaphone,
+  icon: "megaphone",
 }) {
   /** The section heading. */
   title!: LocalizedText;

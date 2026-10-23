@@ -1,0 +1,7 @@
+{
+  "$comment": "Stackra file contract — Purpose: this site's wording (ar) of two `leads::` refusal strings of the marketing service's `leads` module, merged key by key over the owner's file by `stackra gen`; Boundary: the path mirrors the owner's own (`marketing/leads/assets/lang/<locale>/leads.json`), so the file overrides by where it sits, with no keyword; only keys the owning module defines (gen refuses any other); Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0294 (as amended by programming model v3.1, AGENTS.md: the overrides tree)",
+  "refusals": {
+    "rate_limited": "رسائل كثيرة من هذا الاتصال. يرجى المحاولة بعد بضع دقائق.",
+    "captcha_failed": "تعذر التأكد من أنك شخص. يرجى المحاولة مرة أخرى."
+  }
+}

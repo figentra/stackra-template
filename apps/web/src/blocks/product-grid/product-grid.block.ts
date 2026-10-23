@@ -7,18 +7,18 @@
  *           document renderer with the collection as its input. Its renderer is `product-grid.tsx`,
  *           bound by name; the key is derived from the folder.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decisions 14, 16 and 20), ADR 0110 (registered coded blocks)
+ * Governing contract: ADR 0294 (decisions 14, 16 and 20, as amended by programming model v3.1,
+ *                     AGENTS.md: icon names and client classes), ADR 0110 (registered coded blocks)
  */
 import { Block, BlockCategory } from "@stackra/experience";
-import { Icons } from "@stackra/ui/icons";
 import { Int } from "@stackra/validation";
-import { Commerce } from "#stackra/clients";
+import { ListStorefrontProductsQuery } from "#stackra/clients/commerce";
 
 /** A collection slug and a cap of one to twelve cards. */
 export class ProductGridBlock extends Block({
   category: BlockCategory.Commerce,
-  icon: Icons.Package,
-  accepts: Commerce.queries.ListStorefrontProducts,
+  icon: "package",
+  accepts: ListStorefrontProductsQuery,
 }) {
   /** The collection slug the grid features; the renderer's query input. */
   collection!: string;

@@ -6,18 +6,18 @@
  * Boundary: the loader is behaviour and runs before any child loader; its value reaches loaders as
  *           `ctx.site`, components through `useSite`, and the generated SEO route modules through
  *           `ctx.layout(SiteLayout)`, each from the router's one run per request. The site record
- *           comes from the experience service's `sites` module through a cached query: the
- *           `page` profile keys it by the host (or the fixed site), the locale and the version, so
- *           no visitor ever sees another site. It imports no server-only module. No session check:
- *           the public site has none. Pages own their meta; an error bubbles to
- *           `src/app.error.tsx`.
+ *           comes from the experience service's `sites` module through a cached query: the `page`
+ *           profile keys it by the host (or the fixed site), the locale and the version, so no
+ *           visitor ever sees another site. It imports no server-only module. No session check: the
+ *           public site has none. Pages own their meta; an error bubbles to the root boundary
+ *           `@stackra/navigation` owns.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 14, 16 and 17), ADR 0175 (sites by host), ADR 0297
  *                     (decision 3: cache data, not HTML), ADR 0080 (lang and dir)
  */
 import type { I18nConfig } from "@stackra/i18n";
 import { data, Layout, type RouteContext } from "@stackra/navigation";
-import { Experience } from "#stackra/clients";
+import { GetSiteQuery, ResolveSiteQuery } from "#stackra/clients/experience";
 import type { SiteConfig } from "#src/config/site.config";
 import { CacheProfile } from "#src/enums/cache-profile.enum";
 import type { ResolvedSite } from "#src/types/resolved-site.type";
@@ -44,11 +44,11 @@ export class SiteLayout extends Layout {
     const host = new URL(ctx.request.url).host;
     const record = this.site.fixedSiteId
       ? await ctx.query(
-          Experience.queries.GetSite,
+          GetSiteQuery,
           { siteId: this.site.fixedSiteId },
           { cache: CacheProfile.Page },
         )
-      : await ctx.query(Experience.queries.ResolveSite, { host }, { cache: CacheProfile.Page });
+      : await ctx.query(ResolveSiteQuery, { host }, { cache: CacheProfile.Page });
     if (!record) throw data({ code: "site_not_found" }, { status: 404 });
     const isPreview = this.site.previewHostPrefixes.some((prefix) => host.startsWith(prefix));
     return {

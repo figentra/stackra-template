@@ -23,5 +23,11 @@ export default e2ePreset({
   // runway.yaml environments.dev.e2e.turnstile: the Worker gets Cloudflare's always-pass test
   // secret
   turnstile: "test-keys",
-  projects: ["chromium", "mobile-safari", { name: "chromium-rtl", base: "chromium", locale: "ar" }],
+  // one RTL project per i18n.config.ts rtl locale
+  projects: [
+    "chromium",
+    "mobile-safari",
+    { name: "chromium-rtl", base: "chromium", locale: "ar" },
+    { name: "chromium-rtl-ar-sa", base: "chromium", locale: "ar-SA" },
+  ],
 });

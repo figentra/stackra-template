@@ -1,15 +1,24 @@
 # @acme/web
 
 The public site of a Stackra project: the landing page, pricing, a storefront and the tenant's
-page-builder pages, on one hostname per site, in English and Arabic. Every thing with identity is a
-kind class whose base names its kind and whose path names its group (ADR 0294): routes and the site
-layout, page-builder blocks, menus, the pricing flag, the analytics event and config. React
-components stay functions, bound to their route or block by file name. The one piece of request
-logic the app writes is the site resolution in the site layout's loader. The runtime (the entries,
-Vite, React Router 7 framework mode, the Cloudflare Worker, wrangler, Playwright, Lighthouse) is
-generated into `.stackra/`. It reads five services through the public area and writes through
+page-builder pages, on one hostname per site, in English and Arabic with a US English and a Saudi
+Arabic overlay. Every thing with identity is a kind class whose base names its kind and whose path
+names its group (ADR 0294): routes and the site layout, page-builder blocks, menus, flags, the
+analytics event and config. React components are class components too (`extends Component` from
+`@stackra/ui`: fields are state, `use*` fields are hooks, `render()` is the body), which gen
+compiles to function components; each is bound to its route or block by file name and keeps its
+Props in `<name>.props.ts`. The one piece of request logic the app writes is the site resolution in
+the site layout's loader. The member writes no root module: it would say nothing gen does not
+derive, so gen builds the one module `web` from the group folders. The runtime (the entries, Vite,
+React Router 7 framework mode, the Cloudflare Worker, wrangler, Playwright, Lighthouse) is generated
+into `.stackra/`. It reads five services through the public area, each through the named classes of
+`#stackra/clients/<service>` (`GetProductBySlugQuery`, `ResolveSiteQuery`), and writes through
 exactly two public actions (`leads.lead.create`, `seo.not_found.record`). It owns no data. UI comes
-through `@stackra/ui`, like the console.
+through `@stackra/ui`, like the console, and the look is the `acme` theme of `@acme/theme`.
+
+It is a website, not an installable app: `Target.Web` only. A marketing site and a storefront read
+per request have no offline journey (a cart and a checkout need the network), so there is no web app
+manifest, service worker or offline page; the console is the installable PWA.
 
 | Command                  | Does                                                                                                |
 | ------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -24,35 +33,41 @@ through `@stackra/ui`, like the console.
 
 ```text
 apps/web
-├── stackra.config.ts        defineApp: Target.Web + Target.Pwa, render: RenderMode.Server, ApiArea.Public, env class, e2e
+├── stackra.config.ts        defineApp: Target.Web, render: RenderMode.Server, ApiArea.Public, env class, e2e
 ├── vite.extend.ts           the one code hatch (with its Reason): an extra Vite plugin, merged after the stackra plugin
 ├── runway.yaml              dev port/host, domains and aliases, public + server vars, secret names, Worker knobs, health
 ├── stackra.manifest.json    the committed contract: routes, blocks, menus, flag, consumes, forwarding, config keys
 ├── package.json             three aliases: #src/*, #assets/* and #stackra/*
+├── assets/lang/<locale>/    web.json per locale: en and ar complete; en-US and ar-SA hold only the keys that differ
 ├── .stackra/                GENERATED (see .stackra/README.md); the entries live in .stackra/entry/
 └── src/
-    ├── web.module.ts        the root module: `extends Module`, nothing listed
-    ├── app.error.tsx        the root error boundary: the 404 page and the error page with its reference
-    ├── config/              one class per fact: env, site, edge and telemetry are the site's own; i18n, theming, seo,
-    │                        consent, analytics, feature-flags and csp override a package's config
+    ├── config/              one class per fact: env, site, edge and telemetry are the site's own (`Config({ schema })`
+    │                        over a shape in schemas/); i18n, theming, seo, consent, analytics, feature-flags and csp
+    │                        override a package's config under the base's own name (`extends BaseI18nConfig`)
     ├── routes/<name>/       <name>.route.ts or <name>.layout.ts, <name>.tsx bound by name, __tests__/: landing,
     │                        pricing, contact, store, product, page (with page.fallback.tsx); the site layout
-    ├── menus/               Menu classes of kind Navigation: site (the header) and footer (the legal links)
-    ├── flags/               Flag classes: pricing-yearly-first (the pricing experiment)
-    ├── analytics/           AnalyticsEvent classes: lead-submitted
-    ├── components/<name>/   one component per folder (its Props, its own hook, its `__tests__/`): site-header,
-    │                        site-footer, product-card, variant-picker, contact-form, consent-banner, locale-switcher,
-    │                        locale-suggestion (offers the browser's preferred locale; ADR 0297 d4)
+    ├── menus/               Menu classes of kind Navigation: site (the header: groups with sub-navigation, a
+    │                        flag-gated item, an external link) and footer (the legal links)
+    ├── flags/               Flag classes: pricing-yearly-first (the pricing experiment), help-centre (a release switch)
+    ├── analytics/           AnalyticsEvent classes (base from @stackra/events): lead-submitted
+    ├── components/<name>/   one class component per folder (`<name>.props.ts`, its own hook, its `__tests__/`, an
+    │                        index.ts with the component and its Props): site-header, site-footer, product-card,
+    │                        variant-picker, contact-form, consent-banner, locale-switcher, locale-suggestion (offers
+    │                        the browser's preferred locale; ADR 0297 d4)
     ├── hooks/               use-site (the site frame and the pricing table), use-variant-choice (product page and picker)
-    ├── blocks/<name>/       one folder per block: <name>.block.ts (props as fields), <name>.tsx, __tests__/:
-    │                        hero-section, feature-grid, pricing-table, testimonials, faq-section, cta-banner, product-grid
-    ├── schemas/             shape classes shared by two files: contact, the store and contact query strings,
+    ├── blocks/<name>/       one folder per block: <name>.block.ts (props as fields), <name>.tsx with <name>.props.ts,
+    │                        __tests__/: hero-section, feature-grid, pricing-table, testimonials, faq-section,
+    │                        cta-banner, product-grid
+    ├── schemas/             shape classes: the four config options, contact, the store and contact query strings,
     │                        call-to-action, feature, the cache rule and the nested telemetry config objects
-    ├── types/               resolved-site, site-market, variant, variant-choice
+    ├── types/               resolved-site, site-market, variant, variant-choice, feature-card, call-to-action-link,
+    │                        and the hook results (analytics-consent-state, billing-interval-state,
+    │                        locale-suggestion-state)
     ├── enums/               app-local enums: billing-interval, cache-profile
     ├── errors/              refusals: site-context-missing
-    └── styles/app.css       Tailwind v4 + HeroUI v3 + the generated brand tokens, logical CSS, light and dark
-assets/overrides/leads/      {en,ar}.json: this site's wording of two `leads::` strings, bound by path
+    ├── overrides/<owner>/   what the site changes in code or assets it does not own, at the owner's own path:
+    │                        marketing/leads/assets/lang/{en,ar}/leads.json rewords two `leads::` refusals
+    └── styles/app.css       Tailwind v4 + HeroUI v3 + the theme fonts and the generated `acme` theme, logical CSS
 ```
 
 ## The two rules every file follows
@@ -63,12 +78,40 @@ assets/overrides/leads/      {en,ar}.json: this site's wording of two `leads::` 
    typed by class; the app's `src` uses no container API. Keys, labels and texts that a name already
    gives are derived, never written.
 2. Identities are never strings outside their declaration site: queries, actions, refusals, i18n
-   keys, flags and assets are the generated constants of `#stackra/*`; routes are referenced by
-   `Routes.<key>` (a layout, menu, page or block never imports a route class), so every link lands
-   in the visitor's locale mount; closed value sets are `Enum.of` values.
+   keys, flags and assets are the generated constants and classes of `#stackra/*` (a consumed query
+   is a named class: `import { ListPlansQuery } from "#stackra/clients/billing"`); icons are Lucide
+   `IconName` strings (`icon: "receipt"`); routes are referenced by `Routes.<key>` (a layout, menu,
+   page or block never imports a route class), so every link lands in the visitor's locale mount;
+   closed value sets are `Enum.of` values.
 
-Config is read with `useConfig(X)` in components and through the constructor in route and layout
-classes; never as a static.
+Config is read with `useConfig(X)` in components (a hook field: `site = useConfig(SiteConfig)`) and
+through the constructor in route, layout and menu classes; never as a static. There is no error
+boundary in the app: `@stackra/navigation` owns the root one (the 404 page with a way home in the
+visitor's mount, the error page with its reference); a route adds `<name>.error.tsx` only to
+customise its own.
+
+## Locales
+
+`src/config/i18n.config.ts` lists four locales: `en` (the default, unprefixed), `en-US`, `ar` and
+`ar-SA`. A regional locale is an overlay: `assets/lang/en-US/web.json` holds only the US spellings
+and `assets/lang/ar-SA/web.json` only the Saudi consent wording (the Personal Data Protection Law);
+every other key falls back along the chain the config declares (`ar-SA` → `ar` → `en`). Codes are
+BCP 47 (`ar-SA`); each non-default locale is a static mount under its lowercase tag (`/en-us/`,
+`/ar/`, `/ar-sa/`), so the URL alone selects the language and nothing redirects on a cookie or a
+header. Where the logic lives: the locales, fallbacks and URL strategy are this config;
+`@stackra/i18n` merges the catalogues along the chain and formats; gen mounts the routes per locale,
+writes hreflang alternates for every locale and fails on a base-language key missing in another base
+language.
+
+## Overrides
+
+Everything the site changes in code or assets it does not own lives in one tree,
+`src/overrides/<owner>/…`, at the same path as the owner's own file (owner = the package name with
+its scope, or `<service>/<module>` for a consumed service module). A file there overrides by where
+it sits, with no keyword or suffix: `src/overrides/marketing/leads/assets/lang/ar/leads.json`
+rewords two strings of the marketing service's `leads` module, merged key by key over its file. Gen
+refuses a key or path the owner does not have. Configuring a package is not overriding it: config
+overrides stay in `src/config/`.
 
 ## Which file owns which fact
 
@@ -78,9 +121,9 @@ classes; never as a static.
 | Extra Vite plugins                                         | `vite.extend.ts`                                            | `.stackra/vite.config.ts` (merged last)                       |
 | Dev port and host, domains, vars, secret names, Worker     | `runway.yaml`                                               | `vite.config.ts`, `wrangler.jsonc`, Playwright, Lighthouse    |
 | The env contract (`VITE_*`, `STACKRA_*`, the secret names) | `src/config/env.config.ts`                                  | `gen/env.ts`, `env.d.ts`, `wrangler.jsonc` vars               |
-| Locales, default, RTL, fallbacks, URL strategy             | `src/config/i18n.config.ts`                                 | per-locale mounts in `routes.ts`, `<html lang dir>`           |
-| Schemes, theme colour, tenant brand override               | `src/config/theming.config.ts`                              | `root.tsx`, the site frame                                    |
-| Preview hosts, fixed site, product sold, signup path       | `src/config/site.config.ts`                                 | the site layout, robots, the pricing table, prerendering      |
+| Locales, overlays, RTL, fallback chains, URL strategy      | `src/config/i18n.config.ts`                                 | per-locale mounts in `routes.ts`, `<html lang dir>`           |
+| Theme (`acme`), schemes, theme colour, tenant colours      | `src/config/theming.config.ts`                              | `root.tsx`, the site frame                                    |
+| Preview hosts, fixed site, product sold, signup, docs link | `src/config/site.config.ts`                                 | the site layout, robots, the pricing table, the header menu   |
 | Title template, robots groups, sitemap paging, OG, noindex | `src/config/seo.config.ts`                                  | the SEO route modules, `gen/sitemap.ts`, the store route      |
 | Consent categories, cookie, policy version, regions        | `src/config/consent.config.ts`                              | the banner and the consent context                            |
 | Analytics and flag drivers, consent gating                 | `src/config/analytics.config.ts`, `feature-flags.config.ts` | `gen/wiring.ts`, the contexts `createApp` mounts              |
@@ -95,16 +138,16 @@ classes; never as a static.
    request to it (ADR 0297 d2).
 2. `.stackra/entry/worker.ts`: a GET or HEAD with a body is a 400, an alias host goes to the
    canonical domain and a `//` path to its single-slash form (301). Everything else goes to the app
-   `createApp` built from `src/web.module.ts`: it validates the server env, fills the request's
+   `createApp` built from the generated wiring: it validates the server env, fills the request's
    typed context (env, container, reporter, and the public clients bound to the request) and runs
    the React Router server build. Any throw is a static 500 page after the reporter has it.
 3. The root middleware (`.stackra/middleware.ts`) mints the request's CSP nonce; after the router
    answers it sets the CSP header and, on an HTML page, `Cache-Control: private, no-cache` with no
    `Vary` and no cookie.
 4. `SiteLayout.loader`: host → site once per request (`sites.site.resolve`, or `sites.site.get` for
-   a fixed site); the locale is the path's static mount (`/` or `/ar`); the market and brand come
-   with the site. Every route's `loader` receives `ctx.site`, and `ctx.query` for that locale and
-   market.
+   a fixed site); the locale is the path's static mount (`/`, `/en-us`, `/ar` or `/ar-sa`); the
+   market and the tenant's colours come with the site. Every route's `loader` receives `ctx.site`,
+   and `ctx.query` for that locale and market.
 5. The route class's `loader`: each query names a `CacheProfile`, so its answer is cached in the
    Workers cache under the query, its input, the site, the locale, the market and the version, and
    served stale while one request refreshes it (ADR 0297 d3). The route module builds the head
@@ -130,8 +173,8 @@ visitor, so `prerender: true` needs `SiteConfig.fixedSiteId`, which this multi-t
 unset.
 
 Tenant pages (`*`) differ in one way: `RenderMode.Client` builds the head on the server from
-`Experience.queries.GetDocument({ path })` and renders the L2 document in the browser after
-`page.fallback.tsx` (no L2 SSR in v1).
+`GetDocumentQuery` (`{ path }`) and renders the L2 document in the browser after `page.fallback.tsx`
+(no L2 SSR in v1).
 
 ## Tests
 
@@ -140,15 +183,15 @@ Tenant pages (`*`) differ in one way: `RenderMode.Client` builds the head on the
 | `components/*/__tests__/*.test.tsx`, `blocks/*/__tests__/*.test.tsx` | unit | `@stackra/testing/react`                                       | renders in `en` and `ar` (RTL); consent, theme, prices, accordion semantics, card price and link, each block's props      |
 | `hooks/__tests__/`                                                   | unit | `renderHook`                                                   | variant axes and matching; `useSite` inside and outside the site layout                                                   |
 | `routes/<name>/__tests__/*.test.ts(x)`                               | unit | `renderRoute`, `runRouteLoader`, `runRouteSubmit`, `routeMeta` | loaders, the site resolution, the contact submit, the head, each page                                                     |
-| `schemas/__tests__/`, `__tests__/`                                   | unit | `@stackra/testing`                                             | the contact shape; the root module's bindings and contexts; the root error boundary                                       |
+| `schemas/__tests__/`                                                 | unit | `@stackra/testing`                                             | the contact shape                                                                                                         |
 | `routes/<name>/__tests__/*.e2e.test.ts`                              | e2e  | `@stackra/testing/e2e`                                         | landing, consent, locale switch, no cookie on GET HTML; store and crawler view; contact with and without JS; axe, en + ar |
 | `.stackra/lighthouserc.yaml`                                         | e2e  | Lighthouse CI (run by `stackra test --tier e2e`)               | ADR 0183 budgets per route and locale                                                                                     |
 
 ## Catalog entries this member needs (root `pnpm-workspace.yaml`)
 
 Runtime:
-`@stackra/{analytics,app,assets,cache,clients,config,consent,container,content,contracts,csp,errors,experience,feature-flags,i18n,iam,media,money,navigation,platform,seo,state,theming,ui,validation}`
-in `catalog:stackra` (`@acme/brand` is the workspace package); `react`, `react-dom`, `react-router`,
+`@stackra/{analytics,app,assets,cache,clients,config,consent,container,content,contracts,csp,errors,events,experience,feature-flags,i18n,iam,icons,media,money,navigation,platform,seo,state,theming,tokens,ui,validation}`
+in `catalog:stackra` (`@acme/theme` is the workspace package); `react`, `react-dom`, `react-router`,
 `isbot` and `zod` in the default catalog; `@heroui/styles` in `catalog:ui`; `tailwindcss` in
 `catalog:frontend`.
 

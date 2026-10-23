@@ -6,7 +6,7 @@
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decision 8)
  */
-import type { StorefrontProductView } from "#stackra/clients";
+import type { StorefrontProductView } from "#stackra/clients/commerce";
 
 /** One of the product's variants. */
 export type Variant = StorefrontProductView["variants"][number];

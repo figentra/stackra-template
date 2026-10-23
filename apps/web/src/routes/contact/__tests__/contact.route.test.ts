@@ -13,7 +13,7 @@ import { refusal } from "@stackra/errors/testing";
 import { Locale } from "@stackra/i18n";
 import { describe, expect, it } from "@stackra/testing";
 import { runRouteSubmit } from "@stackra/testing/react";
-import { Marketing } from "#stackra/clients";
+import { CreateLeadAction, RateLimitedError } from "#stackra/clients/marketing";
 import { I18n } from "#stackra/i18n";
 import { ContactRoute } from "#src/routes/contact/contact.route";
 
@@ -39,7 +39,7 @@ const GOOD = {
 };
 
 /** Runs the submit with a faked marketing client and Turnstile answer. */
-function submit(fields: Record<string, string>, marketing = fakeClient(Marketing), captcha = true) {
+function submit(fields: Record<string, string>, marketing = fakeClient(), captcha = true) {
   const env = { turnstileSecret: "test" };
   return runRouteSubmit(ContactRoute, {
     site: SITE,
@@ -54,35 +54,33 @@ function submit(fields: Record<string, string>, marketing = fakeClient(Marketing
 describe(ContactRoute, () => {
   /** Invalid input must be answered with field keys and never reach the lead service. */
   it("returns 400 with i18n keys per field and never calls the service", async () => {
-    const marketing = fakeClient(Marketing);
+    const marketing = fakeClient();
     const result = await submit({ ...GOOD, email: "nope" }, marketing);
     expect(result.status).toBe(400);
     expect(result.data.fieldErrors).toEqual({ email: I18n.web.contact.errors.email });
-    expect(marketing.called(Marketing.actions.CreateLead)).toHaveLength(0);
+    expect(marketing.called(CreateLeadAction)).toHaveLength(0);
   });
 
   /** The captcha runs before the service so a bot never costs a lead write. */
   it("refuses when Turnstile says no", async () => {
-    const result = await submit(GOOD, fakeClient(Marketing), false);
+    const result = await submit(GOOD, fakeClient(), false);
     expect(result.status).toBe(422);
     expect(result.data.formError).toBe(I18n.leads.refusals.captcha_failed);
   });
 
   /** Leads must carry the site locale, and service refusals must map to a user-facing message. */
   it("creates the lead with the site locale and maps a refusal code", async () => {
-    const marketing = fakeClient(Marketing, (fake) =>
-      fake.actions.CreateLead.returns({ leadId: "lead_1" }),
-    );
+    const marketing = fakeClient((fake) => fake.on(CreateLeadAction).returns({ leadId: "lead_1" }));
     const ok = await submit(GOOD, marketing);
     expect(ok.data.sent).toEqual({ name: "Lina", email: "lina@northwind.example" });
-    expect(marketing.called(Marketing.actions.CreateLead)[0]).toMatchObject({
+    expect(marketing.called(CreateLeadAction)[0]).toMatchObject({
       locale: Locale.Ar,
       consent: true,
       captchaToken: "tok",
     });
 
-    const limited = fakeClient(Marketing, (fake) =>
-      fake.actions.CreateLead.throws(refusal(Marketing.refusals.rate_limited)),
+    const limited = fakeClient((fake) =>
+      fake.on(CreateLeadAction).throws(refusal(RateLimitedError)),
     );
     expect((await submit(GOOD, limited)).data.formError).toBe(I18n.leads.refusals.rate_limited);
   });

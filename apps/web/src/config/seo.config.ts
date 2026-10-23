@@ -12,13 +12,14 @@
  *           the tenant's SEO record. A rule for one crawler never applies to another. Nested
  *           objects are replaced whole, so they restate the base's type. The site URL is env.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0301 (decisions 2, 3 and 7), ADR 0114
+ * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md: the Base alias),
+ *                     ADR 0301 (decisions 2, 3 and 7), ADR 0114
  */
-import { OgKind, SeoConfig } from "@stackra/seo";
+import { OgKind, SeoConfig as BaseSeoConfig } from "@stackra/seo";
 import { Enum } from "@stackra/validation";
 
 /** How the site is found: title template, robots groups, sitemap paging and OG image kinds. */
-export class WebSeoConfig extends SeoConfig {
+export class SeoConfig extends BaseSeoConfig {
   /** `%s` is the page title. */
   override titleTemplate = "%s · {siteName}";
 
@@ -27,7 +28,7 @@ export class WebSeoConfig extends SeoConfig {
    * crawler you want to keep off the store) adds its own group. A preview host or a sandbox
    * tenant ignores this and disallows everything.
    */
-  override robots: SeoConfig["robots"] = {
+  override robots: BaseSeoConfig["robots"] = {
     "*": {
       allow: ["/"],
       disallow: ["/store?q=", "/*?preview="],
@@ -47,7 +48,7 @@ export class WebSeoConfig extends SeoConfig {
   override consumedSitemaps = true;
 
   /** The OG image route: the kinds it answers, the size and the edge lifetime of an image. */
-  override og: SeoConfig["og"] = {
+  override og: BaseSeoConfig["og"] = {
     kinds: Enum.values(OgKind),
     width: 1200,
     height: 630,

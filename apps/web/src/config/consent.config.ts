@@ -11,15 +11,20 @@
  *           state and no HTML GET response sets the cookie, so cached pages stay shared. A region
  *           with no default here declines.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0298 (decisions 1 to 4 and 6)
+ * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md: the Base alias),
+ *                     ADR 0298 (decisions 1 to 4 and 6)
  */
-import { ConsentCategory, ConsentConfig, ConsentRegime } from "@stackra/consent";
+import {
+  ConsentCategory,
+  ConsentConfig as BaseConsentConfig,
+  ConsentRegime,
+} from "@stackra/consent";
 import { I18n } from "#stackra/i18n";
 
 /** Visitor consent: the categories, where the decision is stored and the policy version. */
-export class WebConsentConfig extends ConsentConfig {
+export class ConsentConfig extends BaseConsentConfig {
   /** The categories the banner explains, `necessary` first and always granted. */
-  override categories: ConsentConfig["categories"] = [
+  override categories: BaseConsentConfig["categories"] = [
     {
       category: ConsentCategory.Necessary,
       required: true,

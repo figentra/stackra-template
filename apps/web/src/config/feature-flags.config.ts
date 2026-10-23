@@ -9,15 +9,19 @@
  *           default, so no identifier is stored. Fields typed by an enum or a driver name restate
  *           their type.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0213 d3 (flags are a settings kind), ADR 0231
- *                     (driver names are checked literals)
+ * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md: the Base alias),
+ *                     ADR 0213 d3 (flags are a settings kind), ADR 0231 (driver names are checked
+ *                     literals)
  */
 import type { DriverName } from "@stackra/container";
-import { FeatureFlagsConfig, FlagTargeting } from "@stackra/feature-flags";
+import {
+  FeatureFlagsConfig as BaseFeatureFlagsConfig,
+  FlagTargeting,
+} from "@stackra/feature-flags";
 import type { FlagProvider } from "@stackra/feature-flags/contracts";
 
 /** Feature flags on the public site: provider driver, build-time defaults and targeting. */
-export class WebFeatureFlagsConfig extends FeatureFlagsConfig {
+export class FeatureFlagsConfig extends BaseFeatureFlagsConfig {
   /** `config` in dev and on-prem, `posthog` in SaaS. */
   override provider: DriverName<FlagProvider> = "config";
 

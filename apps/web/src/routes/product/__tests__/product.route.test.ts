@@ -14,7 +14,7 @@ import { refusal } from "@stackra/errors/testing";
 import { Locale } from "@stackra/i18n";
 import { describe, expect, it } from "@stackra/testing";
 import { routeMeta, runRouteLoader } from "@stackra/testing/react";
-import { Commerce } from "#stackra/clients";
+import { GetProductBySlugQuery, ProductNotFoundError } from "#stackra/clients/commerce";
 import { ProductRoute } from "#src/routes/product/product.route";
 
 /** The Arabic site of the cases. */
@@ -55,8 +55,8 @@ const PRODUCT = {
 describe(ProductRoute, () => {
   /** An unknown slug must be a real 404, not an empty product page. */
   it("throws 404 for an unknown slug", async () => {
-    const commerce = fakeClient(Commerce, (fake) =>
-      fake.queries.GetProductBySlug.throws(refusal(Commerce.refusals.product_not_found)),
+    const commerce = fakeClient((fake) =>
+      fake.on(GetProductBySlugQuery).throws(refusal(ProductNotFoundError)),
     );
     const run = runRouteLoader(ProductRoute, {
       site: SITE,
@@ -70,7 +70,7 @@ describe(ProductRoute, () => {
    * Canonical, alternates and JSON-LD must come from loader data or search listings would be wrong.
    */
   it("builds canonical, alternates and Product JSON-LD from the loader data", async () => {
-    const commerce = fakeClient(Commerce, (fake) => fake.queries.GetProductBySlug.returns(PRODUCT));
+    const commerce = fakeClient((fake) => fake.on(GetProductBySlugQuery).returns(PRODUCT));
     const params = { slug: "demo-tee" };
     const data = await runRouteLoader(ProductRoute, { site: SITE, clients: [commerce], params });
     const descriptors = routeMeta(ProductRoute, { data, site: SITE, path: "/ar/store/demo-tee" });
@@ -97,7 +97,7 @@ describe(ProductRoute, () => {
 
   /** A crumb that 404s teaches crawlers a broken trail; each must open a page that exists. */
   it("links the breadcrumbs to the store, the filtered store and the product", async () => {
-    const commerce = fakeClient(Commerce, (fake) => fake.queries.GetProductBySlug.returns(PRODUCT));
+    const commerce = fakeClient((fake) => fake.on(GetProductBySlugQuery).returns(PRODUCT));
     const params = { slug: "demo-tee" };
     const data = await runRouteLoader(ProductRoute, { site: SITE, clients: [commerce], params });
     const descriptors = routeMeta(ProductRoute, { data, site: SITE, path: "/ar/store/demo-tee" });

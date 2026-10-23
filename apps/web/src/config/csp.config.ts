@@ -8,12 +8,13 @@
  *           styles are nonce-based (the Worker mints one per request); the baseline policy and its
  *           fixed directives are the package's and cannot be loosened here.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 19), ADR 0237 (edge headers)
+ * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md: the Base alias),
+ *                     ADR 0237 (edge headers)
  */
-import { CspConfig } from "@stackra/csp";
+import { CspConfig as BaseCspConfig } from "@stackra/csp";
 
 /** What the site adds to the baseline policy. */
-export class WebCspConfig extends CspConfig {
+export class CspConfig extends BaseCspConfig {
   /** `connect-src` additions: the analytics ingest and Turnstile. */
   override extraConnectSrc: string[] = [
     "https://eu.i.posthog.com",

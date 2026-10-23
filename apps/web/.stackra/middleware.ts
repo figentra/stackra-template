@@ -3,8 +3,8 @@
  * (lookupRedirects, redirectCacheSeconds, notFoundLog) and src/config/env.config.ts (apiUrl)
  * — do not edit
  * Purpose: the root middleware of the server build, in order. `securityHeaders` mints the request's
- *          CSP nonce before anything renders, then sets the CSP header on every response, and on
- *          an HTML page `Cache-Control: private, no-cache`, no `Vary` and no `Set-Cookie`.
+ *          CSP nonce before anything renders, then sets the CSP header on every response, and on an
+ *          HTML page `Cache-Control: private, no-cache`, no `Vary` and no `Set-Cookie`.
  *          `notFoundRedirects` runs only when the router answers an HTML 404: it asks the
  *          experience `seo` module for a redirect (edge-cached as data, same-site targets only,
  *          failing open) or records the 404 after the response is sent.
@@ -18,7 +18,7 @@
  */
 import type { MiddlewareFunction, RouterContextProvider } from "react-router";
 import { contentSecurityPolicy, cspHeaderName, createNonce, CspConfig } from "@stackra/csp";
-import { Experience } from "#stackra/clients";
+import { RecordNotFoundAction, ResolveRedirectQuery } from "#stackra/clients/experience";
 import { EdgeConfig } from "#src/config/edge.config";
 import {
   clientsContext,
@@ -75,7 +75,7 @@ export const notFoundRedirects: MiddlewareFunction<Response> = async (
     context.get(executionContext).waitUntil(
       context
         .get(clientsContext)()
-        .queue(Experience.actions.RecordNotFound, {
+        .queue(RecordNotFoundAction, {
           host: url.host,
           path: url.pathname,
           ...(referrer ? { referrer } : {}),
@@ -100,7 +100,7 @@ async function lookupRedirect(
     const key = new Request(`${url.origin}/__redirect${url.pathname.toLowerCase()}`);
     let cached = await cache.match(key);
     if (!cached) {
-      const answer = await context.get(clientsContext)().query(Experience.queries.ResolveRedirect, {
+      const answer = await context.get(clientsContext)().query(ResolveRedirectQuery, {
         host: url.host,
         path: url.pathname,
       });

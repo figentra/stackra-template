@@ -14,7 +14,7 @@
  */
 import { Route, type MetaContext, type RouteContext } from "@stackra/navigation";
 import type { Seo, SeoConfig } from "@stackra/seo";
-import { Commerce } from "#stackra/clients";
+import { ListStorefrontProductsQuery, SearchProductsQuery } from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
 import { CacheProfile } from "#src/enums/cache-profile.enum";
 import { SiteLayout } from "#src/routes/site/site.layout";
@@ -48,8 +48,8 @@ export class StoreRoute extends Route({
     const cache = { cache: CacheProfile.Catalogue };
     const page =
       q.length >= MIN_SEARCH_LENGTH
-        ? await ctx.query(Commerce.queries.SearchProducts, { ...input, q }, cache)
-        : await ctx.query(Commerce.queries.ListStorefrontProducts, input, cache);
+        ? await ctx.query(SearchProductsQuery, { ...input, q }, cache)
+        : await ctx.query(ListStorefrontProductsQuery, input, cache);
     const noindex = this.seo.noindexParams.some((param) => param in ctx.search);
     return { page, search: q || undefined, noindex };
   }

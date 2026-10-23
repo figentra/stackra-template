@@ -35,10 +35,10 @@ test("store: list, search, detail, variant, 404", async ({ page }) => {
   await expect(price).not.toHaveText(before);
   await expect(await axe(page)).toHaveNoViolations();
 
-  await page.goto("/store/does-not-exist");
-  await expect(
-    page.getByRole("heading", { name: /page not found|الصفحة غير موجودة/ }),
-  ).toBeVisible();
+  const missing = await page.goto("/store/does-not-exist");
+  expect(missing?.status()).toBe(404);
+  // the not-found page is the root boundary @stackra/navigation owns, with one heading
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(await axe(page)).toHaveNoViolations();
 });
 

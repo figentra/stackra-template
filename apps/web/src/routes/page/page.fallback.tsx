@@ -6,16 +6,22 @@
  * Boundary: presentation over the route's loader data; no document rendering on the server (no
  *           document SSR in v1).
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 14: `<name>.fallback.tsx`), ADR 0110, ADR 0114
+ * Governing contract: ADR 0294 (decision 14: `<name>.fallback.tsx`, as amended by programming model
+ *                     v3.1, AGENTS.md: class components), ADR 0110, ADR 0114
  */
-import type { RouteComponent } from "@stackra/navigation";
-import { Skeleton } from "@stackra/ui";
+import type { RouteProps } from "@stackra/navigation";
+import { Component, Skeleton } from "@stackra/ui";
 import type { PageRoute } from "#src/routes/page/page.route";
 
 /** What the server sends inside the frame. */
-export const PageFallback: RouteComponent<typeof PageRoute> = ({ data: { page } }) => (
-  <div aria-busy="true">
-    <h1 className="text-3xl font-semibold tracking-tight">{page.seo.title}</h1>
-    <Skeleton className="mt-6 h-64 w-full rounded-panel" />
-  </div>
-);
+export class PageFallback extends Component<RouteProps<typeof PageRoute>> {
+  /** The page title and a skeleton of the document's place. */
+  render() {
+    return (
+      <div aria-busy="true">
+        <h1 className="text-3xl font-semibold tracking-tight">{this.props.data.page.seo.title}</h1>
+        <Skeleton className="mt-6 h-64 w-full rounded-panel" />
+      </div>
+    );
+  }
+}

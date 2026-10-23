@@ -11,7 +11,9 @@ import { fakeClient } from "@stackra/clients/testing";
 import { ContentEntryType } from "@stackra/content";
 import { describe, expect, it } from "@stackra/testing";
 import { renderRoute, screen } from "@stackra/testing/react";
-import { Billing, Content, Experience } from "#stackra/clients";
+import { ListPlansQuery } from "#stackra/clients/billing";
+import { ListEntriesQuery } from "#stackra/clients/content";
+import { ResolveSiteQuery } from "#stackra/clients/experience";
 import { LandingRoute } from "#src/routes/landing/landing.route";
 import { Routes } from "#stackra/routes";
 
@@ -50,10 +52,12 @@ const FAQ = {
 /** Mounts the route with every client faked. */
 function mount(locale: "en" | "ar") {
   const clients = [
-    fakeClient(Experience, (fake) => fake.queries.ResolveSite.returns(SITE)),
-    fakeClient(Billing, (fake) => fake.queries.ListPlans.returns(LADDER)),
-    fakeClient(Content, (fake) =>
-      fake.queries.ListEntries.when({ type: ContentEntryType.Faq })
+    fakeClient((fake) => fake.on(ResolveSiteQuery).returns(SITE)),
+    fakeClient((fake) => fake.on(ListPlansQuery).returns(LADDER)),
+    fakeClient((fake) =>
+      fake
+        .on(ListEntriesQuery)
+        .when({ type: ContentEntryType.Faq })
         .returns(FAQ)
         .otherwise({ entries: [] }),
     ),

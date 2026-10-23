@@ -20,10 +20,18 @@ ci:
       - ${origin}/pricing
       - ${origin}/store
       - ${origin}/store/demo-tee
+      - ${origin}/en-us
+      - ${origin}/en-us/pricing
+      - ${origin}/en-us/store
+      - ${origin}/en-us/store/demo-tee
       - ${origin}/ar
       - ${origin}/ar/pricing
       - ${origin}/ar/store
       - ${origin}/ar/store/demo-tee
+      - ${origin}/ar-sa
+      - ${origin}/ar-sa/pricing
+      - ${origin}/ar-sa/store
+      - ${origin}/ar-sa/store/demo-tee
     settings:
       preset: desktop
   assert:

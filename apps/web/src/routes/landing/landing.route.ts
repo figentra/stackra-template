@@ -16,7 +16,8 @@
 import { ContentEntryType } from "@stackra/content";
 import { Route, type MetaContext, type RouteContext } from "@stackra/navigation";
 import { OgKind, type Seo } from "@stackra/seo";
-import { Billing, Content } from "#stackra/clients";
+import { ListPlansQuery } from "#stackra/clients/billing";
+import { ListEntriesQuery } from "#stackra/clients/content";
 import { I18n } from "#stackra/i18n";
 import type { SiteConfig } from "#src/config/site.config";
 import { CacheProfile } from "#src/enums/cache-profile.enum";
@@ -41,13 +42,13 @@ export class LandingRoute extends Route({
     const { siteId } = ctx.site;
     const cache = { cache: CacheProfile.Marketing };
     const [ladder, testimonials, faq] = await Promise.all([
-      ctx.query(Billing.queries.ListPlans, { product: this.site.product }, cache),
+      ctx.query(ListPlansQuery, { product: this.site.product }, cache),
       ctx.query(
-        Content.queries.ListEntries,
+        ListEntriesQuery,
         { siteId, type: ContentEntryType.Testimonial, limit: TESTIMONIALS_SHOWN },
         cache,
       ),
-      ctx.query(Content.queries.ListEntries, { siteId, type: ContentEntryType.Faq }, cache),
+      ctx.query(ListEntriesQuery, { siteId, type: ContentEntryType.Faq }, cache),
     ]);
     return { ladder, testimonials: testimonials.entries, faq: faq.entries };
   }

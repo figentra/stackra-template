@@ -15,16 +15,7 @@ import { I18nConfig, type Locale } from "@stackra/i18n";
 import { useLocaleChoice } from "@stackra/i18n/react";
 import { useLocaleHref, useNavigate } from "@stackra/navigation/react";
 import { useEffect, useState } from "react";
-
-/** What the banner renders and does. */
-export interface LocaleSuggestionState {
-  /** The locale to offer; null when there is nothing to offer. */
-  readonly suggested: Locale | null;
-  /** Records the suggested locale as the visitor's choice and opens the same page in it. */
-  readonly accept: () => void;
-  /** Records the current locale as the visitor's choice; the banner hides for good. */
-  readonly dismiss: () => void;
-}
+import type { LocaleSuggestionState } from "#src/types/locale-suggestion-state.type";
 
 /** The language part of a BCP 47 tag (`ar` of `ar-sa`). */
 const languageOf = (tag: string): string => tag.toLowerCase().split("-")[0] ?? "";

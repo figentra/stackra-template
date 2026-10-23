@@ -5,7 +5,7 @@
  * Boundary: a refusal with no details: the code is derived (`site_context_missing`), its text is
  *           the derived key `web::errors.site_context_missing.message`, and it is built with
  *           `SiteContextMissingError.create()`, never `new`. It never reaches a visitor, because
- *           the root error boundary renders the generic error page.
+ *           the root boundary `@stackra/navigation` owns renders the generic error page.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decisions 16 and 20), ADR 0140 (error envelope), ADR 0232
  */

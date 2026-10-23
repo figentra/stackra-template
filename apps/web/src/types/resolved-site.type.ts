@@ -1,14 +1,15 @@
 /**
  * Stackra file contract:
  * Purpose: everything the frame, the head and the clients need to know about the request's site:
- *          tenant, locale, direction, market, indexability, origin, signup URL and brand.
+ *          tenant, locale, direction, market, indexability, origin, signup URL and colours.
  * Boundary: a type shared by the site layout that resolves it, the `useSite` hook that reads it and
  *           the generated SEO route modules; the value is the layout loader's, per request.
  * Runtime: isomorphic
- * Governing contract: ADR 0294 (decision 8), ADR 0175 (sites by host), ADR 0080 (locales)
+ * Governing contract: ADR 0294 (decision 8), ADR 0175 (sites by host), ADR 0080 (locales), ADR 0302
+ *                     (design system tokens)
  */
-import type { BrandTokens } from "@acme/brand/contracts";
 import type { Locale } from "@stackra/i18n";
+import type { ThemeColors } from "@stackra/tokens/contracts";
 import type { SiteMarket } from "#src/types/site-market.type";
 
 /** The site of one request, as `SiteLayout.loader` resolved it. */
@@ -17,7 +18,7 @@ export interface ResolvedSite {
   readonly siteId: string;
   /** Display name, used in the title template and the Organization in JSON-LD. */
   readonly name: string;
-  /** The locale of the route's mount (`/ar/...` is `ar`; no prefix is the default). */
+  /** The locale of the route's mount (`/ar-sa/...` is `ar-SA`; no prefix is the default). */
   readonly locale: Locale;
   /** `rtl` for the locales i18n.config.ts lists as such. */
   readonly dir: "ltr" | "rtl";
@@ -29,6 +30,9 @@ export interface ResolvedSite {
   readonly origin: string;
   /** Where "start trial" goes: the signup path on the canonical origin. */
   readonly signupUrl: string;
-  /** Tenant brand tokens layered over the `@acme/brand` defaults when theming.config.ts allows. */
-  readonly brand: Partial<BrandTokens>;
+  /**
+   * The tenant's colour roles, each a light and dark token, layered over the `acme` theme of
+   * `@acme/theme` when theming.config.ts allows it.
+   */
+  readonly brand: Partial<ThemeColors>;
 }

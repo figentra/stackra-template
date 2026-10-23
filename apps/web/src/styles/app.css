@@ -1,19 +1,22 @@
 /*
 Stackra file contract:
-Purpose: the one stylesheet: Tailwind v4, the HeroUI theme, and the generated @acme/brand tokens
-         mapped onto HeroUI's own variables, so every component follows the brand (and a tenant's
-         override) in light and dark; the brand-only utilities; the Arabic font; a few page-level
-         rules.
-Boundary: token mapping and a few page-level rules only; logical properties only. Only the
-          `--brand-<group>-<name>` names `@acme/brand` generates from its token source are
-          referenced; a tenant override sets the same names through the site frame's nonce-bearing
-          `<Style>`.
+Purpose: the one stylesheet: Tailwind v4, HeroUI v3, the theme fonts of `@stackra/tokens` and the
+         `acme` theme of `@acme/theme`, whose generated CSS sets HeroUI's own variables, so every
+         component follows the theme (and a tenant's colours) in light and dark; the site's two
+         utility names over those variables; a few page-level rules.
+Boundary: imports and page-level rules only; logical properties only. No colour, radius or font is
+          written here: the theme CSS is generated from `@acme/theme` (`defineTheme` of
+          `@stackra/tokens`) and a tenant's colours reach the same variables through the site
+          frame's nonce-bearing `<Style>`. The theme CSS loads after `@heroui/styles` and outside
+          any layer, so it wins over HeroUI's defaults.
 Runtime: browser
-Governing contract: ADR 0080 (logical CSS, light and dark), ADR 0165 (HeroUI v3 on Tailwind v4)
+Governing contract: ADR 0302 (design system tokens), ADR 0080 (logical CSS, light and dark),
+                    ADR 0165 (HeroUI v3 on Tailwind v4)
 */
 @import "tailwindcss";
 @import "@heroui/styles";
-@import "@acme/brand/css/tokens.css";
+@import "@stackra/tokens/fonts/fonts.css";
+@import "@acme/theme/themes/acme/web.css";
 
 /* Tailwind skips gitignored and installed files by default: scan the generated sources and the
    Stackra UI packages, whose components carry utility classes too. */
@@ -36,35 +39,19 @@ Governing contract: ADR 0080 (logical CSS, light and dark), ADR 0165 (HeroUI v3 
   color-scheme: dark;
 }
 
-/* HeroUI's semantic variables point at the brand; the brand file switches its values for dark, so
-   one mapping serves both schemes and a tenant's override reaches every component. */
-:root,
-.light,
-.dark,
-[data-theme] {
-  --accent: var(--brand-color-accent);
-  --accent-foreground: var(--brand-color-accent-foreground);
-  --foreground: var(--brand-color-ink);
-  --muted: var(--brand-color-ink-muted);
-  --surface: var(--brand-color-surface);
-  --warning: var(--brand-color-warning);
-  --radius: var(--brand-radius-md);
-}
-
-/* The brand-only names HeroUI has no variable for: `text-ink`, `text-ink-muted`, the two radii
-   (`rounded-field`, `rounded-panel`) and the font stack. */
+/* The site's names for theme variables HeroUI has no utility for: `text-ink`, `text-ink-muted`
+   and the two radii (`rounded-field`, `rounded-panel`). The theme sets the variables per scheme,
+   so one mapping serves light, dark and a tenant's colours. */
 @theme inline {
-  --color-ink: var(--brand-color-ink);
-  --color-ink-muted: var(--brand-color-ink-muted);
-  --radius-field: var(--brand-radius-md);
-  --radius-panel: var(--brand-radius-lg);
-  --font-sans: var(--brand-font-sans);
+  --color-ink: var(--foreground);
+  --color-ink-muted: var(--muted);
+  --radius-field: var(--field-radius);
+  --radius-panel: var(--radius-lg);
 }
 
-/* Arabic switches the brand's sans stack to its Arabic face and reads better slightly larger at
-   the same line height. */
-:root[lang="ar"] {
-  --brand-font-sans: var(--brand-font-arabic);
+/* Arabic (and every Arabic region) reads better slightly larger at the same line height; the
+   theme already switches it to its Arabic face. */
+:root:lang(ar) {
   font-size: 106.25%;
 }
 

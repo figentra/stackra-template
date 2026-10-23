@@ -13,22 +13,7 @@
  */
 import { ConsentCategory, ConsentStatus } from "@stackra/consent";
 import { useConsent } from "@stackra/consent/react";
-
-/** What the banner and the footer's settings link need. */
-export interface AnalyticsConsentState {
-  /** False on the server and the first client paint, until the browser read the stored decision. */
-  readonly isLoaded: boolean;
-  /** True once the visitor chose either way; the banner hides. */
-  readonly isDecided: boolean;
-  /** True when analytics may run. */
-  readonly isAllowed: boolean;
-  /** Record the grant; analytics starts on its own. */
-  readonly allow: () => void;
-  /** Record the refusal; analytics stops and drops what it queued on its own. */
-  readonly decline: () => void;
-  /** Forget the decision so the banner shows again. */
-  readonly reset: () => void;
-}
+import type { AnalyticsConsentState } from "#src/types/analytics-consent-state.type";
 
 /** Reads and writes the analytics category; safe to call from several components. */
 export function useAnalyticsConsent(): AnalyticsConsentState {

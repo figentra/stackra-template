@@ -13,7 +13,7 @@ import { fakeClient } from "@stackra/clients/testing";
 import { Locale } from "@stackra/i18n";
 import { describe, expect, it } from "@stackra/testing";
 import { runRouteLoader } from "@stackra/testing/react";
-import { Experience } from "#stackra/clients";
+import { GetSiteQuery, ResolveSiteQuery } from "#stackra/clients/experience";
 import { SiteConfig } from "#src/config/site.config";
 import { SiteLayout } from "#src/routes/site/site.layout";
 
@@ -32,7 +32,7 @@ const ENV = { apiUrl: "http://api.test", siteUrl: "https://www.acme.example" };
 describe(SiteLayout, () => {
   /** An unknown host must 404 instead of serving another site by default. */
   it("throws a 404 response when no site owns the host", async () => {
-    const experience = fakeClient(Experience, (fake) => fake.queries.ResolveSite.returns(null));
+    const experience = fakeClient((fake) => fake.on(ResolveSiteQuery).returns(null));
     const run = runRouteLoader(SiteLayout, {
       url: "https://nobody.acme.example/",
       env: ENV,
@@ -46,7 +46,7 @@ describe(SiteLayout, () => {
    * origin.
    */
   it("marks preview hosts as not indexable and builds the signup URL from the env", async () => {
-    const experience = fakeClient(Experience, (fake) => fake.queries.ResolveSite.returns(SITE));
+    const experience = fakeClient((fake) => fake.on(ResolveSiteQuery).returns(SITE));
     const { site } = await runRouteLoader(SiteLayout, {
       url: "https://preview.acme.example/ar",
       env: ENV,
@@ -60,14 +60,14 @@ describe(SiteLayout, () => {
 
   /** A single-tenant deployment pins its site, so no host is ever looked up. */
   it("asks for the fixed site by id and never resolves the host", async () => {
-    const experience = fakeClient(Experience, (fake) => fake.queries.GetSite.returns(SITE));
+    const experience = fakeClient((fake) => fake.on(GetSiteQuery).returns(SITE));
     await runRouteLoader(SiteLayout, {
       url: "https://www.acme.example/",
       env: ENV,
       clients: [experience],
       config: [[SiteConfig, { fixedSiteId: "site_1" }]],
     });
-    expect(experience.called(Experience.queries.GetSite)).toEqual([{ siteId: "site_1" }]);
-    expect(experience.called(Experience.queries.ResolveSite)).toHaveLength(0);
+    expect(experience.called(GetSiteQuery)).toEqual([{ siteId: "site_1" }]);
+    expect(experience.called(ResolveSiteQuery)).toHaveLength(0);
   });
 });

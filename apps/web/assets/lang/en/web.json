@@ -1,5 +1,5 @@
 {
-  "$comment": "Stackra file contract — Purpose: the public site's own strings in en (namespace `web::`); Boundary: same keys in every locale (gen fails otherwise); the derived keys of the site's classes live under `errors.<code>.message`, `enums.<enum>.<code>` and `flags.<flag>.label`, so page strings for error screens are `error_page.*`; every Arabic plural carries zero, one, two, few, many and other; another namespace's strings are overridden in assets/overrides/<namespace>/<locale>.json; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0294 (decision 20: derived keys), ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the public site's own strings in en (namespace `web::`); Boundary: same keys in every base locale (gen fails otherwise); the regional overlays (`en-US`, `ar-SA`) hold only the keys that differ and fall back along the i18n.config.ts chain; the derived keys of the site's classes live under `errors.<code>.message`, `enums.<enum>.<code>` and `flags.<flag>.label`; every Arabic plural carries zero, one, two, few, many and other; another member's strings are reworded in src/overrides/<owner>/…/assets/lang/<locale>/<namespace>.json; Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0294 (decision 20: derived keys), ADR 0192 (ICU plurals)",
   "nav": {
     "home": "Home",
     "pricing": "Pricing",
@@ -7,7 +7,12 @@
     "contact": "Contact",
     "skip": "Skip to content",
     "locale": "Language",
-    "main": "Main navigation"
+    "main": "Main navigation",
+    "shop": "Shop",
+    "resources": "Resources",
+    "help": "Help centre",
+    "docs": "Developer docs",
+    "new_tab": "(opens in a new tab)"
   },
   "hero": {
     "title": "Sell everywhere your customers are",
@@ -111,18 +116,6 @@
     "terms": "Terms",
     "legal": "Legal"
   },
-  "error_page": {
-    "not_found": {
-      "title": "Page not found",
-      "body": "This page moved or never existed.",
-      "home": "Back to the home page"
-    },
-    "server": {
-      "title": "Something went wrong",
-      "body": "We have been told. Please try again in a moment.",
-      "reference": "Reference: {reference}"
-    }
-  },
   "errors": {
     "site_context_missing": {
       "message": "useSite was called outside the site layout."
@@ -143,6 +136,9 @@
   "flags": {
     "pricing_yearly_first": {
       "label": "Pricing page opens on yearly prices"
+    },
+    "help_centre": {
+      "label": "Header links the help centre"
     }
   }
 }
