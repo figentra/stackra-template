@@ -1,14 +1,15 @@
 /**
  * Stackra file contract:
  * Purpose: builds PointsEntry values (the port's DTO, not a row) for driver and matcher tests.
- * Boundary: the generic value factory of @stackra/testing: a DTO has no entity manager, so it is
- *           not a `Factory<Model>`. `at` is the frozen test clock.
+ * Boundary: the generic value factory of @stackra/testing: the port's DTO is not a model, so this
+ *           is a plain value, not a `Factory(Model)` kind, and it stays in ./testing. `at` is the
+ *           frozen test clock.
  * Runtime: isomorphic
- * Governing contract: ADR 0190 (factories), ADR 0269
+ * Governing contract: ADR 0294 (decision 15), ADR 0190 (factories), ADR 0269
  */
 import { factory } from "@stackra/testing";
-import { EntryKind } from "#core/enums/entry-kind.enum";
-import type { PointsEntry } from "#core/interfaces/points-entry.interface";
+import { EntryKind } from "#contracts/enums/entry-kind.enum";
+import type { PointsEntry } from "#contracts/types/points-entry.type";
 import { memberId } from "#core/functions/member-id.function";
 
 /**

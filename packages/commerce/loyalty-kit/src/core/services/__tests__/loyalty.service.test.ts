@@ -7,19 +7,21 @@
  *           @stackra/testing, the module builder from @stackra/container/testing, the refusal
  *           matcher from @stackra/errors/testing.
  * Runtime: node
- * Governing contract: ADR 0143, ADR 0022 (tests beside the subject), ADR 0007 (amended: test
- *                     docblocks)
+ * Governing contract: ADR 0294 (decision 15), ADR 0143, ADR 0022 (tests beside the subject)
  */
-import { beforeEach, describe, expect, it, freezeClock } from "@stackra/testing";
-import { refusal } from "@stackra/errors/testing";
-import { Refusals } from "#stackra/manifest";
-import { createTestingModule } from "@stackra/container/testing";
-import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitConfig, LoyaltyService, memberId } from "@acme/loyalty-kit";
+import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
 import { FakeLoyaltyMembers, pointsEntry } from "@acme/loyalty-kit/testing";
+import { createTestingModule } from "@stackra/container/testing";
+import { refusal } from "@stackra/errors/testing";
+import { beforeEach, describe, expect, freezeClock, it } from "@stackra/testing";
+import { Refusals } from "#stackra/manifest";
 
+/** The one enrolled member of these cases. */
 const usr1 = memberId("usr_1");
+
+/** The frozen clock, also the time of every seeded entry. */
 const at = new Date("2026-10-21T00:00:00Z");
 
 /**
@@ -46,7 +48,7 @@ describe(LoyaltyService, () => {
   });
 
   /**
-   * The base rate is floored and ledger-free: a hook or a tier may scale it later, but it is never
+   * The base rate is floored and ledger-free: an extension or a tier may scale it later, but it is never
    * written here.
    */
   it("quotes the base earn without touching the ledger", async () => {

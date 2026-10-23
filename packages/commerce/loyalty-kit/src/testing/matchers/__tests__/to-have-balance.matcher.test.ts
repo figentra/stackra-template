@@ -4,12 +4,11 @@
  *          numbers.
  * Boundary: unit tier on the memory driver, constructed directly.
  * Runtime: node
- * Governing contract: ADR 0022, ADR 0007 (amended: test docblocks)
+ * Governing contract: ADR 0269, ADR 0022
  */
-import { describe, expect, it } from "@stackra/testing";
-import { memberId } from "@acme/loyalty-kit";
-import { MemoryLoyaltyLedger } from "@acme/loyalty-kit";
+import { MemoryLoyaltyLedgerDriver, memberId } from "@acme/loyalty-kit";
 import { pointsEntry, toHaveBalance } from "@acme/loyalty-kit/testing";
+import { describe, expect, it } from "@stackra/testing";
 
 /** Guards the ledger matcher the other suites trust, so a wrong balance cannot pass unnoticed. */
 describe(toHaveBalance, () => {
@@ -18,7 +17,7 @@ describe(toHaveBalance, () => {
    * the assertion alone.
    */
   it("compares the ledger balance and names the actual number on failure", async () => {
-    const ledger = new MemoryLoyaltyLedger();
+    const ledger = new MemoryLoyaltyLedgerDriver();
     await ledger.append(pointsEntry.build({ points: 40 }));
     await expect(ledger).toHaveBalance(memberId("usr_1"), 40);
     await expect(expect(ledger).toHaveBalance(memberId("usr_1"), 41)).rejects.toThrow("found 40");

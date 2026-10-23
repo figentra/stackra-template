@@ -1,23 +1,22 @@
 /**
  * Stackra file contract:
- * Purpose: an in-memory LoyaltyLedger for tests and `ledger: "memory"`; same idempotency and expiry
- *          contract as postgres.
- * Boundary: the memory driver every capability ships before its production driver (ADR 0266).
- *           Registers itself with `@Driver(LoyaltyLedger, "memory")`; gen writes the binding into
- *           `#stackra/wiring`. Isomorphic, so it lives in core and ./testing re-exports it.
+ * Purpose: an in-memory LoyaltyLedger for tests and `ledger: "memory"`; the same idempotency and
+ *          expiry contract as postgres.
+ * Boundary: the memory driver every capability ships before its production driver (ADR 0266). Its
+ *           name is the file prefix (`memory`); gen writes it as a candidate of the port into
+ *           `#stackra/wiring`. Isomorphic, so it lives in core and ships from the `.` entry.
  * Runtime: isomorphic
- * Governing contract: ADR 0266 decision 2
+ * Governing contract: ADR 0294 (decisions 15 and 16), ADR 0266 decision 2
  */
 import { Driver } from "@stackra/container";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import { EntryKind } from "#contracts/enums/entry-kind.enum";
+import { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
+import type { MemberId } from "#contracts/types/member-id.type";
+import type { PointsEntry } from "#contracts/types/points-entry.type";
 import { EXPIRE_REFERENCE_PREFIX } from "#core/constants/expire-reference-prefix.constant";
-import { EntryKind } from "#core/enums/entry-kind.enum";
-import type { PointsEntry } from "#core/interfaces/points-entry.interface";
-import type { MemberId } from "#core/types/member-id.type";
 
 /** Holds entries in a Map for the life of the container, so every test gets a fresh ledger. */
-@Driver(LoyaltyLedger, "memory")
-export class MemoryLoyaltyLedger extends LoyaltyLedger {
+export class MemoryLoyaltyLedgerDriver extends Driver(LoyaltyLedger) {
   /** Entries keyed `<memberId>|<reference>`, which is what makes `append` idempotent. */
   private readonly entries = new Map<string, PointsEntry>();
 
@@ -47,7 +46,7 @@ export class MemoryLoyaltyLedger extends LoyaltyLedger {
     let removed = 0;
     // a snapshot: `append` adds entries to the map while this loop runs
     for (const e of Array.from(this.entries.values())) {
-      if (e.memberId !== memberId || !e.kind.is(EntryKind.Earn) || e.at >= before) continue;
+      if (e.memberId !== memberId || e.kind !== EntryKind.Earn || e.at >= before) continue;
       const written = await this.append({
         memberId,
         points: -e.points,

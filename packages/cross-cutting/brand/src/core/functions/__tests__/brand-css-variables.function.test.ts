@@ -8,8 +8,8 @@
  * Governing contract: ADR 0022, ADR 0007 (amended: test docblocks)
  */
 import { describe, expect, it } from "@stackra/testing";
+import type { BrandTokens } from "#contracts/types/brand-tokens.type";
 import { brandCssVariables } from "#core/functions/brand-css-variables.function";
-import type { BrandTokens } from "#core/types/brand-tokens.type";
 
 /** Guards the one brand function whose output reaches HTML. */
 describe(brandCssVariables, () => {

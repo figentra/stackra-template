@@ -4,19 +4,20 @@
  *          take off a total.
  * Boundary: generic maths over the LoyaltyLedger and LoyaltyMembers ports; no knowledge of orders
  *           or of any product. It never writes an earn: crediting a purchase is
- *           `AccountService.earn`, which enrolls, runs the hook chain and records the event.
+ *           `AccountService.earn`, which enrolls, runs the extension chain and records the event.
  *           Exported by LoyaltyKitModule for hosts to inject by class.
  * Runtime: isomorphic
- * Governing contract: ADR 0220 (integer minor units), ADR 0263 (typed constructor, no @Inject)
+ * Governing contract: ADR 0294 (decisions 15, 16 and 17), ADR 0220 (integer minor units)
  */
-import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
-import type { LoyaltyMembers } from "#contracts/loyalty-members.port";
+import { Service } from "@stackra/app";
 import type { LoyaltyKitConfig } from "#config/loyalty-kit.config";
-import { EntryKind } from "#core/enums/entry-kind.enum";
+import { EntryKind } from "#contracts/enums/entry-kind.enum";
+import type { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
+import type { LoyaltyMembers } from "#contracts/ports/loyalty-members.port";
+import type { MemberId } from "#contracts/types/member-id.type";
+import type { RedemptionQuote } from "#contracts/types/redemption-quote.type";
 import { InsufficientPointsError } from "#core/errors/insufficient-points.error";
 import { NotAMemberError } from "#core/errors/not-a-member.error";
-import type { RedemptionQuote } from "#core/interfaces/redemption-quote.interface";
-import type { MemberId } from "#core/types/member-id.type";
 
 /**
  * The kit's public service. Inject it by class in any module of the host.
@@ -25,27 +26,28 @@ import type { MemberId } from "#core/types/member-id.type";
  * constructor(private readonly loyalty: LoyaltyService) {}
  * const { amountMinor } = await this.loyalty.quote(member, requestedPoints, runningTotalMinor);
  */
-export class LoyaltyService {
+export class LoyaltyService extends Service {
   /**
-   * @param ledger - an abstract-class port, so no `@Inject`; the driver is chosen by config
-   * `ledger`.
-   * @param members - implemented by the host service, never by the kit.
-   * @param config - the resolved config class; by type, no `@Inject`.
+   * @param ledger - the port; the driver is chosen by config `ledger`.
+   * @param members - implemented by the host, never by the kit.
+   * @param config - the resolved config class, the host's override included.
    */
   constructor(
     private readonly ledger: LoyaltyLedger,
     private readonly members: LoyaltyMembers,
     private readonly config: LoyaltyKitConfig,
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * Largest redemption allowed for `requested` points against `totalMinor`: never more than the
    * balance, never more than `maxRedeemPercent` of the total, converted at `pointValueMinor`. Reads
    * only; nothing is held.
    * @param totalMinor - the amount still to pay at this point of the adjustment chain, in minor
-   * units.
+   *                     units.
    * @returns zero points and zero amount when the member has no balance or the cap rounds to
-   * nothing.
+   *          nothing.
    */
   async quote(member: MemberId, requested: number, totalMinor: number): Promise<RedemptionQuote> {
     const balance = await this.ledger.balance(member);
@@ -58,9 +60,9 @@ export class LoyaltyService {
   }
 
   /**
-   * The base points an amount earns before any hook runs: floor(amountMinor × earnPerMinor). Pure
-   * maths: no ledger read, no write, no tier; `AccountService.earn` applies the tier multiplier and
-   * credits the result.
+   * The base points an amount earns before any extension runs: floor(amountMinor × earnPerMinor).
+   * Pure maths: no ledger read, no write, no tier; `AccountService.earn` applies the tier
+   * multiplier and credits the result.
    * @returns zero for a sub-point amount.
    */
   quoteEarn(amountMinor: number): number {
@@ -68,14 +70,17 @@ export class LoyaltyService {
   }
 
   /**
-   * Refuses a redemption the member cannot make; used by verify hooks before anything is reserved.
+   * Refuses a redemption the member cannot make; used by verify extensions before anything is
+   * reserved.
    * @throws NotAMemberError when the principal is not enrolled.
    * @throws InsufficientPointsError when `points` exceeds the balance.
    */
   async assertCanRedeem(member: MemberId, points: number): Promise<void> {
-    if (!(await this.members.isMember(member))) throw new NotAMemberError(member);
+    if (!(await this.members.isMember(member))) {
+      throw NotAMemberError.create({ principalId: member });
+    }
     const balance = await this.ledger.balance(member);
-    if (points > balance) throw new InsufficientPointsError(balance, points);
+    if (points > balance) throw InsufficientPointsError.create({ balance, requested: points });
   }
 
   /**

@@ -1,21 +1,31 @@
 /**
  * Stackra file contract:
- * Purpose: one row of the account list: the public shape of a loyalty account.
- * Boundary: a schema class only; the list output is a `Page` of it. Never the database row, never
- *           the ledger entries.
+ * Purpose: `LoyaltyAccountView`: one row of the account list, the public shape of a loyalty
+ *          account.
+ * Boundary: a shape class (an output view of the `LoyaltyAccount` model); the output of the
+ *           standard list and get operations gen writes for LoyaltyAccountResource. Never the
+ *           database row, never the ledger entries.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0128
+ * Governing contract: ADR 0294 (decisions 4, 15 and 26)
  */
-import { Schema, z } from "@stackra/schema";
-import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
+import type { PublicId } from "@stackra/contracts";
+import { Schema } from "@stackra/validation";
+import type { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 
-/** An account as the console list and the `@Crud` list query return it. */
-export class LoyaltyAccountView extends Schema(
-  z.object({
-    accountId: z.string(),
-    memberId: z.string(),
-    tier: LoyaltyTier.schema,
-    isFrozen: z.boolean(),
-    createdAt: z.iso.datetime(),
-  }),
-) {}
+/** An account as the console list and the operations return it. */
+export class LoyaltyAccountView extends Schema {
+  /** The account's public id. */
+  accountId!: PublicId<"lac">;
+
+  /** The principal the account belongs to. */
+  memberId!: string;
+
+  /** The current tier. */
+  tier!: LoyaltyTier;
+
+  /** Whether the account is frozen for review. */
+  isFrozen!: boolean;
+
+  /** When the account was created. */
+  createdAt!: Date;
+}

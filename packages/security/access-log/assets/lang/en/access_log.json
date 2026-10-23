@@ -1,11 +1,20 @@
 {
-  "nav": { "audit": "Audit trail", "access_log": "Access log" },
-  "resource": { "entries": "Access records" },
-  "classifications": {
-    "personal": "Personal",
-    "financial": "Financial",
-    "health": "Health",
-    "pseudonymous": "Pseudonymous"
+  "nav": {
+    "audit": "Audit trail",
+    "access_log": "Access log"
+  },
+  "resources": {
+    "access_log_entry": {
+      "title": "Access records"
+    }
+  },
+  "enums": {
+    "data_classification": {
+      "personal": "Personal",
+      "financial": "Financial",
+      "health": "Health",
+      "pseudonymous": "Pseudonymous"
+    }
   },
   "permissions": {
     "access_log_entry": {
@@ -13,5 +22,9 @@
       "purge": "Purge old access records"
     }
   },
-  "errors": { "access_log_write_failed": "Access log unavailable; the read was served." }
+  "errors": {
+    "access_log_write_failed": {
+      "message": "Access log unavailable; the read was served."
+    }
+  }
 }

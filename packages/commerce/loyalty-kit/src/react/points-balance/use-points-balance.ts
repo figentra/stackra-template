@@ -1,12 +1,11 @@
 /**
  * Stackra file contract:
  * Purpose: derives "expires soon" from a balance view; the React hook of the points-balance
- *          component.
- * Boundary: a React hook named `use*`, kept beside its component in `use-*.ts`: `hooks/` is
- *           reserved for extension hooks, so a React hook never lives there.
+ *          renderer.
+ * Boundary: a React hook named `use*`, kept beside its component in `use-*.ts`; "hook" means a
+ *           React hook only.
  * Runtime: browser
- * Governing contract: ADR 0231 (hooks start with `use`), ADR 0265 (`hooks/` is extension hooks
- *                     only)
+ * Governing contract: ADR 0294 (decisions 7 and 23), ADR 0231 (hooks start with `use`)
  */
 import { useState } from "react";
 import type { BalanceView } from "#core/schemas/balance-view.schema";
@@ -14,7 +13,7 @@ import type { BalanceView } from "#core/schemas/balance-view.schema";
 /** Thirty days in milliseconds; the warning window. */
 const SOON_MS = 30 * 24 * 60 * 60 * 1_000;
 
-/** What the balance tile needs beyond the data itself. */
+/** What the balance renderer needs beyond the data itself. */
 export interface PointsBalanceState {
   /** True when the oldest live points expire within thirty days of now. */
   readonly expiresSoon: boolean;
@@ -29,5 +28,5 @@ export function usePointsBalance(data?: BalanceView): PointsBalanceState {
   // render stays pure
   const [now] = useState(Date.now);
   const expiry = data?.nextExpiryAt;
-  return { expiresSoon: !!expiry && Date.parse(expiry) - now < SOON_MS };
+  return { expiresSoon: !!expiry && expiry.getTime() - now < SOON_MS };
 }

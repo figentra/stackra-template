@@ -2,32 +2,32 @@
  * Stackra file contract:
  * Purpose: the default LoyaltyLedger driver: points entries kept in `@stackra/ledger`'s journal
  *          over Postgres.
- * Boundary: implements the port only and registers itself as `postgres`; lazy-loaded so it never
- *           reaches a browser bundle. The journal owns the arithmetic every ledger shares
- *           (idempotent append per reference, running balance, set-based reversal); the kit keeps
- *           its own domain port, so a host can still `@Replaces` it. Runs inside whatever
- *           transaction the caller holds. No SQL is written here.
+ * Boundary: implements the port only. Its name is the file prefix (`postgres`), the package
+ *           default in LoyaltyKitConfig; the generated wiring loads it lazily, so it never reaches
+ *           a browser bundle. The journal owns the arithmetic every ledger shares (idempotent
+ *           append per reference, running balance, set-based reversal); the kit keeps its own
+ *           domain port, so a host can still `@Replaces` it. Runs inside whatever transaction the
+ *           caller holds. No SQL is written here.
  * Runtime: node
- * Governing contract: ADR 0263 (self-registering drivers), ADR 0220 (integer minor units), ADR 0266
+ * Governing contract: ADR 0294 (decisions 15 and 16), ADR 0220 (integer minor units), ADR 0266
  */
 import { Driver } from "@stackra/container";
 import type { Journal } from "@stackra/ledger";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import { EntryKind } from "#contracts/enums/entry-kind.enum";
+import { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
+import type { MemberId } from "#contracts/types/member-id.type";
+import type { PointsEntry } from "#contracts/types/points-entry.type";
 import { EXPIRE_REFERENCE_PREFIX } from "#core/constants/expire-reference-prefix.constant";
-import { EntryKind } from "#core/enums/entry-kind.enum";
-import type { PointsEntry } from "#core/interfaces/points-entry.interface";
-import type { MemberId } from "#core/types/member-id.type";
 import type { LedgerEntry } from "#node/models/ledger-entry.model";
 
 /**
- * The journal's unique (tenant, account, reference) index, not application logic, enforces
+ * The journal's unique (tenant, member, reference) index, not application logic, enforces
  * idempotency.
  */
-@Driver(LoyaltyLedger, "postgres")
-export class PostgresLoyaltyLedger extends LoyaltyLedger {
+export class PostgresLoyaltyLedgerDriver extends Driver(LoyaltyLedger) {
   /**
-   * @param journal - the journal over the `loyalty_ledger_entries` table, tenant-scoped by the
-   * model's trait.
+   * @param journal - the journal over `loyalty_kit.ledger_entries`, tenant-scoped by the model's
+   *                  trait.
    */
   constructor(private readonly journal: Journal<LedgerEntry>) {
     super();

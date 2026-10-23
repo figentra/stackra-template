@@ -2,24 +2,24 @@
  * Stackra file contract:
  * Purpose: the production sink: one row per record; a repeated callId is swallowed by the unique
  *          index.
- * Boundary: implements the port only; registers itself as `postgres` and is lazy-loaded by the
- *           generated wiring. Drivers always sit in `drivers/`, even when ./node has only one.
+ * Boundary: implements the port only. Its name is the file prefix (`postgres`), the package
+ *           default in AccessLogConfig; the generated wiring loads it lazily, so it never reaches a
+ *           browser bundle.
  * Runtime: node
- * Governing contract: ADR 0263 (self-registering drivers)
+ * Governing contract: ADR 0294 (decisions 15 and 16), ADR 0263
  */
 import { Driver } from "@stackra/container";
-import type { Repository } from "@stackra/database";
-import { UniqueViolation } from "@stackra/database";
-import { AccessLogSink } from "#contracts/access-log-sink.port";
-import type { AccessRecord } from "#core/interfaces/access-record.interface";
+import { type Repository, UniqueViolation } from "@stackra/database";
+import { AccessLogSink } from "#contracts/ports/access-log-sink.port";
+import type { AccessRecord } from "#contracts/types/access-record.type";
 import type { AccessLogEntry } from "#node/models/access-log-entry.model";
 
 /**
  * Writes outside the caller's transaction (`requiresNew`), so a rolled-back read still leaves its
  * access record.
  */
-@Driver(AccessLogSink, "postgres")
-export class PostgresAccessLogSink extends AccessLogSink {
+export class PostgresAccessLogSinkDriver extends Driver(AccessLogSink) {
+  /** @param rows - the record repository, tenant-scoped by the model's trait. */
   constructor(private readonly rows: Repository<AccessLogEntry>) {
     super();
   }

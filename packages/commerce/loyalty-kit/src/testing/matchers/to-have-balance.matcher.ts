@@ -5,11 +5,12 @@
  * Boundary: a matcher owned by the package whose port it reads (ADR 0269), exported from
  *           `@acme/loyalty-kit/testing`.
  * Runtime: isomorphic
- * Governing contract: ADR 0269 (domain matchers live in the owning package's ./testing)
+ * Governing contract: ADR 0294 (decision 15), ADR 0269 (domain matchers live in the owning
+ *                     package's ./testing)
  */
 import { createMatcher } from "@stackra/testing";
-import type { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
-import type { MemberId } from "#core/types/member-id.type";
+import type { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
+import type { MemberId } from "#contracts/types/member-id.type";
 
 /**
  * Passes when the ledger's balance for `member` equals `points`; the message names both numbers.

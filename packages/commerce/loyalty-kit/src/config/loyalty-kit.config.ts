@@ -1,48 +1,49 @@
 /**
  * Stackra file contract:
  * Purpose: package defaults of the loyalty kit's configuration (the first layer: package → host →
- *          env → runway).
- * Boundary: a config class: types from the property declarations, validation from the field
- *           decorators (Zod is the engine inside @stackra/validation and never visible here).
- *           Values only; never per tenant (that is settings). The ledger driver is the one
- *           `@DriverOf` choice for this port (runway `drivers.ledger` is its per-environment
- *           layer); a custom driver class is a host `@Replaces(LoyaltyLedger)`. `LoyaltyMembers`
- *           has no field: a port with one registered driver needs no selector.
+ *          environment → runway).
+ * Boundary: a config class: the property types are the rules, the initializers the defaults, and
+ *           gen compiles them to `LoyaltyKitConfig$`, which hosts extend. The key is the package
+ *           key (`loyalty_kit`), because the file is named after the package. Values only; never
+ *           per tenant (that is settings). The ledger driver is a `DriverName<LoyaltyLedger>`
+ *           field (runway `config.loyalty_kit.ledger` is its per-environment layer); a custom
+ *           driver class is a host `@Replaces(LoyaltyLedger)`. `LoyaltyMembers` has no field: a
+ *           port with one candidate needs no selector.
  * Runtime: isomorphic
- * Governing contract: ADR 0146 (config layers), ADR 0095 (field rules), ADR 0263 (gen writes the
- *                     wiring)
+ * Governing contract: ADR 0294 (decisions 4, 19 and 20), ADR 0146 (config layers), ADR 0263
  */
-import { Config, DriverOf } from "@stackra/config";
+import { Config } from "@stackra/config";
 import type { DriverName } from "@stackra/container";
 import { Int, Num } from "@stackra/validation";
-import { LoyaltyLedger } from "#contracts/loyalty-ledger.port";
+import type { LoyaltyLedger } from "#contracts/ports/loyalty-ledger.port";
 
 /**
- * Injected by type (no `@Inject`): `constructor(private readonly config: LoyaltyKitConfig)`. A host
- * overrides values in its own `src/config/loyalty-kit.config.ts` with `override(LoyaltyKitConfig,
- * {...})`; `STACKRA_LOYALTY_KIT__*` environment variables and `runway.yaml` layer on top. Validated
- * once at boot.
+ * Injected by type: `constructor(private readonly config: LoyaltyKitConfig)`. A host overrides
+ * values in its own `src/config/loyalty-kit.config.ts` with a `<Host>LoyaltyKitConfig` subclass;
+ * `STACKRA_LOYALTY_KIT__*` environment variables and runway layer on top. Validated once at boot.
  */
-@Config("loyalty_kit")
-export class LoyaltyKitConfig {
+export class LoyaltyKitConfig extends Config {
+  /** Which ledger driver runs; names are the driver file prefixes, so a typo is a type error. */
+  ledger: DriverName<LoyaltyLedger> = "postgres";
+
   /**
-   * Which registered ledger driver runs; a typo is a type error because the names are the
-   * `@Driver(LoyaltyLedger, name)` registrations. @defaultValue "postgres"
+   * Named instances for a host that runs two ledgers while migrating drivers, each injected as
+   * `Named<LoyaltyLedger, "primary">`; empty by default, a host sets them in its override.
    */
-  @DriverOf(LoyaltyLedger) ledger: DriverName<LoyaltyLedger> = "postgres";
-  /**
-   * Named instances for a host that runs two ledgers while migrating drivers; each is injected with
-   * `@Named("primary")`. Empty by default: a host sets them in its override. @defaultValue {}
-   */
-  @DriverOf(LoyaltyLedger, { named: { primary: "postgres", archive: "memory" } })
   ledgers: Record<string, DriverName<LoyaltyLedger>> = {};
-  /** Minor units one point is worth at redemption. @defaultValue 1 (one cent) */
-  @Int({ min: 1 }) pointValueMinor = 1;
-  /**
-   * Points earned per minor unit spent; the result is floored. @defaultValue 0.01 (one point per
-   * 100 cents)
-   */
-  @Num({ min: 0, exclusiveMin: true }) earnPerMinor = 0.01;
-  /** Largest share of an order total points may cover, as a whole percentage. @defaultValue 50 */
-  @Int({ min: 0, max: 100 }) maxRedeemPercent = 50;
+
+  /** Minor units one point is worth at redemption: one cent by default. */
+  @Int({ min: 1 })
+  pointValueMinor = 1;
+
+  /** Points earned per minor unit spent, floored: one point per 100 cents by default. */
+  @Num({ exclusiveMin: 0 })
+  earnPerMinor = 0.01;
+
+  /** Largest share of an order total points may cover, as a whole percentage. */
+  @Int({
+    min: 0,
+    max: 100,
+  })
+  maxRedeemPercent = 50;
 }

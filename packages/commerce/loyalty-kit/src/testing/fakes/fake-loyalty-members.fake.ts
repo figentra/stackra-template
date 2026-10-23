@@ -6,12 +6,12 @@
  *           fakes is this package's abstract class, which is why the fake lives here and not in
  *           @stackra/testing (ADR 0269).
  * Runtime: isomorphic
- * Governing contract: ADR 0126 (./testing entry), ADR 0266 decision 2 (a fake per capability), ADR
- *                     0269
+ * Governing contract: ADR 0294 (decision 15), ADR 0266 decision 2 (a fake per capability),
+ *                     ADR 0269
  */
 import { Fake } from "@stackra/testing";
-import { LoyaltyMembers } from "#contracts/loyalty-members.port";
-import type { MemberId } from "#core/types/member-id.type";
+import { LoyaltyMembers } from "#contracts/ports/loyalty-members.port";
+import type { MemberId } from "#contracts/types/member-id.type";
 
 /**
  * Answers `isMember` from a fixed set; `calls("isMember")` lists what was asked. One runtime export
@@ -26,7 +26,8 @@ export class FakeLoyaltyMembers extends Fake.of(LoyaltyMembers) {
   /**
    * Shorthand for `new FakeLoyaltyMembers(new Set(ids))`.
    * @example
-   * createTestingModule(LoyaltyKitModule).override(LoyaltyMembers, FakeLoyaltyMembers.with(["usr_1"]))
+   * createTestingModule(LoyaltyKitModule)
+   *   .override(LoyaltyMembers, FakeLoyaltyMembers.with(["usr_1"]))
    */
   static with(ids: readonly string[]): FakeLoyaltyMembers {
     return new FakeLoyaltyMembers(new Set(ids));

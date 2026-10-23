@@ -1,33 +1,32 @@
 /**
  * Stackra file contract:
- * Purpose: `@AccessLogged({ classification, subjects })`: marks a method whose every call is
- *          written to the access log.
- * Boundary: the decorator annotates; it stores its options under the metadata key `createDecorator`
- *           registers for the Explorer and nothing else. Registration happens in the Explorer at
- *           bootstrap, never at import time. Legacy decorators over the container's WeakMap store
- *           (ADR 0005); no reflect-metadata. Its type is `AccessLoggedDecorator`, generic over the
- *           method's own argument list. `decorators/` appears with its second file; the catalogue
- *           shows the folder.
+ * Purpose: `@AccessLogged({ classification, subjects })`: the class facet whose every call to a
+ *          declared method is written to the access log.
+ * Boundary: the decorator annotates and nothing else: `createDecorator` stores the options under
+ *           the decorator itself, which is the key the Explorer and gen look up. It is registered
+ *           for the kinds it may mark (actions, queries and services), so the facet-target lint
+ *           refuses it anywhere else. Wrapping happens in AccessLogExplorer at bootstrap, never at
+ *           import time; no reflect-metadata.
  * Runtime: isomorphic
- * Governing contract: ADR 0117 C2 (a package owns its decorators), ADR 0144 (Explorers)
+ * Governing contract: ADR 0294 (decision 6), ADR 0144 (Explorers), ADR 0117 C2 (a package owns
+ *                     its decorators)
  */
 import { createDecorator } from "@stackra/container";
-import type { AccessLoggedDecorator } from "#core/interfaces/access-logged-decorator.interface";
-import type { AccessLoggedOptions } from "#core/interfaces/access-logged-options.interface";
+import type { AccessLoggedOptions } from "#contracts/types/access-logged-options.type";
 
 /**
- * Marks a provider method. The method's arguments are passed to `subjects` to extract record ids.
- * The decorator is its own metadata key: the Explorer asks `discovery.methodsWith(AccessLogged)`
- * and gen discovers it by `kind`. No `schema`: the options hold a function, which gen checks by
- * type, not at run time.
+ * Marks a class whose declared methods expose classified data. On an action it logs each `handle`
+ * call against the principal the call is for; on a service with `subjects: "customerId"` it logs
+ * each call against the `customerId` of the records it handles.
  *
  * @example
  * ```ts
- * @AccessLogged({ classification: DataClassification.Personal, subjects: (id: string) => [id] })
- * async view(id: string): Promise<CustomerView> { … }
+ * @AccessLogged({ classification: DataClassification.Personal, subjects: "customerId" })
+ * export class CustomerService extends CrudService(Customer) { … }
  * ```
  */
-export const AccessLogged = createDecorator<AccessLoggedOptions<never[]>>({
+export const AccessLogged = createDecorator<AccessLoggedOptions>({
   kind: "access_logged",
-  target: "method",
-}) as unknown as AccessLoggedDecorator; // typed per call site; the runtime value is unchanged
+  target: "class",
+  kinds: ["action", "query", "service"],
+});

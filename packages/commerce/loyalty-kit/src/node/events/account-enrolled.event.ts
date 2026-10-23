@@ -1,25 +1,32 @@
 /**
  * Stackra file contract:
- * Purpose: the fact that an account now exists for a principal. Public, so it leaves through the
- *          host's outbox as `loyalty_kit.account.enrolled.v1`.
- * Boundary: one event per class; version 1 until `@Version` says otherwise. Recorded once, by
- *           AccountService.enroll.
+ * Purpose: the fact that an account now exists for a principal. Leaves through the host's outbox as
+ *          `loyalty_kit.account.enrolled.v1`.
+ * Boundary: an integration event: typed fields, built only with `AccountEnrolled.create`, recorded
+ *           once, by AccountService#enroll. Version 1 until a breaking change adds `version: 2` and
+ *           a change file beside this one.
  * Runtime: isomorphic
- * Governing contract: ADR 0141 (names and envelope), ADR 0078 (outbox)
+ * Governing contract: ADR 0294 (decisions 5, 16 and 20), ADR 0141 (names and envelope), ADR 0078
+ *                     (outbox)
  */
-import { Event, IntegrationEvent, z } from "@stackra/events";
-import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
+import type { PublicId } from "@stackra/contracts";
+import { IntegrationEvent } from "@stackra/events";
+import type { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 
 /**
  * The account exists now; consumers react to it without asking the kit.
  *
  * @example
- * ```ts
- * account.record(new AccountEnrolled({ accountId, memberId, tier }));
- * @OnEvent(AccountEnrolled) async handle(event: AccountEnrolled) { event.data.tier }
- * ```
+ * account.record(AccountEnrolled.create({ accountId, memberId, tier }));
+ * async handle(event: AccountEnrolled) { event.tier } // in a listener
  */
-@Event({ name: "account.enrolled", public: true })
-export class AccountEnrolled extends IntegrationEvent(
-  z.object({ accountId: z.string(), memberId: z.string(), tier: LoyaltyTier.schema }),
-) {}
+export class AccountEnrolled extends IntegrationEvent({ name: "account.enrolled" }) {
+  /** The new account. */
+  accountId!: PublicId<"lac">;
+
+  /** The principal it belongs to. */
+  memberId!: string;
+
+  /** The tier it starts at. */
+  tier!: LoyaltyTier;
+}

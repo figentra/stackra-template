@@ -1,18 +1,24 @@
 /**
  * Stackra file contract:
- * Purpose: the output of `loyalty_kit.points.redeem`: what was debited, what it is worth and the
- *          balance after.
- * Boundary: a schema class only.
+ * Purpose: `RedeemPointsOutput`: the output of `loyalty_kit.points.redeem@1`: what was debited,
+ *          what it is worth and the balance after.
+ * Boundary: a shape class shared by the action and the workflow's `output`, so it lives in schemas.
  * Runtime: isomorphic
- * Governing contract: ADR 0095, ADR 0128
+ * Governing contract: ADR 0294 (decisions 4, 15 and 26)
  */
-import { Schema, z } from "@stackra/schema";
+import { Int, Schema } from "@stackra/validation";
 
-/** What the caller gets back: what was debited, what it is worth, and the balance after. */
-export class RedeemPointsOutput extends Schema(
-  z.object({
-    points: z.number().int().nonnegative(),
-    amountMinor: z.number().int().nonnegative(),
-    balance: z.number().int().nonnegative(),
-  }),
-) {}
+/** What the caller gets back. */
+export class RedeemPointsOutput extends Schema {
+  /** Points debited. */
+  @Int({ min: 0 })
+  points!: number;
+
+  /** The discount those points bought, in minor units. */
+  @Int({ min: 0 })
+  amountMinor!: number;
+
+  /** The member's balance after the debit. */
+  @Int({ min: 0 })
+  balance!: number;
+}

@@ -28,11 +28,23 @@
       "./src/*.tsx",
       "./src/*/index.ts"
     ],
+    "#contracts/*": [
+      "./src/contracts/*",
+      "./src/contracts/*.ts",
+      "./src/contracts/*.tsx",
+      "./src/contracts/*/index.ts"
+    ],
     "#core/*": [
       "./src/core/*",
       "./src/core/*.ts",
       "./src/core/*.tsx",
       "./src/core/*/index.ts"
+    ],
+    "#node/*": [
+      "./src/node/*",
+      "./src/node/*.ts",
+      "./src/node/*.tsx",
+      "./src/node/*/index.ts"
     ],
     "#stackra/*": [
       "./.stackra/gen/*",
@@ -42,7 +54,9 @@
     ]
   },
   "exports": {
-    ".": "./src/index.ts",
+    ".": "./.stackra/entry/index.ts",
+    "./contracts": "./.stackra/entry/contracts.ts",
+    "./node": "./.stackra/entry/node.ts",
     "./css/tokens.css": "./css/tokens.css",
     "./css/native.css": "./css/native.css",
     "./assets/*": "./assets/*"
@@ -52,6 +66,14 @@
       ".": {
         "types": "./dist/index.d.mts",
         "import": "./dist/index.mjs"
+      },
+      "./contracts": {
+        "types": "./dist/contracts.d.mts",
+        "import": "./dist/contracts.mjs"
+      },
+      "./node": {
+        "types": "./dist/node.d.mts",
+        "import": "./dist/node.mjs"
       },
       "./css/tokens.css": "./css/tokens.css",
       "./css/native.css": "./css/native.css",
@@ -69,6 +91,9 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "build": "tsdown"
+  },
+  "dependencies": {
+    "@stackra/app": "catalog:stackra"
   },
   "devDependencies": {
     "@stackra/gen": "catalog:stackra",

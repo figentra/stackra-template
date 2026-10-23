@@ -7,24 +7,25 @@
  *           ids. One module for the file, seeded once; each case uses its own demo member, so the
  *           cases do not depend on each other's order.
  * Runtime: node
- * Governing contract: ADR 0151 (engine conformance), 0152 decision 1 (`waitFor`), 0182, ADR 0022
+ * Governing contract: ADR 0151 (engine conformance), ADR 0152 decision 1 (`waitFor`), ADR 0182,
+ *                     ADR 0294 (decision 18), ADR 0022
  */
-import { beforeAll, describe, expect, it, freezeClock, freezeIds } from "@stackra/testing";
-import { refusal } from "@stackra/errors/testing";
-import { Refusals } from "#stackra/manifest";
-import { createTestingModule, type TestingApp } from "@stackra/container/testing";
-import { run } from "@stackra/actions/testing";
-import { actors } from "@stackra/iam/testing";
-import { usePostgres } from "@stackra/database/testing";
-import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { memberId } from "@acme/loyalty-kit";
+import { LoyaltyLedger, LoyaltyMembers } from "@acme/loyalty-kit/contracts";
 import { LoyaltyKitModule } from "@acme/loyalty-kit/node";
-import { DemoSeeder, FakeLoyaltyMembers } from "@acme/loyalty-kit/testing";
+import { FakeLoyaltyMembers, LoyaltyKitDemoSeeder } from "@acme/loyalty-kit/testing";
+import { run } from "@stackra/actions/testing";
+import { createTestingModule, type TestingApp } from "@stackra/container/testing";
+import { usePostgres } from "@stackra/database/testing";
+import { refusal } from "@stackra/errors/testing";
+import { actors } from "@stackra/iam/testing";
+import { beforeAll, describe, expect, freezeClock, freezeIds, it } from "@stackra/testing";
+import { Refusals } from "#stackra/manifest";
 import { ConfirmRedemptionAction } from "#node/actions/confirm-redemption.action";
 import { RedeemPointsAction } from "#node/actions/redeem-points.action";
 import { RedeemPointsWorkflow } from "#node/workflows/redeem-points.workflow";
 
-usePostgres();
+usePostgres(); // one container for this file; the compiled migrations run once
 
 /** Guards the redemption saga, where a failed step must never leave points debited. */
 describe(RedeemPointsWorkflow, () => {
@@ -40,10 +41,10 @@ describe(RedeemPointsWorkflow, () => {
         queue: "memory",
         workflow: "native",
       })
-      .seed(DemoSeeder) // every demo member holds 1 000 points
+      .seed(LoyaltyKitDemoSeeder) // every demo member holds 1 000 points
       .override(
         LoyaltyMembers,
-        FakeLoyaltyMembers.with([DemoSeeder.ids.silver, DemoSeeder.ids.gold]),
+        FakeLoyaltyMembers.with([LoyaltyKitDemoSeeder.ids.silver, LoyaltyKitDemoSeeder.ids.gold]),
       )
       .compile();
   });
@@ -53,8 +54,8 @@ describe(RedeemPointsWorkflow, () => {
    * after the clock passes the wait.
    */
   it("keeps the debit when the host confirms within the wait", async () => {
-    const silver = memberId(DemoSeeder.ids.silver);
-    const as = actors.customer(DemoSeeder.ids.silver);
+    const silver = memberId(LoyaltyKitDemoSeeder.ids.silver);
+    const as = actors.customer(LoyaltyKitDemoSeeder.ids.silver);
 
     const result = await run(
       RedeemPointsAction,
@@ -64,7 +65,7 @@ describe(RedeemPointsWorkflow, () => {
     await run(ConfirmRedemptionAction, { reference: "ord_2" }, { as });
     await app.workflows.advanceClock("16m"); // past the wait: a confirmed run never compensates
 
-    const record = await app.workflows.last(RedeemPointsAction);
+    const record = await app.workflows.last(RedeemPointsWorkflow);
     expect(record.steps.map((s) => `${s.name}:${s.status}`)).toEqual([
       "quote:done",
       "debit:done",
@@ -79,17 +80,17 @@ describe(RedeemPointsWorkflow, () => {
    * it in reverse.
    */
   it("credits the points back when the host never confirms", async () => {
-    const gold = memberId(DemoSeeder.ids.gold);
+    const gold = memberId(LoyaltyKitDemoSeeder.ids.gold);
 
     const result = await run(
       RedeemPointsAction,
       { points: 300, reference: "ord_1", totalMinor: 10_000 },
-      { as: actors.customer(DemoSeeder.ids.gold), idempotencyKey: "k1" },
+      { as: actors.customer(LoyaltyKitDemoSeeder.ids.gold), idempotencyKey: "k1" },
     );
     await expect(app.get(LoyaltyLedger)).toHaveBalance(gold, 700);
 
     await app.workflows.advanceClock("16m"); // past the confirm step's 15 minute wait
-    const record = await app.workflows.last(RedeemPointsAction);
+    const record = await app.workflows.last(RedeemPointsWorkflow);
     expect(record.steps.map((s) => `${s.name}:${s.status}`)).toEqual([
       "quote:done",
       "debit:compensated",

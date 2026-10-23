@@ -1,40 +1,46 @@
 /**
  * Stackra file contract:
- * Purpose: the balance tile: tier, balance and the expiry warning, rendered by the overview
- *          document.
- * Boundary: presentation only on @stackra/ui; props are typed from the override point in core. No
- *           business logic: the redeem form is a separate block. A component is a folder (ADR 0128
- *           decision 2) and stays a function; it is registered for the point by the `@Override`
- *           class in react/overrides.
+ * Purpose: the renderer of PointsBalanceWidget: tier, balance and the expiry warning on the
+ *          customer's "My points" page.
+ * Boundary: presentation only on @stackra/ui, bound to the Custom widget by its name; an app may
+ *           override it in `src/overrides/loyalty_kit/points-balance.override.tsx`. The data is the
+ *           balance query's own output (`BalanceView`, from core, since ./react never imports
+ *           ./node). No business logic: the redeem form is a separate block. A function, never a
+ *           class.
  * Runtime: browser
- * Governing contract: ADR 0128 decision 2, ADR 0165 (HeroUI through @stackra/ui), ADR 0080 (typed
- *                     i18n keys)
+ * Governing contract: ADR 0294 (decisions 7 and 15), ADR 0165 (HeroUI through @stackra/ui),
+ *                     ADR 0080 (typed i18n keys)
  */
-import { Card, Stat, Text } from "@stackra/ui";
 import { useTranslation } from "@stackra/i18n/react";
-import type { OverrideComponent } from "@stackra/panel";
+import { Card, Stat, Text } from "@stackra/ui";
 import { I18n } from "#stackra/i18n";
-import type { PointsBalanceTile } from "#core/override-points/points-balance.point";
+import type { BalanceView } from "#core/schemas/balance-view.schema";
 import { usePointsBalance } from "#react/points-balance/use-points-balance";
+
+/** What the panel hands the renderer. */
+export interface PointsBalanceProps {
+  /** The bound query's output; undefined while loading. */
+  readonly data?: BalanceView;
+
+  /** True while the panel refreshes the widget. */
+  readonly isRefreshing: boolean;
+}
 
 /**
  * Shows the balance with a warning when points expire within thirty days; the tier badge takes its
- * label from the enum.
+ * label from the enum's i18n keys.
  */
-export const PointsBalance: OverrideComponent<typeof PointsBalanceTile> = ({
-  data,
-  isRefreshing,
-}) => {
+export function PointsBalance({ data, isRefreshing }: PointsBalanceProps) {
   const { t } = useTranslation();
   const { expiresSoon } = usePointsBalance(data);
   return (
     <Card aria-busy={isRefreshing}>
       <Stat
-        label={t(I18n.loyalty_kit.widgets.points_balance)}
+        label={t(I18n.loyalty_kit.widgets.points_balance.title)}
         value={data?.balance ?? 0}
-        badge={data && t(data.tier.label)}
+        badge={data && t(I18n.loyalty_kit.enums.loyalty_tier[data.tier])}
       />
-      {expiresSoon && <Text tone="warning">{t(I18n.loyalty_kit.documents.expiry_note)}</Text>}
+      {expiresSoon && <Text tone="warning">{t(I18n.loyalty_kit.overview.expiry_note)}</Text>}
     </Card>
   );
-};
+}

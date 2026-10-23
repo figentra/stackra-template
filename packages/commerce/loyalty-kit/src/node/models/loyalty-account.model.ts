@@ -1,26 +1,17 @@
 /**
  * Stackra file contract:
  * Purpose: a member's loyalty account: tier, status and the entries that make up the balance.
- * Boundary: data, invariants and recorded events; status moves only through AccountService. Shows
- *           every field shape a model carries: scalar fields, an enum column, a JSON cast, traits
- *           by mixin, a has-many relation, a getter. Key `loyalty_kit.loyalty_account` and table
- *           `loyalty_accounts` are derived from the class name. Every index is declared here, so
- *           `stackra db diff` never proposes dropping one.
+ * Boundary: data, relations and indexes. Key `loyalty_kit.loyalty_account`, table
+ *           `loyalty_kit.loyalty_accounts` (the kit's Postgres schema), public ids `lac_…`. Tier
+ *           and status move only through AccountService; recorded events reach the outbox when the
+ *           unit of work flushes. The member id is the host principal's public id, whatever its
+ *           prefix, so it stays a bounded string. Every index is an `@Index` here, so `stackra db
+ *           diff` never proposes dropping one. No constructor-made state.
  * Runtime: node
- * Governing contract: ADR 0095 (fields), 0133 (traits), 0134 (classification), 0239 (tenancy)
+ * Governing contract: ADR 0294 (decisions 4, 11, 20 and 27), ADR 0133 (traits), ADR 0239
+ *                     (BelongsToTenant)
  */
-import {
-  Bool,
-  Classified,
-  DateTime,
-  Enumerated,
-  HasMany,
-  Index,
-  Json,
-  Model,
-  Nullable,
-  Str,
-} from "@stackra/model";
+import { Collection, Index, Model, OneToMany } from "@stackra/model";
 import {
   BelongsToTenant,
   HasPublicId,
@@ -28,18 +19,20 @@ import {
   Timestamps,
   Versioned,
 } from "@stackra/model/traits";
-import { LoyaltyTier } from "#core/enums/loyalty-tier.enum";
-import { AccountNotes } from "#node/schemas/account-notes.schema";
+import { Str } from "@stackra/validation";
+import { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 import { LedgerEntry } from "#node/models/ledger-entry.model";
+import type { AccountNotes } from "#node/schemas/account-notes.schema";
 
 /**
- * One account per (tenant, principal). The traits give the row its public id (`lac_…`), tenant
- * column with row-level security, timestamps, an optimistic version and a soft delete; the kit
- * never hard-deletes an account because its entries are an audit record. Recorded events
- * (`account.record(...)`) reach the outbox when the unit of work flushes.
+ * One account per (tenant, principal). The traits give the row its public id, the tenant column
+ * with row-level security, timestamps, an optimistic version and a soft delete; the kit never
+ * hard-deletes an account because its entries are an audit record.
  */
-@Model()
-@Index<LoyaltyAccount>(["tenantId", "memberId"], { unique: true, where: "deleted_at is null" })
+@Index(["tenantId", "memberId"], {
+  unique: true,
+  where: "deleted_at is null",
+})
 export class LoyaltyAccount extends Model.with(
   HasPublicId("lac"),
   BelongsToTenant,
@@ -47,24 +40,25 @@ export class LoyaltyAccount extends Model.with(
   Versioned,
   SoftDeletes,
 ) {
-  /**
-   * The host principal's public id; unique per tenant among live accounts (the `@Index` above).
-   * Personal only by linkage, so `pseudonymous`.
-   */
-  @Classified("pseudonymous") @Str({ max: 64 }) memberId!: string;
-  /**
-   * Current tier; raised by RecalculateTierListener after each earn, never set by hand except at
-   * enrolment.
-   */
-  @Enumerated(LoyaltyTier) tier!: LoyaltyTier;
+  /** The host principal's public id; unique per tenant among live accounts. */
+  @Str({ max: 64 })
+  memberId!: string;
+
+  /** Current tier; raised by RecalculateTierListener after an earn, chosen only at enrolment. */
+  tier: LoyaltyTier = LoyaltyTier.Bronze;
+
   /** Frozen accounts earn and redeem nothing until staff unfreeze them. */
-  @Bool() isFrozen!: boolean;
+  isFrozen = false;
+
   /** When the account was frozen; null while active. */
-  @Nullable() @DateTime() frozenAt!: Date | null;
-  /** Merchant notes; a JSON cast validated by {@link AccountNotes} on write and parsed on read. */
-  @Json(AccountNotes.schema) notes!: AccountNotes;
+  frozenAt: Date | null = null;
+
+  /** Merchant notes; jsonb. */
+  notes: AccountNotes = {};
+
   /** The ledger rows; loaded on demand with `populate: ["entries"]`. */
-  @HasMany(() => LedgerEntry, (entry) => entry.account) entries!: LedgerEntry[];
+  @OneToMany(() => LedgerEntry, (entry) => entry.account)
+  entries = new Collection<LedgerEntry>(this);
 
   /** Whether points may move; the single rule every action checks before touching the ledger. */
   get canTransact(): boolean {

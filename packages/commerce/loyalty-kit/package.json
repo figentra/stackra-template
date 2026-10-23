@@ -2,7 +2,7 @@
   "name": "@acme/loyalty-kit",
   "version": "0.1.0",
   "private": true,
-  "description": "Points, tiers and redemption as a module: a ledger port with self-registering postgres and memory drivers.",
+  "description": "Points, tiers and redemption as a module: a ledger port with postgres and memory drivers, extension points and a redemption workflow.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -69,11 +69,11 @@
     ]
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./contracts": "./src/contracts/index.ts",
-    "./node": "./src/node/index.ts",
-    "./react": "./src/react/index.ts",
-    "./testing": "./src/testing/index.ts",
+    ".": "./.stackra/entry/index.ts",
+    "./contracts": "./.stackra/entry/contracts.ts",
+    "./node": "./.stackra/entry/node.ts",
+    "./react": "./.stackra/entry/react.ts",
+    "./testing": "./.stackra/entry/testing.ts",
     "./assets/*": "./assets/*"
   },
   "publishConfig": {
@@ -115,6 +115,7 @@
   },
   "dependencies": {
     "@stackra/actions": "catalog:stackra",
+    "@stackra/app": "catalog:stackra",
     "@stackra/config": "catalog:stackra",
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
@@ -127,11 +128,11 @@
     "@stackra/panel": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
     "@stackra/scheduler": "catalog:stackra",
-    "@stackra/schema": "catalog:stackra",
     "@stackra/settings": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "@stackra/versioning": "catalog:stackra",
-    "@stackra/workflow": "catalog:stackra"
+    "@stackra/workflow": "catalog:stackra",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@stackra/gen": "catalog:stackra",
@@ -156,8 +157,5 @@
     "@stackra/testing": {
       "optional": true
     }
-  },
-  "stackra": {
-    "module": "./src/node/loyalty-kit.module.ts"
   }
 }

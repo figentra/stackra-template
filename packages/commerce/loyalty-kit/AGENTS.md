@@ -10,7 +10,9 @@ Governing contract: root AGENTS.md
 
 - Owner: `@acme/platform-team` (`.github/CODEOWNERS`). This member is points, tiers and redemption
   as a module.
-- The ledger is a port (`./contracts`); drivers self-register, consumers never import a driver.
+- The ledger is a port (`./contracts`); drivers are named by their file prefix and selected by
+  config, so consumers never import a driver. Never write an entry barrel or a tool config: gen
+  writes them into `.stackra/`.
 - Never import an app or a service; a package depends only on packages.
 - Secrets: forbidden; secret values come from the project's secret store at run time.
 

@@ -8,7 +8,7 @@
  * Governing contract: ADR 0231 (design tokens: dotted and custom-property forms); the `--brand-`
  *                     prefix is this package's own namespace, not an ADR rule
  */
-import type { BrandToken } from "#core/types/brand-tokens.type";
+import type { BrandToken } from "#contracts/types/brand-token.type";
 
 /**
  * Names the CSS custom property of a token.

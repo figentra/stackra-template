@@ -9,14 +9,15 @@
  *           element. Anything else throws, so a bad tenant value fails loudly instead of reaching a
  *           page. The rule applies in light and dark, because a tenant override has one value.
  * Runtime: isomorphic
- * Governing contract: ADR 0231 (design tokens: dotted and custom-property forms), ADR 0127
- *                     (categories)
+ * Governing contract: ADR 0294 (decisions 7 and 15), ADR 0231 (design tokens: dotted and
+ *                     custom-property forms), ADR 0127 (categories)
  */
-import { COLOR_TOKENS } from "#core/design-tokens/color.design-token";
-import { FONT_TOKENS } from "#core/design-tokens/font.design-token";
-import { RADIUS_TOKENS } from "#core/design-tokens/radius.design-token";
+import type { BrandToken } from "#contracts/types/brand-token.type";
+import type { BrandTokens } from "#contracts/types/brand-tokens.type";
+import { COLOR_TOKENS } from "#core/constants/color-tokens.constant";
+import { FONT_TOKENS } from "#core/constants/font-tokens.constant";
+import { RADIUS_TOKENS } from "#core/constants/radius-tokens.constant";
 import { brandVariableName } from "#core/functions/brand-variable-name.function";
-import type { BrandToken, BrandTokens } from "#core/types/brand-tokens.type";
 
 /** Every key a tenant may override. */
 const KNOWN_TOKENS: ReadonlySet<string> = new Set([
