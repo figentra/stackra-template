@@ -164,19 +164,25 @@
     "runway.yaml": "stackra.lock.yaml"
   },
 
-  // ── Search and watching: skip build output and caches ───────────────────────────────────────────
+  // ── Search and watching: skip generated output, build output and caches ─────────────────────────
+  // `.stackra/` is gen output: excluded from search and the file watcher, but no `files.exclude`
+  // entry, so it stays visible in the explorer for reading what gen wrote.
   "files.watcherExclude": {
+    "**/.stackra/**": true,
     "**/node_modules/**": true,
     "**/dist/**": true,
     "**/.turbo/**": true,
     "**/coverage/**": true,
+    "**/.cache/**": true,
     "**/.expo/**": true
   },
   "search.exclude": {
+    "**/.stackra": true,
     "**/node_modules": true,
     "**/dist": true,
     "**/.turbo": true,
     "**/coverage": true,
+    "**/.cache": true,
     "pnpm-lock.yaml": true
   },
 
