@@ -17,7 +17,9 @@ import type { OrderPlaced } from "#modules/orders/events/order-placed.event";
 
 /** The confirmation half of redemption: the hold becomes the order's redeemed points. */
 export class SettleOnOrderPlacedListener extends Listener {
-  /** @param loyalty - the kit's service; `settle` finds the hold by the order id. */
+  /**
+   * @param loyalty - the kit's service; `settle` finds the hold by the order id.
+   */
   constructor(private readonly loyalty: LoyaltyService) {
     super();
   }

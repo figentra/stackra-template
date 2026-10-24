@@ -18,7 +18,9 @@ import type { OrderService } from "#modules/orders/services/order.service";
 
 /** Injected into the kit wherever it asks for LoyaltyMembers, without the kit knowing commerce. */
 export class CommerceLoyaltyMembersDriver extends Driver(LoyaltyMembers) {
-  /** @param orders - counts the principal's paid orders. */
+  /**
+   * @param orders - counts the principal's paid orders.
+   */
   constructor(private readonly orders: OrderService) {
     super();
   }

@@ -16,7 +16,9 @@ export class CycleThemeShortcut extends Shortcut({
   keys: "mod+shift+l",
   group: I18n.console.palette.group_app,
 }) {
-  /** @param theming - the console's theming config; its `schemes` is the cycle order. */
+  /**
+   * @param theming - the console's theming config; its `schemes` is the cycle order.
+   */
   constructor(private readonly theming: ThemingConfig) {
     super();
   }

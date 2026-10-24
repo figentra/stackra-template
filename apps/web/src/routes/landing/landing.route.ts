@@ -32,7 +32,9 @@ export class LandingRoute extends Route({
   layout: SiteLayout,
   seo: { title: I18n.web.hero.title },
 }) {
-  /** @param site - the site config; its `product` names the plan ladder the page sells. */
+  /**
+   * @param site - the site config; its `product` names the plan ladder the page sells.
+   */
   constructor(private readonly site: SiteConfig) {
     super();
   }

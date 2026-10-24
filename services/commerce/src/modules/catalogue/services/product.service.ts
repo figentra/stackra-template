@@ -24,7 +24,9 @@ import { ProductView } from "#modules/catalogue/schemas/product-view.schema";
 
 /** The in-process surface orders uses: `assertSellable` before a price is quoted. */
 export class ProductService extends CrudService<Product> {
-  /** @param cache - holds each view for ten minutes; ArchiveProductAction forgets it. */
+  /**
+   * @param cache - holds each view for ten minutes; ArchiveProductAction forgets it.
+   */
   constructor(private readonly cache: Cache) {
     super();
   }

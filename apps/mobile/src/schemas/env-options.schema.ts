@@ -22,7 +22,9 @@ import { Schema, Str } from "@stackra/validation";
 
 /** The public values of the binary, one field per `EXPO_PUBLIC_*` variable. */
 export class EnvOptions extends Schema {
-  /** EAS project id; the generated Expo config builds the update URL from it. Empty in a clone. */
+  /**
+   * EAS project id; the generated Expo config builds the update URL from it. Empty in a clone.
+   */
   easProjectId = "";
 
   /** Origin of the generated gateway the clients call. */
@@ -44,13 +46,17 @@ export class EnvOptions extends Schema {
   @Str({ min: 1 })
   identityClientId!: string;
 
-  /** Sentry DSN; empty disables crash reporting. Public by design; feeds `logger.telemetry.dsn`. */
+  /**
+   * Sentry DSN; empty disables crash reporting. Public by design; feeds `logger.telemetry.dsn`.
+   */
   telemetryDsn = "";
 
   /** The registered push transport; feeds `platform.push.provider`. */
   pushProvider: DriverName<PushTransport> = "expo";
 
-  /** The public PostHog project key; empty disables sending. Feeds `analytics.posthogKey`. */
+  /**
+   * The public PostHog project key; empty disables sending. Feeds `analytics.posthogKey`.
+   */
   analyticsPosthogKey = "";
 
   /** The same public key for the `posthog` flag provider; feeds `feature_flags.posthogKey`. */

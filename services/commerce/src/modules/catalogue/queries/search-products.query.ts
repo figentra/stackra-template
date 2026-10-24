@@ -25,7 +25,9 @@ export class SearchProductsQuery extends Query({
   area: ApiArea.Public,
   actors: [ActorKind.Anonymous, ActorKind.User, ActorKind.Agent, ActorKind.Service],
 }) {
-  /** @param search - the @stackra/search reader; `in(Product)` queries the model's index. */
+  /**
+   * @param search - the @stackra/search reader; `in(Product)` queries the model's index.
+   */
   constructor(
     private readonly storefront: StorefrontService,
     private readonly search: Search,

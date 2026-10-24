@@ -37,7 +37,9 @@ export class StockLevel extends Model.with(
   @Int({ min: 0 })
   reserved = 0;
 
-  /** Units still sellable. Invariant: never negative while backorders are off. */
+  /**
+   * Units still sellable. Invariant: never negative while backorders are off.
+   */
   get available(): number {
     return this.onHand - this.reserved;
   }

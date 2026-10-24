@@ -15,9 +15,7 @@ import { Component } from "#stackra/ui";
 import { Icon } from "@stackra/ui/react";
 import type { EmptyViewProps } from "./empty-view.props";
 
-/**
- * Centred block; `role="status"` is not used because an empty list is not a change to announce.
- */
+/** Centred block; `role="status"` is not used because an empty list is not a change to announce. */
 export class EmptyView extends Component<EmptyViewProps> {
   /** The translator of the active locale. */
   i18n = useTranslation();

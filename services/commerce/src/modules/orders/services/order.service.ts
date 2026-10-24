@@ -40,7 +40,9 @@ import { OrderView } from "#modules/orders/schemas/order-view.schema";
   subjects: "customerId",
 })
 export class OrderService extends CrudService<Order> {
-  /** @param lifecycle - the only writer of `Order.status`. */
+  /**
+   * @param lifecycle - the only writer of `Order.status`.
+   */
   constructor(private readonly lifecycle: OrderStateMachine) {
     super();
   }

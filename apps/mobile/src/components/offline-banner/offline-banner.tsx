@@ -15,7 +15,9 @@ import { Component } from "#stackra/ui";
 import { useOfflineBanner } from "#src/components/offline-banner/use-offline-banner";
 import { I18n } from "#stackra/i18n";
 
-/** The banner. Renders `null` when there is nothing to say. */
+/**
+ * The banner. Renders `null` when there is nothing to say.
+ */
 export class OfflineBanner extends Component {
   /** The translator of the active locale. */
   i18n = useTranslation();

@@ -17,7 +17,11 @@ export type ScreenStateProps =
   | {
       /** Skeleton rows while the first page loads; never shown on a refetch (the data stays). */
       readonly kind: "loading";
-      /** How many rows to sketch. @defaultValue 3 */
+      /**
+       * How many rows to sketch.
+       *
+       * @defaultValue 3
+       */
       readonly rows?: number;
     }
   | {

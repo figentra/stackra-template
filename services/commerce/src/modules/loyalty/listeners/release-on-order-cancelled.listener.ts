@@ -17,7 +17,9 @@ import type { OrderCancelled } from "#modules/orders/events/order-cancelled.even
 
 /** The undo half of redemption: an order that never got paid spends no points. */
 export class ReleaseOnOrderCancelledListener extends Listener {
-  /** @param loyalty - the kit's service; `release` finds the hold by the order id. */
+  /**
+   * @param loyalty - the kit's service; `release` finds the hold by the order id.
+   */
   constructor(private readonly loyalty: LoyaltyService) {
     super();
   }

@@ -22,7 +22,9 @@ import type { SiteConfig } from "#src/config/site.config";
 
 /** Home, two groups with their sub-navigation, and contact. */
 export class SiteMenu extends Menu({ kind: MenuKind.Navigation }) {
-  /** @param site - the site config; its `docsUrl` is the external docs link. */
+  /**
+   * @param site - the site config; its `docsUrl` is the external docs link.
+   */
   constructor(private readonly site: SiteConfig) {
     super();
   }

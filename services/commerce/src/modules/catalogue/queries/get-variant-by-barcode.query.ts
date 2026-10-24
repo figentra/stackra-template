@@ -32,7 +32,9 @@ export class GetVariantByBarcodeQuery extends Query({
     path: "/variants/by-barcode/:barcode",
   },
 }) {
-  /** @param variants - the generic repository of Variant. */
+  /**
+   * @param variants - the generic repository of Variant.
+   */
   constructor(private readonly variants: Repository<Variant>) {
     super();
   }

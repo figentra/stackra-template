@@ -35,7 +35,9 @@ export class PointsIssuedQuery extends Query({
     invalidateOn: [PointsEarned, PointsRedeemed],
   },
 }) {
-  /** @param rows - the ledger entry repository; `sum` runs in SQL. */
+  /**
+   * @param rows - the ledger entry repository; `sum` runs in SQL.
+   */
   constructor(private readonly rows: Repository<LedgerEntry>) {
     super();
   }

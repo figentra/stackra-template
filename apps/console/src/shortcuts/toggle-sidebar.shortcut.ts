@@ -17,7 +17,9 @@ export class ToggleSidebarShortcut extends Shortcut({
   keys: "mod+b",
   group: I18n.console.palette.group_app,
 }) {
-  /** @param ui - the UI store; the layout re-renders from its flag. */
+  /**
+   * @param ui - the UI store; the layout re-renders from its flag.
+   */
   constructor(private readonly ui: UiStore) {
     super();
   }

@@ -16,6 +16,10 @@ export interface LoadingStateProps {
    * @defaultValue false
    */
   readonly fullScreen?: boolean;
-  /** Skeleton rows to draw in-place. @defaultValue 3 */
+  /**
+   * Skeleton rows to draw in-place.
+   *
+   * @defaultValue 3
+   */
   readonly rows?: number;
 }

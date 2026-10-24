@@ -22,7 +22,9 @@ import { OrderCardMenu } from "#src/menus/order-card.menu";
 import { OrderStatus } from "#stackra/clients/commerce";
 import { I18n } from "#stackra/i18n";
 
-/** The card. Accessible as a button whose label is the id and the status. */
+/**
+ * The card. Accessible as a button whose label is the id and the status.
+ */
 export class OrderCard extends Component<OrderCardProps> {
   /** The translator of the active locale. */
   i18n = useTranslation();

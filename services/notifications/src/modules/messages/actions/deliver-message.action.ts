@@ -35,7 +35,9 @@ export class DeliverMessageAction extends Action({
     onDeadLetter: "markFailed",
   },
 }) {
-  /** @param messages - delivers through the transport and marks failures. */
+  /**
+   * @param messages - delivers through the transport and marks failures.
+   */
   constructor(private readonly messages: MessageService) {
     super();
   }

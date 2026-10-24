@@ -28,7 +28,9 @@ import type { OrderService } from "#modules/orders/services/order.service";
 export class OrderPlacedNotification extends Notification({
   category: NotificationCategory.Transactional,
 }) {
-  /** @param config - the storefront base URL comes from the commerce config. */
+  /**
+   * @param config - the storefront base URL comes from the commerce config.
+   */
   constructor(
     private readonly orders: OrderService,
     private readonly config: CommerceConfig,

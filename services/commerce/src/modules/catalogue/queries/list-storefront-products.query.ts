@@ -32,7 +32,9 @@ export class ListStorefrontProductsQuery extends Query({
     path: "/public/products",
   },
 }) {
-  /** @param search - the @stackra/search reader; `in(Product)` queries the model's index. */
+  /**
+   * @param search - the @stackra/search reader; `in(Product)` queries the model's index.
+   */
   constructor(
     private readonly products: ProductService,
     private readonly storefront: StorefrontService,

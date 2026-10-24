@@ -34,7 +34,9 @@ import type { SettingsRoute } from "#src/routes/settings/settings.route";
 import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 
-/** The settings list. The update id shows which EAS Update is running, for support tickets. */
+/**
+ * The settings list. The update id shows which EAS Update is running, for support tickets.
+ */
 export class Settings extends Component<RouteProps<typeof SettingsRoute>> {
   /** The translator of the active locale. */
   i18n = useTranslation();

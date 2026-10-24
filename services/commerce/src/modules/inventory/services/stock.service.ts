@@ -73,7 +73,9 @@ export class StockService extends CrudService<StockLevel> {
     });
   }
 
-  /** Undo of `reserve`. Idempotent: releasing twice never makes reserved stock negative. */
+  /**
+   * Undo of `reserve`. Idempotent: releasing twice never makes reserved stock negative.
+   */
   async release(lines: readonly StockLine[]): Promise<void> {
     for (const line of lines) {
       const level = await this.findOneOrFail({ variantId: line.variantId });

@@ -11,7 +11,9 @@
  */
 import { Enum, Tone } from "@stackra/contracts";
 
-/** Only `active` sells; `archived` is terminal. Cases are plain codes, compared with `===`. */
+/**
+ * Only `active` sells; `archived` is terminal. Cases are plain codes, compared with `===`.
+ */
 export const ProductStatus = Enum.of({
   Draft: ["draft", { tone: Tone.Default }],
   Active: ["active", { tone: Tone.Success }],

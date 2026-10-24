@@ -16,12 +16,16 @@ import { OrdersSettings } from "#modules/orders/orders.settings";
 
 /** Listed in `preconditions` of `orders.order.create`. */
 export class AcceptingOrdersPrecondition extends Precondition {
-  /** @param settings - reads the tenant's resolved group, so a pause applies without a deploy. */
+  /**
+   * @param settings - reads the tenant's resolved group, so a pause applies without a deploy.
+   */
   constructor(private readonly settings: SettingsReader) {
     super();
   }
 
-  /** @throws OrdersPausedError when the tenant has switched `acceptingOrders` off. */
+  /**
+   * @throws OrdersPausedError when the tenant has switched `acceptingOrders` off.
+   */
   async check(_ctx: PreconditionContext): Promise<void> {
     const { acceptingOrders } = await this.settings.get(OrdersSettings);
     if (!acceptingOrders) throw OrdersPausedError.create();

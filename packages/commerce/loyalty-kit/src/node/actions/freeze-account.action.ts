@@ -29,7 +29,9 @@ export class FreezeAccountAction extends Action({
   },
   tool: true,
 }) {
-  /** @param accounts - loads the account and flips the flag. */
+  /**
+   * @param accounts - loads the account and flips the flag.
+   */
   constructor(private readonly accounts: AccountService) {
     super();
   }

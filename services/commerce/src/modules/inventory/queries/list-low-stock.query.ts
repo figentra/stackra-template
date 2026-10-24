@@ -26,7 +26,9 @@ export class ListLowStockQuery extends Query({
     path: "/stock/low",
   },
 }) {
-  /** @param settings - the tenant's threshold, resolved per call. */
+  /**
+   * @param settings - the tenant's threshold, resolved per call.
+   */
   constructor(
     private readonly stock: StockService,
     private readonly settings: SettingsReader,

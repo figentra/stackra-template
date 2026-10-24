@@ -36,7 +36,9 @@ export class SendMessageAction extends Action({
     path: "/messages",
   },
 }) {
-  /** @param messages - opens the dedup row. */
+  /**
+   * @param messages - opens the dedup row.
+   */
   constructor(private readonly messages: MessageService) {
     super();
   }

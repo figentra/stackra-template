@@ -17,10 +17,18 @@ export interface EmptyViewProps {
   readonly title: I18nKey;
   /** What the user can do about it. */
   readonly description?: I18nKey;
-  /** Decorative icon; hidden from assistive tech. @defaultValue "inbox" */
+  /**
+   * Decorative icon; hidden from assistive tech.
+   *
+   * @defaultValue "inbox"
+   */
   readonly icon?: IconName;
   /** A single primary action (a button or link), rendered under the text. */
   readonly action?: ReactNode;
-  /** Tighter spacing for use inside a sidebar header or a card. @defaultValue false */
+  /**
+   * Tighter spacing for use inside a sidebar header or a card.
+   *
+   * @defaultValue false
+   */
   readonly compact?: boolean;
 }

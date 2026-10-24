@@ -17,7 +17,9 @@ export class OpenPaletteShortcut extends Shortcut({
   keys: "mod+k",
   group: I18n.console.palette.group_app,
 }) {
-  /** @param palette - the palette's store; the shell's dialog follows it. */
+  /**
+   * @param palette - the palette's store; the shell's dialog follows it.
+   */
   constructor(private readonly palette: PaletteStore) {
     super();
   }
