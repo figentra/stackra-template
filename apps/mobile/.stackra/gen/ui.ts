@@ -4,7 +4,14 @@
  *          Code imports it only as `#stackra/ui` (Stackra ADR 0305 rule 37); the Metro transformer
  *          compiles each `extends Component` class to a function component. Every other component
  *          comes from `@stackra/ui/native` directly.
- * Boundary: re-exports the facade and declares nothing.
+ * Boundary: declares only the props typing on top of the facade (`this.props` is `Readonly<P>`
+ *           even before `@stackra/ui` is built) and adds no runtime member.
  * Runtime: react-native
  */
-export { Component } from "@stackra/ui/native";
+import { Component as UiComponent } from "@stackra/ui/native";
+
+/** The class-component base; `P` types `this.props`. */
+export abstract class Component<P extends object = object> extends UiComponent<P> {
+  /** The props the host passed; a component never writes them. */
+  declare readonly props: Readonly<P>;
+}

@@ -4,7 +4,14 @@
  *          rule 37). This is the file the `react` entry is built against (`@stackra/ui/react`); the
  *          `native` entry is built against the same module with `@stackra/ui/native` in its place, so
  *          `src/react/` and `src/native/` share one import.
- * Boundary: re-exports the facade and declares nothing.
+ * Boundary: declares only the props typing on top of the facade (`this.props` is `Readonly<P>`
+ *           even before `@stackra/ui` is built) and adds no runtime member.
  * Runtime: browser
  */
-export { Component } from "@stackra/ui/react";
+import { Component as UiComponent } from "@stackra/ui/react";
+
+/** The class-component base; `P` types `this.props`. */
+export abstract class Component<P extends object = object> extends UiComponent<P> {
+  /** The props the host passed; a component never writes them. */
+  declare readonly props: Readonly<P>;
+}
