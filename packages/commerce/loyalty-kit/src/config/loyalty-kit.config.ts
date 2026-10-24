@@ -33,4 +33,16 @@ import { LoyaltyKitOptions } from "#core/schemas/loyalty-kit-options.schema";
 export class LoyaltyKitConfig extends Config({
   schema: LoyaltyKitOptions,
   env: { ledger: "STACKRA_LOYALTY_KIT_LEDGER" },
-}) {}
+}) {
+  // `declare`: types only; the value and its default stay in LoyaltyKitOptions, so the layers
+  // (package → host → environment → runway) keep one source.
+
+  /** Minor units one point is worth at redemption; default 1 (one cent). */
+  declare readonly pointValueMinor: LoyaltyKitOptions["pointValueMinor"];
+
+  /** Points earned per minor unit spent, floored; default 0.01 (one point per 100 cents). */
+  declare readonly earnPerMinor: LoyaltyKitOptions["earnPerMinor"];
+
+  /** Largest share of an order total points may cover, as a whole percentage; default 50. */
+  declare readonly maxRedeemPercent: LoyaltyKitOptions["maxRedeemPercent"];
+}
