@@ -18,7 +18,9 @@ import type { MemberId } from "#contracts/types/member-id.type";
  * per fake file: the shorthand is the static `with`.
  */
 export class LoyaltyMembersFake extends Fake.of(LoyaltyMembers) {
-  /** @param ids - principal public ids treated as enrolled. */
+  /**
+   * @param ids - principal public ids treated as enrolled.
+   */
   constructor(private readonly ids: ReadonlySet<string>) {
     super();
   }

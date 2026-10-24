@@ -30,7 +30,9 @@ export class MarkInboxMessageReadAction extends Action({
     path: "/inbox-messages/:inboxMessageId/read",
   },
 }) {
-  /** @param inboxMessages - the generic repository of InboxMessage. */
+  /**
+   * @param inboxMessages - the generic repository of InboxMessage.
+   */
   constructor(private readonly inboxMessages: Repository<InboxMessage>) {
     super();
   }

@@ -16,7 +16,11 @@ export class AddVariantBarcodeMigration extends Migration {
   /** Adds the nullable column. */
   up(schema: SchemaBuilder): void {
     schema.table("variants", (t: Blueprint) => {
-      t.string("barcode", 14).nullable();
+      t.string("barcode", 14)
+        .nullable()
+        .comment(
+          "GTIN or EAN as printed on the pack, scanned by the mobile POS; null without one.",
+        );
     });
   }
 }

@@ -16,7 +16,9 @@ import type { OrderService } from "#modules/orders/services/order.service";
 
 /** One sentence and the order view, read as the agent's principal. */
 export class OrderFacts extends Facts<Order> {
-  /** @param lifecycle - tells the agent whether a cancel would be allowed now. */
+  /**
+   * @param lifecycle - tells the agent whether a cancel would be allowed now.
+   */
   constructor(
     private readonly orders: OrderService,
     private readonly lifecycle: OrderStateMachine,

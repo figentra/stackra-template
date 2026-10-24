@@ -11,5 +11,7 @@
  */
 import type { Branded } from "@stackra/contracts";
 
-/** The host principal's public id, branded as a member. The kit never resolves it to a person. */
+/**
+ * The host principal's public id, branded as a member. The kit never resolves it to a person.
+ */
 export type MemberId = Branded<string, "loyalty_kit.MemberId">;

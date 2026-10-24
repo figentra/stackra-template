@@ -27,7 +27,9 @@ export class AdjustStockAction extends Action({
     path: "/stock/:variantId/locations/:locationId",
   },
 }) {
-  /** @param stock - the level reads and writes. */
+  /**
+   * @param stock - the level reads and writes.
+   */
   constructor(private readonly stock: StockService) {
     super();
   }

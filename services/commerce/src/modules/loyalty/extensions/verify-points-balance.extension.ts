@@ -26,7 +26,9 @@ import type { OrderDraft } from "#modules/orders/schemas/order-draft.schema";
 export class VerifyPointsBalanceExtension extends Extension<
   OrderExtensionPoint["verifyPlacement"]
 > {
-  /** @param loyalty - the kit's service; `assertCanRedeem` reads the ledger. */
+  /**
+   * @param loyalty - the kit's service; `assertCanRedeem` reads the ledger.
+   */
   constructor(private readonly loyalty: LoyaltyService) {
     super();
   }

@@ -34,7 +34,9 @@ export class PricingRoute extends Route({
   layout: SiteLayout,
   seo: { title: I18n.web.pricing.title },
 }) {
-  /** @param site - the site config; its `product` names the plan ladder the page sells. */
+  /**
+   * @param site - the site config; its `product` names the plan ladder the page sells.
+   */
   constructor(private readonly site: SiteConfig) {
     super();
   }

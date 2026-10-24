@@ -21,7 +21,9 @@ import type { AccessLogEntry } from "#node/models/access-log-entry.model";
  * access record.
  */
 export class PostgresAccessLogSinkDriver extends Driver(AccessLogSink) {
-  /** @param rows - the record repository, tenant-scoped by the model's trait. */
+  /**
+   * @param rows - the record repository, tenant-scoped by the model's trait.
+   */
   constructor(private readonly rows: Repository<AccessLogEntry>) {
     super();
   }

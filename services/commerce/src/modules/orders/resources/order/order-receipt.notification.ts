@@ -26,7 +26,9 @@ import type { OrderService } from "#modules/orders/services/order.service";
 export class OrderReceiptNotification extends Notification({
   category: NotificationCategory.Transactional,
 }) {
-  /** @param orders - reads the paid order and maps it to OrderView. */
+  /**
+   * @param orders - reads the paid order and maps it to OrderView.
+   */
   constructor(private readonly orders: OrderService) {
     super();
   }

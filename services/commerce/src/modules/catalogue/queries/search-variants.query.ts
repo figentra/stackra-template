@@ -30,7 +30,9 @@ export class SearchVariantsQuery extends Query({
     path: "/variants",
   },
 }) {
-  /** @param search - the @stackra/search reader over the product's index. */
+  /**
+   * @param search - the @stackra/search reader over the product's index.
+   */
   constructor(private readonly search: Search) {
     super();
   }

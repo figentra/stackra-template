@@ -15,7 +15,9 @@ import { AccessLogWriteFailedError } from "#core/errors/access-log-write-failed.
 
 /** `AccessLogSinkFake.with({ failing: true })` throws on every write; the service swallows it. */
 export class AccessLogSinkFake extends Fake.of(AccessLogSink) {
-  /** @param failing - when true, every write throws after it is recorded. */
+  /**
+   * @param failing - when true, every write throws after it is recorded.
+   */
   constructor(private readonly failing = false) {
     super();
   }

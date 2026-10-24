@@ -32,7 +32,9 @@ export class AttachProductImageAction extends Action({
     path: "/products/:productId/images",
   },
 }) {
-  /** @param media - the @stackra/media library; it owns storage, variants and upload tokens. */
+  /**
+   * @param media - the @stackra/media library; it owns storage, variants and upload tokens.
+   */
   constructor(
     private readonly products: ProductService,
     private readonly media: MediaLibrary,

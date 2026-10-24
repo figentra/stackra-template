@@ -20,7 +20,9 @@ export class GetOrderQuery extends Query({
   key: "order.get",
   actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],
 }) {
-  /** @param orders - loads the record for the policy and maps it to OrderView. */
+  /**
+   * @param orders - loads the record for the policy and maps it to OrderView.
+   */
   constructor(private readonly orders: OrderService) {
     super();
   }

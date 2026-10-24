@@ -19,7 +19,9 @@ export class GetProductQuery extends Query({
   key: "product.get",
   actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],
 }) {
-  /** @param products - serves the cached view in the request locale. */
+  /**
+   * @param products - serves the cached view in the request locale.
+   */
   constructor(private readonly products: ProductService) {
     super();
   }

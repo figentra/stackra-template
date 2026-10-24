@@ -62,7 +62,9 @@ export class Product extends Model.with(
   @Str({ max: 200 })
   slug!: string;
 
-  /** Sale state; written only by ProductStateMachine. The initializer is the initial state. */
+  /**
+   * Sale state; written only by ProductStateMachine. The initializer is the initial state.
+   */
   status: ProductStatus = ProductStatus.Draft;
 
   /** Rich-text document (L2) per locale for the storefront page; null until one is written. */

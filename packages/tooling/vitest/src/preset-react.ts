@@ -9,7 +9,9 @@
 import { defineConfig, mergeConfig } from "vitest/config";
 import { stackraVitest } from "./preset.ts";
 
-/** Base preset + jsdom. The consumer adds `@testing-library/jest-dom/vitest` in its own setupFiles. */
+/**
+ * Base preset + jsdom. The consumer adds `@testing-library/jest-dom/vitest` in its own setupFiles.
+ */
 export const stackraVitestReact = mergeConfig(
   stackraVitest,
   defineConfig({ test: { environment: "jsdom", css: false } }),

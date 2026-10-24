@@ -16,7 +16,9 @@ import type { DebitOutcome } from "#contracts/enums/debit-outcome.enum";
 import type { MemberId } from "#contracts/types/member-id.type";
 import type { PointsEntry } from "#contracts/types/points-entry.type";
 
-/** Where points live. The kit never knows which driver it got. */
+/**
+ * Where points live. The kit never knows which driver it got.
+ */
 export abstract class LoyaltyLedger extends Port {
   /** Sum of every live entry for the member; zero for an unknown member. */
   abstract balance(memberId: MemberId): Promise<number>;

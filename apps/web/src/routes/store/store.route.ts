@@ -32,7 +32,9 @@ export class StoreRoute extends Route({
   search: StoreSearch,
   seo: { title: I18n.web.store.title },
 }) {
-  /** @param seo - the site's SEO config; its `noindexParams` mark a search page `noindex`. */
+  /**
+   * @param seo - the site's SEO config; its `noindexParams` mark a search page `noindex`.
+   */
   constructor(private readonly seo: SeoConfig) {
     super();
   }

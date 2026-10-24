@@ -21,7 +21,9 @@
 import { Config } from "@stackra/config";
 import { EnvOptions } from "#src/schemas/env-options.schema";
 
-/** The public env. Components read it with `useConfig(EnvConfig)`, never `process.env`. */
+/**
+ * The public env. Components read it with `useConfig(EnvConfig)`, never `process.env`.
+ */
 export class EnvConfig extends Config({
   schema: EnvOptions,
   env: {

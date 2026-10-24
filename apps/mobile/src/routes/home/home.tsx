@@ -26,7 +26,9 @@ import { I18n } from "#stackra/i18n";
 import { Routes } from "#stackra/routes";
 import { Slots } from "#stackra/slots";
 
-/** The dashboard. Each quick action is a typed navigation to a route key. */
+/**
+ * The dashboard. Each quick action is a typed navigation to a route key.
+ */
 export class Home extends Component<RouteProps<typeof HomeRoute>> {
   /** The translator of the active locale. */
   i18n = useTranslation();

@@ -30,7 +30,9 @@ export class GetProductBySlugQuery extends Query({
     path: "/public/products/by-slug/:slug",
   },
 }) {
-  /** @param storefront - prices and stocks the product for the request's market. */
+  /**
+   * @param storefront - prices and stocks the product for the request's market.
+   */
   constructor(
     private readonly products: ProductService,
     private readonly storefront: StorefrontService,

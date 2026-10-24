@@ -16,7 +16,9 @@ import type { OrderService } from "#modules/orders/services/order.service";
 
 /** Bridges the payments capture fact into the order lifecycle; the only consumer of the capture. */
 export class MarkOrderPaidListener extends Listener {
-  /** @param orders - its `markPaid` is idempotent on the payment id. */
+  /**
+   * @param orders - its `markPaid` is idempotent on the payment id.
+   */
   constructor(private readonly orders: OrderService) {
     super();
   }

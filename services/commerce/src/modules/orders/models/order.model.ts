@@ -54,7 +54,9 @@ export class Order extends Model.with(
   /** The customer principal who placed it; set from the actor, never from input. */
   customerId!: PublicId<"usr">;
 
-  /** Lifecycle; written only by OrderStateMachine. The initializer is the initial state. */
+  /**
+   * Lifecycle; written only by OrderStateMachine. The initializer is the initial state.
+   */
   status: OrderStatus = OrderStatus.PendingPayment;
 
   /** Sum of line prices before adjustments; columns `subtotal_minor` and `subtotal_currency`. */

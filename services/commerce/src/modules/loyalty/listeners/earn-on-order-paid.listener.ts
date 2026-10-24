@@ -18,7 +18,9 @@ import type { OrderPaid } from "#modules/orders/events/order-paid.event";
 
 /** Credits points for the paid total; the event carries the total, so no second read is needed. */
 export class EarnOnOrderPaidListener extends Listener({ queue: Queues.Default }) {
-  /** @param accounts - the kit's account service; `earn` enrols the customer on the first one. */
+  /**
+   * @param accounts - the kit's account service; `earn` enrols the customer on the first one.
+   */
   constructor(private readonly accounts: AccountService) {
     super();
   }

@@ -21,14 +21,24 @@ export class CreateProductCollectionsMigration extends Migration {
       t.hasPublicId("pcl");
       t.belongsToTenant();
       t.timestamps();
-      t.translatable(["title"]);
-      t.string("slug", 64);
+      t.translatable(["title"])
+        .notNull()
+        .comment("Display name, one value per locale; the storefront shows the visitor's.");
+      t.string("slug", 64)
+        .notNull()
+        .comment("URL segment the store filters on (`?collection=summer`); not translated.");
       t.unique(["tenant_id", "slug"]);
     });
     schema.create("product_collection_items", (t: Blueprint) => {
       t.belongsToTenant();
-      t.belongsTo("products", { column: "product_id" }).cascadeOnDelete();
-      t.belongsTo("product_collections", { column: "product_collection_id" }).cascadeOnDelete();
+      t.belongsTo("products", { column: "product_id" })
+        .notNull()
+        .cascadeOnDelete()
+        .comment("The product listed in the collection; deleted with the product.");
+      t.belongsTo("product_collections", { column: "product_collection_id" })
+        .notNull()
+        .cascadeOnDelete()
+        .comment("The collection the product is listed in; deleted with the collection.");
       t.primary(["product_id", "product_collection_id"]);
     });
   }

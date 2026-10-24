@@ -24,10 +24,18 @@ export class CreateInventoryMigration extends Migration {
       t.belongsToTenant();
       t.timestamps();
       t.versioned();
-      t.string("variant_id", 30);
-      t.string("location_id", 64);
-      t.integer("on_hand").default(0);
-      t.integer("reserved").default(0);
+      t.string("variant_id", 30)
+        .notNull()
+        .comment("Public id of the catalogue variant; catalogue owns the variant row.");
+      t.string("location_id", 64).notNull().comment("Public id of the warehouse or shop.");
+      t.integer("on_hand")
+        .notNull()
+        .default(0)
+        .comment("Physical units counted at the location, set by `inventory.stock.adjust`.");
+      t.integer("reserved")
+        .notNull()
+        .default(0)
+        .comment("Units held for pending orders; raised by reserve, lowered by release.");
       t.unique(["tenant_id", "variant_id", "location_id"]);
     });
   }

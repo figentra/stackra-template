@@ -48,7 +48,9 @@ export const coverage = Object.freeze({
   thresholds: { ...COVERAGE_THRESHOLDS },
 } satisfies CoverageOptions);
 
-/** The per-package changes `withCoverage` applies on top of the shared block. Each one needs a reason in the package. */
+/**
+ * The per-package changes `withCoverage` applies on top of the shared block. Each one needs a reason in the package.
+ */
 export interface CoverageOverrides {
   /** Additional exclude globs appended to the shared list. */
   exclude?: string[];

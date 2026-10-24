@@ -32,7 +32,9 @@ export class RedeemPointsExtension extends Extension<OrderExtensionPoint["adjust
   order: 200,
   input: RedeemPointsRequest,
 }) {
-  /** @param loyalty - the kit's service; `quote` reads the ledger and never writes in pricing. */
+  /**
+   * @param loyalty - the kit's service; `quote` reads the ledger and never writes in pricing.
+   */
   constructor(private readonly loyalty: LoyaltyService) {
     super();
   }

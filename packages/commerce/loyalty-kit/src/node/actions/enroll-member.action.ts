@@ -40,7 +40,9 @@ export class EnrollMemberAction extends Action({
   tool: true,
   intent: true,
 }) {
-  /** @param accounts - creates the account and records `account.enrolled`. */
+  /**
+   * @param accounts - creates the account and records `account.enrolled`.
+   */
   constructor(private readonly accounts: AccountService) {
     super();
   }

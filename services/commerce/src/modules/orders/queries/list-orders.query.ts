@@ -27,7 +27,9 @@ export class ListOrdersQuery extends Query({
   actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],
   intent: true,
 }) {
-  /** @param orders - the table read (sort, filter, keyset cursor) and the row-to-view mapping. */
+  /**
+   * @param orders - the table read (sort, filter, keyset cursor) and the row-to-view mapping.
+   */
   constructor(private readonly orders: OrderService) {
     super();
   }

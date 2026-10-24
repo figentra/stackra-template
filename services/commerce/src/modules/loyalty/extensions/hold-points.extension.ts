@@ -26,7 +26,9 @@ import type { PricedOrder } from "#modules/orders/schemas/priced-order.schema";
 
 /** The write half of redemption: RedeemPointsExtension priced the discount, this reserves it. */
 export class HoldPointsExtension extends Extension<OrderExtensionPoint["reservePlacement"]> {
-  /** @param loyalty - the kit's service; `hold` is the atomic covered debit. */
+  /**
+   * @param loyalty - the kit's service; `hold` is the atomic covered debit.
+   */
   constructor(private readonly loyalty: LoyaltyService) {
     super();
   }

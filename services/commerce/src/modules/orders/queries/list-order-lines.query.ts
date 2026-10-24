@@ -30,7 +30,9 @@ export class ListOrderLinesQuery extends Query({
     path: "/orders/:orderId/lines",
   },
 }) {
-  /** @param graph - the graph reader; field names are checked against both models. */
+  /**
+   * @param graph - the graph reader; field names are checked against both models.
+   */
   constructor(
     private readonly orders: OrderService,
     private readonly graph: GraphQuery,

@@ -19,21 +19,31 @@ export class EnvOptions extends Schema {
   /** Which target is being built; set by `stackra build --target`, never by hand. */
   target: Target = Target.Web;
 
-  /** Origin of the gateway and the BFF; empty means same origin. On-prem changes this one value. */
+  /**
+   * Origin of the gateway and the BFF; empty means same origin. On-prem changes this one value.
+   */
   @Str({ pattern: /^(https?:\/\/[^/\s]+)?$/ })
   apiOrigin = "";
 
-  /** Realtime origin; empty means the API origin. Feeds `realtime.origin`. */
+  /**
+   * Realtime origin; empty means the API origin. Feeds `realtime.origin`.
+   */
   @Str({ pattern: /^(https?:\/\/[^/\s]+)?$/ })
   realtimeOrigin = "";
 
-  /** Sentry DSN; empty disables browser error reporting. Public by design; feeds `telemetry.dsn`. */
+  /**
+   * Sentry DSN; empty disables browser error reporting. Public by design; feeds `telemetry.dsn`.
+   */
   telemetryDsn = "";
 
-  /** VAPID public key; empty disables Web Push. Feeds `platform.push.vapidPublicKey`. */
+  /**
+   * VAPID public key; empty disables Web Push. Feeds `platform.push.vapidPublicKey`.
+   */
   pushVapidPublicKey = "";
 
-  /** The public PostHog project key; empty disables sending. Feeds `analytics.posthogKey`. */
+  /**
+   * The public PostHog project key; empty disables sending. Feeds `analytics.posthogKey`.
+   */
   analyticsPosthogKey = "";
 
   /** The same public key for the `posthog` flag provider; feeds `feature_flags.posthogKey`. */

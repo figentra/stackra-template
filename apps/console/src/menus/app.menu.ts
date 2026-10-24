@@ -29,7 +29,9 @@ import { ToggleSidebarShortcut } from "#src/shortcuts/toggle-sidebar.shortcut";
 
 /** The desktop menu bar: File, View, Go and Help; the Go navigation is generated. */
 export class AppMenu extends Menu({ kind: MenuKind.App }) {
-  /** @param desktop - the console's desktop config; its `menus.docsUrl` is the Help link. */
+  /**
+   * @param desktop - the console's desktop config; its `menus.docsUrl` is the Help link.
+   */
   constructor(private readonly desktop: DesktopConfig) {
     super();
   }
