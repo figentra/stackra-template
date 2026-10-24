@@ -27,18 +27,39 @@ export class CreateCatalogueMigration extends Migration {
       t.belongsToTenant();
       t.timestamps();
       t.versioned();
-      t.translatable(["title"]);
-      t.string("slug", 200);
-      t.enum("status", ["draft", "active", "archived"]).default("draft");
+      t.translatable(["title"])
+        .notNull()
+        .comment("Display name, one value per locale; the console edits each.");
+      t.string("slug", 200)
+        .notNull()
+        .comment("URL segment, unique per tenant (`idx_products_tenant_id_slug`); not translated.");
+      t.enum("status", ["draft", "active", "archived"])
+        .notNull()
+        .default("draft")
+        .comment(
+          "Sale state; written only by ProductStateMachine. The initializer is the initial state.",
+        );
       t.unique(["tenant_id", "slug"]);
     });
     schema.create("variants", (t: Blueprint) => {
       t.hasPublicId("var");
       t.belongsToTenant();
       t.timestamps();
-      t.belongsTo("products", { column: "product_id" }).cascadeOnDelete();
-      t.string("sku", 64);
-      t.boolean("track_inventory").default(true);
+      t.belongsTo("products", { column: "product_id" })
+        .notNull()
+        .cascadeOnDelete()
+        .comment(
+          "The owning product; foreign key `fk_variants_product_id`, deleted with the product.",
+        );
+      t.string("sku", 64)
+        .notNull()
+        .comment("Merchant's stock-keeping unit; shown in the console and on packing slips.");
+      t.boolean("track_inventory")
+        .notNull()
+        .default(true)
+        .comment(
+          "When false, inventory never reserves or refuses stock for it (services, digital goods).",
+        );
       t.unique(["tenant_id", "sku"]);
     });
   }

@@ -18,12 +18,28 @@ export class AddStorefrontFieldsMigration extends Migration {
   /** Adds the storefront columns, every one nullable or defaulted. */
   up(schema: SchemaBuilder): void {
     schema.table("products", (t: Blueprint) => {
-      t.translatable(["description"]).nullable();
-      t.jsonb("images").default([]);
-      t.jsonb("seo").nullable();
+      t.translatable(["description"])
+        .nullable()
+        .comment(
+          "Rich-text document (L2) per locale for the storefront page; null until one is written.",
+        );
+      t.jsonb("images")
+        .notNull()
+        .default([])
+        .comment("Storefront images in display order; the first is the card image.");
+      t.jsonb("seo")
+        .nullable()
+        .comment(
+          "Merchant overrides of the page title and meta description; null derives both from it.",
+        );
     });
     schema.table("variants", (t: Blueprint) => {
-      t.jsonb("options").default({});
+      t.jsonb("options")
+        .notNull()
+        .default({})
+        .comment(
+          'Option values that tell variants apart (`{ size: "M", colour: "navy" }`), for the picker.',
+        );
     });
   }
 }

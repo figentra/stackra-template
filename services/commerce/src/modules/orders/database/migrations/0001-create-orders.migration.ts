@@ -30,24 +30,41 @@ export class CreateOrdersMigration extends Migration {
       t.timestamps();
       t.userStamps();
       t.versioned();
-      t.string("customer_id", 30);
-      t.enum("status", ["pending_payment", "paid", "cancelled", "expired"]).default(
-        "pending_payment",
-      );
-      t.money("subtotal");
-      t.jsonb("adjustments").default([]);
-      t.money("total");
-      t.string("payment_id", 64).nullable();
+      t.string("customer_id", 30)
+        .notNull()
+        .comment("The customer principal who placed it; set from the actor, never from input.");
+      t.enum("status", ["pending_payment", "paid", "cancelled", "expired"])
+        .notNull()
+        .default("pending_payment")
+        .comment(
+          "Lifecycle; written only by OrderStateMachine. The initializer is the initial state.",
+        );
+      t.money("subtotal").notNull().comment("Sum of line prices before adjustments.");
+      t.jsonb("adjustments")
+        .notNull()
+        .default([])
+        .comment(
+          "What the `adjustTotals` extensions applied at placement, in the order they ran; jsonb.",
+        );
+      t.money("total").notNull().comment("Amount charged, never below zero.");
+      t.string("payment_id", 64)
+        .nullable()
+        .comment("The payments service's id once a payment is authorized.");
       t.index(["customer_id"]);
       t.index(["tenant_id", "status", "created_at"]);
     });
     schema.create("order_lines", (t: Blueprint) => {
       t.hasPublicId("oln");
       t.belongsToTenant();
-      t.belongsTo("orders", { column: "order_id" }).cascadeOnDelete();
-      t.link("variant_id");
-      t.integer("quantity");
-      t.money("unit_price");
+      t.belongsTo("orders", { column: "order_id" })
+        .notNull()
+        .cascadeOnDelete()
+        .comment(
+          "The owning order; foreign key `fk_order_lines_order_id`, deleted with the order.",
+        );
+      t.link("variant_id").notNull().comment("The catalogue variant sold.");
+      t.integer("quantity").notNull().comment("Units ordered; at least one.");
+      t.money("unit_price").notNull().comment("Price of one unit at placement.");
     });
   }
 }

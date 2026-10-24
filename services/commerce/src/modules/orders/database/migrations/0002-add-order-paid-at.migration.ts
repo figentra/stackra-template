@@ -17,7 +17,7 @@ export class AddOrderPaidAtMigration extends Migration {
   /** Adds the nullable column. */
   up(schema: SchemaBuilder): void {
     schema.table("orders", (t: Blueprint) => {
-      t.timestamp("paid_at").nullable();
+      t.timestamp("paid_at").nullable().comment("When the payment was captured.");
     });
   }
 }
