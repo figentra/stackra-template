@@ -2,21 +2,24 @@
   "name": "@acme/docs",
   "version": "0.1.0",
   "private": true,
-  "description": "The project's documentation site: Mintlify (docs.json + MDX), with the API reference generated from the consumed services' manifests.",
+  "description": "The project's documentation site: pages and a DocsConfig; stackra gen assembles the Mintlify site into .stackra/site, with the API reference from the consumed services' manifests.",
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "gen": "stackra gen",
     "dev": "stackra dev",
-    "build": "cd src && mint validate",
-    "lint": "cd src && mint broken-links && mint a11y",
+    "build": "stackra build",
+    "lint": "stackra lint",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "a11y": "cd src && mint a11y",
-    "clean": "rm -rf src/.mintlify .turbo"
+    "clean": "rm -rf .stackra/site .turbo"
   },
   "devDependencies": {
     "@stackra/cli": "catalog:stackra",
+    "@stackra/contracts": "catalog:stackra",
+    "@stackra/gen": "catalog:stackra",
+    "@stackra/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
     "mint": "catalog:docs",
     "oxfmt": "catalog:quality"
   }
