@@ -18,7 +18,6 @@
  */
 import type { PublicId } from "@stackra/contracts";
 import {
-  BelongsToTenant,
   Collection,
   HasPublicId,
   Index,
@@ -29,6 +28,7 @@ import {
   Versioned,
 } from "@stackra/model";
 import type { Money } from "@stackra/money";
+import { BelongsToTenant } from "@stackra/tenancy/node";
 import { Str } from "@stackra/validation";
 import { OrderStatus } from "#modules/orders/enums/order-status.enum";
 import { OrderLine } from "#modules/orders/models/order-line.model";

@@ -20,7 +20,6 @@
  */
 import { DataClassification } from "@stackra/contracts";
 import {
-  BelongsToTenant,
   Collection,
   HasPublicId,
   Index,
@@ -31,6 +30,7 @@ import {
   Timestamps,
   Versioned,
 } from "@stackra/model";
+import { BelongsToTenant } from "@stackra/tenancy/node";
 import { Classified, Str } from "@stackra/validation";
 import { LoyaltyTier } from "#contracts/enums/loyalty-tier.enum";
 import { LedgerEntry } from "#node/models/ledger-entry.model";

@@ -13,7 +13,6 @@
  *                     v3.1, AGENTS.md), ADR 0133 (traits)
  */
 import {
-  BelongsToTenant,
   HasPublicId,
   Index,
   Model,
@@ -21,6 +20,7 @@ import {
   Translatable,
   type Translated,
 } from "@stackra/model";
+import { BelongsToTenant } from "@stackra/tenancy/node";
 import { Str } from "@stackra/validation";
 
 /** The slug is unique per tenant (`idx_product_collections_tenant_id_slug`): the filter key. */

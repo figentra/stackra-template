@@ -11,7 +11,6 @@
  * Governing contract: ADR 0294 (decisions 4, 11, 20, 27 and 28), ADR 0104 (as amended)
  */
 import {
-  BelongsToTenant,
   HasPublicId,
   Index,
   ManyToOne,
@@ -20,6 +19,7 @@ import {
   type Ref,
   Timestamps,
 } from "@stackra/model";
+import { BelongsToTenant } from "@stackra/tenancy/node";
 import { Str } from "@stackra/validation";
 import { Product } from "#modules/catalogue/models/product.model";
 

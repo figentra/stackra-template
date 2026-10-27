@@ -112,6 +112,8 @@ stamps and optimistic locking:
 
 ```ts
 // services/commerce/src/modules/orders/models/order.model.ts (abridged)
+import { BelongsToTenant } from "@stackra/tenancy/node"; // tenancy owns the trait, not @stackra/model
+
 @Index(["tenantId", "status", "createdAt"])
 export class Order extends Model.with(
   HasPublicId("ord"),
@@ -277,6 +279,7 @@ renders in an overlay as well as in the main window.
 │                                 tool servers); rendered to .mcp.json
 ├── .claude/launch.json           dev-server launch configuration for the assistant's preview
 ├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE
+├── assets/                       brand, mobile, store, landing and lang sources (ADR 0441)
 ├── apps/                         tier:app (apps/README.md)
 │   ├── console/                  @acme/console: tenant console, targets web + pwa + desktop
 │   │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json

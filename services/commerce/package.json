@@ -79,6 +79,7 @@
     "@stackra/settings": "catalog:stackra",
     "@stackra/state-machine": "catalog:stackra",
     "@stackra/support": "catalog:stackra",
+    "@stackra/tenancy": "catalog:stackra",
     "@stackra/transport": "catalog:stackra",
     "@stackra/ui": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",

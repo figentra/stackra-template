@@ -9,16 +9,9 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 11, 20, 27 and 28), ADR 0104 (as amended), ADR 0220
  */
-import {
-  BelongsToTenant,
-  HasPublicId,
-  type Link,
-  ManyToOne,
-  Model,
-  OnDelete,
-  type Ref,
-} from "@stackra/model";
+import { HasPublicId, type Link, ManyToOne, Model, OnDelete, type Ref } from "@stackra/model";
 import type { Money } from "@stackra/money";
+import { BelongsToTenant } from "@stackra/tenancy/node";
 import { Int } from "@stackra/validation";
 import { Variant } from "#modules/catalogue/models/variant.model";
 import { Order } from "#modules/orders/models/order.model";

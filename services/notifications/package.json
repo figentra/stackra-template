@@ -64,6 +64,7 @@
     "@stackra/outbox": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
     "@stackra/settings": "catalog:stackra",
+    "@stackra/tenancy": "catalog:stackra",
     "@stackra/transport": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "@stackra/webhooks": "catalog:stackra",

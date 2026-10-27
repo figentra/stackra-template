@@ -16,7 +16,6 @@
  *                     (Postgres hybrid search)
  */
 import {
-  BelongsToTenant,
   Collection,
   HasPublicId,
   Index,
@@ -29,6 +28,7 @@ import {
   type Translated,
   Versioned,
 } from "@stackra/model";
+import { BelongsToTenant } from "@stackra/tenancy/node";
 import { Str } from "@stackra/validation";
 import { ProductStatus } from "#modules/catalogue/enums/product-status.enum";
 import { ProductCollection } from "#modules/catalogue/models/product-collection.model";

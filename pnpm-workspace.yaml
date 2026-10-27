@@ -29,16 +29,23 @@ minimumReleaseAge: 1440
 trustPolicy: no-downgrade
 
 catalogs:
-  # Stackra framework packages, one version line for the whole framework. Bumped together.
+  # Stackra framework packages, one version line for the whole framework. Bumped together. Lists
+  # every framework package a product uses (the union of the products' members), so
+  # `catalogMode: strict` never blocks a product from adding one.
   stackra:
+    "@stackra/access-log": 1.0.0
+    "@stackra/achievements": 1.0.0
     "@stackra/actions": 1.0.0
     "@stackra/ai": 1.0.0
     "@stackra/analytics": 1.0.0
     "@stackra/app": 1.0.0
     "@stackra/assets": 1.0.0
+    "@stackra/builder": 1.0.0
     "@stackra/cache": 1.0.0
+    "@stackra/calendar": 1.0.0
     "@stackra/cli": 1.0.0
     "@stackra/clients": 1.0.0
+    "@stackra/collaboration": 1.0.0
     "@stackra/config": 1.0.0
     "@stackra/consent": 1.0.0
     "@stackra/container": 1.0.0
@@ -46,22 +53,29 @@ catalogs:
     "@stackra/contracts": 1.0.0
     "@stackra/coordinator": 1.0.0
     "@stackra/csp": 1.0.0
+    "@stackra/data-transfer": 1.0.0
     "@stackra/database": 1.0.0
+    "@stackra/devices": 1.0.0
+    "@stackra/documents": 1.0.0
     "@stackra/entitlements": 1.0.0
     "@stackra/errors": 1.0.0
     "@stackra/events": 1.0.0
     "@stackra/experience": 1.0.0
     "@stackra/feature-flags": 1.0.0
     "@stackra/filesystem": 1.0.0
+    "@stackra/fiscal": 1.0.0
     "@stackra/gen": 1.0.0
     "@stackra/i18n": 1.0.0
-    "@stackra/icons": 1.0.0
     "@stackra/iam": 1.0.0
+    "@stackra/icons": 1.0.0
     "@stackra/identity": 1.0.0
     "@stackra/integrations": 1.0.0
     "@stackra/ledger": 1.0.0
+    "@stackra/licensing": 1.0.0
     "@stackra/locking": 1.0.0
     "@stackra/logger": 1.0.0
+    "@stackra/loyalty-kit": 1.0.0
+    "@stackra/market-packs": 1.0.0
     "@stackra/media": 1.0.0
     "@stackra/model": 1.0.0
     "@stackra/money": 1.0.0
@@ -69,16 +83,23 @@ catalogs:
     "@stackra/notifications": 1.0.0
     "@stackra/outbox": 1.0.0
     "@stackra/panel": 1.0.0
+    "@stackra/payments": 1.0.0
     "@stackra/peripherals": 1.0.0
     "@stackra/platform": 1.0.0
+    "@stackra/pricing": 1.0.0
     "@stackra/query": 1.0.0
     "@stackra/queue": 1.0.0
     "@stackra/realtime": 1.0.0
+    "@stackra/registry": 1.0.0
+    "@stackra/rules": 1.0.0
     "@stackra/runway": 1.0.0
     "@stackra/scheduler": 1.0.0
+    "@stackra/scope": 1.0.0
     "@stackra/search": 1.0.0
+    "@stackra/segments": 1.0.0
     "@stackra/seo": 1.0.0
     "@stackra/settings": 1.0.0
+    "@stackra/shipping": 1.0.0
     "@stackra/shortcuts": 1.0.0
     "@stackra/state": 1.0.0
     "@stackra/state-machine": 1.0.0

@@ -13,7 +13,8 @@
  *                     (BelongsToTenant)
  */
 import type { Json } from "@stackra/contracts";
-import { AppendOnly, BelongsToTenant, HasPublicId, Index, Model, Searchable } from "@stackra/model";
+import { AppendOnly, HasPublicId, Index, Model, Searchable } from "@stackra/model";
+import { BelongsToTenant } from "@stackra/tenancy/node";
 import { Str } from "@stackra/validation";
 import type { DataClassification } from "#contracts/enums/data-classification.enum";
 
