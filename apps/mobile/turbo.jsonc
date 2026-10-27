@@ -1,6 +1,0 @@
-// Stackra file contract:
-// Purpose: extends the root turbo.jsonc and declares this member's one tier tag.
-// Boundary: tier tag only.
-// Runtime: node
-// Governing contract: ADR 0003
-{ "$schema": "https://turborepo.dev/schema.json", "extends": ["//"], "tags": ["tier:app"] }

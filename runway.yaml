@@ -2,7 +2,7 @@
 # Stackra file contract:
 # Purpose: the ROOT runway: WHERE things run and HOW they are packed. Providers and accounts,
 #          destinations per environment (AWS account and region, Encore Cloud app, Docker host,
-#          Cloudflare zone, EAS project), the pools many members share (the one Postgres server per
+#          Cloudflare zone), the product key `stackra new` names members after, the pools many members share (the one Postgres server per
 #          environment, the cache cluster, the queue provider, networking), domains, the edge, the
 #          release policy, the DEFAULTS members inherit, and each environment's TOPOLOGY: whether
 #          the service members run as one process (`monolith`), in named groups (`grouped`) or one
@@ -16,7 +16,7 @@
 #           (src/config) and no secret value (Stackra ADR 0173). `ref:<path>` resolves from the
 #           private stacks repository's Pulumi stack config at infra and deploy time (Stackra ADR
 #           0171); a private product repository may inline the id. Read by `stackra infra`, `stackra
-#           gen` (Encore process allocation, compose, wrangler, eas.json), `stackra dev` and the
+#           gen` (Encore process allocation, compose), `stackra dev` and the
 #           runway workflows; validated by `@stackra/runway/schema/root.json` in `stackra validate`,
 #           which fails when a grouped environment does not place every service member in exactly
 #           one group. `defaults.service.config` is the config layer every service member starts
@@ -33,6 +33,13 @@ $schema: "@stackra/runway/schema/root.json"
 version: 3
 # Prefix for stacks (`acme-platform/staging`), images (`acme-platform-core`), Workers and tags.
 project: acme-platform
+
+# The product this repository is (ADR 0335 decision 2). `stackra new` names members after its key:
+# `@figentra/acme-service-<name>` and `@figentra/acme-<name>` (ADR 0349 decision 2). A base product
+# has no `edition`. The lean starter ships no surface and no mobile app, so the `surfaces` and
+# `mobile` blocks (ADR 0441 decision 3) are absent until the product adds one.
+product:
+  key: acme
 
 # ── Providers: every account and vendor, named once ───────────────────────────────────────────────
 providers:
@@ -103,23 +110,6 @@ providers:
   # otel-lgtm container.
   otlp:
     endpoint: ref:otlp.endpoint
-  # The EAS project the mobile app builds and updates under (Stackra ADR 0180).
-  expo:
-    account: acme
-    projectId: ref:expo.projectId
-  # The Apple developer team that signs the iOS app, and the App Store Connect app record the
-  # submit profiles in the mobile member's eas.json upload to (Stackra ADR 0180).
-  apple:
-    teamId: ref:apple.teamId
-    ascAppId: ref:apple.ascAppId
-  # The Play developer account, and the SHA-256 of the Play app-signing certificate that the console's
-  # /.well-known/assetlinks.json publishes so Android verifies the mobile app's /m/* links.
-  google:
-    playDeveloperId: ref:google.playDeveloperId
-    appSigningSha256: ref:google.appSigningSha256
-  # Licence keys and distribution of paid packages (Stackra ADR 0177).
-  keygen:
-    account: ref:keygen.account
   # The Mintlify project the docs member deploys to (Stackra ADR 0299).
   mintlify:
     project: ref:mintlify.project
@@ -131,10 +121,6 @@ environments:
     destinations:
       # `stackra dev` = gen --watch + `encore run` + the compose infra below.
       services: compose
-      # Apps with web, PWA or desktop targets run their own dev server on the member's port.
-      web: vite-dev
-      # Metro on the member's port.
-      mobile: expo-dev
     # The shared containers `stackra dev` brings. A driver's own container (Valkey, object storage,
     # mail capture, antivirus) comes from the package that ships the driver and starts only when a
     # member selects it; the identity provider comes with the identity member.
@@ -211,8 +197,6 @@ environments:
   preview:
     destinations:
       services: encore-cloud
-      web: cloudflare-workers
-      mobile: eas
     # One Encore environment per pull request.
     encore:
       env: "preview-${pr}"
@@ -235,7 +219,7 @@ environments:
       default: core
       groups:
         core:
-          members: [commerce, notifications]
+          members: [example]
           cpu: 0.25
           memory: 512Mi
           instances:
@@ -277,9 +261,6 @@ environments:
   staging:
     destinations:
       services: encore-cloud
-      web: cloudflare-workers
-      mobile: eas
-      desktop: electron-release
     # Encore Cloud process allocation = the groups of `topology` below.
     encore:
       env: staging
@@ -316,13 +297,13 @@ environments:
         versioning: true
         lifecycle:
           expireNoncurrentDays: 30
-    # Both services share one process allocation; staging carries a fraction of production load.
+    # Every service shares one process allocation; staging carries a fraction of production load.
     topology:
       mode: grouped
       default: core
       groups:
         core:
-          members: [commerce, notifications]
+          members: [example]
           cpu: 0.5
           memory: 1Gi
           instances:
@@ -369,19 +350,11 @@ environments:
     # Staging deploys on every merge to main.
     deploy:
       on: merge-to-main
-    # The EAS update channel members inherit.
-    mobile:
-      channel: staging
-    desktop:
-      channel: beta
 
   production:
     destinations:
       # Switch `services` to aws-ecs, helm or compose and the matching `targets.*` block applies.
       services: encore-cloud
-      web: cloudflare-workers
-      mobile: eas
-      desktop: electron-release
       # The docs member; it follows main, not the promotion (`targets.mintlify.deployOn`).
       docs: mintlify
     encore:
@@ -426,26 +399,8 @@ environments:
       # member of this repository needs it.
       isolate: []
       groups:
-        commerce:
-          members: [commerce]
-          cpu: 1
-          memory: 2Gi
-          instances:
-            min: 2
-            max: 10
-          scaling:
-            metric: cpu
-            target: 60
-          # queue consumers, crons and the outbox relay scale apart from request handling
-          workers:
-            split: true
-            cpu: 0.5
-            memory: 1Gi
-            instances:
-              min: 1
-              max: 4
-        notifications:
-          members: [notifications]
+        example:
+          members: [example]
           cpu: 0.5
           memory: 1Gi
           instances:
@@ -454,6 +409,8 @@ environments:
           scaling:
             metric: cpu
             target: 60
+          # queue consumers, crons and the outbox relay scale with request handling until a member
+          # needs them apart
           workers:
             split: false
     defaults:
@@ -491,10 +448,6 @@ environments:
     deploy:
       on: promote
       approval: github-environment
-    mobile:
-      channel: production
-    desktop:
-      channel: latest
 
 # ── Target blocks: provider shape, selected by `environments.<env>.destinations.*` ────────────────
 targets:
@@ -523,64 +476,6 @@ targets:
     ingressClass: nginx
     storageClass: default
     zarf: true
-  cloudflare-workers:
-    compatibilityDate: "2026-10-01"
-    observability:
-      headSamplingRate: 0.1
-  eas:
-    # A native build runs on a native fingerprint change, the `build:mobile` label or a release
-    # (Stackra ADR 0180).
-    buildTrigger: fingerprint
-    # The monthly EAS build budget (Stackra ADR 0180).
-    monthlyBuildCap: 60
-    # Signing certificates live in EAS, never in the repository.
-    credentials: eas-managed
-    # Which CI secrets the submit step reads.
-    submit:
-      ios: app-store-connect-api-key
-      android: service-account
-    # OTA (expo-updates): the channel is `environments.<env>.mobile.channel`; the runtime version is
-    # the member's `stackra.config.ts` `expo.runtimeVersion` (the fingerprint policy), so an update
-    # never reaches a binary whose native layer differs. A staged rollout widens by `stepHours`
-    # unless the crash-rate gate trips.
-    ota:
-      rollout:
-        startPercent: 10
-        endPercent: 100
-        stepHours: 24
-      gate:
-        crashFreeSessions: 99.5
-      rollback: republish-previous
-    # A production store release (Play) opens at this percentage of users; the crash-rate gate
-    # above widens it, as for OTA updates (Stackra ADR 0180).
-    storeRollout:
-      startPercent: 10
-    # The server-side minimum-version gate: the gateway refuses a mobile binary older than the last
-    # `supportedStoreVersions` store releases, and the app asks the user to update (Stackra ADR
-    # 0180). A release policy, the same for every mobile member, so it is not a member fact.
-    minimumVersion:
-      gate: true
-      supportedStoreVersions: 2
-  electron-release:
-    # Members append `/<key>/<channel>/`.
-    feed:
-      bucket: r2:acme-downloads
-      publicOrigin: https://downloads.acme.example
-    # A staged rollout widens by `stepHours` (Stackra ADR 0254).
-    rollout:
-      startPercent: 20
-      endPercent: 100
-      stepHours: 24
-    # Tooling only; ON or OFF is the member's `release.desktop.signing`.
-    signing:
-      mac: notarize
-      windows: azure-trusted-signing
-      linux: none
-    # Runner images of the desktop release jobs, pinned so a runner upgrade is a reviewed change.
-    runners:
-      mac: macos-15
-      windows: windows-2025
-      linux: ubuntu-24.04
   # The docs site (Stackra ADR 0299). CI deploys each merge to main once `mint validate`,
   # `mint broken-links` and `mint a11y` passed on its pull request, then smoke-tests the
   # published site; a failed smoke test fails the deploy job. The deploy on every push through
@@ -623,18 +518,6 @@ secrets:
   defaultPath: runtime
   # CI-only names the release workflows read over OIDC; never given to a runtime.
   ci:
-    - EXPO_TOKEN
-    - APPLE_ASC_KEY_ID
-    - APPLE_ASC_ISSUER_ID
-    - APPLE_ASC_KEY_P8
-    - GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
-    # The Firebase client config of the Android app (FCM push), synced to EAS as a file variable.
-    - GOOGLE_SERVICES_JSON
-    - APPLE_NOTARY_KEY_P8
-    - APPLE_SIGNING_CERT_P12
-    - APPLE_SIGNING_CERT_PASSWORD
-    - AZURE_SIGNING_CLIENT_ID
-    - AZURE_SIGNING_CLIENT_SECRET
     - CLOUDFLARE_API_TOKEN
     - SENTRY_AUTH_TOKEN
     - TURBO_TOKEN
@@ -644,8 +527,8 @@ secrets:
     # The docs deploy job alone reads it (targets.mintlify, Stackra ADR 0299).
     - MINTLIFY_ADMIN_KEY
   # Runtime names the generated API gateway reads (Stackra ADR 0237); the gateway belongs to no
-  # member, so its names sit here. The web Worker signs the visitor address it forwards with the
-  # same key, which apps/web/runway.yaml names too (Stackra ADR 0297 decision 6).
+  # member, so its names sit here. A web app's Worker signs the visitor address it forwards with the
+  # same key, which that app's runway.yaml names too (Stackra ADR 0297 decision 6).
   gateway:
     - GATEWAY_VISITOR_SIGNING_KEY
 
@@ -671,7 +554,7 @@ release:
   # Where every release is recorded.
   records: [github-deployments, linear-release, "slack:#deploys"]
   # Build and publish order across destinations.
-  buildOrder: [npm, cloudflare-workers, encore-cloud, eas, aws-ecs, compose, helm, mintlify]
+  buildOrder: [npm, encore-cloud, aws-ecs, compose, helm, mintlify]
   # On-premises upgrades (Stackra ADR 0179).
   onPrem:
     upgrades: sequential-minor

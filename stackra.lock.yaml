@@ -14,10 +14,8 @@
 version: 1
 # The repository these pins belong to (root package.json `name`).
 repository: acme-platform
-# Module key → the full 40-character commit SHA of that producer's committed manifest. The members
-# consume acme-platform producers that live outside this repository (identity, experience,
-# platform, billing, content, marketing, pricing and payments; each member's stackra.manifest.json
-# names them with `pin: stackra.lock.yaml#<key>`). Each gets its SHA here when its repository
-# publishes its manifest; until then the map is empty, the committed `.stackra/gen` client samples
-# stand in, and a revision is never invented.
+# Module key → the full 40-character commit SHA of that producer's committed manifest. The lean
+# starter consumes no external producer yet; a member that does names it in its
+# stackra.manifest.json with `pin: stackra.lock.yaml#<key>`, and the key gets its SHA here when the
+# producer's repository publishes its manifest. A revision is never invented.
 producers: {}

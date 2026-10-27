@@ -56,8 +56,6 @@
 
   // ── File types the editor cannot guess ──────────────────────────────────────────────────────────
   "files.associations": {
-    // The tsconfig presets carry a contract comment but no tsconfig*.json name.
-    "**/packages/tooling/typescript/src/*.json": "jsonc",
     // eas.json carries its contract as `//` lines (eas-cli reads it as JSON5 and refuses `$comment`).
     "**/eas.json": "jsonc",
     // CODEOWNERS is `path owner` lines with `#` comments, not Markdown.
@@ -86,17 +84,7 @@
       "fileMatch": ["**/.claude/launch.json"],
       "url": "https://www.schemastore.org/claude-code-launch.json"
     },
-    // The tsconfig presets have no tsconfig*.json name, so VS Code would not recognise them.
-    {
-      "fileMatch": ["**/packages/tooling/typescript/src/*.json"],
-      "url": "https://www.schemastore.org/tsconfig.json"
-    },
-    // The oxlint presets: oxlint's own schema at the catalog version (1.86.0).
-    {
-      "fileMatch": ["**/packages/tooling/oxlint/src/*.jsonc"],
-      "url": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json"
-    },
-    // EAS build profiles, including the generated apps/mobile/.stackra/eas.json (eas-cli in mise.toml).
+    // EAS build profiles, including a mobile app's generated .stackra/eas.json (eas-cli in mise.toml).
     {
       "fileMatch": ["**/eas.json"],
       "url": "https://raw.githubusercontent.com/expo/eas-cli/v25.3.0/packages/eas-json/schema/eas.schema.json"

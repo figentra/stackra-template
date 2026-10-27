@@ -1,3 +1,15 @@
+<!--
+Stackra file contract:
+Purpose: the human entry for a Stackra product repository started from this template: what the lean
+         starter holds, how to start, where each fact lives and what to replace.
+Boundary: orientation only; the grammar and rules are AGENTS.md, the framework guides are
+          docs.stackra.figentra.com.
+Runtime: none (documentation)
+Governing contract: Stackra ADR 0294 and 0295 (programming model and build), ADR 0436 and 0441
+                    (product repositories), ADR 0349 (product package names), stackra-15 (the lean
+                    starter, owner decision 2026-10-27)
+-->
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/brand/stackra-endorsed-en-dark.svg" />
@@ -22,17 +34,17 @@ Stackra is a TypeScript framework for products that ship one backend to many sur
 behaviour as kind classes (actions, queries, models, events, routes), each extending the base of its
 kind in the folder of its kind, and `stackra gen` derives the rest: the identities, the dependency
 wiring, the HTTP and MCP endpoints, typed clients for every consumer, the runtime entries and the
-tool configs for web, PWA, desktop and mobile. This repository is the monorepo that
-`pnpm create stackra` will render, written in the programming model v3.1: two services, three apps,
-three packages, five tooling presets and the docs site, each showing every file kind with its test.
-The example product is **Acme**, a multi-tenant commerce platform: a staff console, a public
-storefront, a mobile app, and the commerce and notifications services behind them.
+tool configs for web, PWA, desktop and mobile. This repository is the **lean starter** for a product
+repository, in the programming model v3.1: the root config, the docs site, one example service and
+one example package. It is a starting point, not a sample product. Both examples are written by
+`stackra new` and nothing else, and `pnpm validate` fails when they drift from what `stackra new`
+writes today. The tool presets are the core `@stackra/*-config` packages, from `catalog:stackra`; no
+copy of them lives here. Products ship packages and add apps only when they need one (D16). The
+placeholder product is **Acme** (`product.key: acme` in `runway.yaml`).
 
-> [!NOTE] **Pre-release.** The `@stackra/*` packages and the `stackra` CLI are not published yet.
-> Nothing here installs or compiles today; the template exists so humans and agents can read a
-> complete project end to end and review the programming model before the first release. Generated
-> output under `.stackra/` is committed only so it can be read next to its source (see
-> `.gitignore`).
+> [!NOTE] **Pre-release.** The `@stackra/*` packages and the `stackra` CLI are not published yet, so
+> nothing here installs or compiles today. Nothing generated is committed: `.stackra/` is gitignored
+> and `stackra gen` writes it.
 
 ## Quick start
 
@@ -42,30 +54,24 @@ storefront, a mobile app, and the commerce and notifications services behind the
 
    ```sh
    mise install                 # node, pnpm, gitleaks, infisical, maestro, encore, eas-cli, pinned
-   pnpm install:pro             # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`);
-                                # `pnpm install` inside Infisical for the HeroUI Pro licence token
+   pnpm install                 # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`)
    stackra agents setup         # once per machine: Stackra skills, sub-agents and guard hooks for your assistant
    pnpm gen && pnpm dev         # generate .stackra/ and run every member
    pnpm verify                  # the gate CI runs
    ```
 
-3. Replace the example identity, see [Make it yours](#make-it-yours).
+3. Replace the example identity, see [Make it yours](#make-it-yours), then rename or delete the
+   examples (see [How each member kind is created](#how-each-member-kind-is-created)).
 
 ## Structure
 
-| Path                               | What it holds                                                                |
-| ---------------------------------- | ---------------------------------------------------------------------------- |
-| `services/commerce`                | the feature service: catalogue, inventory, orders and loyalty modules        |
-| `services/notifications`           | a consumer service: reaches commerce by event, call and command, never code  |
-| `apps/console`                     | tenant console: web, PWA and desktop (Electron) from one source tree         |
-| `apps/web`                         | public site and storefront: server-rendered on Workers, installable as a PWA |
-| `apps/mobile`                      | Expo app for iOS and Android                                                 |
-| `apps/docs`                        | Mintlify docs: guides, ADRs and the API reference generated from manifests   |
-| `packages/commerce/loyalty-kit`    | a feature package: every kind a package can hold                             |
-| `packages/security/access-log`     | a decorator package: the `@AccessLogged` class facet with its explorer       |
-| `packages/design-system/theme`     | the Acme theme (`defineTheme`), rendered to web and native CSS               |
-| `packages/tooling/*`               | TypeScript, oxlint, Vitest, tsdown and commitlint presets                    |
-| `runway.yaml`, `stackra.lock.yaml` | infrastructure and topology; pinned external producer manifests              |
+| Path                               | What it holds                                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------------- |
+| `services/example`                 | `@figentra/acme-service-example`: the example service, as `stackra new` wrote it |
+| `packages/application/example`     | `@figentra/acme-example`: the example package, as `stackra new` wrote it         |
+| `apps/docs`                        | Mintlify docs: guides, ADRs and the API reference generated from manifests       |
+| `assets/`                          | brand, mobile, store, landing and lang sources (ADR 0441)                        |
+| `runway.yaml`, `stackra.lock.yaml` | product key, infrastructure and topology; pinned external producer manifests     |
 
 The full annotated tree is in [Tree](#tree) below.
 
@@ -81,7 +87,7 @@ behaviour. One class becomes an HTTP endpoint, an MCP tool, a typed client metho
 check:
 
 ```ts
-// services/commerce/src/modules/orders/actions/cancel-order.action.ts (abridged)
+// illustrative: services/<name>/src/modules/orders/actions/cancel-order.action.ts
 export class CancelOrderAction extends Action({
   key: "order.cancel",
   actors: [ActorKind.User, ActorKind.Agent, ActorKind.Service],
@@ -111,7 +117,7 @@ class; its field types are its columns, and traits add the public id, tenancy, t
 stamps and optimistic locking:
 
 ```ts
-// services/commerce/src/modules/orders/models/order.model.ts (abridged)
+// illustrative: services/<name>/src/modules/orders/models/order.model.ts
 import { BelongsToTenant } from "@stackra/tenancy/node"; // tenancy owns the trait, not @stackra/model
 
 @Index(["tenantId", "status", "createdAt"])
@@ -142,7 +148,7 @@ A **route** is a folder: the route class names its path, layout and tab, the pag
 whose classes are imported by name from `#stackra/clients/<service>`:
 
 ```ts
-// apps/console/src/routes/quick-order/quick-order.route.ts (abridged)
+// illustrative: apps/<name>/src/routes/quick-order/quick-order.route.ts
 export class QuickOrderRoute extends Route({
   path: "/quick-order",
   layout: ShellLayout,
@@ -170,7 +176,7 @@ to a React function component (`classComponents()` from `@stackra/gen/node` in t
 config, `@stackra/gen/metro-transformer` in the generated Metro config):
 
 ```tsx
-// apps/console/src/components/theme-toggle/theme-toggle.tsx (abridged)
+// illustrative: apps/<name>/src/components/theme-toggle/theme-toggle.tsx
 export class ThemeToggle extends Component {
   /** The translator of the active locale. */
   i18n = useTranslation();
@@ -209,19 +215,12 @@ dictionary, is in [`AGENTS.md`](AGENTS.md) and
 
 ## Surfaces
 
-Each app lists its targets in `stackra.config.ts`, and `stackra gen` builds only those
+The lean starter ships no app surface: `apps/docs` is the only app. An app lists its targets (web,
+PWA, desktop, mobile) in its `stackra.config.ts`, and `stackra gen` builds only those
 ([Stackra ADR 0281](https://docs.stackra.figentra.com/adr/0281-desktop-surfaces-targets-desktop-modes-and-overlay-styles)).
-
-| Surface | Where                      | What you get                                                                     |
-| ------- | -------------------------- | -------------------------------------------------------------------------------- |
-| Web     | `apps/console`, `apps/web` | a client-rendered console and a server-rendered site on Cloudflare Workers       |
-| PWA     | `apps/console`, `apps/web` | manifest, service worker, push, offline mutation queue                           |
-| Desktop | `apps/console`             | Electron with the hardening baseline, tray, deep links, auto-update and overlays |
-| Mobile  | `apps/mobile`              | Expo with native tabs, EAS builds and over-the-air updates                       |
-
-The console's desktop target runs in `Hybrid` mode (a window plus a tray icon) with one overlay in
-`src/config/desktop.config.ts`: `quick`, a launcher bar on `CommandOrControl+Shift+Space`. Any route
-renders in an overlay as well as in the main window.
+A product adds an app, or a `surfaces` or `mobile` block in the root `runway.yaml` that points at an
+OS shell (ADR 0441), only when it ships one; until then the root runway names no web, mobile or
+desktop destination.
 
 ## Developer experience
 
@@ -252,7 +251,8 @@ renders in an overlay as well as in the main window.
 ├── AGENTS.md                     agent entry: grammar, group folders, kind table, identities,
 │                                 dictionary and rules
 ├── README.md                     this file
-├── package.json                  root scripts over `stackra` and turbo; tooling devDependencies
+├── package.json                  root scripts over `stackra` and turbo (`validate` adds the example
+│                                 drift check); the core `@stackra/*-config` presets
 ├── pnpm-workspace.yaml           members + the only source of versions (catalogs, `workspace:*`)
 ├── turbo.jsonc                   task graph (`gen` before typecheck/test/build) and tier boundaries
 ├── .oxlintrc.jsonc               lint entry: extends `@stackra/oxlint-config`, no rules of its own
@@ -263,14 +263,13 @@ renders in an overlay as well as in the main window.
 │                                 environment, defaults, targets, edge, secrets, release policy)
 ├── .gitignore                    `.stackra/*` and the generated root shims of tool configs
 ├── .github/                      Quality Gate (pre-release: `scripts/preview-gate.mjs`; then `pnpm verify`),
+│                                 the example drift check (`scripts/example-drift.mjs`),
 │                                 release (skips until pnpm-lock.yaml is committed), issue and PR
 │                                 templates, CODEOWNERS, the main ruleset (`rulesets/main.json`),
 │                                 Stackra brand assets (`assets/`, all rights reserved)
 ├── .changeset/                   pending release notes for packages (apps and services deploy by SHA)
 ├── lefthook.yml · .commitlintrc.yaml · knip.jsonc · .gitleaks.toml · .editorconfig · .gitattributes
 ├── renovate.json5                dependency update policy (catalogs, mise.toml, actions by SHA)
-├── .easignore                    what EAS uploads for a mobile build (generated; re-includes
-│                                 apps/mobile/.stackra/ and its root shims, which git ignores)
 ├── .vscode/                      editor: oxfmt and oxlint through Oxc, TypeScript 7 extension
 │                                 (useTsgo), schema mappings, debug configurations, tasks
 ├── .markdownlint.yaml · cspell.config.yaml   Markdown structure checks; spelling (editor, hook, CI)
@@ -281,57 +280,19 @@ renders in an overlay as well as in the main window.
 ├── CLAUDE.md · CONTRIBUTING.md · SECURITY.md · LICENSE · NOTICE
 ├── assets/                       brand, mobile, store, landing and lang sources (ADR 0441)
 ├── apps/                         tier:app (apps/README.md)
-│   ├── console/                  @acme/console: tenant console, targets web + pwa + desktop
-│   │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
-│   │   ├── stackra.manifest.json  committed contract (generated): the gateway reads `consumes`
-│   │   ├── assets/{lang/<locale>/<namespace>.json, public/logo.svg}   en, ar, en-US, ar-SA
-│   │   ├── src/{config/, schemas/, panels/, routes/<name>/ (offline/ included),
-│   │   │        components/<name>/, stores/, menus/, shortcuts/, blocks/<name>/, documents/,
-│   │   │        hooks/, overrides/<owner>/, enums/, types/, styles/}   no root module file
-│   │   └── .stackra/{entry/, gen/, vite.config.ts, vitest.config.ts, playwright.config.ts,
-│   │                 index.html, sw.ts, pwa/, desktop/}   generated
-│   ├── web/                      @acme/web: public site and storefront, targets web + pwa
-│   │   │                         (React Router 7 on Workers, server-rendered)
-│   │   ├── assets/{lang/<locale>/<namespace>.json, public/logo.svg}
-│   │   ├── vite.extend.ts        the Vite hatch: add-only, opens with a `Reason:` header
-│   │   ├── src/{config/, schemas/, routes/<name>/, components/<name>/, blocks/<name>/,
-│   │   │        analytics/, flags/, hooks/, menus/, overrides/<owner>/, enums/, types/, styles/}
-│   │   └── .stackra/{entry/, gen/, vite.config.ts, react-router.config.ts, wrangler.jsonc, …}
-│   ├── mobile/                   @acme/mobile: Expo app, targets ios + android
-│   │   ├── assets/{lang/<locale>/<namespace>.json, public/logo.svg}
-│   │   ├── src/{mobile.module.ts (narrows the client modules), config/ (chrome.config.ts),
-│   │   │        schemas/, routes/<name>/, components/<name>/, stores/, menus/ (tab-bar.menu.ts),
-│   │   │        blocks/<name>/, documents/, analytics/, overrides/commerce/orders/, enums/,
-│   │   │        types/, styles/, __tests__/}
-│   │   └── .stackra/{entry/, gen/, app.config.ts, eas.json, metro.config.js, maestro/, …}
 │   └── docs/                     @acme/docs: Mintlify; content root is src/ (docs.json, pages,
 │                                 guides/, adr/, api-reference/, assets/)
 ├── packages/                     tier:lib, packages/<category>/<name> (packages/README.md)
-│   ├── commerce/loyalty-kit/     @acme/loyalty-kit: the SHAPES CATALOGUE, every kind a package
-│   │   │                         can hold
-│   │   ├── assets/lang/<locale>/loyalty_kit.json
-│   │   └── src/{config/, contracts/{ports,enums,types}/, core/, node/ (the module's groups,
-│   │            database/macros/ included), react/<name>/, native/<name>/, testing/}
-│   ├── security/access-log/      @acme/access-log: a DECORATOR package (the `@AccessLogged` class
-│   │                             facet + its explorer, sink drivers, a retention job, the audit
-│   │                             resource)
-│   ├── design-system/theme/      @acme/theme: `ACME_THEME`, built with `defineTheme` from
-│   │                             `@stackra/tokens` and rendered to themes/acme/web.css and
-│   │                             themes/acme/native.css (Stackra ADR 0302)
-│   └── tooling/                  tier:config presets: typescript, oxlint (boundaries), vitest,
-│                                 tsdown, commitlint
+│   └── application/example/      @figentra/acme-example: `stackra new package example
+│                                 --category application`; package.json, stackra.config.ts
+│                                 (`definePackage({})`), tsconfig.json, turbo.jsonc, assets/,
+│                                 README.md, AGENTS.md, CHANGELOG.md, LICENSE; no src/ yet
 └── services/                     tier:service (services/README.md)
-    ├── commerce/                 @acme/service-commerce: the feature service
-    │   ├── stackra.config.ts · runway.yaml · package.json · turbo.jsonc · tsconfig.json
-    │   ├── stackra.manifest.json · openapi.json   committed contract (generated)
-    │   ├── assets/{lang/<locale>/<module>.json, ai/orders/, public/orders/}
-    │   ├── src/{config/, schemas/, __tests__/}   no root module file: gen derives it
-    │   ├── src/modules/{orders,catalogue,inventory,loyalty}/<group>/   orders shows every
-    │   │                                                               group (its README)
-    │   └── .stackra/{entry/server.ts, gen/, vitest.config.ts}   generated
-    └── notifications/            @acme/service-notifications: the consumer (event + call +
-                                  `.queue()`), delivery, the in-app inbox, preferences and the
-                                  log; a port with two drivers and a signed inbound webhook event
+    └── example/                  @figentra/acme-service-example: `stackra new service example
+                                  --area app`; package.json, stackra.config.ts
+                                  (`defineService({ area: ApiArea.App })`), runway.yaml,
+                                  tsconfig.json, turbo.jsonc, assets/, README.md, AGENTS.md,
+                                  CHANGELOG.md; no src/ yet
 ```
 
 ### Package map
@@ -339,7 +300,7 @@ renders in an overlay as well as in the main window.
 The template follows the settled package map, not the earlier
 [Stackra ADR 0127](https://docs.stackra.figentra.com/adr/0127-package-categories-including-infrastructure)
 rows. `@stackra/notifications` (it was `@stackra/mail`) holds the notification kinds, the `Notifier`
-port and the mail-body helpers; the notifications service does delivery, the in-app inbox and
+port and the mail-body helpers; a notifications service does delivery, the in-app inbox and
 preferences. `@stackra/shortcuts` was `@stackra/kbd`, and shape tooling (`Schema`, the field
 decorators) is `@stackra/validation` (`Enum` and `Port` are `@stackra/contracts`), so there is no
 `@stackra/schema`. There is no `@stackra/forms` (forms come from `@stackra/ui/react` and
@@ -349,8 +310,8 @@ half is `@stackra/vite-plugin`), no `@stackra/router` (`@stackra/navigation`) an
 `@stackra/templates` (a mail body is a `.mail.tsx` class component beside its notification).
 `@stackra/connections` is folded into `@stackra/integrations`, every event base (`AnalyticsEvent`
 included) comes from `@stackra/events`, icons are `IconName` strings from `@stackra/icons` rendered
-by `@stackra/ui`'s `Icon` (there is no `@stackra/ui/icons`), and the example brand package
-`@acme/brand` is replaced by the theme package `@acme/theme` in the `design-system` category
+by `@stackra/ui`'s `Icon` (there is no `@stackra/ui/icons`), and a product's brand is a theme
+package built with `defineTheme` in the `design-system` category
 ([Stackra ADR 0302](https://docs.stackra.figentra.com/adr/0302-stackra-design-system-tokens-ui-and-the-playground)).
 
 ## Which file owns which fact
@@ -379,37 +340,24 @@ files name them. Wrong place, for each row: a port number is runway, not config;
 not runway; the list of targets is `stackra.config.ts`; a group's cpu is the root runway, never a
 member's; a column is the model, never a hand-written migration.
 
-### HeroUI Pro licence
-
-The console builds on HeroUI Pro directly, `@heroui-pro/react`
-([Stackra ADR 0197](https://docs.stackra.figentra.com/adr/0197-heroui-pro-is-used-only-in-our-own-apps)
-as amended, stackra#127). Its postinstall downloads the licensed components, so installing the
-workspace needs a HeroUI Pro licence token. **A team that copies this template needs its own HeroUI
-Pro licence, or must replace the Pro components (the console shell, palette, sheet, KPI and empty
-states) with the free `@stackra/ui` ones and drop `@heroui-pro/react`.**
-
-The licence token is `HEROUI_PERSONAL_TOKEN` and lives only in Infisical. The postinstall reads only
-`HEROUI_AUTH_TOKEN`, and without it exits 0 leaving an empty package, so both install paths expose
-`HEROUI_PERSONAL_TOKEN` as `HEROUI_AUTH_TOKEN` for the install alone and run
-`.github/scripts/heroui-pro.mjs`, which fails before the install when the token is missing and after
-it when the components were not downloaded. Locally, `pnpm install:pro` runs `pnpm install` under
-`infisical run --env=dev --path=/install`, a folder that holds that one token so no other value
-reaches the dependencies' install scripts. In CI, release.yml exchanges the job's GitHub OIDC token
-with Infisical for `HEROUI_PERSONAL_TOKEN` from `/ci` (repository variables
-`INFISICAL_CI_IDENTITY_ID`, `INFISICAL_PROJECT_ID`, `INFISICAL_DOMAIN`) for the install step only,
-then blanks it. There is no `.npmrc` with a value and no repository secret. The `heroui-pro` and
-`heroui-native-pro` MCP servers in `.mcp.yaml` read the same token through `stackra mcp exec`, never
-from a file. No Pro source is committed.
-
 ## How each member kind is created
 
-| Kind    | Command                                              | What it writes                                                                                                                                               |
-| ------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| project | `pnpm create stackra <name>`                         | this root, one example service, the console                                                                                                                  |
-| service | `pnpm new service <name>`                            | `services/<name>/` with `stackra.config.ts` (`defineService`), `runway.yaml`, `src/config/`, `assets/`, the boot test (no module file: gen derives it)       |
-| app     | `pnpm new app <name> --targets web,pwa,desktop`      | `apps/<name>/` with `stackra.config.ts` (`defineApp`), `runway.yaml`, `assets/lang/<locale>/<name>.json`, `src/config/` (the error boundary is navigation's) |
-| package | `pnpm new package <name> --category <c> --entries …` | `packages/<c>/<name>/` with `stackra.config.ts` (`definePackage`), the entry folders, `assets/`, `publishConfig`; gen writes its `<Key>Module`               |
-| module  | `pnpm new module <key>` (in a service or package)    | `src/modules/<key>/README.md`; lang goes to the member's `assets/lang/<locale>/<key>.json`; a module file only for `exports`                                 |
+| Kind       | Command                                                            | What it writes                                                                                                                                            |
+| ---------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| service    | `stackra new service <name> --area <public\|app\|admin\|platform>` | `services/<name>/`: package.json (`@figentra/<product>-service-<name>`), `stackra.config.ts` (`defineService`), `runway.yaml`, tsconfig, turbo, `assets/` |
+| package    | `stackra new package <name> --category <c>`                        | `packages/<c>/<name>/`: package.json (`@figentra/<product>-<name>`), `stackra.config.ts` (`definePackage`), tsconfig, turbo, `assets/`, LICENSE           |
+| seed pack  | `stackra new seed-pack <name>`                                     | `seed-packs/<name>/`                                                                                                                                      |
+| regenerate | `stackra new <kind> <name> ... --over`                             | only the missing files; prints a diff for each authored file that differs from the template, never touching `src/`, CHANGELOG.md or runway.yaml           |
+
+The product key comes from the root `runway.yaml` (`product.key`) unless `--scope` names another
+(ADR 0349 decision 2), and `@stackra/*` versions are `catalog:stackra`. Nothing is written under
+`src/`: the first module or entry file is yours. The two examples were written by exactly these
+commands (`.github/scripts/example-drift.mjs` lists the arguments), and `pnpm validate` runs them
+again with `--over`: a missing file or an authored difference fails it. To start your product,
+rename an example with `stackra new` under your own name and delete the example folder, or delete
+both; the check skips an example whose folder is gone, and you remove its entry from the script once
+you no longer want it. A new member goes into the root runway's production topology (a group in
+`environments.production.topology.groups`) before `stackra validate` passes.
 
 Nobody writes an entry, an entry barrel or a tool config: gen writes `.stackra/entry/<target>.ts`
 (calling `createApp` from `@stackra/app/<target>`), the barrels, the Vite, Vitest, Playwright,
@@ -423,20 +371,20 @@ or `electron.extend.ts`, add-only and opening with a `Reason:` header.
 
 Where the template offers two valid shapes, this is the rule for picking one.
 
-| Question                                     | Choose                                                                                                                                            |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A generated operation or a hand-written one? | `operations: { list: true }` on the resource while the standard one is enough; a query when the filter narrows by actor                           |
-| A workflow or an inline `handle`?            | `handle` for one step in one transaction; `return ctx.run(Workflow, input)` for several steps, a compensation or a call out                       |
-| Query or action?                             | a query for a read with no transaction; an action for anything that changes state, or that must be audited and replayed                           |
-| `CrudService` method or a repository?        | a named read on the model's `CrudService<Model>`; `services/<name>.repository.ts` only for reads beyond it                                        |
-| Policy or precondition?                      | a policy for "may this principal touch this record"; a precondition for "may anyone run this now" (orders paused)                                 |
-| Where does an Input or Output go?            | always `schemas/<name>-input.schema.ts` and `schemas/<name>-output.schema.ts`, also when one file uses it                                         |
-| Extension, interceptor or event?             | an extension to change a value or refuse at a published slot; an interceptor to wrap a whole action call; a listener to react after it            |
-| Query cache or the `Cache` port?             | the query's `cache:` for a read others call; the injected `Cache` port with `CacheKey.of(...)` for a value inside a service                       |
-| Config override or `src/overrides/`?         | a config override (`extends BaseX`, in `src/config/`) to configure a package; `src/overrides/<owner>/…` to shadow its file                        |
-| Config, settings or flag?                    | config when it is deploy-time and the same for every tenant; settings when a tenant admin changes it; a flag for on/off                           |
-| An enum or a string?                         | an `Enum.of` for any closed set of house values; a string only where an identity is written, a `keyof`, a driver name                             |
-| A shared resource or `requires`?             | shared by default; `requires` with `dedicated: true` and a `reason` only when the member cannot share (`services/commerce/runway.yaml` shows one) |
+| Question                                     | Choose                                                                                                                                 |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A generated operation or a hand-written one? | `operations: { list: true }` on the resource while the standard one is enough; a query when the filter narrows by actor                |
+| A workflow or an inline `handle`?            | `handle` for one step in one transaction; `return ctx.run(Workflow, input)` for several steps, a compensation or a call out            |
+| Query or action?                             | a query for a read with no transaction; an action for anything that changes state, or that must be audited and replayed                |
+| `CrudService` method or a repository?        | a named read on the model's `CrudService<Model>`; `services/<name>.repository.ts` only for reads beyond it                             |
+| Policy or precondition?                      | a policy for "may this principal touch this record"; a precondition for "may anyone run this now" (orders paused)                      |
+| Where does an Input or Output go?            | always `schemas/<name>-input.schema.ts` and `schemas/<name>-output.schema.ts`, also when one file uses it                              |
+| Extension, interceptor or event?             | an extension to change a value or refuse at a published slot; an interceptor to wrap a whole action call; a listener to react after it |
+| Query cache or the `Cache` port?             | the query's `cache:` for a read others call; the injected `Cache` port with `CacheKey.of(...)` for a value inside a service            |
+| Config override or `src/overrides/`?         | a config override (`extends BaseX`, in `src/config/`) to configure a package; `src/overrides/<owner>/…` to shadow its file             |
+| Config, settings or flag?                    | config when it is deploy-time and the same for every tenant; settings when a tenant admin changes it; a flag for on/off                |
+| An enum or a string?                         | an `Enum.of` for any closed set of house values; a string only where an identity is written, a `keyof`, a driver name                  |
+| A shared resource or `requires`?             | shared by default; `requires` with `dedicated: true` and a `reason` only when the member cannot share                                  |
 
 ## File kind → folder → test
 
@@ -478,62 +426,64 @@ with `client.called(GetOrderQuery)` (a queued call with `client.queued(CancelOrd
 
 ### Services and packages (in a module)
 
-`orders/…` is `services/commerce/src/modules/orders/`; a package's module is `src/node/`.
+`orders/…` is a service's `src/modules/orders/`; a package's module is `src/node/`. The worked
+example of every kind is in the framework guides
+([docs.stackra.figentra.com](https://docs.stackra.figentra.com)); this starter ships none.
 
-| Kind                                    | Group / suffix                                                                                                           | Test                                                            | Example                                                                                           |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| boot                                    | no authored root module: gen derives it and writes `.stackra/entry/server.ts`                                            | `src/__tests__/<key>.module.int.test.ts`                        | `services/commerce/src/__tests__/commerce.module.int.test.ts`                                     |
-| module, settings                        | `modules/<key>/<key>.module.ts` only for `exports`; `<key>.settings.ts` (`extends Settings`)                             | covered by the boot test; settings faked with `fakeSettings`    | `orders/orders.module.ts`, `orders/orders.settings.ts`                                            |
-| model, state machine                    | `models/*.model.ts`, `models/<model>.state-machine.ts` (`StateMachine<Model>`)                                           | none (a factory instead); through the action that transitions   | `orders/models/order.model.ts`, `orders/models/order.state-machine.ts`                            |
-| bucket                                  | `models/*.bucket.ts` (`extends Bucket`)                                                                                  | through the action that uploads                                 | `catalogue/models/product-images.bucket.ts`                                                       |
-| enum                                    | `enums/*.enum.ts` (`Enum.of`)                                                                                            | none                                                            | `orders/enums/order-status.enum.ts`                                                               |
-| schema (input, output, data, view)      | `schemas/<name>-input.schema.ts`, `<name>-output.schema.ts`, `<name>-data.schema.ts`, `<name>.schema.ts`                 | through action and contract tests                               | `orders/schemas/cancel-order-input.schema.ts`, `orders/schemas/order-view.schema.ts`              |
-| response change                         | `schemas/<name>-<yyyy-mm>.change.ts` (`Change<View>({ date, sunset })`)                                                  | the `.contract` test                                            | `orders/schemas/order-view-2027-03.change.ts`                                                     |
-| error                                   | `errors/*.error.ts` (`extends Refusal`)                                                                                  | `toRefuseWith(refusal(XyError))` in the thrower's test          | `orders/errors/order-not-payable.error.ts`                                                        |
-| migration                               | `database/migrations/NNNN-<name>.migration.ts` (`stackra db diff` output, a frozen snapshot)                             | applied, rolled back and reapplied by `stackra db check`        | `orders/database/migrations/0002-add-order-paid-at.migration.ts`                                  |
-| macro                                   | `database/macros/<name>.macro.ts` (`extends Macro`, gives `t.<name>()`)                                                  | `stackra db check` (its columns match its partner's)            | `access-log/src/node/database/macros/data-classification.macro.ts`                                |
-| factory, seeder                         | `database/factories/<model>.factory.ts` (`Factory<Model>`), `database/seeders/{minimal,demo,test}.seeder.ts`             | none                                                            | `orders/database/factories/order.factory.ts`, `orders/database/seeders/demo.seeder.ts`            |
-| action, job                             | `actions/*.action.ts` (surfaces `endpoint`, `tool`, `job`, `intent`; a job is `job: { queue, cron }`)                    | `actions/__tests__/<name>.action.test.ts`                       | `orders/actions/cancel-order.action.ts`, `orders/actions/expire-unpaid-orders.action.ts`          |
-| query                                   | `queries/*.query.ts` (`cache: { ttl, invalidateOn }` when cached)                                                        | `queries/__tests__/<name>.query.test.ts`                        | `orders/queries/order-kpis.query.ts`                                                              |
-| workflow, signal                        | `workflows/*.workflow.ts`, `workflows/*.signal.ts`                                                                       | `workflows/__tests__/<name>.workflow.int.test.ts`               | `orders/workflows/create-order.workflow.ts`                                                       |
-| service                                 | `services/*.service.ts` (`Service`, `CrudService<Model>`)                                                                | `services/__tests__/<name>.service.test.ts`                     | `orders/services/order-pricing.service.ts`                                                        |
-| permissions, policy                     | `access/<model>.permissions.ts`, `access/<model>.policy.ts` (`Policy<Model>`)                                            | the `.contract` test; `access/__tests__/<model>.policy.test.ts` | `orders/access/order.permissions.ts`, `orders/access/order.policy.ts`                             |
-| precondition, flag, entitlement, role   | `access/*.precondition.ts`, `access/*.flag.ts`, `access/*.entitlement.ts`, `access/*.role.ts`                            | through the action that names it                                | `orders/access/accepting-orders.precondition.ts`, `catalogue/access/product-limit.entitlement.ts` |
-| event, event version                    | `events/*.event.ts` (bases from `@stackra/events`), `events/<name>-v<n>.change.ts`                                       | the `.contract` test                                            | `orders/events/order-paid.event.ts`, `loyalty-kit/src/node/events/points-earned-v1.change.ts`     |
-| integration, connection                 | `integrations/*.integration.ts`, `connections/*.connection.ts` (`Connection<Integration>`)                               | `connections/__tests__/<name>.connection.test.ts` (`check()`)   | `services/notifications/src/modules/messages/integrations/resend.integration.ts`                  |
-| inbound webhook                         | `events/*.event.ts` (`WebhookEvent<Integration>({ type })`) plus the listener that handles it                            | the listener's test                                             | `services/notifications/src/modules/messages/events/`                                             |
-| listener                                | `listeners/*.listener.ts`                                                                                                | `listeners/__tests__/<name>.listener.test.ts`                   | `orders/listeners/mark-order-paid.listener.ts`                                                    |
-| extension point, extension, interceptor | `extensions/*.extension-point.ts`, `extensions/*.extension.ts` (`Extension<Point["slot"]>`), `*.interceptor.ts`          | `extensions/__tests__/<name>.extension.test.ts`                 | `orders/extensions/order.extension-point.ts`, `loyalty/extensions/redeem-points.extension.ts`     |
-| port, driver                            | `contracts/ports/*.port.ts` (package), `drivers/<prefix>-<port>.driver.ts`                                               | `drivers/__tests__/<name>.driver.int.test.ts`                   | `loyalty-kit/src/contracts/ports/loyalty-ledger.port.ts`, `loyalty/drivers/`                      |
-| resource, widget, document              | `resources/<model>/*.resource.ts` (`Resource<Model>`), `*.widget.ts` (`Widget<Query>`), `*.document.ts`                  | the `.contract` test and the console e2e tier                   | `orders/resources/order/order.resource.ts`, `orders/resources/order/order-kpis.widget.ts`         |
-| notification, mail body                 | `resources/<model>/<name>.notification.ts` with `<name>.mail.tsx` beside it and its `schemas/<name>-data.schema.ts`      | `resources/<model>/__tests__/<name>.notification.test.ts`       | `orders/resources/order/order-receipt.notification.ts`                                            |
-| search                                  | the `@Searchable` facet on the model                                                                                     | through the query that uses it                                  | `catalogue/models/product.model.ts`                                                               |
-| AI                                      | `ai/*.skill.ts`, `ai/*.prompt.ts`, `ai/*.facts.ts` (`Facts<Model>`)                                                      | `.stackra/gen/ai.ts` lists what became a tool                   | `orders/ai/`                                                                                      |
-| class facet + explorer                  | a `createDecorator` facet and `<entry>/<pkg>.explorer.ts`                                                                | the explorer's test                                             | `packages/security/access-log`                                                                    |
-| type, constant, function                | `types/*.type.ts`, `constants/*.constant.ts`, `functions/*.function.ts` (`contracts/types/` when public)                 | through their users                                             | `packages/commerce/loyalty-kit/src/contracts/types/`                                              |
-| fake, matcher, fixture (package)        | `testing/<name>.fake.ts`, `testing/<name>.matcher.ts` (`createMatcher`), `testing/<name>.fixture.ts`                     | `testing/__tests__/<name>.matcher.test.ts`                      | `loyalty-kit/src/testing/`                                                                        |
-| config                                  | `src/config/*.config.ts` (`Config({ schema, env })`, or a `Base`-alias override) and its `<stem>-options.schema.ts`      | compiled by the boot test                                       | `services/commerce/src/config/loyalty-kit.config.ts`                                              |
-| contract                                | `stackra.manifest.json` and `openapi.json` at the member root (generated, committed)                                     | `src/__tests__/stackra-manifest.contract.test.ts`               | `services/commerce/stackra.manifest.json`                                                         |
-| lang, asset                             | member root `assets/lang/<locale>/<module>.json` (regional overlays hold only differing keys), `assets/<kind>/<module>/` | gen fails on a key missing in a base locale                     | `services/commerce/assets/lang/en/orders.json`                                                    |
+| Kind                                    | Group / suffix                                                                                                           | Test                                                            |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| boot                                    | no authored root module: gen derives it and writes `.stackra/entry/server.ts`                                            | `src/__tests__/<key>.module.int.test.ts`                        |
+| module, settings                        | `modules/<key>/<key>.module.ts` only for `exports`; `<key>.settings.ts` (`extends Settings`)                             | covered by the boot test; settings faked with `fakeSettings`    |
+| model, state machine                    | `models/*.model.ts`, `models/<model>.state-machine.ts` (`StateMachine<Model>`)                                           | none (a factory instead); through the action that transitions   |
+| bucket                                  | `models/*.bucket.ts` (`extends Bucket`)                                                                                  | through the action that uploads                                 |
+| enum                                    | `enums/*.enum.ts` (`Enum.of`)                                                                                            | none                                                            |
+| schema (input, output, data, view)      | `schemas/<name>-input.schema.ts`, `<name>-output.schema.ts`, `<name>-data.schema.ts`, `<name>.schema.ts`                 | through action and contract tests                               |
+| response change                         | `schemas/<name>-<yyyy-mm>.change.ts` (`Change<View>({ date, sunset })`)                                                  | the `.contract` test                                            |
+| error                                   | `errors/*.error.ts` (`extends Refusal`)                                                                                  | `toRefuseWith(refusal(XyError))` in the thrower's test          |
+| migration                               | `database/migrations/NNNN-<name>.migration.ts` (`stackra db diff` output, a frozen snapshot)                             | applied, rolled back and reapplied by `stackra db check`        |
+| macro                                   | `database/macros/<name>.macro.ts` (`extends Macro`, gives `t.<name>()`)                                                  | `stackra db check` (its columns match its partner's)            |
+| factory, seeder                         | `database/factories/<model>.factory.ts` (`Factory<Model>`), `database/seeders/{minimal,demo,test}.seeder.ts`             | none                                                            |
+| action, job                             | `actions/*.action.ts` (surfaces `endpoint`, `tool`, `job`, `intent`; a job is `job: { queue, cron }`)                    | `actions/__tests__/<name>.action.test.ts`                       |
+| query                                   | `queries/*.query.ts` (`cache: { ttl, invalidateOn }` when cached)                                                        | `queries/__tests__/<name>.query.test.ts`                        |
+| workflow, signal                        | `workflows/*.workflow.ts`, `workflows/*.signal.ts`                                                                       | `workflows/__tests__/<name>.workflow.int.test.ts`               |
+| service                                 | `services/*.service.ts` (`Service`, `CrudService<Model>`)                                                                | `services/__tests__/<name>.service.test.ts`                     |
+| permissions, policy                     | `access/<model>.permissions.ts`, `access/<model>.policy.ts` (`Policy<Model>`)                                            | the `.contract` test; `access/__tests__/<model>.policy.test.ts` |
+| precondition, flag, entitlement, role   | `access/*.precondition.ts`, `access/*.flag.ts`, `access/*.entitlement.ts`, `access/*.role.ts`                            | through the action that names it                                |
+| event, event version                    | `events/*.event.ts` (bases from `@stackra/events`), `events/<name>-v<n>.change.ts`                                       | the `.contract` test                                            |
+| integration, connection                 | `integrations/*.integration.ts`, `connections/*.connection.ts` (`Connection<Integration>`)                               | `connections/__tests__/<name>.connection.test.ts` (`check()`)   |
+| inbound webhook                         | `events/*.event.ts` (`WebhookEvent<Integration>({ type })`) plus the listener that handles it                            | the listener's test                                             |
+| listener                                | `listeners/*.listener.ts`                                                                                                | `listeners/__tests__/<name>.listener.test.ts`                   |
+| extension point, extension, interceptor | `extensions/*.extension-point.ts`, `extensions/*.extension.ts` (`Extension<Point["slot"]>`), `*.interceptor.ts`          | `extensions/__tests__/<name>.extension.test.ts`                 |
+| port, driver                            | `contracts/ports/*.port.ts` (package), `drivers/<prefix>-<port>.driver.ts`                                               | `drivers/__tests__/<name>.driver.int.test.ts`                   |
+| resource, widget, document              | `resources/<model>/*.resource.ts` (`Resource<Model>`), `*.widget.ts` (`Widget<Query>`), `*.document.ts`                  | the `.contract` test and the console e2e tier                   |
+| notification, mail body                 | `resources/<model>/<name>.notification.ts` with `<name>.mail.tsx` beside it and its `schemas/<name>-data.schema.ts`      | `resources/<model>/__tests__/<name>.notification.test.ts`       |
+| search                                  | the `@Searchable` facet on the model                                                                                     | through the query that uses it                                  |
+| AI                                      | `ai/*.skill.ts`, `ai/*.prompt.ts`, `ai/*.facts.ts` (`Facts<Model>`)                                                      | `.stackra/gen/ai.ts` lists what became a tool                   |
+| class facet + explorer                  | a `createDecorator` facet and `<entry>/<pkg>.explorer.ts`                                                                | the explorer's test                                             |
+| type, constant, function                | `types/*.type.ts`, `constants/*.constant.ts`, `functions/*.function.ts` (`contracts/types/` when public)                 | through their users                                             |
+| fake, matcher, fixture (package)        | `testing/<name>.fake.ts`, `testing/<name>.matcher.ts` (`createMatcher`), `testing/<name>.fixture.ts`                     | `testing/__tests__/<name>.matcher.test.ts`                      |
+| config                                  | `src/config/*.config.ts` (`Config({ schema, env })`, or a `Base`-alias override) and its `<stem>-options.schema.ts`      | compiled by the boot test                                       |
+| contract                                | `stackra.manifest.json` and `openapi.json` at the member root (generated, committed)                                     | `src/__tests__/stackra-manifest.contract.test.ts`               |
+| lang, asset                             | member root `assets/lang/<locale>/<module>.json` (regional overlays hold only differing keys), `assets/<kind>/<module>/` | gen fails on a key missing in a base locale                     |
 
 ### Apps
 
-| Kind                   | Group / suffix                                                                                                             | Test                                                                          | Example                                                             |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| root module            | `src/<key>.module.ts` only to narrow client `imports` or `wrap`; entries generated in `.stackra/entry/`                    | `src/__tests__/<key>.module.test.ts`                                          | `apps/mobile/src/mobile.module.ts`                                  |
-| panel                  | `panels/*.panel.ts` (`extends Panel({ path, area })`)                                                                      | none; gen writes `Panels` into every member that references it                | `apps/console/src/panels/tenant-admin.panel.ts`                     |
-| route, layout          | `routes/<name>/<name>.route.ts` or `<name>.layout.ts`, the page class `<name>.tsx`, `<name>.error.tsx` only to customise   | `routes/<name>/__tests__/<name>.route.test.tsx`, `.e2e.test.ts`, `.flow.yaml` | `apps/console/src/routes/quick-order/`                              |
-| component              | `components/<name>/{<name>.tsx,<name>.props.ts,index.ts}` (`extends Component<Props>`)                                     | `components/<name>/__tests__/<name>.test.tsx`                                 | `apps/web/src/components/product-card/`                             |
-| store                  | `stores/*.store.ts` (`extends Store({ persist })`, the state as fields)                                                    | `stores/__tests__/<name>.store.test.ts`                                       | `apps/console/src/stores/ui.store.ts`                               |
-| menu, shortcut, bridge | `menus/*.menu.ts`, `shortcuts/*.shortcut.ts`, `bridges/*.bridge.ts` (desktop, only for an uncovered need)                  | `__tests__/` beside them                                                      | `apps/console/src/menus/app.menu.ts`, `apps/console/src/shortcuts/` |
-| block, document        | `blocks/<name>/{<name>.block.ts,<name>.tsx,<name>.props.ts}`, `documents/*.document.ts`                                    | `blocks/<name>/__tests__/`                                                    | `apps/mobile/src/blocks/promo-banner/`                              |
-| analytics event        | `analytics/*.analytics-event.ts` (`extends AnalyticsEvent({ name })` from `@stackra/events`)                               | through the component that tracks it                                          | `apps/web/src/analytics/`                                           |
-| flag                   | `flags/*.flag.ts` (`extends Flag`)                                                                                         | through the component it gates                                                | `apps/web/src/flags/pricing-yearly-first.flag.ts`                   |
-| React hook             | `hooks/use-*.ts` (two or more importers), else beside its route or component; its result type in `types/`                  | `hooks/__tests__/use-<name>.test.ts`                                          | `apps/web/src/hooks/use-variant-choice.ts`                          |
-| server helper (web)    | `<name>.server.ts` beside the route that runs it (takes `ctx`, never imports config)                                       | `__tests__/` beside it                                                        | `apps/web/src/routes/`                                              |
-| override               | `src/overrides/<owner>/<owner's own path>`: same file name, same exported name, a `Base` alias for declarations            | `__tests__/` beside it                                                        | `apps/console/src/overrides/@acme/loyalty-kit/`                     |
-| enum                   | `enums/*.enum.ts` (only when one app uses the set)                                                                         | none                                                                          | `apps/console/src/enums/density.enum.ts`                            |
-| config, chrome         | `src/config/*.config.ts` with `src/schemas/<stem>-options.schema.ts`, including `desktop.config.ts` and `chrome.config.ts` | none                                                                          | `apps/console/src/config/desktop.config.ts`                         |
+| Kind                   | Group / suffix                                                                                                             | Test                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| root module            | `src/<key>.module.ts` only to narrow client `imports` or `wrap`; entries generated in `.stackra/entry/`                    | `src/__tests__/<key>.module.test.ts`                                          |
+| panel                  | `panels/*.panel.ts` (`extends Panel({ path, area })`)                                                                      | none; gen writes `Panels` into every member that references it                |
+| route, layout          | `routes/<name>/<name>.route.ts` or `<name>.layout.ts`, the page class `<name>.tsx`, `<name>.error.tsx` only to customise   | `routes/<name>/__tests__/<name>.route.test.tsx`, `.e2e.test.ts`, `.flow.yaml` |
+| component              | `components/<name>/{<name>.tsx,<name>.props.ts,index.ts}` (`extends Component<Props>`)                                     | `components/<name>/__tests__/<name>.test.tsx`                                 |
+| store                  | `stores/*.store.ts` (`extends Store({ persist })`, the state as fields)                                                    | `stores/__tests__/<name>.store.test.ts`                                       |
+| menu, shortcut, bridge | `menus/*.menu.ts`, `shortcuts/*.shortcut.ts`, `bridges/*.bridge.ts` (desktop, only for an uncovered need)                  | `__tests__/` beside them                                                      |
+| block, document        | `blocks/<name>/{<name>.block.ts,<name>.tsx,<name>.props.ts}`, `documents/*.document.ts`                                    | `blocks/<name>/__tests__/`                                                    |
+| analytics event        | `analytics/*.analytics-event.ts` (`extends AnalyticsEvent({ name })` from `@stackra/events`)                               | through the component that tracks it                                          |
+| flag                   | `flags/*.flag.ts` (`extends Flag`)                                                                                         | through the component it gates                                                |
+| React hook             | `hooks/use-*.ts` (two or more importers), else beside its route or component; its result type in `types/`                  | `hooks/__tests__/use-<name>.test.ts`                                          |
+| server helper (web)    | `<name>.server.ts` beside the route that runs it (takes `ctx`, never imports config)                                       | `__tests__/` beside it                                                        |
+| override               | `src/overrides/<owner>/<owner's own path>`: same file name, same exported name, a `Base` alias for declarations            | `__tests__/` beside it                                                        |
+| enum                   | `enums/*.enum.ts` (only when one app uses the set)                                                                         | none                                                                          |
+| config, chrome         | `src/config/*.config.ts` with `src/schemas/<stem>-options.schema.ts`, including `desktop.config.ts` and `chrome.config.ts` | none                                                                          |
 
 ## Generated, never authored
 
@@ -542,10 +492,9 @@ with `client.called(GetOrderQuery)` (a queued call with `client.queued(CancelOrd
 Electron configs, and `.stackra/gen/*.ts`, imported only as `#stackra/<name>` (`i18n`, `assets`,
 `env`, `wiring`, `flags`, `queues`, `panels`, `slots`, `routes`, `migrations`, `manifest`, …) or,
 for a consumed service, as `#stackra/clients/<service>` (one file per service exporting its module,
-action, query, event, enum and permission classes by name). Every `#stackra/*` import in this tree
-has its sample, and every sample is complete. Consumed services' lang files are copied into
-`.stackra/lang/`, so an app never imports a service package. `.stackra/` is fully gitignored; the
-committed contract is `stackra.manifest.json` and `openapi.json` at the member root: consumers
+action, query, event, enum and permission classes by name). Consumed services' lang files are copied
+into `.stackra/lang/`, so an app never imports a service package. `.stackra/` is fully gitignored;
+the committed contract is `stackra.manifest.json` and `openapi.json` at the member root: consumers
 generate their clients from them, `stackra gen --check` fails when they are stale or when an
 identity changed without `@Renamed`, and `apps/docs` publishes projections of them.
 
@@ -574,11 +523,11 @@ overlay key its base lacks). An app changes a consumed module's strings in
 
 ## Framework project vs product repository
 
-`pnpm create stackra my-app` renders this shape with one example service. A larger product uses the
-same generator: many `services/<name>`, private `@acme/*` packages for logic two of its services
-share ([Stackra ADR 0259](https://docs.stackra.figentra.com/adr/0259-module-placement-three-homes),
-home B), and the apps. Nothing in a service file differs between the two; the root runway's topology
-decides whether services run as one process, in groups or one each.
+`pnpm create stackra my-app` renders this shape. A product grows it with the same generator: many
+`services/<name>`, private `@figentra/<product>-*` packages for logic two of its services share
+([Stackra ADR 0259](https://docs.stackra.figentra.com/adr/0259-module-placement-three-homes), home
+B), and an app only when it needs one. Nothing in a service file differs between the two; the root
+runway's topology decides whether services run as one process, in groups or one each.
 
 ## Make it yours
 
@@ -586,27 +535,25 @@ Acme is the example product throughout: every project-specific value names it, a
 placeholder. `acme.example` is a reserved example domain. Replace these with your own before the
 first push (`pnpm create stackra` asks for them and rewrites them for you):
 
-| Value                                                                 | Where                                                                                                                                                    | Put                                                                           |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `acme-platform` (root package `name`)                                 | `package.json`, `runway.yaml` (`project`, `providers.encore.app`, GitHub), `stackra.lock.yaml`, `.mcp.yaml` (Encore app id)                              | your project name and Encore app id                                           |
-| `@acme/*` member names                                                | every app, service and example package `package.json` and their imports, the root scripts' `--filter`, `.claude/launch.json` (`--filter` of each server) | your npm scope                                                                |
-| `acme` organisation                                                   | `runway.yaml` (GitHub, Sentry, Expo), `.github/ISSUE_TEMPLATE/config.yml` (security advisory URL)                                                        | your GitHub, Sentry and Expo organisations                                    |
-| `@acme/platform-team`                                                 | `.github/CODEOWNERS`, `runway.yaml` (production reviewers), `CONTRIBUTING.md` (conduct reports)                                                          | your GitHub team                                                              |
-| `acme.example`, `*.acme.example`                                      | `runway.yaml`, app `runway.yaml`, config defaults                                                                                                        | your domains                                                                  |
-| `example.acme.console`, `example.acme.mobile`, `acme-console`, `acme` | each app's `stackra.config.ts` (`name`, `scheme`, bundle ids), `apps/console/src/config/desktop.config.ts`, Maestro flows                                | your bundle ids and URL schemes                                               |
-| `figentra/stackra-template` (CI badge, repository URL)                | the README badges, `repository` in each `packages/*/*/package.json` (not tooling)                                                                        | your repository (npm provenance checks it)                                    |
-| copyright holder                                                      | `LICENSE` and the copies in each package                                                                                                                 | yours                                                                         |
-| product theme (Acme mark, blue accent)                                | `packages/design-system/theme` (`defineTheme`), `apps/*/assets/public/logo.svg`, `apps/docs/src/docs.json`                                               | your theme                                                                    |
-| Stackra brand assets (all rights reserved)                            | `.github/assets/` (see its `NOTICE`), the README logo block, the brand line in `NOTICE`                                                                  | remove them, or keep them unmodified to say the project is built with Stackra |
-| social preview image                                                  | `.github/assets/social-preview.png`, uploaded by hand under **Settings → General → Social preview**                                                      | your own image; GitHub has no file setting for it                             |
-| `refs-issue-key` rule (off)                                           | `.commitlintrc.yaml`                                                                                                                                     | your tracker's prefix under `rules`, to require an issue-key footer           |
-| `GITHUB_TOKEN` in the release job                                     | `.github/workflows/release.yml`                                                                                                                          | a GitHub App token if the version PR must run the gate                        |
+| Value                                                  | Where                                                                                                                            | Put                                                                           |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `acme-platform` (root package `name`)                  | `package.json`, `runway.yaml` (`project`, `providers.encore.app`, GitHub), `stackra.lock.yaml`, `.mcp.yaml` (Encore app id)      | your project name and Encore app id                                           |
+| `acme` product key                                     | `runway.yaml` (`product.key`); the examples' names follow it (`@figentra/acme-*`), so regenerate or delete them after the change | your product key                                                              |
+| `@acme/docs`                                           | `apps/docs/package.json`, the root `docs` script's `--filter`, `.claude/launch.json`                                             | your npm scope                                                                |
+| `acme` organisation                                    | `runway.yaml` (GitHub, Sentry), `.github/ISSUE_TEMPLATE/config.yml` (security advisory URL)                                      | your GitHub and Sentry organisations                                          |
+| `@acme/platform-team`                                  | `.github/CODEOWNERS`, `runway.yaml` (production reviewers), `CONTRIBUTING.md` (conduct reports)                                  | your GitHub team                                                              |
+| `acme.example`, `*.acme.example`                       | `runway.yaml`, app `runway.yaml`, config defaults                                                                                | your domains                                                                  |
+| `figentra/stackra-template` (CI badge, repository URL) | the README badges                                                                                                                | your repository                                                               |
+| copyright holder                                       | `LICENSE` and the copy in each package (`stackra new` copies it)                                                                 | yours                                                                         |
+| Stackra brand assets (all rights reserved)             | `.github/assets/` (see its `NOTICE`), the README logo block, the brand line in `NOTICE`                                          | remove them, or keep them unmodified to say the project is built with Stackra |
+| social preview image                                   | `.github/assets/social-preview.png`, uploaded by hand under **Settings → General → Social preview**                              | your own image; GitHub has no file setting for it                             |
+| `refs-issue-key` rule (off)                            | `.commitlintrc.yaml`                                                                                                             | your tracker's prefix under `rules`, to require an issue-key footer           |
+| `GITHUB_TOKEN` in the release job                      | `.github/workflows/release.yml`                                                                                                  | a GitHub App token if the version PR must run the gate                        |
 
 Then import `.github/rulesets/main.json` (Settings → Rules → Rulesets), turn on private
 vulnerability reporting (`SECURITY.md`), and install the Renovate app.
 
-Template-only lines, removed in a real project once `@stackra/*` is published: `!.stackra/**` in the
-root and member `.gitignore` files with the committed `.stackra/` samples, and the pre-release step
+Template-only lines, removed in a real project once `@stackra/*` is published: the pre-release step
 in `.github/workflows/ci.yml` with `.github/scripts/preview-gate.mjs`.
 
 Secret values never go in a file: a config's options schema marks a field `@Secret("NAME")` (or its
@@ -624,22 +571,13 @@ your secret store (Infisical by default, Stackra ADR 0173).
 
 ## Reading order
 
-1. The monorepo root: this README's [Tree](#tree), then `package.json`, `pnpm-workspace.yaml` and
-   `turbo.jsonc`
+1. The monorepo root: this README's [Tree](#tree), then `package.json`, `pnpm-workspace.yaml`,
+   `turbo.jsonc` and `runway.yaml` (the product key and the topology)
 2. `AGENTS.md` (grammar, group folders, kind table, dictionary and rules)
-3. `services/commerce/src/modules/orders/README.md`, then `actions/create-order.action.ts` and
-   `workflows/create-order.workflow.ts`
-4. `services/commerce/src/modules/loyalty/extensions/redeem-points.extension.ts` (extending another
-   module)
-5. `services/commerce/.stackra/gen/wiring.ts`, `extensions.ts` and `stackra.manifest.json` (what gen
-   derived and locked)
-6. `services/notifications/README.md` (reaching another service: event, call, command)
-7. `packages/commerce/loyalty-kit/README.md` (shapes index) and
-   `packages/security/access-log/README.md` (a class facet)
-8. `apps/console/README.md` (an app: route folders, flags, the generated entry), then `runway.yaml`
-   (the topology) and `apps/console/runway.yaml`
-9. `apps/docs/src/guides/add-a-field.mdx` (the first change every newcomer makes: a field from the
-   model to the test)
+3. `services/example/` and `packages/application/example/` (what `stackra new` writes)
+4. The framework's programming-model guide and worked examples on
+   [docs.stackra.figentra.com](https://docs.stackra.figentra.com), then your first module in
+   `services/<name>/src/modules/<key>/`
 
 ## Licence
 

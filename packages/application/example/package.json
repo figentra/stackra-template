@@ -1,0 +1,70 @@
+{
+  "name": "@figentra/acme-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "An example package: rename it to the product's first shared package or delete it.",
+  "keywords": [
+    "stackra",
+    "application"
+  ],
+  "license": "UNLICENSED",
+  "files": [
+    "dist",
+    "src",
+    "assets",
+    "stackra.manifest.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./assets/*": "./assets/*"
+  },
+  "imports": {
+    "#src/*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts"
+    ],
+    "#assets/*": "./assets/*"
+  },
+  "scripts": {
+    "build": "stackra build",
+    "typecheck": "stackra typecheck",
+    "lint": "stackra lint",
+    "test": "stackra test",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "clean": "rm -rf dist coverage .turbo .stackra"
+  },
+  "dependencies": {
+    "@stackra/contracts": "catalog:stackra"
+  },
+  "devDependencies": {
+    "@stackra/cli": "catalog:stackra",
+    "@stackra/tsdown-config": "catalog:stackra",
+    "@stackra/typescript-config": "catalog:stackra",
+    "@stackra/vitest-config": "catalog:stackra",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:quality",
+    "oxfmt": "catalog:quality",
+    "oxlint": "catalog:quality",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:quality"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "stackra": {
+    "kind": "package",
+    "tier": "lib",
+    "category": "application",
+    "runtimes": [
+      "isomorphic"
+    ]
+  }
+}

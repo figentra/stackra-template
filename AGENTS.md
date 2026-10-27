@@ -1,8 +1,8 @@
 <!--
 Stackra file contract:
-Purpose: the agent entry for a Stackra project: the programming model v3.1 grammar, the group
-         folders, the kind table, the derived identities, the dictionary and the rules every agent
-         reads first.
+Purpose: the agent entry for a Stackra product repository started from the lean starter: what it
+         holds, the programming model v3.1 grammar, the group folders, the kind table, the derived
+         identities, the dictionary and the rules every agent reads first.
 Boundary: vocabulary and placement only; procedures live in skills, the file-kind → test table and
           the test helpers in README.md, the worked guide in apps/docs/src/guides.
 Runtime: node
@@ -12,7 +12,8 @@ Governing contract: Stackra ADR 0294 as amended by 0305 (programming model v3.1,
                     (extensions), 0159 (migrations), 0146 (config), 0107 and 0218 (integrations),
                     0108 and 0213 (settings), 0164 (panel), 0297 (locale URLs), 0302 (design
                     system), 0300 (presets, spelling), 0022 (tests), 0007 (docblocks, amended),
-                    0231 (naming), 0140 (errors), 0208 (system roles)
+                    0231 (naming), 0140 (errors), 0208 (system roles), 0349 (product package
+                    names), stackra-15 (the lean starter)
 -->
 
 # Agent guide
@@ -40,6 +41,21 @@ gen reads it from the syntax tree without running code, and nothing needs `refle
 Decorators stay where they attach a fact to one member: a field rule, a step, a transition or a
 class facet (the decorator test: if the folder, the suffix, the base class, a field type, a method
 name or a derived name already says it, write no decorator).
+
+## This repository
+
+A lean product starter, not a sample product: the root config, `apps/docs`, one example service
+(`services/example`, `@figentra/acme-service-example`) and one example package
+(`packages/application/example`, `@figentra/acme-example`). Both examples are exactly what
+`stackra new` writes for the product key in `runway.yaml` (`product.key: acme`); never hand-edit
+them into shape. `pnpm validate` runs `.github/scripts/example-drift.mjs`, which reruns
+`stackra new ... --over` per example and fails on a missing file or an authored difference. To start
+real work, create the product's own members with `stackra new` and delete the examples (the check
+skips a deleted one), or write the first module under `services/example/src/modules/<key>/` and drop
+that example's entry from the script. The tool presets are the core `@stackra/*-config` packages
+from `catalog:stackra`; there is no `packages/tooling`. The code below is illustrative: the paths it
+names (`orders`, `commerce`, a console or mobile app) show where a file goes, not files in this
+repository.
 
 ## Grammar
 
@@ -274,7 +290,7 @@ without props is `extends Component`; with props, `extends Component<XProps>` an
 `<name>.props.ts`.
 
 ```tsx
-// apps/console/src/components/pending-changes/pending-changes.tsx (abridged)
+// illustrative: apps/<name>/src/components/pending-changes/pending-changes.tsx
 export class PendingChanges extends Component {
   /** A field whose initializer calls a hook is a read-only hook field. */
   i18n = useTranslation();
@@ -334,7 +350,7 @@ so hosts import `LoyaltyKitModule`. Consumed modules and every other generated c
 imported by name from a per-service subpath, never walked through a namespace:
 
 ```ts
-// apps/mobile/src/mobile.module.ts: kept, because it narrows what the binary ships
+// illustrative: apps/mobile/src/mobile.module.ts, kept because it narrows what the binary ships
 import { Module } from "@stackra/container";
 import { CatalogueModule, OrdersModule } from "#stackra/clients/commerce";
 import { ExperienceModule } from "#stackra/clients/experience";
@@ -470,20 +486,20 @@ reads it with `SettingsReader#get(OrdersSettings)`.
 
 Everything that changes code or assets the member does not own lives in one tree,
 `src/overrides/<owner>/…`, mirroring the owner's own paths. `<owner>` is the package name with its
-scope (`@acme/loyalty-kit`) or `<service>/<module>` for a consumed service module. A file there
-shadows the owner's file at the same path: no keyword, no `.override.tsx` suffix.
+scope (`@figentra/acme-loyalty-kit`) or `<service>/<module>` for a consumed service module. A file
+there shadows the owner's file at the same path: no keyword, no `.override.tsx` suffix.
 
 ```text
-apps/mobile/src/overrides/commerce/orders/assets/lang/ar/orders.json                    keys merged over the owner's
-apps/console/src/overrides/@acme/loyalty-kit/src/react/points-balance/points-balance.tsx  renderer shadow
-apps/console/src/overrides/@acme/loyalty-kit/src/node/resources/loyalty-account/points-balance.widget.ts
+apps/mobile/src/overrides/commerce/orders/assets/lang/ar/orders.json                              keys merged over the owner's
+apps/console/src/overrides/@figentra/acme-loyalty-kit/src/react/points-balance/points-balance.tsx  renderer shadow
+apps/console/src/overrides/@figentra/acme-loyalty-kit/src/node/resources/loyalty-account/points-balance.widget.ts
 ```
 
 A shadow keeps its base's name and imports the base under a `Base` alias; there are no
 `<Host><Base>` names:
 
 ```ts
-import { PointsBalanceWidget as BasePointsBalanceWidget } from "@acme/loyalty-kit/node";
+import { PointsBalanceWidget as BasePointsBalanceWidget } from "@figentra/acme-loyalty-kit/node";
 
 /** On the console dashboard's grid instead of the account page. */
 export class PointsBalanceWidget extends Widget.place(BasePointsBalanceWidget, {
@@ -537,7 +553,7 @@ fail gen (`identity_collision`) and a second override of one base in a member fa
 it as `Base<Name>` and only sets `override` field defaults:
 
 ```ts
-import { LoyaltyKitConfig as BaseLoyaltyKitConfig } from "@acme/loyalty-kit";
+import { LoyaltyKitConfig as BaseLoyaltyKitConfig } from "@figentra/acme-loyalty-kit";
 
 /** Points may cover at most 30 % of an order, below the kit's 50 %. */
 export class LoyaltyKitConfig extends BaseLoyaltyKitConfig {
@@ -692,8 +708,8 @@ mobile) · `IconName` → `@stackra/icons/contracts` · `Bridge` → `@stackra/p
 `@stackra/i18n` · `PromptMoment`, `Capability`, `DesktopMode`, `OverlayStyle`, `OverlayAnchor` →
 `@stackra/platform` · a consumed service's classes → `#stackra/clients/<service>` · `Queues`,
 `Slots`, `Panels`, `Flags`, `Routes`, `I18n`, `Migrations` → `#stackra/*` · a refusal in a test is
-its error class (`refusal(OrderNotPayableError)`), never a code · the theme →
-`@acme/theme/themes/acme/web.css` (web) and `@acme/theme/themes/acme/native.css` (mobile) with
+its error class (`refusal(OrderNotPayableError)`), never a code · the theme → the product's theme
+package's `themes/<key>/web.css` (web) and `themes/<key>/native.css` (mobile) with
 `@stackra/tokens/fonts/fonts.css`; colours are tokens, never literals
 ([Stackra ADR 0302](https://docs.stackra.figentra.com/adr/0302-stackra-design-system-tokens-ui-and-the-playground)).
 `zod` is imported only by generated code and the `@Field(zod)` hatch.
@@ -785,8 +801,9 @@ its error class (`refusal(OrderNotPayableError)`), never a code · the theme →
 ## Commands
 
 Every repo operation is a `stackra` command behind a root script: `pnpm gen` (after any declaration
-change; commit the member's `stackra.manifest.json` and `openapi.json`), `pnpm new <kind> <name>`,
-`pnpm verify` (the gate CI runs), `pnpm validate`, `pnpm structure` (the group → kind → test table),
+change; commit the member's `stackra.manifest.json` and `openapi.json`), `pnpm new <kind> <name>`
+(`stackra new`, which names the member after the product key), `pnpm verify` (the gate CI runs),
+`pnpm validate` (with the example drift check), `pnpm structure` (the group → kind → test table),
 `pnpm db:diff`, `pnpm run doctor` (`run`, because `pnpm doctor` is pnpm's own command). Agent
 skills, sub-agents, rules and guard hooks are not in this repository: install them once per machine
 with `stackra agents setup` (`@stackra/skills`), and read framework know-how through the Stackra MCP
