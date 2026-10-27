@@ -4,12 +4,14 @@ description: "A test beside every subject; helpers come from the package that ow
 icon: "flask-conical"
 ---
 
+{/* Stackra file contract: Purpose: where tests go in this project, their tiers, and which package each test helper comes from. Boundary: a guide; its code is illustrative (an orders module in a service you add), since the lean starter's two examples hold no tests yet. Runtime: docs. Governing contract: Stackra ADR 0294 and 0305; stackra-15 (the lean starter); stackra-177. */}
+
 Every test file sits in a `__tests__/` folder beside its subject and is named after it
 (`access/order.policy.ts` → `access/__tests__/order.policy.test.ts`). Every `describe` names its
 subject by class, and every `describe` and `it` carries a docblock saying why the case matters. The
 tier is in the file name: unit is unmarked, `.int.test.ts` uses a Postgres container,
 `.contract.test.ts` checks the manifest against the previous release, `.e2e.test.ts` is Playwright,
-and a mobile journey is a Maestro `*.flow.yaml` beside the routes it drives.
+and a mobile app's journey is a Maestro `*.flow.yaml` beside the routes it drives.
 
 ## Where helpers come from
 
@@ -39,12 +41,12 @@ Apps and services fake a generated client the same way, `fakeClient((fake) => fa
 `client.called(X)`: never a string or a computed key.
 
 ```ts
-// GetOrderQuery from "#stackra/clients/commerce"; QuotePriceQuery and NoPriceError from
+// illustrative: GetOrderQuery from "#stackra/clients/orders"; QuotePriceQuery and NoPriceError from
 // "#stackra/clients/pricing"; OrderNotPayableError from "#modules/orders/errors/order-not-payable.error"
-const commerce = fakeClient((fake) => fake.on(GetOrderQuery).returns(order));
+const orders = fakeClient((fake) => fake.on(GetOrderQuery).returns(order));
 const pricing = fakeClient((fake) => fake.on(QuotePriceQuery).throws(refusal(NoPriceError)));
 
-expect(commerce.called(GetOrderQuery)).toEqual([{ orderId: order.id }]);
+expect(orders.called(GetOrderQuery)).toEqual([{ orderId: order.id }]);
 const result = await run(CancelOrderAction, { orderId }, { as: actors.customer() });
 expect(result).toRefuseWith(refusal(OrderNotPayableError));
 ```
@@ -59,10 +61,10 @@ it.
 
 ## Budgets are tests
 
-Axe runs in every end-to-end journey and fails on serious or critical findings; mobile pages run
-`axe` and an RTL check under the Arabic locale in their unit tests. The site's `lighthouserc.yaml`
-fails the build when a route exceeds its performance numbers, and every Arabic plural must carry all
-six CLDR categories or gen fails.
+Axe runs in every end-to-end journey and fails on serious or critical findings; a mobile app's pages
+run `axe` and an RTL check under the Arabic locale in their unit tests. A public site's
+`lighthouserc.yaml` fails the build when a route exceeds its performance numbers, and every Arabic
+plural must carry all six CLDR categories or gen fails.
 
 ## Components, extensions and migrations
 
