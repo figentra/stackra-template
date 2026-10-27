@@ -99,3 +99,6 @@ android/
 .mcp.json
 # The release SBOM, written by `pnpm sbom` in CI and uploaded from there.
 sbom.cdx.json
+
+# Generated docs site (ADR 0002 as amended by STA-1316); after the template re-include so it wins.
+**/.stackra/site/
