@@ -1,5 +1,10 @@
 {
   "$comment": "Stackra file contract — Purpose: the ar-SA overlay of `console::`: Saudi business usage names a tenant an establishment (منشأة), as the Kingdom's commercial registry and government platforms do; Boundary: an overlay holds differing keys only; every other key falls back along ar-SA → ar → en; Runtime: browser; Governing contract: ADR 0080, ADR 0192, ADR 0234 d9",
+  "enums": {
+    "settings_tab": {
+      "tenant": "المنشأة"
+    }
+  },
   "tenant": {
     "switch": "تبديل المنشأة",
     "none_title": "لا توجد منشأة بعد",

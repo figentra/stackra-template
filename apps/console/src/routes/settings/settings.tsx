@@ -71,7 +71,7 @@ export class Settings extends Component<RouteProps<typeof SettingsRoute>> {
   get densities() {
     return Enum.values(Density).map((density) => ({
       value: density,
-      label: this.i18n.t(I18n.enums.density[density]),
+      label: this.i18n.t(I18n.console.enums.density[density]),
     }));
   }
 
@@ -91,10 +91,14 @@ export class Settings extends Component<RouteProps<typeof SettingsRoute>> {
         <h1 className="text-xl font-semibold">{t(I18n.pages.settings.title)}</h1>
         <Tabs aria-label={t(I18n.pages.settings.tabs)}>
           <Tabs.List>
-            <Tabs.Tab id={SettingsTab.Device}>{t(I18n.enums.settings_tab.device)}</Tabs.Tab>
-            <Tabs.Tab id={SettingsTab.Privacy}>{t(I18n.enums.settings_tab.privacy)}</Tabs.Tab>
+            <Tabs.Tab id={SettingsTab.Device}>{t(I18n.console.enums.settings_tab.device)}</Tabs.Tab>
+            <Tabs.Tab id={SettingsTab.Privacy}>
+              {t(I18n.console.enums.settings_tab.privacy)}
+            </Tabs.Tab>
             {data.tenant && (
-              <Tabs.Tab id={SettingsTab.Tenant}>{t(I18n.enums.settings_tab.tenant)}</Tabs.Tab>
+              <Tabs.Tab id={SettingsTab.Tenant}>
+                {t(I18n.console.enums.settings_tab.tenant)}
+              </Tabs.Tab>
             )}
           </Tabs.List>
           <Tabs.Panel id={SettingsTab.Device}>

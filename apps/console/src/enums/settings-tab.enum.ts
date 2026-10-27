@@ -3,7 +3,7 @@
  * Purpose: the sections of the console's settings page, one tab each.
  * Boundary: an `Enum.of` value plus the type of the same name; app-local (only the settings page
  *           shows these tabs). Each code is the tab's id; the labels are the derived i18n keys
- *           `enums::settings_tab.<code>`. The page leaves out the tenant tab when its loader
+ *           `console::enums.settings_tab.<code>`. The page leaves out the tenant tab when its loader
  *           returned no tenant values.
  * Runtime: browser
  * Governing contract: ADR 0294 (decisions 4, 16 and 20), ADR 0231 (snake_case codes)

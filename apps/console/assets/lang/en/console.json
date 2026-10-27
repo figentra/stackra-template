@@ -1,5 +1,16 @@
 {
-  "$comment": "Stackra file contract — Purpose: the console's chrome strings (namespace `console::`): the shell, the palette, the switchers, the offline banner, the queue, the inbox, the realtime chip, errors and risk labels; Boundary: keys this app's components reference; page copy is `pages::`, document copy `documents::`, derived shortcut, enum and menu labels have their own namespaces; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "$comment": "Stackra file contract — Purpose: the console's chrome strings (namespace `console::`): the shell, the palette, the switchers, the offline banner, the queue, the inbox, the realtime chip, errors and risk labels; Boundary: keys this app's components reference; page copy is `pages::`, document copy `documents::`, the derived labels of the console's own enums sit under `enums.<enum>.<code>` (gen derives `console::enums.*`), derived shortcut and menu labels have their own namespaces; every Arabic plural carries zero, one, two, few, many and other; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0234 d9, ADR 0080, ADR 0192 (ICU plurals)",
+  "enums": {
+    "density": {
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    },
+    "settings_tab": {
+      "device": "This device",
+      "privacy": "Privacy",
+      "tenant": "Tenant"
+    }
+  },
   "shell": {
     "brand": "Acme Console",
     "top_bar": "Top bar",

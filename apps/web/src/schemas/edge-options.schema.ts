@@ -17,7 +17,8 @@ import type { CacheRule } from "#src/schemas/cache-rule.schema";
 /** The data cache profiles and what the Worker does around the router. */
 export class EdgeOptions extends Schema {
   /** One rule per `CacheProfile` code; a query's `{ cache }` option names the profile. */
-  cache: Record<CacheProfile, CacheRule> = {
+  // A shape map is keyed by `string` (gen compiles no enum-keyed record); the keys are `CacheProfile` codes.
+  cache: Record<string, CacheRule> = {
     [CacheProfile.Marketing]: {
       freshFor: Duration.days(1),
       staleFor: Duration.days(7),
