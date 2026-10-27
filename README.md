@@ -401,6 +401,14 @@ then blanks it. There is no `.npmrc` with a value and no repository secret. The 
 `heroui-native-pro` MCP servers in `.mcp.yaml` read the same token through `stackra mcp exec`, never
 from a file. No Pro source is committed.
 
+The `@stackra` and `@stackra-pro` scopes resolve from the Stackra registry,
+`https://npm.stackra.figentra.com/`, through the scope mappings in `.npmrc`
+([Stackra ADR 0453](https://docs.stackra.figentra.com/adr/0453-the-stackra-registry-one-npm-compatible-store-on-cloudflare-and-our-own-licence-engine)
+decision 10). Free `@stackra/*` packages need no account and no token. A team that installs
+`@stackra-pro/*` adds one line to `.npmrc`, a reference that pnpm expands from the environment:
+`//npm.stackra.figentra.com/:_authToken=${STACKRA_LICENCE_TOKEN}`, with the licence token kept in
+its vault, never in a file.
+
 ## How each member kind is created
 
 | Kind    | Command                                              | What it writes                                                                                                                                               |
