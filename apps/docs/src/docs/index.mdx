@@ -1,27 +1,31 @@
 ---
-title: "Acme Retail on Stackra"
-description: "One commerce service, a console, a mobile app and a public site on Stackra."
+title: "Acme on Stackra"
+description: "The lean Stackra starter: one example service, one example package and this site."
 icon: "house"
 ---
 
-Acme Retail is a `pnpm create stackra` project. It has one service (`@acme/service-commerce`:
-catalogue, inventory, orders, loyalty), the console that renders what that service declares, the
-public site, and this documentation. Everything a page here says about the API is generated from the
-service's committed manifest, so it cannot drift from the code.
+{/* Stackra file contract: Purpose: the landing page of the Acme docs: what the lean starter holds and where to read next. Boundary: describes only the starter's members (services/example, packages/application/example, apps/docs); framework rules are the root AGENTS.md and Stackra's own docs. Runtime: docs. Governing contract: Stackra ADR 0002 (2026-10-27 amendment); stackra-15 (the lean starter); stackra-177. */}
+
+Acme is a placeholder product started from the Stackra template (`product.key: acme` in the root
+`runway.yaml`). The starter is lean: one example service (`services/example`,
+`@figentra/acme-service-example`), one example package (`packages/application/example`,
+`@figentra/acme-example`) and this documentation. Both examples are exactly what `stackra new`
+writes, with no modules yet; rename them to your first service and package, or delete them. A
+product adds apps only when it needs one.
 
 <CardGroup cols={2}>
   <Card title="Quickstart" icon="rocket" href="/quickstart">
-    Run the service, the console and the site locally in ten minutes.
+    From clone to a generated, running workspace.
   </Card>
   <Card title="The programming model" icon="shapes" href="/guides/programming-model">
     v3.1: the path says the kind, the base class is the kind, one declaration per file; gen derives
     and locks the identities.
   </Card>
-  <Card title="Decisions" icon="landmark" href="/adr">
-    Why the repository looks the way it does, one ADR per decision.
+  <Card title="Testing" icon="flask-conical" href="/guides/testing">
+    Where each test goes and which package each helper comes from.
   </Card>
-  <Card title="API reference" icon="code" href="/api-reference/introduction">
-    Every public action and event of the commerce service, with try-it.
+  <Card title="Decisions" icon="landmark" href="/adr">
+    The project's own decisions, one ADR per decision.
   </Card>
 </CardGroup>
 
@@ -29,7 +33,8 @@ service's committed manifest, so it cannot drift from the code.
 
 1. `AGENTS.md` at the repository root: the programming model v3.1 grammar, the group folders, the
    kind table and the dictionary.
-2. `services/commerce/src/modules/orders/README.md`, then `actions/create-order.action.ts`.
-3. The [programming model](/guides/programming-model) guide.
-4. [Add a field end to end](/guides/add-a-field): one change through every file it touches.
-5. One ADR, [0001](/adr/0001-loyalty-ledger-is-a-port), to see how a decision is recorded.
+2. `README.md` at the repository root: the structure, how each member kind is created and what to
+   replace.
+3. The [programming model](/guides/programming-model) guide, then [testing](/guides/testing).
+4. `services/example/README.md` and `packages/application/example/README.md`, before you rename or
+   replace them.

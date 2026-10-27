@@ -5,8 +5,8 @@
  * Boundary: data only; no function, no environment read and no import of the app's own code.
  * Runtime: node
  * Governing contract: Stackra ADR 0295 (decisions 1 and 2); Stackra ADR 0002 (2026-10-27 amendment); Stackra ADR 0082
- *                     (API areas).
+ *                     (API areas); stackra-177 (the lean starter's name).
  */
 import { ApiArea, defineApp } from "@stackra/contracts";
 
-export default defineApp({ targets: [], area: ApiArea.Public, name: "Acme Retail docs" });
+export default defineApp({ targets: [], area: ApiArea.Public, name: "Acme docs" });
