@@ -16,7 +16,6 @@
  *                     ADR 0301 (decisions 2, 3 and 7), ADR 0114
  */
 import { OgKind, SeoConfig as BaseSeoConfig } from "@stackra/seo";
-import { Enum } from "@stackra/contracts";
 
 /** How the site is found: title template, robots groups, sitemap paging and OG image kinds. */
 export class SeoConfig extends BaseSeoConfig {
@@ -49,7 +48,7 @@ export class SeoConfig extends BaseSeoConfig {
 
   /** The OG image route: the kinds it answers, the size and the edge lifetime of an image. */
   override og: BaseSeoConfig["og"] = {
-    kinds: Enum.values(OgKind),
+    kinds: [OgKind.Site, OgKind.Page, OgKind.Product],
     width: 1200,
     height: 630,
     cacheSeconds: 86_400,

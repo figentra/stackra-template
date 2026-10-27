@@ -13,13 +13,14 @@
  *           (`chrome.config.ts`). Per-tenant brand at runtime is Pro on mobile (ADR 0180 decision
  *           1): white-label builds arrive through an EAS variant in runway.yaml, so this app shows
  *           only the scheme switch. The splash colours are the only literals because the native
- *           splash cannot read CSS. Fields typed by an enum restate their type; nested objects
- *           merge the base value explicitly.
+ *           splash cannot read CSS. `ColorScheme` is a string union, so schemes are literals.
+ *           The splash is written whole: the base's is computed from the Stackra theme, so
+ *           `...this.splash` is no gen constant.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (decision 19, as amended by programming model v3.1, AGENTS.md: Base
  *                     alias), ADR 0295 (decisions 4 and 10), ADR 0056, ADR 0080, ADR 0180, ADR 0234
  */
-import { ColorScheme, ThemingConfig as BaseThemingConfig } from "@stackra/theming";
+import { type ColorScheme, ThemingConfig as BaseThemingConfig } from "@stackra/theming";
 
 /** The `acme` theme's light and dark schemes, following the system until the user picks one. */
 export class ThemingConfig extends BaseThemingConfig {
@@ -30,16 +31,16 @@ export class ThemingConfig extends BaseThemingConfig {
   override logo = "mobile::public/logo.svg";
 
   /** The schemes the settings page offers. */
-  override schemes: ColorScheme[] = [ColorScheme.Light, ColorScheme.Dark, ColorScheme.System];
+  override schemes: ColorScheme[] = ["light", "dark", "system"];
 
   /** The scheme of a first launch. */
-  override defaultScheme: ColorScheme = ColorScheme.System;
+  override defaultScheme: ColorScheme = "system";
 
   /** The Android status bar and the adaptive icon background, per scheme. */
   override themeColor = { light: "#f7f7f5", dark: "#1c1e22" };
 
   /** The native splash background per scheme; the image is derived from `logo`. */
-  override splash = { ...this.splash, background: { light: "#f7f7f5", dark: "#1c1e22" } };
+  override splash = { background: { light: "#f7f7f5", dark: "#1c1e22" } };
 
   /** Platform fonts, which cover Arabic script natively, until the theme ships font files. */
   override selfHostedFonts = false;

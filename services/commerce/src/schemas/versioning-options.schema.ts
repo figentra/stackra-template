@@ -23,7 +23,7 @@ export class VersioningOptions extends Schema {
     pattern: /^\d{4}-\d{2}-\d{2}$/,
     each: true,
   })
-  supported = ["2026-10-01", "2027-03-01"];
+  supported: string[] = ["2026-10-01", "2027-03-01"];
 
   /** What a caller with no pin gets: the oldest supported date, so it never breaks. */
   @Str({ pattern: /^\d{4}-\d{2}-\d{2}$/ })

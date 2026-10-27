@@ -16,6 +16,9 @@ import { Routes, type RouteKey } from "#stackra/routes";
 /** A label per locale and one of the site's route keys. */
 export class CallToAction extends Schema {
   /** The button's label, one value per locale. */
+  // reason: `LocalizedText` ships no schema, so gen cannot compile it; this is its shape, a
+  // read-only map of locale tag to text
+  @Field(z.record(z.string(), z.string()).readonly())
   label!: LocalizedText;
 
   /** The route the button opens, in the visitor's locale mount. */

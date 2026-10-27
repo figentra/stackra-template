@@ -22,7 +22,8 @@ import {
   OfflineMode,
   OfflinePrecondition,
 } from "@stackra/actions";
-import { type Cache, CacheKey } from "@stackra/cache";
+import { CacheKey } from "@stackra/cache";
+import type { Cache } from "@stackra/cache/contracts";
 import { ActorKind } from "@stackra/contracts";
 import { Product } from "#modules/catalogue/models/product.model";
 import type { ProductStateMachine } from "#modules/catalogue/models/product.state-machine";

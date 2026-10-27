@@ -17,7 +17,7 @@ import { RealtimeConfig as BaseRealtimeConfig } from "@stackra/realtime";
 /** Customers never subscribe to tenant channels; a staff token lasts five minutes. */
 export class RealtimeConfig extends BaseRealtimeConfig {
   /** Only the tenant's staff may subscribe. */
-  override channelRealms: Realm[] = [Realm.Tenant];
+  override channelRealms: Realm[] = [Realm.Staff];
 
   /** How long a subscribe token stays valid. */
   override subscribeTokenTtl = Duration.minutes(5);

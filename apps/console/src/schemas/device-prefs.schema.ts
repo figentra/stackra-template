@@ -10,14 +10,14 @@
  * Governing contract: ADR 0294 (decisions 4 and 8), ADR 0256 (prefs store)
  */
 import { Locale } from "@stackra/i18n";
-import { ColorScheme } from "@stackra/theming";
+import type { ColorScheme } from "@stackra/theming";
 import { Schema } from "@stackra/validation";
 import { Density } from "#src/enums/density.enum";
 
 /** Theme, language, density, local notifications and the consent switches on this device. */
 export class DevicePrefs extends Schema {
   /** The colour scheme; `system` follows the operating system. */
-  scheme: ColorScheme = ColorScheme.System;
+  scheme: ColorScheme = "system";
 
   /** The interface language. */
   locale: Locale = Locale.En;

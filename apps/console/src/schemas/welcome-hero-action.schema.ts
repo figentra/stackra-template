@@ -16,6 +16,9 @@ import { Routes, type RouteKey } from "#stackra/routes";
 /** A label key and one of the console's route keys. */
 export class WelcomeHeroAction extends Schema {
   /** The button's label, as an i18n key the document references. */
+  // reason: `I18nKey` ships no schema; a key is `<namespace>::<path>`, so the document check needs
+  // a string with the separator
+  @Field(z.custom<I18nKey>((key) => typeof key === "string" && key.includes("::")))
   labelKey!: I18nKey;
 
   /** The route the button opens. */

@@ -35,7 +35,7 @@ export class FeatureFlagsConfig extends BaseFeatureFlagsConfig {
   override refreshEvery = Duration.seconds(60);
 
   /** Evaluate per tenant. */
-  override targeting: FlagTargeting = FlagTargeting.Tenant;
+  override targeting: FlagTargeting = FlagTargeting.Scope;
 
   /** Fail gen on a flag past its expiry instead of warning. */
   override failOnExpired = true;

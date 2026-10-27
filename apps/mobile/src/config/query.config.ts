@@ -17,7 +17,7 @@ import { QueryConfig as BaseQueryConfig, QueryScope } from "@stackra/query";
 /** Keyed by tenant, so a switch never shows another tenant's data; replayed gently on a radio. */
 export class QueryConfig extends BaseQueryConfig {
   /** What the cache and the queue are keyed by. */
-  override scope: QueryScope = QueryScope.Tenant;
+  override scope: QueryScope = QueryScope.ActiveScope;
 
   /** Hours a persisted query survives a cold start. */
   override persistMaxAgeHours = 24;

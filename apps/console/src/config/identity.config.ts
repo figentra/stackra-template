@@ -8,7 +8,9 @@
  *           the first route, reports any failure except "signed out" and boots signed out, and
  *           flips to signed out on a 401 from any generated client. No client secret exists on a
  *           browser client; the issuer and client id come from the BFF's discovery endpoint. The
- *           sign-in route is `SignInRoute`, which the shell's loader redirects to by key. The PKCE
+ *           sign-in route is `SignInRoute`, which the shell's loader redirects to by key. Sign-out keeps
+ *           the base's `postLogoutRoute` (`null`, the sign-in route): a route ref is no gen constant,
+ *           and the shell's loader would send a signed-out dashboard to sign in anyway. The PKCE
  *           loopback port is a dev fact in runway.yaml. The class keeps the base's name and imports
  *           the base as `BaseIdentityConfig`; a second override of the same base fails gen.
  * Runtime: isomorphic
@@ -18,8 +20,6 @@
  */
 import { Target } from "@stackra/contracts";
 import { AuthFlow, IdentityConfig as BaseIdentityConfig } from "@stackra/identity";
-import type { RouteRef } from "@stackra/navigation";
-import { Routes } from "#stackra/routes";
 
 /** How the console authenticates: BFF cookie session on web and PWA, PKCE on desktop. */
 export class IdentityConfig extends BaseIdentityConfig {
@@ -32,12 +32,6 @@ export class IdentityConfig extends BaseIdentityConfig {
 
   /** The BFF mount, relative to the API origin. */
   override bffEndpoint = "/api/auth";
-
-  /**
-   * Where the browser lands after signing out, as a route ref so a removed route is a type error;
-   * signed out, the shell's loader sends it on to sign in.
-   */
-  override postLogoutRoute: RouteRef = Routes.dashboard;
 
   /** Signs out a forgotten shared till after 30 minutes; the queue pauses, never drops. */
   override idleMinutes = 30;

@@ -12,7 +12,8 @@
  * Runtime: node
  * Governing contract: ADR 0294 (decisions 13, 16 and 17), ADR 0105 (as amended), ADR 0137 (cache)
  */
-import { type Cache, CacheKey } from "@stackra/cache";
+import { CacheKey } from "@stackra/cache";
+import type { Cache } from "@stackra/cache/contracts";
 import { Duration, type PublicId } from "@stackra/contracts";
 import { CrudService } from "@stackra/database";
 import type { Locale } from "@stackra/i18n";

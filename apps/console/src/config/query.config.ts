@@ -21,7 +21,7 @@ import type { QueueLeader } from "@stackra/query/contracts";
 /** Server state on the client: the persisted query cache and the offline mutation queue. */
 export class QueryConfig extends BaseQueryConfig {
   /** Key cache and queue by tenant so a switch never shows another tenant's data. */
-  override scope: QueryScope = QueryScope.Tenant;
+  override scope: QueryScope = QueryScope.ActiveScope;
 
   /** Encrypt the persisted cache at rest. */
   override persistEncrypted = true;

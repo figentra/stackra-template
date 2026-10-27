@@ -4,7 +4,8 @@
  *          (never indexed), an optional fixed site for a single-tenant deployment, the product
  *          whose plan ladder the pricing pages sell, where "start trial" goes and the developer
  *          docs the header links to.
- * Boundary: a shape class read by `SiteConfig`; values only. Preview prefixes per environment come
+ * Boundary: a shape class read by `SiteConfig`; values only. `docsUrl` is a `Url`, which gen checks as an absolute URL;
+ *           a rule decorator does not apply to a brand type. Preview prefixes per environment come
  *           through runway `config.web.site`.
  * Runtime: isomorphic
  * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md), ADR 0297
@@ -29,6 +30,5 @@ export class SiteOptions extends Schema {
   signupPath = "/signup";
 
   /** The developer documentation on its own host; the header's menu opens it in a new tab. */
-  @Str({ pattern: /^https:\/\// })
   docsUrl: Url = "https://docs.acme.example";
 }

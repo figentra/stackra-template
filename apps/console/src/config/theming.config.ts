@@ -7,7 +7,8 @@
  *          theme colours per scheme from the theme's `background` token.
  * Boundary: an override keeps the base's name and imports the base as `BaseThemingConfig`; it sets
  *           `override` field defaults only and inherits the base's key (`theming`). A second
- *           override of the same base fails gen. Colours are tokens, never literals here: the
+ *           override of the same base fails gen. Defaults are gen constants: the logo is its asset
+ *           key and `ColorScheme` is a string union, so both are literals. Colours are tokens, never literals here: the
  *           stylesheet imports `@acme/theme/themes/acme/web.css` and the faces from
  *           `@stackra/tokens/fonts/fonts.css`. Per-tenant brand at runtime is Pro (brand service),
  *           so the console shows the house theme only.
@@ -16,8 +17,7 @@
  *                     Base alias), ADR 0302 (design system), ADR 0080 d4 (light and dark from
  *                     tokens), ADR 0234 (asset keys)
  */
-import { ColorScheme, ThemingConfig as BaseThemingConfig } from "@stackra/theming";
-import { Assets } from "#stackra/assets";
+import { type ColorScheme, ThemingConfig as BaseThemingConfig } from "@stackra/theming";
 
 /** Look of the console: theme, logo source, schemes and fonts. */
 export class ThemingConfig extends BaseThemingConfig {
@@ -25,13 +25,13 @@ export class ThemingConfig extends BaseThemingConfig {
   override theme = "acme";
 
   /** The one SVG every icon derives from. */
-  override logo = Assets.console.public.logo_svg;
+  override logo = "console::public/logo.svg";
 
   /** Schemes the toggle cycles through, in order. */
-  override schemes: ColorScheme[] = [ColorScheme.Light, ColorScheme.Dark, ColorScheme.System];
+  override schemes: ColorScheme[] = ["light", "dark", "system"];
 
   /** The scheme of a first visit. */
-  override defaultScheme: ColorScheme = ColorScheme.System;
+  override defaultScheme: ColorScheme = "system";
 
   /**
    * Self-host and preload the theme's faces (Geist, IBM Plex Sans Arabic) from

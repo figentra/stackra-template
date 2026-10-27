@@ -63,6 +63,7 @@
     "@stackra/notifications": "catalog:stackra",
     "@stackra/outbox": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
+    "@stackra/scheduler": "catalog:stackra",
     "@stackra/settings": "catalog:stackra",
     "@stackra/tenancy": "catalog:stackra",
     "@stackra/transport": "catalog:stackra",
@@ -73,6 +74,7 @@
   "devDependencies": {
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
+    "@stackra/tsdown-config": "workspace:*",
     "@stackra/typescript-config": "workspace:*",
     "@stackra/vitest-config": "workspace:*",
     "oxfmt": "catalog:quality",

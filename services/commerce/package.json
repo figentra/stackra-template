@@ -93,6 +93,7 @@
     "@stackra/gen": "catalog:stackra",
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
+    "@stackra/tsdown-config": "workspace:*",
     "@stackra/typescript-config": "workspace:*",
     "@stackra/vitest-config": "workspace:*",
     "oxfmt": "catalog:quality",
