@@ -4,7 +4,7 @@ Purpose: the agent entry for a Stackra project: the programming model v3.1 gramm
          folders, the kind table, the derived identities, the dictionary and the rules every agent
          reads first.
 Boundary: vocabulary and placement only; procedures live in skills, the file-kind → test table and
-          the test helpers in README.md, the worked guide in apps/docs/src/guides.
+          the test helpers in README.md, the worked guide in apps/docs/src/docs/guides.
 Runtime: node
 Governing contract: Stackra ADR 0294 as amended by 0305 (programming model v3.1, class
                     components), 0306 (overrides), 0307 (panel), 0308 (integrations) and 0309
@@ -772,9 +772,8 @@ its error class (`refusal(OrderNotPayableError)`), never a code · the theme →
   comments; a strict JSON file whose tool tolerates an extra key carries it in `$comment`
   (`.claude/launch.json`, `.changeset/config.json`). The recorded exceptions take no header because
   their tool rejects unknown keys or every key is data: `.github/rulesets/main.json` (GitHub's
-  ruleset schema), `apps/docs/src/docs.json` (validated by `mint validate` against Mintlify's
-  schema), every `package.json` (its `description` says what the member is), `assets/lang/**/*.json`
-  (every key is a message) and the AI eval datasets under `assets/ai/`.
+  ruleset schema), every `package.json` (its `description` says what the member is),
+  `assets/lang/**/*.json` (every key is a message) and the AI eval datasets under `assets/ai/`.
 - Naming
   ([Stackra ADR 0231](https://docs.stackra.figentra.com/adr/0231-naming-and-casing-standard)):
   module keys one snake_case segment; verbs `get`, `list`, `search`, `stats`, qualifier last; codes
