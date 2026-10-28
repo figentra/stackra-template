@@ -15,6 +15,10 @@
   (`renovate.json5`) proposes the updates.
 - Runner images are pinned (`ubuntu-24.04`), so an image upgrade is a reviewed change.
 - The toolchain comes from `mise.toml`, so CI runs the same versions as a contributor.
+- Turborepo remote cache (Stackra STA-1393): a job that runs turbo first logs in to Infisical by
+  OIDC with the org variable `INFISICAL_TURBO_IDENTITY_ID` and exports `TURBO_API`, `TURBO_TOKEN`,
+  `TURBO_TEAM` and `TURBO_REMOTE_CACHE_SIGNATURE_KEY` from `/ci/turbo`. Without the variable the
+  step is skipped and turbo uses its local cache only.
 
 ## Branch rules
 
