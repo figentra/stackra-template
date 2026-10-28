@@ -35,9 +35,6 @@ export class AnalyticsConfig extends BaseAnalyticsConfig {
   /** Send field web vitals with the page view. */
   override webVitals = true;
 
-  /** Record session replays; off on the public site. */
-  override sessionReplay = false;
-
   /** Run without cookies until consent is granted. */
   override cookieless = true;
 
