@@ -118,6 +118,7 @@ words:
   - maestro
   - magento
   - mailpit
+  - mapfile
   - maxage
   - meilisearch
   - menuitemradio
@@ -153,6 +154,7 @@ words:
   - pgvector
   - picsum
   - pinnable
+  - pipefail
   - pitr
   - pkce
   - plpgsql
@@ -180,8 +182,10 @@ words:
   - riyals
   - rtl
   - runway
+  - sbdchd
   - sbom
   - sessionless
+  - shellcheck
   - shfmt
   - siem
   - slos
@@ -190,6 +194,7 @@ words:
   - spicedb
   - ssr
   - stackra
+  - stmts
   - stylesheet
   - svix
   - syft
@@ -217,6 +222,7 @@ words:
   - upstash
   - uuidgen
   - valkey
+  - varchar
   - vite
   - vitest
   - wcag
