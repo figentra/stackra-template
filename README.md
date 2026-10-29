@@ -221,10 +221,10 @@ decisions 2 and 3): the product ships packages, and the root `runway.yaml` names
 around them. `surfaces:` lists each web surface (here `console` on the `os/console@3` shell and
 `landing` on `os/landing@1` seeded from `assets/landing`) with the packages it loads and its host;
 `mobile:` lists each app from the OS mobile template (here `app` on `os/mobile@3`) with its
-identity, capabilities and the `assets/mobile/<app>` and `assets/store/<app>/<locale>` sources.
-Both entries load the example package; point them at the product's own packages or delete them.
-A screen is a route, block or component in a package's `react/` or `native/` entry, never an
-`apps/<name>` folder.
+identity, capabilities and the `assets/mobile/<app>` and `assets/store/<app>/<locale>` sources. Both
+entries load the example package; point them at the product's own packages or delete them. A screen
+is a route, block or component in a package's `react/` or `native/` entry, never an `apps/<name>`
+folder.
 
 ## Developer experience
 

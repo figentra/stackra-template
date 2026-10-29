@@ -385,10 +385,10 @@ index on an existing table without `.concurrently()`.
 
 ## Clients and sites
 
-A product has no app members (ADR 0441): its console, landing site and mobile apps are entries
-under `surfaces:` and `mobile:` in the root `runway.yaml`, OS shells that load the product's
-packages, and Runway builds them. A package's `react/` and `native/` entries carry the screens.
-Every client consumes manifests the same way: it imports a service's classes by name from
+A product has no app members (ADR 0441): its console, landing site and mobile apps are entries under
+`surfaces:` and `mobile:` in the root `runway.yaml`, OS shells that load the product's packages, and
+Runway builds them. A package's `react/` and `native/` entries carry the screens. Every client
+consumes manifests the same way: it imports a service's classes by name from
 `#stackra/clients/<service>` (`CreateOrderAction`, `GetOrderQuery`, `OrderPaid`), gen infers the
 consumed services from those imports and records them in the app's manifest. Types come from the
 class, `ActionInput<typeof CreateOrderAction>`, never from a hand-written type. Routes are keyed by

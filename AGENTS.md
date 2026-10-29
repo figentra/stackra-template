@@ -56,13 +56,13 @@ skips a deleted one), or write the first module under `services/example/src/modu
 that example's entry from the script. The tool presets are the core `@stackra/*-config` packages
 from `catalog:stackra`; there is no `packages/tooling`.
 
-There is no app member besides `apps/docs` (ADR 0441 decisions 2 and 3). The product ships
-packages; its web surfaces (`console`, `landing`, …) and mobile apps are entries under `surfaces:`
-and `mobile:` in the root `runway.yaml`, each naming an OS shell or template line and the packages
-it loads, and Runway builds them. Their sources sit in the root `assets/` tree (`brand/`,
-`mobile/<app>/`, `store/<app>/<locale>/`, `landing/`, `lang/`). Never add `apps/console`,
-`apps/web` or `apps/mobile`: a new screen is a route, block or component in a package's `react/` or
-`native/` entry, loaded by a surface. The code below is illustrative: the paths it names (`orders`,
+There is no app member besides `apps/docs` (ADR 0441 decisions 2 and 3). The product ships packages;
+its web surfaces (`console`, `landing`, …) and mobile apps are entries under `surfaces:` and
+`mobile:` in the root `runway.yaml`, each naming an OS shell or template line and the packages it
+loads, and Runway builds them. Their sources sit in the root `assets/` tree (`brand/`,
+`mobile/<app>/`, `store/<app>/<locale>/`, `landing/`, `lang/`). Never add `apps/console`, `apps/web`
+or `apps/mobile`: a new screen is a route, block or component in a package's `react/` or `native/`
+entry, loaded by a surface. The code below is illustrative: the paths it names (`orders`,
 `commerce`, an app's `src/`) show where a file goes in a shell or a package, not files in this
 repository.
 
@@ -81,7 +81,7 @@ repository.
 | R9   | One blank line between class members; an object of two or more properties in decorator or base-factory arguments goes one property per line. Every file opens with the four-field header; every member has a one-line TSDoc.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | R10  | `.stackra/` is generated and fully gitignored. The committed contracts sit at the member root: `stackra.manifest.json` and `openapi.json`. A tool that reads only the member root reads a gitignored shim there.                                                                                                                                                                                                                                                                                                                                                                                                              |
 | R11  | **Partners by type argument**: the class a declaration is typed against is a type argument (`Policy<Order>`, `Resource<Order>({…})`, `Widget<OrderKpisQuery>({…})`, a slot as `Extension<Point["slot"]>`; `Resource<Order, OrderView>` names a differing list row only until gen writes the model-to-row map); a sibling of the same stem is found by name. A value argument only where members are inherited (`Driver(MailTransport)`, `Widget.place(BaseX, {…})`, `extends BaseX`). Inside a decorator a model is a thunk (`@ManyToOne(() => Variant)`); same module `Ref<T>` or `Collection<T>`, another module `Link<T>`. |
-| R12  | Every member authors `stackra.config.ts`. `<key>.module.ts` is written only when it says something gen cannot derive ([Modules](#modules)). Nobody writes `main.ts`, an `*.app.ts`, an entry barrel or an `index.ts` beside a root module. Exempt from `stackra.config.ts`: the core `@stackra/*-config` presets.                                                                                                                                                                                                                                                                                                               |
+| R12  | Every member authors `stackra.config.ts`. `<key>.module.ts` is written only when it says something gen cannot derive ([Modules](#modules)). Nobody writes `main.ts`, an `*.app.ts`, an entry barrel or an `index.ts` beside a root module. Exempt from `stackra.config.ts`: the core `@stackra/*-config` presets.                                                                                                                                                                                                                                                                                                             |
 
 ## Group folders
 
