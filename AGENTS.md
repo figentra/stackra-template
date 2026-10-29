@@ -4,7 +4,7 @@ Purpose: the agent entry for a Stackra product repository started from the lean 
          holds, the programming model v3.1 grammar, the group folders, the kind table, the derived
          identities, the dictionary and the rules every agent reads first.
 Boundary: vocabulary and placement only; procedures live in skills, the file-kind → test table and
-          the test helpers in README.md, the worked guide in apps/docs/src/docs/guides.
+          the test helpers in README.md, the guides in apps/docs/src/docs/guides.
 Runtime: node
 Governing contract: Stackra ADR 0294 as amended by 0305 (programming model v3.1, class
                     components), 0306 (overrides), 0307 (panel), 0308 (integrations) and 0309
