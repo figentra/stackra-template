@@ -26,6 +26,11 @@ engineStrict: true
 # a compromised release has time to be pulled; a dependency that loses its trusted-publisher
 # provenance between versions fails the install instead of downgrading silently.
 minimumReleaseAge: 1440
+# First-party packages, published from our own CI with provenance; third-party packages keep the day.
+minimumReleaseAgeExclude:
+  - "@stackra/*"
+  - "@stackra-pro/*"
+  - "@figentra/*"
 trustPolicy: no-downgrade
 
 catalogs:
