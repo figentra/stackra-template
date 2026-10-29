@@ -200,6 +200,7 @@ words:
   - syft
   - tanstack
   - tenancy
+  - testflight
   - toggleable
   - togglefullscreen
   - transpilable
