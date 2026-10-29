@@ -75,7 +75,19 @@ mobile:
       android:
         package: com.acme.app
       scheme: acme
+    # Flags from the os/mobile line's capabilities.json; the build strips every module not listed.
     capabilities: [push]
+    # The platform accounts a managed build publishes under; a scope that connects its own store
+    # account publishes there instead (ADR 0439 decisions 7 and 8).
+    stores:
+      apple:
+        account: acme
+      google:
+        account: acme
+    # The EAS channel the mobile job builds on (required). `project`, the EAS project id, joins
+    # here once the app is created in EAS.
+    eas:
+      channel: production
 
 # ── Providers: every account and vendor, named once ───────────────────────────────────────────────
 providers:
