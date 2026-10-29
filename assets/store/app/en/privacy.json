@@ -1,0 +1,12 @@
+{
+  "collects": [
+    {
+      "type": "device_id",
+      "purposes": ["app_functionality"],
+      "consent": "necessary",
+      "source": "push",
+      "linked": true,
+      "tracking": false
+    }
+  ]
+}
