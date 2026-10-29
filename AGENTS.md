@@ -781,6 +781,12 @@ its error class (`refusal(OrderNotPayableError)`), never a code · the theme →
   and route keys snake_case; files kebab-case with the kind suffix; constants SCREAMING_SNAKE;
   namespace lookups `<module>::<path>`; secrets `<PROVIDER>_<PURPOSE>`; constraint names `idx_`,
   `fk_`, `ck_`.
+- Deploys (owner decision 2026-10-28): agents develop and deploy end to end, through CI and runway,
+  never from the Mac. dev, preview and staging deploy and publish without asking: dispatch a deploy
+  workflow, merge the changesets version PR, push its release tags, roll back. Production waits on
+  one owner approval in the `production` GitHub Environment (`runway promote <sha>`); a package
+  publish waits on the one approval of the `release` environment. Secret values, the production
+  environments and their reviewers, and repository deletion stay with the owner.
 
 ## Commands
 
