@@ -12,15 +12,17 @@ One folder per mobile app key (`store/<app>/`), named in the app entry's `store`
 `runway.yaml`; the entry's `identity` and `capabilities` are the app's bundle id, package, names and
 App Store Connect capabilities.
 
-`store.yaml` sits in the app folder and holds the app-level facts: `urls` (`privacyPolicy` and
-`support` required, `marketing`), `review` (the contact, the notes, the `demoAccount`, an optional
-`seed` that resets the demo data and the `probe` that proves the account works),
-`usesNonExemptEncryption`, `appGroups` and `testflight.groups`. Every credential in it is a secret
-NAME (`emailSecret`, `phoneSecret`, `usernameSecret`, `passwordSecret`, `tokenSecret`, in
-SCREAMING_SNAKE) read from Infisical at release time, never a value.
+`store.yaml` sits in the app folder and holds the app-level facts: `ascAppId` (the App Store Connect
+app id, once the app record exists), `urls` (`privacyPolicy` and `support` required, `marketing`),
+`review` (the contact, the notes, the `demoAccount`, an optional `seed` that resets the demo data
+and the `probe` that proves the account works), `usesNonExemptEncryption`, `appGroups` and
+`testflight.groups`. Every credential in it is a secret NAME (`emailSecret`, `phoneSecret`,
+`usernameSecret`, `passwordSecret`, `tokenSecret`, in SCREAMING_SNAKE) read from Infisical at
+release time, never a value.
 
 One sub-folder per locale (`store/<app>/<locale>/`, `en`, `ar`, …) holds `name.txt` (30 characters),
-`subtitle.txt` (30), `description.md` (4000), `keywords.txt` (100, comma-separated), `privacy.json`
-(the data the app collects, the same file in every locale) and, optionally, `shortDescription.txt`,
-`promotionalText.txt` and `whatsNew.txt`. Screenshots are captured in CI from the built app and
-framed by the brand kit; they are not committed.
+`subtitle.txt` (30), `description.md` (4000), `keywords.txt` (100, comma-separated), `privacy.yaml`
+(the data the app collects as `collects:` rows, with an optional `deletion:`, the same file in every
+locale) and, optionally, `shortDescription.txt`, `promotionalText.txt` and `whatsNew.txt`.
+Screenshots are captured in CI from the built app and framed by the brand kit; they are not
+committed.

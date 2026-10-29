@@ -8,6 +8,9 @@
 #           example product: replace the urls and names with the product's own.
 # Runtime: node
 # Governing contract: Stackra ADR 0441 (decision 1), ADR 0480 (store presence as data)
+# The App Store Connect app id, a number shown in App Store Connect once the app record exists; the
+# release tooling writes it into eas.json before EAS submit and refuses to submit without it.
+# ascAppId: "1234567890"
 urls:
   # Both are required: the store tooling refuses a listing without them.
   privacyPolicy: https://acme.example/privacy
