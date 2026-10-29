@@ -8,7 +8,7 @@
 import type { ReactElement } from "react";
 import { ScrollView, Text } from "react-native";
 
-import { EXAMPLE_COPY } from "#src/constants/example-copy.constant";
+import { EXAMPLE_COPY } from "#src/core/constants/example-copy.constant";
 
 // shortcut: a function component with inline styles until the screen is a package screen class (STA-339).
 /** The example mobile screen. */

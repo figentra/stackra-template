@@ -8,8 +8,9 @@
  */
 import { registerBlocks } from "@stackra/experience";
 
-import { HeroBlock } from "#src/blocks/hero/hero.block";
-import { Hero } from "#src/blocks/hero/hero";
+import { HeroBlock } from "#src/core/blocks/hero/hero.block";
+import { Hero } from "#src/react/hero/hero";
 
-// shortcut: registered by hand until the generated wiring registers the package's blocks (STA-339).
-registerBlocks([{ key: "acme_example.hero", block: HeroBlock, component: Hero }]);
+// shortcut: registered by hand until the generated wiring registers the package's blocks (STA-339); the key is the
+// one gen derives, `<member>.<snake(block folder)>`, so documents keep resolving once it does.
+registerBlocks([{ key: "example.hero", block: HeroBlock, component: Hero }]);

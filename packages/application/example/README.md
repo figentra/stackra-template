@@ -9,7 +9,11 @@ the OS shells. Rename it to the product's first package or delete it.
 | ----------- | ----------------- | ------------------------------ | ------------------------------------------------------------------- |
 | `./console` | `src/console.tsx` | the console shell (console@3)  | `register(shell)`: `shell.route(...)` adds the example's page       |
 | `./native`  | `src/native.tsx`  | the mobile template (mobile@3) | `register(app)`: `app.screen(...)` adds the screen Home lists       |
-| `./landing` | `src/landing.ts`  | the landing shell (landing@1)  | registers the `acme_example.hero` block that `assets/landing` draws |
+| `./landing` | `src/landing.ts`  | the landing shell (landing@1)  | registers the `example.hero` block that `assets/landing` draws |
+
+The pieces sit in the v3.1 groups: the console page in `src/react/example-home/`, the mobile screen in
+`src/native/welcome-screen/`, the block class in `src/core/blocks/hero/` with its web component in
+`src/react/hero/`, and the copy in `src/core/constants/`. Each entry exports a named `register`.
 
 Run all three locally from the repository root with `stackra dev --product --os <figentra/os checkout>
 --device <simulator udid>`. The register functions and the hand-written block schema are shortcuts until gen

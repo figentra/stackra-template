@@ -1,8 +1,8 @@
 /**
  * Stackra file contract:
  * Purpose: `HeroBlock`, the example's landing block: a title and a line under it, which a landing document names as
- *          `acme_example.hero`.
- * Boundary: the props only; the component is `hero.tsx` beside it.
+ *          `example.hero`.
+ * Boundary: the props only; the web component is `react/hero/hero.tsx`.
  * Runtime: isomorphic
  * Governing contract: ADR 0440 (decision 4: a product block renders in the browser); ADR 0270.
  */
@@ -10,7 +10,7 @@ import { Block, BlockCategory } from "@stackra/experience";
 import { registerSchemas } from "@stackra/validation";
 import { z } from "zod";
 
-import { HERO_BLOCK } from "#src/constants/hero-block.constant";
+import { HERO_BLOCK } from "#src/core/constants/hero-block.constant";
 
 /** The example hero. */
 export class HeroBlock extends Block({

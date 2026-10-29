@@ -8,15 +8,11 @@
 import { Heading } from "@stackra/ui/react";
 import type { ReactElement } from "react";
 
+import type { HeroProps } from "#src/react/hero/hero.props";
+
 // shortcut: a function component until block components are bound by name by gen (STA-339).
 /** The example hero. */
-export function Hero({
-  title,
-  subtitle,
-}: {
-  readonly title: string;
-  readonly subtitle?: string;
-}): ReactElement {
+export function Hero({ title, subtitle }: HeroProps): ReactElement {
   return (
     <section style={{ padding: "64px 24px", textAlign: "center" }}>
       <Heading level={1}>{title}</Heading>

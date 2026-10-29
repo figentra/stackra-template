@@ -8,7 +8,7 @@
 import { Card, Heading } from "@stackra/ui/react";
 import type { ReactElement } from "react";
 
-import { EXAMPLE_COPY } from "#src/constants/example-copy.constant";
+import { EXAMPLE_COPY } from "#src/core/constants/example-copy.constant";
 
 // shortcut: a function component until the console page is a panel resource of the package's module (STA-339).
 /** The example console page. */
