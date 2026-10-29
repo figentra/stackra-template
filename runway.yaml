@@ -55,6 +55,8 @@ surfaces:
   # (ADR 0440).
   landing:
     shell: os/landing@1
+    # The blocks the landing documents draw come from these packages.
+    packages: ["@figentra/acme-example"]
     content: assets/landing
     host: acme
 
