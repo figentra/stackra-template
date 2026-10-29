@@ -27,5 +27,12 @@
     // declaration files, as in the base preset: an `export {}` there turns `declare module` into an
     // augmentation, which a source-file rule would remove
     "**/*.d.ts"
+  ],
+  "overrides": [
+    {
+      // the repo scripts are CLIs: stdout and stderr are their output, as in the preset's tools/
+      "files": ["**/.github/scripts/**"],
+      "rules": { "no-console": "off" }
+    }
   ]
 }
