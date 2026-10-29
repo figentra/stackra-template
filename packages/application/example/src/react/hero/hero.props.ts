@@ -9,7 +9,7 @@
 
 /** The hero's props. */
 export interface HeroProps {
-  /** The headline. */
+  /** The headline the hero shows. */
   readonly title: string;
 
   /** The line under it, when the document gives one. */

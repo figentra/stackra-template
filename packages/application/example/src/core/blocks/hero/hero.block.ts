@@ -17,7 +17,7 @@ export class HeroBlock extends Block({
   category: BlockCategory.Marketing,
   icon: HERO_BLOCK.icon,
 }) {
-  /** The headline. */
+  /** The headline the hero shows. */
   title!: string;
 
   /** The line under it. */

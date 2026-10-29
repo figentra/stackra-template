@@ -6,7 +6,7 @@
  *          lean starter lists no `apiReference`: its example service has no action yet and no committed manifest.
  * Boundary: data only (field initializers); gen imports the file and reads the fields of the one exported class.
  *           Logo and favicon are paths under `src/assets`; a page is its path under `src/docs` without the extension.
- * Runtime: node (read by gen at build time)
+ * Runtime: node
  * Governing contract: Stackra ADR 0002 (2026-10-27 amendment); Stackra ADR 0295 (decisions 3 and 4); Stackra ADR 0039
  *                     (the API reference on Mintlify); stackra-15 (the lean starter); stackra-177.
  */
@@ -14,17 +14,23 @@ import { DocsConfig } from "@stackra/gen";
 
 /** The Acme docs site. */
 export class AcmeDocsConfig extends DocsConfig {
+  /** The site name in the header, the browser tab and the llms.txt index. */
   override readonly name = "Acme";
 
+  /** The site description search engines and the llms.txt index show. */
   override readonly description =
     "How Acme is built on Stackra: the lean starter, its programming model, tests and decisions.";
 
+  /** The brand colours Mintlify themes the site with. */
   override readonly colors = { primary: "#2F6DF6", light: "#F7F7F5", dark: "#1C1E22" };
 
+  /** The light and dark logos under src/assets, linking home. */
   override readonly logo = { light: "logo/light.svg", dark: "logo/dark.svg", href: "/" };
 
+  /** The favicon under src/assets. */
   override readonly favicon = "favicon.svg";
 
+  /** The tabs and their page groups; a page is its path under src/docs. */
   override readonly navigation = [
     {
       tab: "Guides",
@@ -47,8 +53,10 @@ export class AcmeDocsConfig extends DocsConfig {
     },
   ];
 
+  /** The footer's social links. */
   override readonly footer = { socials: { github: "https://github.com/acme" } };
 
+  /** The Mintlify keys gen does not own, passed through to docs.json. */
   override readonly raw = {
     fonts: { family: "Geist" },
     appearance: { default: "system" },
