@@ -20,10 +20,27 @@
   "type": "module",
   "sideEffects": [
     "./src/landing.ts",
-    "./src/blocks/**/*.block.ts",
+    "./src/core/blocks/**/*.block.ts",
     "./dist/landing.mjs"
   ],
   "imports": {
+    "#core/*": [
+      "./src/core/*",
+      "./src/core/*.ts",
+      "./src/core/*/index.ts"
+    ],
+    "#native/*": [
+      "./src/native/*",
+      "./src/native/*.ts",
+      "./src/native/*.tsx",
+      "./src/native/*/index.ts"
+    ],
+    "#react/*": [
+      "./src/react/*",
+      "./src/react/*.ts",
+      "./src/react/*.tsx",
+      "./src/react/*/index.ts"
+    ],
     "#src/*": [
       "./src/*",
       "./src/*.ts",
