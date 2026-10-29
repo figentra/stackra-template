@@ -215,12 +215,16 @@ dictionary, is in [`AGENTS.md`](AGENTS.md) and
 
 ## Surfaces
 
-The lean starter ships no app surface: `apps/docs` is the only app. An app lists its targets (web,
-PWA, desktop, mobile) in its `stackra.config.ts`, and `stackra gen` builds only those
-([Stackra ADR 0281](https://docs.stackra.figentra.com/adr/0281-desktop-surfaces-targets-desktop-modes-and-overlay-styles)).
-A product adds an app, or a `surfaces` or `mobile` block in the root `runway.yaml` that points at an
-OS shell (ADR 0441), only when it ships one; until then the root runway names no web, mobile or
-desktop destination.
+There are no app members besides `apps/docs`
+([ADR 0441](https://docs.stackra.figentra.com/adr/0441-product-repository-layout-assets-tree-and-root-runway-surfaces)
+decisions 2 and 3): the product ships packages, and the root `runway.yaml` names what Runway builds
+around them. `surfaces:` lists each web surface (here `console` on the `os/console@3` shell and
+`landing` on `os/landing@1` seeded from `assets/landing`) with the packages it loads and its host;
+`mobile:` lists each app from the OS mobile template (here `app` on `os/mobile@3`) with its
+identity, capabilities and the `assets/mobile/<app>` and `assets/store/<app>/<locale>` sources.
+Both entries load the example package; point them at the product's own packages or delete them.
+A screen is a route, block or component in a package's `react/` or `native/` entry, never an
+`apps/<name>` folder.
 
 ## Developer experience
 
@@ -476,7 +480,7 @@ example of every kind is in the framework guides
 | contract                                | `stackra.manifest.json` and `openapi.json` at the member root (generated, committed)                                     | `src/__tests__/stackra-manifest.contract.test.ts`               |
 | lang, asset                             | member root `assets/lang/<locale>/<module>.json` (regional overlays hold only differing keys), `assets/<kind>/<module>/` | gen fails on a key missing in a base locale                     |
 
-### Apps
+### Shells and package UI entries (`src/` of a shell, or a package `react/` and `native/` entry)
 
 | Kind                   | Group / suffix                                                                                                             | Test                                                                          |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
