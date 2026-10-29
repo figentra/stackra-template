@@ -32,6 +32,10 @@ minimumReleaseAgeExclude:
   - "@stackra-pro/*"
   - "@figentra/*"
 trustPolicy: no-downgrade
+# 2.2.2's npm wrapper was hand-published by the sole maintainer; gitHead eb4e504 = tag v2.2.2, the platform
+# binaries carry SLSA provenance, and the diff vs 2.2.1 is version bumps + android-arm64 (checked 2026-10-29).
+trustPolicyExclude:
+  - "lefthook@2.2.2"
 
 catalogs:
   # Stackra framework packages, one version line for the whole framework. Bumped together. Lists
