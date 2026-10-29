@@ -2,7 +2,8 @@
 # Stackra file contract:
 # Purpose: the ROOT runway: WHERE things run and HOW they are packed. Providers and accounts,
 #          destinations per environment (AWS account and region, Encore Cloud app, Docker host,
-#          Cloudflare zone), the product key `stackra new` names members after, the pools many members share (the one Postgres server per
+#          Cloudflare zone), the product key `stackra new` names members after, the web surfaces and
+#          mobile apps Runway builds around the product's packages (no app members), the pools many members share (the one Postgres server per
 #          environment, the cache cluster, the queue provider, networking), domains, the edge, the
 #          release policy, the DEFAULTS members inherit, and each environment's TOPOLOGY: whether
 #          the service members run as one process (`monolith`), in named groups (`grouped`) or one
@@ -28,7 +29,7 @@
 # Runtime: node
 # Governing contract: Stackra ADR 0296 (root topology groups and defaults), Stackra ADR 0168 and
 #                     0169 (as amended by 0296), 0170, 0171, 0173, 0175, 0179, 0180, 0184, 0238,
-#                     0254, 0299 (docs runway)
+#                     0254, 0299 (docs runway), 0436, 0439 and 0441 (surfaces and mobile apps)
 $schema: "@stackra/runway/schema/root.json"
 version: 3
 # Prefix for stacks (`acme-platform/staging`), images (`acme-platform-core`), Workers and tags.
@@ -36,10 +37,45 @@ project: acme-platform
 
 # The product this repository is (ADR 0335 decision 2). `stackra new` names members after its key:
 # `@figentra/acme-service-<name>` and `@figentra/acme-<name>` (ADR 0349 decision 2). A base product
-# has no `edition`. The lean starter ships no surface and no mobile app, so the `surfaces` and
-# `mobile` blocks (ADR 0441 decision 3) are absent until the product adds one.
+# has no `edition`.
 product:
   key: acme
+
+# ── Surfaces and mobile apps: no app members (ADR 0441 decisions 2 and 3, ADR 0436, ADR 0439) ─────
+# The product ships packages; the OS shells and the mobile template are built around them by
+# Runway, which publishes the bundles and writes the platform `host:` and `wellknown:` rows. Each
+# entry below loads the example package: replace it with the product's own, or delete the entry.
+surfaces:
+  # The tenant console: the OS console shell loading the product's packages through its import map.
+  console:
+    shell: os/console@3
+    packages: ["@figentra/acme-example"]
+    host: console.acme
+  # The landing site: experience documents rendered at the edge, seeded once from assets/landing
+  # (ADR 0440).
+  landing:
+    shell: os/landing@1
+    content: assets/landing
+    host: acme
+
+mobile:
+  # One app from the OS mobile template; the build keeps only the capabilities listed (ADR 0439).
+  # Icon and splash sources sit in `assets`, store listings per locale in `store` (ADR 0441 d1).
+  app:
+    template: os/mobile@3
+    packages: ["@figentra/acme-example"]
+    assets: assets/mobile/app
+    store: assets/store/app
+    identity:
+      name:
+        en: Acme
+        ar: أكمي
+      ios:
+        bundleId: com.acme.app
+      android:
+        package: com.acme.app
+      scheme: acme
+    capabilities: [push]
 
 # ── Providers: every account and vendor, named once ───────────────────────────────────────────────
 providers:
