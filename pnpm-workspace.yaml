@@ -36,6 +36,10 @@ trustPolicy: no-downgrade
 # binaries carry SLSA provenance, and the diff vs 2.2.1 is version bumps + android-arm64 (checked 2026-10-29).
 trustPolicyExclude:
   - "lefthook@2.2.2"
+  # semver 6.3.1 (Babel 7 pins ^6.3.1): the 6.x line never had provenance and pnpm compares it with the
+  # provenanced 7.x line; published by npm CLI maintainer lukekarrys (CVE-2022-25883 fix), gitHead b717044 =
+  # "chore: release 6.3.1", diff vs 6.3.0 is tooling metadata plus the regex fix (checked 2026-10-29).
+  - "semver@6.3.1"
 
 catalogs:
   # Stackra framework packages, one version line for the whole framework. Bumped together. Lists
