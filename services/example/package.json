@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@stackra/app": "catalog:stackra",
+    "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra"
   },
   "devDependencies": {
