@@ -86,6 +86,7 @@
   },
   "devDependencies": {
     "@stackra/cli": "catalog:stackra",
+    "@stackra/testing": "catalog:stackra",
     "@stackra/tsdown-config": "catalog:stackra",
     "@stackra/typescript-config": "catalog:stackra",
     "@stackra/vitest-config": "catalog:stackra",
