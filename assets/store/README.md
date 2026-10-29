@@ -8,7 +8,8 @@ Governing contract: Stackra ADR 0441 decision 1 (draft text until stackra-01 lan
 
 # assets/store
 
-One folder per mobile app key, one sub-folder per locale (`store/<app>/<locale>/`), named in the app entry's `store`.
-Each locale holds `name.txt` (30 characters), `subtitle.txt` (30), `description.md` (4000), `keywords.txt` (100,
-comma-separated), `privacy.json` (the store privacy answers) and `screenshots/` captions. Screenshots themselves are
-captured in CI from the built app and framed by the brand kit; they are not committed.
+One folder per mobile app key, one sub-folder per locale (`store/<app>/<locale>/`), named in the app
+entry's `store`. Each locale holds `name.txt` (30 characters), `subtitle.txt` (30), `description.md`
+(4000), `keywords.txt` (100, comma-separated), `privacy.json` (the store privacy answers) and
+`screenshots/` captions. Screenshots themselves are captured in CI from the built app and framed by
+the brand kit; they are not committed.
