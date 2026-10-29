@@ -8,5 +8,6 @@ Governing contract: Stackra ADR 0441 decision 1 (draft text until stackra-01 lan
 
 # assets/lang
 
-Permission prompts and store strings, one file per locale (`<locale>.json`), keyed by the permission or store field.
-Runway writes the prompts into the app config of each build and the store strings into each submission.
+Permission prompts and store strings, one file per locale (`<locale>.json`), keyed by the permission
+or store field. Runway writes the prompts into the app config of each build and the store strings
+into each submission.
