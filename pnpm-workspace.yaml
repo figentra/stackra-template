@@ -130,9 +130,6 @@ catalogs:
     react-router: 7.9.4
     isbot: 5.1.31
     "@react-email/components": 0.5.2
-    # HeroUI Pro for a console app (Stackra ADR 0197 as amended): the vendor's current release line is
-    # still beta; its postinstall downloads the licensed components (allowBuilds below).
-    "@heroui-pro/react": 1.0.0-beta.10
     # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.
     "@types/node": 24.19.2
     # React's types follow the React 19.2 line above, for web, desktop and mobile alike.
@@ -254,8 +251,3 @@ allowBuilds:
   # Downloads the Sentry CLI that uploads native and JavaScript source maps (pulled in by
   # @sentry/react-native).
   "@sentry/cli": true
-  # HeroUI Pro (a console app's @heroui-pro/react, Stackra ADR 0197 as amended): its postinstall
-  # downloads the licensed components with HEROUI_AUTH_TOKEN, filled from Infisical's
-  # HEROUI_PERSONAL_TOKEN; the lean starter ships no member that depends on it.
-  heroui-pro: true
-  "@heroui-pro/react": true

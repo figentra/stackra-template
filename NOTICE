@@ -6,7 +6,5 @@ This project is MIT-licensed (LICENSE), with these exclusions:
   Figentra Technologies L.L.C.
 - A font committed to this repository keeps its own licence, and that licence text sits beside the
   font file.
-- Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed. An app that adds
-  HeroUI Pro consumes it as a dependency (@heroui-pro/react, under Stackra ADR 0197 as amended)
-  under its vendor's terms; it is not covered by the MIT licence and its install needs your own
-  HeroUI Pro licence token (HEROUI_PERSONAL_TOKEN, read from Infisical).
+- Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed or depended on
+  (Stackra ADR 0469).
