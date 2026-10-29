@@ -37,7 +37,7 @@ maestro-report/
 # app. Every member's, at any depth: the pattern has no leading or middle slash, so it is unanchored.
 .stackra/
 # The root shims gen writes for the tools that read only the member root; each re-exports or copies
-# its `.stackra/` file.
+# its `.stackra/` file, and tsconfig.build.json is a package's declaration build.
 /apps/*/vitest.config.ts
 /apps/*/vite.config.ts
 /apps/*/react-router.config.ts
@@ -51,6 +51,7 @@ maestro-report/
 /services/*/vitest.config.ts
 /packages/*/*/vitest.config.ts
 /packages/*/*/tsdown.config.ts
+/packages/*/*/tsconfig.build.json
 # React Router typegen output (a web app).
 .react-router/
 # Wrangler's local state and its local secret file (secrets come from the store, never a file).
