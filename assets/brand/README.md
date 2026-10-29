@@ -8,7 +8,8 @@ Governing contract: Stackra ADR 0441 decision 1 (draft text until stackra-01 lan
 
 # assets/brand
 
-Brand sources only (Stackra ADR 0441 decision 4): the marks (`logo.svg`, `logo-mono.svg`, `mark.svg`), the kit
-configuration (concept, logo rules, asset manifest), decisions, the Arabic review and the version history. Exploration
-moves to `versions/` once a direction is picked and is never deleted. The brand kit generates everything else in CI;
-do not commit its outputs. Fonts are not kept here: keep only licence notes for fonts the product already uses.
+Brand sources only (Stackra ADR 0441 decision 4): the marks (`logo.svg`, `logo-mono.svg`,
+`mark.svg`), the kit configuration (concept, logo rules, asset manifest), decisions, the Arabic
+review and the version history. Exploration moves to `versions/` once a direction is picked and is
+never deleted. The brand kit generates everything else in CI; do not commit its outputs. Fonts are
+not kept here: keep only licence notes for fonts the product already uses.

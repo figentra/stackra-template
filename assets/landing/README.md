@@ -8,6 +8,7 @@ Governing contract: Stackra ADR 0441 decision 1 (draft text until stackra-01 lan
 
 # assets/landing
 
-Seed experience documents (`<page>.json`) and their images for the product's landing site. Runway imports them once
-into the experience service for the product's platform tenant; after that marketing edits them in the builder and this
-folder no longer owns them. A seed may name only blocks registered in the landing block set (Stackra ADR 0440).
+Seed experience documents (`<page>.json`) and their images for the product's landing site. Runway
+imports them once into the experience service for the product's platform tenant; after that
+marketing edits them in the builder and this folder no longer owns them. A seed may name only blocks
+registered in the landing block set (Stackra ADR 0440).

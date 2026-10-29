@@ -8,7 +8,8 @@ Governing contract: Stackra ADR 0441 decision 1 (draft text until stackra-01 lan
 
 # assets/mobile
 
-One folder per mobile app key of the root runway's `mobile` block (`mobile/<app>/`), named in that entry's `assets`.
+One folder per mobile app key of the root runway's `mobile` block (`mobile/<app>/`), named in that
+entry's `assets`.
 
 | File                    | Format and size                                       |
 | ----------------------- | ----------------------------------------------------- |
