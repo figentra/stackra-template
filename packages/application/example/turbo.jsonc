@@ -1,3 +1,13 @@
 // Turborepo package configuration: extends the root turbo.jsonc and declares this member's tags.
 // Owner: release-operations · Secrets: forbidden
-{ "$schema": "https://turborepo.dev/schema.json", "extends": ["//"], "tags": ["tier:lib","category:application","runtime:isomorphic"] }
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tags": [
+    "tier:lib",
+    "category:application",
+    "runtime:isomorphic",
+    "runtime:browser",
+    "runtime:react-native",
+  ],
+}

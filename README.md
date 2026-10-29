@@ -65,13 +65,13 @@ placeholder product is **Acme** (`product.key: acme` in `runway.yaml`).
 
 ## Structure
 
-| Path                               | What it holds                                                                    |
-| ---------------------------------- | -------------------------------------------------------------------------------- |
-| `services/example`                 | `@figentra/acme-service-example`: the example service, as `stackra new` wrote it |
-| `packages/application/example`     | `@figentra/acme-example`: the example package, as `stackra new` wrote it         |
-| `apps/docs`                        | Mintlify docs: guides, ADRs and the API reference generated from manifests       |
-| `assets/`                          | brand, mobile, store, landing and lang sources (ADR 0441)                        |
-| `runway.yaml`, `stackra.lock.yaml` | product key, infrastructure and topology; pinned external producer manifests     |
+| Path                               | What it holds                                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------- |
+| `services/example`                 | `@figentra/acme-service-example`: the example service, as `stackra new` wrote it        |
+| `packages/application/example`     | `@figentra/acme-example`: the example package, with console, native and landing entries |
+| `apps/docs`                        | Mintlify docs: guides, ADRs and the API reference generated from manifests              |
+| `assets/`                          | brand, mobile, store, landing and lang sources (ADR 0441)                               |
+| `runway.yaml`, `stackra.lock.yaml` | product key, infrastructure and topology; pinned external producer manifests            |
 
 The full annotated tree is in [Tree](#tree) below.
 
@@ -586,7 +586,8 @@ your secret store (Infisical by default, Stackra ADR 0173).
 1. The monorepo root: this README's [Tree](#tree), then `package.json`, `pnpm-workspace.yaml`,
    `turbo.jsonc` and `runway.yaml` (the product key and the topology)
 2. `AGENTS.md` (grammar, group folders, kind table, dictionary and rules)
-3. `services/example/` and `packages/application/example/` (what `stackra new` writes)
+3. `services/example/` (what `stackra new` writes) and `packages/application/example/` (what a
+   product ships into the OS shells)
 4. The framework's programming-model guide and worked examples on
    [docs.stackra.figentra.com](https://docs.stackra.figentra.com), then your first module in
    `services/<name>/src/modules/<key>/`

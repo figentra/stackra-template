@@ -2,10 +2,10 @@
   "name": "@figentra/acme-example",
   "version": "0.0.0",
   "private": true,
-  "description": "An example package: rename it to the product's first shared package or delete it.",
+  "description": "An example package: its console page, mobile screen and landing block show how a product ships packages into the OS shells. Rename it to the product's first package or delete it.",
   "keywords": [
-    "stackra",
-    "application"
+    "application",
+    "stackra"
   ],
   "license": "UNLICENSED",
   "files": [
@@ -18,10 +18,11 @@
     "LICENSE"
   ],
   "type": "module",
-  "sideEffects": false,
-  "exports": {
-    "./assets/*": "./assets/*"
-  },
+  "sideEffects": [
+    "./src/landing.ts",
+    "./src/blocks/**/*.block.ts",
+    "./dist/landing.mjs"
+  ],
   "imports": {
     "#src/*": [
       "./src/*",
@@ -30,6 +31,24 @@
       "./src/*/index.ts"
     ],
     "#assets/*": "./assets/*"
+  },
+  "exports": {
+    "./console": {
+      "@stackra/source": "./src/console.tsx",
+      "types": "./dist/console.d.mts",
+      "default": "./dist/console.mjs"
+    },
+    "./landing": {
+      "@stackra/source": "./src/landing.ts",
+      "types": "./dist/landing.d.mts",
+      "default": "./dist/landing.mjs"
+    },
+    "./native": {
+      "@stackra/source": "./src/native.tsx",
+      "types": "./dist/native.d.mts",
+      "default": "./dist/native.mjs"
+    },
+    "./assets/*": "./assets/*"
   },
   "scripts": {
     "build": "stackra build",
@@ -41,7 +60,12 @@
     "clean": "rm -rf dist coverage .turbo .stackra"
   },
   "dependencies": {
-    "@stackra/contracts": "catalog:stackra"
+    "@stackra/contracts": "catalog:stackra",
+    "@stackra/experience": "catalog:stackra",
+    "@stackra/icons": "catalog:stackra",
+    "@stackra/ui": "catalog:stackra",
+    "@stackra/validation": "catalog:stackra",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@stackra/cli": "catalog:stackra",
@@ -49,12 +73,29 @@
     "@stackra/typescript-config": "catalog:stackra",
     "@stackra/vitest-config": "catalog:stackra",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
     "@vitest/coverage-v8": "catalog:quality",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
+    "react": "catalog:",
+    "react-native": "catalog:mobile",
+    "react-router": "catalog:",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:quality"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-native": "catalog:mobile",
+    "react-router": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    },
+    "react-router": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=24.0.0"
@@ -64,7 +105,9 @@
     "tier": "lib",
     "category": "application",
     "runtimes": [
-      "isomorphic"
+      "isomorphic",
+      "browser",
+      "react-native"
     ]
   }
 }

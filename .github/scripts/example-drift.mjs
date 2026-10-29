@@ -2,7 +2,8 @@
 /**
  * Stackra file contract:
  * Purpose: the example-member drift check, run by `pnpm validate` after `stackra validate`: each example member
- *          (`services/example`, `packages/application/example`) must equal what `stackra new` writes for it today.
+ *          (`services/example`) must equal what `stackra new` writes for it today; the example package carries the
+ *          entries the OS shells load, so it is no longer generated as it is.
  *          It runs `stackra new <kind> <name> ... --over` per example, which writes any missing file and prints a
  *          line diff for each authored file that differs from the template; any written file or diff fails.
  * Boundary: the examples and their `stackra new` arguments are listed in EXAMPLES; an example whose folder is gone
@@ -31,17 +32,8 @@ const EXAMPLES = [
       "An example service: rename it to the product's first service or delete it.",
     ],
   },
-  {
-    folder: "packages/application/example",
-    args: [
-      "package",
-      "example",
-      "--category",
-      "application",
-      "--description",
-      "An example package: rename it to the product's first shared package or delete it.",
-    ],
-  },
+  // packages/application/example is not here: it carries the hand-written console, native and landing entries the
+  // OS shells load (STA-1604), so it no longer equals what `stackra new package` writes.
 ];
 
 /**

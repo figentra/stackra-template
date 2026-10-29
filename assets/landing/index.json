@@ -1,0 +1,7 @@
+{
+  "block": "acme_example.hero",
+  "props": {
+    "title": "Acme",
+    "subtitle": "This page is a seed document from assets/landing, drawn by the OS landing shell with the example's block."
+  }
+}

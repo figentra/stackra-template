@@ -47,14 +47,17 @@ name or a derived name already says it, write no decorator).
 
 A lean product starter, not a sample product: the root config, `apps/docs`, one example service
 (`services/example`, `@figentra/acme-service-example`) and one example package
-(`packages/application/example`, `@figentra/acme-example`). Both examples are exactly what
-`stackra new` writes for the product key in `runway.yaml` (`product.key: acme`); never hand-edit
-them into shape. `pnpm validate` runs `.github/scripts/example-drift.mjs`, which reruns
-`stackra new ... --over` per example and fails on a missing file or an authored difference. To start
-real work, create the product's own members with `stackra new` and delete the examples (the check
-skips a deleted one), or write the first module under `services/example/src/modules/<key>/` and drop
-that example's entry from the script. The tool presets are the core `@stackra/*-config` packages
-from `catalog:stackra`; there is no `packages/tooling`.
+(`packages/application/example`, `@figentra/acme-example`). The service is exactly what
+`stackra new` writes for the product key in `runway.yaml` (`product.key: acme`); never hand-edit it
+into shape. `pnpm validate` runs `.github/scripts/example-drift.mjs`, which reruns
+`stackra new ... --over` for it and fails on a missing file or an authored difference. The package
+also carries the entries the OS shells load from a product (`./console`, `./native`, `./landing`),
+so `stackra dev --product --os <figentra/os checkout>` shows it in the console, the landing page and
+the mobile app; the drift check skips it. To start real work, create the product's own members with
+`stackra new` and delete the examples (the check skips a deleted one), or write the first module
+under `services/example/src/modules/<key>/` and drop that example's entry from the script. The tool
+presets are the core `@stackra/*-config` packages from `catalog:stackra`; there is no
+`packages/tooling`.
 
 There is no app member besides `apps/docs` (ADR 0441 decisions 2 and 3). The product ships packages;
 its web surfaces (`console`, `landing`, …) and mobile apps are entries under `surfaces:` and

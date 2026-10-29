@@ -43,8 +43,9 @@ checks to run a subset, for example `node .github/scripts/preview-gate.mjs forma
 needs only Node and the gitleaks pinned in `mise.toml`.
 
 `node .github/scripts/example-drift.mjs` (the second half of `pnpm validate`) fails when
-`services/example` or `packages/application/example` differs from what `stackra new` writes for it
-today; it needs the workspace install (the `stackra` CLI) and skips an example the product deleted.
+`services/example` differs from what `stackra new` writes for it today (the example package carries
+the OS shells' entries, so it is not checked); it needs the workspace install (the `stackra` CLI)
+and skips an example the product deleted.
 
 Runbooks: [CI](https://docs.stackra.figentra.com/runbooks/ci) and
 [release](https://docs.stackra.figentra.com/runbooks/release).
