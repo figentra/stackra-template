@@ -133,8 +133,8 @@ catalogs:
     # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.
     "@types/node": 24.19.2
     # React's types follow the React 19.2 line above, for web, desktop and mobile alike.
-    "@types/react": 19.2.18
-    "@types/react-dom": 19.2.7
+    "@types/react": 19.3.0
+    "@types/react-dom": 19.3.0
     # The schemas `stackra gen` compiles from shape classes import zod, so every member that authors
     # shapes depends on it; authored code never imports it, except through the `@Field(zod)` hatch.
     # 4.1 or later is needed for codecs and `.exactOptional()` (Stackra ADR 0294 decision 26).
