@@ -18,7 +18,7 @@
     "@stackra/cli": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
     "@stackra/gen": "catalog:stackra",
-    "@stackra/typescript-config": "workspace:*",
+    "@stackra/typescript-config": "catalog:stackra",
     "@types/node": "catalog:",
     "mint": "catalog:docs",
     "oxfmt": "catalog:quality"
