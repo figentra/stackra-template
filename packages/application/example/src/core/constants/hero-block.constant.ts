@@ -9,4 +9,7 @@ import type { IconName } from "@stackra/icons/contracts";
 
 // shortcut: a literal icon name until gen emits the package's `Icons` constants (STA-339).
 /** The example hero's palette data. */
-export const HERO_BLOCK = { icon: "sparkles" } as const satisfies { readonly icon: IconName };
+export const HERO_BLOCK = {
+  /** The icon the block palette shows beside the hero entry. */
+  icon: "sparkles",
+} as const satisfies { readonly icon: IconName };
