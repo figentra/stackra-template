@@ -595,5 +595,5 @@ your secret store (Infisical by default, Stackra ADR 0173).
 ## Licence
 
 MIT, see [`LICENSE`](LICENSE). The bundled Stackra brand images, fonts and paid-licence code are
-excluded, see [`NOTICE`](NOTICE). The Stackra and Figentra names and logos are trademarks of
-Figentra Technologies L.L.C (`.github/assets/NOTICE`).
+excluded, see [`NOTICE`](NOTICE). The Stackra and Figentra names and logos are trademarks of Fulers
+Technologies L.L.C. (`.github/assets/NOTICE`).
