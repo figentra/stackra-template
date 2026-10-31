@@ -60,6 +60,7 @@
         "assets/**",
         "package.json",
         "stackra.config.ts",
+        "tsconfig.json",
         "*.extend.ts",
         "runway.yaml",
         "$TURBO_ROOT$/services/*/stackra.manifest.json"
