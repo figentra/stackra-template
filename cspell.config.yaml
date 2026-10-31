@@ -86,6 +86,7 @@ words:
   - extensionless
   - figentra
   - frontmatter
+  - fulers
   - ghcr
   - gitleaks
   - gorhom
@@ -104,12 +105,14 @@ words:
   - isbot
   - jsdom
   - keygen
+  - keytar
   - kiro
   - knip
   - laravel
   - lefthook
   - lgtm
   - lhci
+  - libxmljs
   - lighthouseci
   - lighthouserc
   - llms
