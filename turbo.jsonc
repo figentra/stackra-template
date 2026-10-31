@@ -38,8 +38,9 @@
   // Read without entering the cache key: they change how a tool runs, never what it produces.
   "globalPassThroughEnv": ["HOME", "PATH", "ENCORE_*", "TURBO_*", "DOCKER_HOST"],
 
-  // tier:config — packages/tooling/*; tier:lib — packages/<category>/<name>; tier:app — apps/*, reach
-  // services over the wire only (#stackra/clients); tier:service — services/*, never another service.
+  // tier:config — the core @stackra/*-config presets (catalog:stackra, no member here); tier:lib —
+  // packages/<category>/<name>; tier:app — apps/*, reach services over the wire only
+  // (#stackra/clients); tier:service — services/*, never another service.
   "boundaries": {
     "tags": {
       "tier:config": { "dependencies": { "deny": ["tier:lib", "tier:app", "tier:service"] } },
@@ -86,19 +87,20 @@
     "typecheck": {
       "description": "tsc --noEmit.",
       "dependsOn": ["gen", "^build"],
-      // A tsconfig preset change re-checks every member that extends it.
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/typescript/src/**"]
+      // A preset change (@stackra/typescript-config) arrives as a catalog bump in pnpm-workspace.yaml,
+      // a global dependency, so it re-checks every member.
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "test": {
       "description": "Each member's vitest suite.",
       "dependsOn": ["gen"],
-      // The vitest presets shape every member's projects; a preset change re-runs the suites.
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/vitest/src/**"]
+      // A vitest preset change is a catalog bump (pnpm-workspace.yaml, a global dependency).
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "test:coverage": {
       "description": "vitest run --coverage against the shared gate; packages only.",
       "dependsOn": ["gen"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/vitest/src/**"],
+      "inputs": ["$TURBO_DEFAULT$"],
       "outputs": ["coverage/**"]
     },
     "test:e2e": {
@@ -117,8 +119,8 @@
     "build": {
       "description": "Build a member's deployable output: tsdown for packages, the generated Vite, Metro, Electron or Wrangler build for apps.",
       "dependsOn": ["gen", "^build"],
-      // A tsdown preset change rebuilds every package.
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/tooling/tsdown/src/**"],
+      // A tsdown preset change is a catalog bump (pnpm-workspace.yaml, a global dependency).
+      "inputs": ["$TURBO_DEFAULT$"],
       // Public values a bundler inlines (Stackra ADR 0231 prefixes) and the server-side build values;
       // they change the output, so they enter the cache key.
       "env": ["VITE_*", "EXPO_PUBLIC_*", "RENDERER_VITE_*", "MAIN_VITE_*", "STACKRA_*"],
@@ -129,11 +131,7 @@
     },
     "lint": {
       "description": "oxlint, no fixes; no ^build: linting a member's own source needs nothing built.",
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/.oxlintrc.jsonc",
-        "$TURBO_ROOT$/packages/tooling/oxlint/src/**"
-      ]
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxlintrc.jsonc"]
     },
     "format": {
       "description": "Rewrite files with oxfmt. Never cached: its job is to mutate the tree.",

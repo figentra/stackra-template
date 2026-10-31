@@ -1,3 +1,11 @@
+<!--
+Stackra file contract:
+Purpose: the security policy: how to report a vulnerability, what to expect and what is supported.
+Boundary: policy only; the repository setting that turns private reporting on is a maintainer step.
+Runtime: none (documentation)
+Governing contract: Stackra ADR 0019 (supply-chain hardening), ADR 0007 (documentation standard)
+-->
+
 # Security policy
 
 ## Reporting a vulnerability
@@ -7,7 +15,7 @@ vulnerability reporting: the **Report a vulnerability** button on the repository
 (the issue form's "Security report" link opens the same page). Only the maintainers can read the
 report.
 
-Include the affected member (for example `services/commerce`), the version or commit, the steps to
+Include the affected member (for example `services/example`), the version or commit, the steps to
 reproduce, and the impact you see. Never put a secret value in a report; name the secret instead.
 
 ## What to expect
@@ -22,7 +30,6 @@ reproduce, and the impact you see. Never put a secret value in a report; name th
 | ---------------------------------------- | ----------------------------------------------------------------------------- |
 | Apps and services (`apps/`, `services/`) | the revision deployed from `main`; a fix ships as a new deploy                |
 | Published packages (`packages/`)         | the latest minor release of the current major; older releases are not patched |
-| Tooling presets (`packages/tooling/`)    | the revision on `main` (they are not published)                               |
 
 ## Scope
 

@@ -1,9 +1,0 @@
-{
-  "$comment": "Stackra file contract — Purpose: the ar-SA overlay of the public site's strings (namespace `web::`): only the keys whose Saudi legal wording differs from the general `ar`: consent text that names the Personal Data Protection Law (PDPL); Boundary: every other key falls back to `ar`, then to the default `en` (i18n.config.ts fallbacks); a key here must exist in `ar` (gen fails otherwise); Runtime: isomorphic; Governing contract: ADR 0234 d9, ADR 0080, ADR 0297 (decision 4)",
-  "contact": {
-    "consent": "أوافق على تواصلكم معي بخصوص هذا الطلب وفق نظام حماية البيانات الشخصية."
-  },
-  "consent": {
-    "body": "نستخدم ملفًا ضروريًا واحدًا. ملفات التحليلات متوقفة حتى توافق، وفق نظام حماية البيانات الشخصية."
-  }
-}
