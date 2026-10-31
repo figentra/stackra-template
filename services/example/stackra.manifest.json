@@ -25,6 +25,14 @@
       "from": "@stackra/app"
     },
     {
+      "code": "bearer_token_invalid",
+      "kind": "unauthenticated",
+      "category": "unauthenticated",
+      "module": "app",
+      "class": "BearerTokenInvalidError",
+      "from": "@stackra/app"
+    },
+    {
       "code": "csrf_token_invalid",
       "kind": "forbidden",
       "category": "forbidden",
@@ -70,6 +78,22 @@
       "classes": {
         "memory": {
           "class": "MemoryEdgeSigningKeysDriver",
+          "from": "@stackra/app/server"
+        }
+      },
+      "from": "@stackra/app"
+    },
+    {
+      "port": "JsonWebKeys",
+      "key": "app.JsonWebKeys",
+      "candidates": ["memory", "oidc"],
+      "classes": {
+        "memory": {
+          "class": "MemoryJsonWebKeysDriver",
+          "from": "@stackra/app/server"
+        },
+        "oidc": {
+          "class": "OidcJsonWebKeysDriver",
           "from": "@stackra/app/server"
         }
       },
