@@ -1,0 +1,37 @@
+# Stackra file contract:
+# Purpose: the OSV-Scanner advisories CI's dependency scan ignores, each by advisory id, with an expiry
+#          and the package that pulls it in. Only docs and build tooling that never ships in an app.
+# Boundary: ignores only; a runtime advisory is fixed (a catalog bump or an override in
+#           pnpm-workspace.yaml), never listed here. Renew an entry only after rechecking its parent.
+# Runtime: node
+# Governing contract: Stackra ADR 0174 (OSV-Scanner), Stackra ADR 0019 (supply-chain hardening)
+
+[[IgnoredVulns]]
+id = "GHSA-vwc7-r8mq-g2x9"
+ignoreUntil = 2026-11-30
+reason = "adm-zip 0.6.x, no fixed version; pulled in by mint (@mintlify/cli), the apps/docs build tool only."
+
+[[IgnoredVulns]]
+id = "GHSA-f88m-g3jw-g9cj"
+ignoreUntil = 2026-11-30
+reason = "sharp 0.33.5 (fixed in 0.35.x); pulled in by mint (@mintlify/prebuild, favicons), docs build tooling only."
+
+[[IgnoredVulns]]
+id = "GHSA-rgj7-g3m4-5g8c"
+ignoreUntil = 2026-11-30
+reason = "sharp 0.33.5 (fixed in 0.35.x); pulled in by mint (@mintlify/prebuild, favicons), docs build tooling only."
+
+[[IgnoredVulns]]
+id = "GHSA-wq5f-xc86-pv6w"
+ignoreUntil = 2026-11-30
+reason = "sharp 0.33.5 (fixed in 0.35.x); pulled in by mint (@mintlify/prebuild, favicons), docs build tooling only."
+
+[[IgnoredVulns]]
+id = "GHSA-238p-pmpm-9mq7"
+ignoreUntil = 2026-11-30
+reason = "katex 0.16.x (fixed in 0.18.x); pulled in by mint (@mintlify/mdx, rehype-katex), docs build tooling only."
+
+[[IgnoredVulns]]
+id = "GHSA-mrhx-c7xc-m3w5"
+ignoreUntil = 2026-11-30
+reason = "zod 3.24.0 (fixed in 4.6.6, another major); pulled in by mint (@mintlify/cli, @mintlify/validation), docs build tooling only. zod 4.x is fixed by the pnpm-workspace.yaml override."

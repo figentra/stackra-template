@@ -49,6 +49,7 @@ words:
   - applinks
   - assetlinks
   - autocapture
+  - axios
   - axllent
   - betterstack
   - blockmaps
@@ -84,6 +85,7 @@ words:
   - escpos
   - expo
   - extensionless
+  - fflate
   - figentra
   - frontmatter
   - fulers

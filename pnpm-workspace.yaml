@@ -140,7 +140,7 @@ catalogs:
   default:
     react: 19.2.3
     react-dom: 19.2.3
-    react-router: 7.9.4
+    react-router: 7.18.4
     isbot: 5.1.31
     "@react-email/components": 0.5.2
     # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.
@@ -216,7 +216,7 @@ catalogs:
     vite: 7.1.10
     tsdown: 0.23.1
     electron: 38.2.0
-    "@react-router/dev": 7.9.4
+    "@react-router/dev": 7.18.4
   # Format, lint, spelling and test tools every member's scripts run.
   quality:
     vitest: 5.0.5
@@ -240,15 +240,28 @@ catalogs:
     "@cyclonedx/cyclonedx-npm": 6.0.1
   # The Mintlify CLI that builds and previews apps/docs.
   docs:
-    mint: 4.2.1095
+    mint: 4.2.1184
 
-# @react-router/dev 7.9.4 declares `typescript: ^5.1.0` as a peer, while the workspace compiles with
-# TypeScript 7 (catalog `build`). The plugin only reads tsconfig paths and runs typegen, which TypeScript
-# 7 serves; check a web app's typegen whenever either version moves, and drop this entry once the peer
-# range includes 7.
+# @react-router/dev 7.18.4 declares `typescript: ^5.1.0 || ^6.0.0` as a peer, while the workspace
+# compiles with TypeScript 7 (catalog `build`). The plugin only reads tsconfig paths and runs typegen,
+# which TypeScript 7 serves; check a web app's typegen whenever either version moves, and drop this
+# entry once the peer range includes 7.
 peerDependencyRules:
   allowedVersions:
     "@react-router/dev>typescript": "7"
+
+# Security fixes for transitive dependencies (OSV-Scanner, Stackra ADR 0174), each within the major
+# its parent asks for. Drop an entry once the parent's own range resolves the fixed version.
+overrides:
+  axios@<1.20.0: 1.20.0
+  qs@<6.16.1: 6.16.1
+  js-yaml@>=4 <4.3.2: 4.3.2
+  image-size@>=2 <2.0.3: 2.0.3
+  re2js@<2.8.7: 2.8.7
+  fflate@>=0.7 <0.7.5: 0.7.5
+  fflate@>=0.8 <0.8.3: 0.8.3
+  adm-zip@<0.6.1: 0.6.1
+  zod@>=4 <4.6.6: 4.6.7
 
 # Dependency lifecycle scripts are blocked by default (pnpm supply-chain security). Every entry here was
 # reviewed; a new one must be, too. Install fails (ERR_PNPM_IGNORED_BUILDS) until it is.
