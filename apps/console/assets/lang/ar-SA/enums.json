@@ -1,6 +1,0 @@
-{
-  "$comment": "Stackra file contract — Purpose: the ar-SA overlay of `enums::`: the establishment wording of the tenant settings tab; Boundary: an overlay holds differing keys only; every other key falls back along ar-SA → ar → en; Runtime: browser; Governing contract: ADR 0294 d20 (derived keys), ADR 0080",
-  "settings_tab": {
-    "tenant": "المنشأة"
-  }
-}

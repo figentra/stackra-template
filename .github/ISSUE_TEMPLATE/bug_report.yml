@@ -23,7 +23,7 @@ body:
     id: member
     attributes:
       label: Member
-      description: The app, service or package (for example services/commerce).
+      description: The app, service or package (for example services/example).
   # Without a version or commit a maintainer cannot reproduce against the same code.
   - type: input
     id: version

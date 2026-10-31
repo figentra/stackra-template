@@ -49,6 +49,7 @@ words:
   - applinks
   - assetlinks
   - autocapture
+  - axios
   - axllent
   - betterstack
   - blockmaps
@@ -84,8 +85,10 @@ words:
   - escpos
   - expo
   - extensionless
+  - fflate
   - figentra
   - frontmatter
+  - fulers
   - ghcr
   - gitleaks
   - gorhom
@@ -104,20 +107,25 @@ words:
   - isbot
   - jsdom
   - keygen
+  - keystyle
+  - keytar
   - kiro
   - knip
   - laravel
   - lefthook
   - lgtm
   - lhci
+  - libxmljs
   - lighthouseci
   - lighthouserc
   - llms
   - lproj
   - ltree
+  - lukekarrys
   - maestro
   - magento
   - mailpit
+  - mapfile
   - maxage
   - meilisearch
   - menuitemradio
@@ -131,6 +139,7 @@ words:
   - mise
   - mkcert
   - mmkv
+  - mobileprovision
   - modeline
   - monorepo
   - nnnn
@@ -150,9 +159,11 @@ words:
   - oxfmtrc
   - oxlint
   - oxlintrc
+  - pathspecs
   - pgvector
   - picsum
   - pinnable
+  - pipefail
   - pitr
   - pkce
   - plpgsql
@@ -167,6 +178,7 @@ words:
   - prerendered
   - prerendering
   - pressable
+  - provenanced
   - pulumi
   - pwa
   - qdrant
@@ -180,8 +192,10 @@ words:
   - riyals
   - rtl
   - runway
+  - sbdchd
   - sbom
   - sessionless
+  - shellcheck
   - shfmt
   - siem
   - slos
@@ -190,11 +204,13 @@ words:
   - spicedb
   - ssr
   - stackra
+  - stmts
   - stylesheet
   - svix
   - syft
   - tanstack
   - tenancy
+  - testflight
   - toggleable
   - togglefullscreen
   - transpilable
@@ -209,6 +225,7 @@ words:
   - typecheck
   - typegen
   - typesense
+  - udid
   - unaccent
   - ungrantable
   - uniwind
@@ -217,6 +234,7 @@ words:
   - upstash
   - uuidgen
   - valkey
+  - varchar
   - vite
   - vitest
   - wcag

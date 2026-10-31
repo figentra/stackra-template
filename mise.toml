@@ -14,6 +14,8 @@ node = "24.22.0"
 pnpm = "12.6.0"
 # Secret scanner for the pre-commit hook and the CI gate (.gitleaks.toml).
 gitleaks = "8.30.1"
+# Known vulnerabilities in pnpm-lock.yaml, in the Quality Gate (ADR 0174).
+"aqua:google/osv-scanner" = "2.7.0"
 # Infisical CLI, the default secret store (Stackra ADR 0173); it injects values, never prints them.
 "github:Infisical/cli" = "0.44.2"
 # Maestro, the mobile end-to-end runner; it also needs a JDK on PATH.

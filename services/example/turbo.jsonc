@@ -1,0 +1,3 @@
+// Turborepo package configuration: extends the root turbo.jsonc and declares this member's tags.
+// Owner: release-operations · Secrets: forbidden
+{ "$schema": "https://turborepo.dev/schema.json", "extends": ["//"], "tags": ["tier:service","runtime:node"] }
