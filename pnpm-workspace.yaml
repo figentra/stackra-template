@@ -264,3 +264,10 @@ allowBuilds:
   # Downloads the Sentry CLI that uploads native and JavaScript source maps (pulled in by
   # @sentry/react-native).
   "@sentry/cli": true
+  # Blocked after review: validate and build pass without their build steps.
+  # Install-time usage telemetry (through @mintlify/cli and the Spectral linter).
+  "@scarf/scarf": false
+  # Native keychain binding for the Mintlify CLI's login, which the docs build never uses.
+  keytar: false
+  # Native XML validator, an optional peer of @cyclonedx/cyclonedx-library; the SBOM is JSON.
+  libxmljs2: false
