@@ -1,8 +1,9 @@
 # Stackra file contract:
 # Purpose: the OSV-Scanner advisories CI's dependency scan ignores, each by advisory id, with an expiry
-#          and the package that pulls it in. Only docs and build tooling that never ships in an app.
-# Boundary: ignores only; a runtime advisory is fixed (a catalog bump or an override in
-#           pnpm-workspace.yaml), never listed here. Renew an entry only after rechecking its parent.
+#          and the package that pulls it in: docs and build tooling that never ships in an app, plus
+#          three runtime advisories the owner accepted for 14 days while core fixes them (STA-1736).
+# Boundary: ignores only; a runtime advisory is otherwise fixed (a catalog bump or an override in
+#           pnpm-workspace.yaml). Renew an entry only after rechecking its parent.
 # Runtime: node
 # Governing contract: Stackra ADR 0174 (OSV-Scanner), Stackra ADR 0019 (supply-chain hardening)
 
@@ -35,3 +36,18 @@ reason = "katex 0.16.x (fixed in 0.18.x); pulled in by mint (@mintlify/mdx, rehy
 id = "GHSA-mrhx-c7xc-m3w5"
 ignoreUntil = 2026-11-30
 reason = "zod 3.24.0 (fixed in 4.6.6, another major); pulled in by mint (@mintlify/cli, @mintlify/validation), docs build tooling only. zod 4.x is fixed by the pnpm-workspace.yaml override."
+
+[[IgnoredVulns]]
+id = "GHSA-w5hq-g745-h8pq"
+ignoreUntil = 2026-11-14
+reason = "uuid 8: runtime via @stackra/data-transfer → exceljs; core fix STA-1736, due 2026-11-14."
+
+[[IgnoredVulns]]
+id = "GHSA-3g3m-2fjr-6pw4"
+ignoreUntil = 2026-11-14
+reason = "glob 10: runtime via @stackra/data-transfer → exceljs; core fix STA-1736, due 2026-11-14."
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2026-11-14
+reason = "minimatch: runtime via @stackra/data-transfer → exceljs; core fix STA-1736, due 2026-11-14."
