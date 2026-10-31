@@ -38,12 +38,6 @@
       minimumReleaseAge: null,
     },
     {
-      // HeroUI Pro is a licensed beta line: every bump is reviewed by hand against its changelog.
-      matchPackageNames: ["@heroui-pro/**"],
-      groupName: "heroui pro",
-      automerge: false,
-    },
-    {
       // Expo SDK packages move together, with `expo install --fix`; a new SDK major is a planned
       // upgrade, never an automatic pull request.
       matchPackageNames: ["expo", "expo-*", "react-native"],

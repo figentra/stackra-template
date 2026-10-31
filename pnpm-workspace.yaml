@@ -4,8 +4,8 @@
 #          version any member references is pinned here; a member's package.json names a catalog
 #          (`catalog:<name>`) or `workspace:*`, never a literal version.
 # Boundary: versions and install policy only; no scripts and no secret. Exact pins, no ranges.
-#           Workspace members (@acme/loyalty-kit, @acme/access-log, @acme/theme and the
-#           packages/tooling presets) are `workspace:*`, never catalog entries.
+#           Workspace members (the example service and package) are `workspace:*`, never catalog
+#           entries; the tool presets are the core @stackra/*-config packages, from `catalog:stackra`.
 # Runtime: node
 # Governing contract: Stackra ADR 0013 (versions come only from catalogs and workspace references),
 #                     Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0294 (decisions 23 and
@@ -26,96 +26,114 @@ engineStrict: true
 # a compromised release has time to be pulled; a dependency that loses its trusted-publisher
 # provenance between versions fails the install instead of downgrading silently.
 minimumReleaseAge: 1440
+# First-party packages, published from our own CI with provenance; third-party packages keep the day.
+minimumReleaseAgeExclude:
+  - "@stackra/*"
+  - "@stackra-pro/*"
+  - "@figentra/*"
 trustPolicy: no-downgrade
+# 2.2.2's npm wrapper was hand-published by the sole maintainer; gitHead eb4e504 = tag v2.2.2, the platform
+# binaries carry SLSA provenance, and the diff vs 2.2.1 is version bumps + android-arm64 (checked 2026-10-29).
+trustPolicyExclude:
+  - "lefthook@2.2.2"
+  # semver 6.3.1 (Babel 7 pins ^6.3.1): the 6.x line never had provenance and pnpm compares it with the
+  # provenanced 7.x line; published by npm CLI maintainer lukekarrys (CVE-2022-25883 fix), gitHead b717044 =
+  # "chore: release 6.3.1", diff vs 6.3.0 is tooling metadata plus the regex fix (checked 2026-10-29).
+  - "semver@6.3.1"
 
 catalogs:
   # Stackra framework packages, one version line for the whole framework. Bumped together. Lists
   # every framework package a product uses (the union of the products' members), so
   # `catalogMode: strict` never blocks a product from adding one.
   stackra:
-    "@stackra/access-log": 1.0.0
-    "@stackra/achievements": 1.0.0
-    "@stackra/actions": 1.0.0
-    "@stackra/ai": 1.0.0
-    "@stackra/analytics": 1.0.0
-    "@stackra/app": 1.0.0
-    "@stackra/assets": 1.0.0
-    "@stackra/builder": 1.0.0
-    "@stackra/cache": 1.0.0
-    "@stackra/calendar": 1.0.0
-    "@stackra/cli": 1.0.0
-    "@stackra/clients": 1.0.0
-    "@stackra/collaboration": 1.0.0
-    "@stackra/config": 1.0.0
-    "@stackra/consent": 1.0.0
-    "@stackra/container": 1.0.0
-    "@stackra/content": 1.0.0
-    "@stackra/contracts": 1.0.0
-    "@stackra/coordinator": 1.0.0
-    "@stackra/csp": 1.0.0
-    "@stackra/data-transfer": 1.0.0
-    "@stackra/database": 1.0.0
-    "@stackra/devices": 1.0.0
-    "@stackra/documents": 1.0.0
-    "@stackra/entitlements": 1.0.0
-    "@stackra/errors": 1.0.0
-    "@stackra/events": 1.0.0
-    "@stackra/experience": 1.0.0
-    "@stackra/feature-flags": 1.0.0
-    "@stackra/filesystem": 1.0.0
-    "@stackra/fiscal": 1.0.0
-    "@stackra/gen": 1.0.0
-    "@stackra/i18n": 1.0.0
-    "@stackra/iam": 1.0.0
-    "@stackra/icons": 1.0.0
-    "@stackra/identity": 1.0.0
-    "@stackra/integrations": 1.0.0
-    "@stackra/ledger": 1.0.0
-    "@stackra/licensing": 1.0.0
-    "@stackra/locking": 1.0.0
-    "@stackra/logger": 1.0.0
-    "@stackra/loyalty-kit": 1.0.0
-    "@stackra/market-packs": 1.0.0
-    "@stackra/media": 1.0.0
-    "@stackra/model": 1.0.0
-    "@stackra/money": 1.0.0
-    "@stackra/navigation": 1.0.0
-    "@stackra/notifications": 1.0.0
-    "@stackra/outbox": 1.0.0
-    "@stackra/panel": 1.0.0
-    "@stackra/payments": 1.0.0
-    "@stackra/peripherals": 1.0.0
-    "@stackra/platform": 1.0.0
-    "@stackra/pricing": 1.0.0
-    "@stackra/query": 1.0.0
-    "@stackra/queue": 1.0.0
-    "@stackra/realtime": 1.0.0
-    "@stackra/registry": 1.0.0
-    "@stackra/rules": 1.0.0
-    "@stackra/runway": 1.0.0
-    "@stackra/scheduler": 1.0.0
-    "@stackra/scope": 1.0.0
-    "@stackra/search": 1.0.0
-    "@stackra/segments": 1.0.0
-    "@stackra/seo": 1.0.0
-    "@stackra/settings": 1.0.0
-    "@stackra/shipping": 1.0.0
-    "@stackra/shortcuts": 1.0.0
-    "@stackra/state": 1.0.0
-    "@stackra/state-machine": 1.0.0
-    "@stackra/storage": 1.0.0
-    "@stackra/support": 1.0.0
-    "@stackra/tenancy": 1.0.0
-    "@stackra/testing": 1.0.0
-    "@stackra/theming": 1.0.0
-    "@stackra/tokens": 1.0.0
-    "@stackra/transport": 1.0.0
-    "@stackra/ui": 1.0.0
-    "@stackra/validation": 1.0.0
-    "@stackra/versioning": 1.0.0
-    "@stackra/vite-plugin": 1.0.0
-    "@stackra/webhooks": 1.0.0
-    "@stackra/workflow": 1.0.0
+    "@stackra/access-log": 0.2.0
+    "@stackra/achievements": 0.2.0
+    "@stackra/actions": 0.2.0
+    "@stackra/ai": 0.2.0
+    "@stackra/analytics": 0.2.0
+    "@stackra/app": 0.2.0
+    "@stackra/assets": 0.2.0
+    "@stackra/builder": 0.2.0
+    "@stackra/cache": 0.2.0
+    "@stackra/calendar": 0.2.0
+    "@stackra/cli": 0.2.0
+    "@stackra/clients": 0.2.0
+    "@stackra/collaboration": 0.2.0
+    "@stackra/commitlint-config": 0.2.0
+    "@stackra/config": 0.2.0
+    "@stackra/consent": 0.2.0
+    "@stackra/container": 0.2.0
+    "@stackra/content": 0.2.0
+    "@stackra/contracts": 0.2.0
+    "@stackra/coordinator": 0.2.0
+    "@stackra/csp": 0.2.0
+    "@stackra/data-transfer": 0.2.0
+    "@stackra/database": 0.2.0
+    "@stackra/devices": 0.2.0
+    "@stackra/documents": 0.2.0
+    "@stackra/entitlements": 0.2.0
+    "@stackra/errors": 0.2.0
+    "@stackra/events": 0.2.0
+    "@stackra/experience": 0.2.0
+    "@stackra/feature-flags": 0.2.0
+    "@stackra/filesystem": 0.2.0
+    "@stackra/fiscal": 0.2.0
+    "@stackra/gen": 0.2.0
+    "@stackra/i18n": 0.2.0
+    "@stackra/iam": 0.2.0
+    "@stackra/icons": 0.2.0
+    "@stackra/identity": 0.2.0
+    "@stackra/integrations": 0.2.0
+    "@stackra/ledger": 0.2.0
+    "@stackra/licensing": 0.2.0
+    "@stackra/locking": 0.2.0
+    "@stackra/logger": 0.2.0
+    "@stackra/loyalty-kit": 0.2.0
+    "@stackra/market-packs": 0.2.0
+    "@stackra/media": 0.2.0
+    "@stackra/model": 0.2.0
+    "@stackra/money": 0.2.0
+    "@stackra/navigation": 0.2.0
+    "@stackra/notifications": 0.2.0
+    "@stackra/outbox": 0.2.0
+    "@stackra/oxlint-config": 0.2.0
+    "@stackra/panel": 0.2.0
+    "@stackra/payments": 0.2.0
+    "@stackra/peripherals": 0.2.0
+    "@stackra/platform": 0.2.0
+    "@stackra/pricing": 0.2.0
+    "@stackra/query": 0.2.0
+    "@stackra/queue": 0.2.0
+    "@stackra/realtime": 0.2.0
+    "@stackra/registry": 0.2.0
+    "@stackra/rules": 0.2.0
+    "@stackra/runway": 0.2.0
+    "@stackra/scheduler": 0.2.0
+    "@stackra/scope": 0.2.0
+    "@stackra/search": 0.2.0
+    "@stackra/segments": 0.2.0
+    "@stackra/seo": 0.2.0
+    "@stackra/settings": 0.2.0
+    "@stackra/shipping": 0.2.0
+    "@stackra/shortcuts": 0.2.0
+    "@stackra/state": 0.2.0
+    "@stackra/state-machine": 0.2.0
+    "@stackra/storage": 0.2.0
+    "@stackra/support": 0.2.0
+    "@stackra/tenancy": 0.2.0
+    "@stackra/testing": 0.2.0
+    "@stackra/theming": 0.2.0
+    "@stackra/tokens": 0.2.0
+    "@stackra/transport": 0.2.0
+    "@stackra/tsdown-config": 0.2.0
+    "@stackra/typescript-config": 0.2.0
+    "@stackra/ui": 0.2.0
+    "@stackra/validation": 0.2.0
+    "@stackra/versioning": 0.2.0
+    "@stackra/vitest-config": 0.2.0
+    "@stackra/vite-plugin": 0.2.0
+    "@stackra/webhooks": 0.2.0
+    "@stackra/workflow": 0.2.0
   # Shared by web, desktop and mobile members (`catalog:`). react and react-dom stay on the exact
   # renderer version react-native 0.86 (Expo SDK 57) ships with, so every member and every package
   # with a React entry resolves one React.
@@ -125,14 +143,11 @@ catalogs:
     react-router: 7.9.4
     isbot: 5.1.31
     "@react-email/components": 0.5.2
-    # HeroUI Pro for the console (Stackra ADR 0197 as amended): the vendor's current release line is
-    # still beta; its postinstall downloads the licensed components (allowBuilds below).
-    "@heroui-pro/react": 1.0.0-beta.10
     # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.
     "@types/node": 24.19.2
     # React's types follow the React 19.2 line above, for web, desktop and mobile alike.
-    "@types/react": 19.2.18
-    "@types/react-dom": 19.2.7
+    "@types/react": 19.3.0
+    "@types/react-dom": 19.3.0
     # The schemas `stackra gen` compiles from shape classes import zod, so every member that authors
     # shapes depends on it; authored code never imports it, except through the `@Field(zod)` hatch.
     # 4.1 or later is needed for codecs and `.exactOptional()` (Stackra ADR 0294 decision 26).
@@ -148,7 +163,7 @@ catalogs:
     workbox-precaching: 7.3.0
     workbox-routing: 7.3.0
     workbox-strategies: 7.3.0
-  # Expo SDK 57 (apps/mobile). Expo-owned packages are pinned to the versions expo 57.0.31 bundles
+  # Expo SDK 57 (a mobile app member). Expo-owned packages are pinned to the versions expo 57.0.31 bundles
   # (`expo install --check` reports any drift); bump them together, in one change, with
   # `expo install --fix`. React Navigation and the native tab bar are code-based navigation (no
   # expo-router, Stackra ADR 0227). heroui-native's peers (expo-blur, @gorhom/bottom-sheet,
@@ -194,7 +209,7 @@ catalogs:
     expo-web-browser: 57.0.3
     "@sentry/react-native": 7.11.0
   # Toolchain that compiles and bundles: TypeScript, Turborepo, Vite, tsdown, Electron and the
-  # React Router build plugin. The presets in packages/tooling are written against these pins.
+  # React Router build plugin. The core @stackra/*-config presets are written against these pins.
   build:
     turbo: 2.11.9
     typescript: 7.0.2
@@ -229,7 +244,7 @@ catalogs:
 
 # @react-router/dev 7.9.4 declares `typescript: ^5.1.0` as a peer, while the workspace compiles with
 # TypeScript 7 (catalog `build`). The plugin only reads tsconfig paths and runs typegen, which TypeScript
-# 7 serves; check apps/web typegen whenever either version moves, and drop this entry once the peer
+# 7 serves; check a web app's typegen whenever either version moves, and drop this entry once the peer
 # range includes 7.
 peerDependencyRules:
   allowedVersions:
@@ -249,9 +264,10 @@ allowBuilds:
   # Downloads the Sentry CLI that uploads native and JavaScript source maps (pulled in by
   # @sentry/react-native).
   "@sentry/cli": true
-  # HeroUI Pro (the console's @heroui-pro/react, Stackra ADR 0197 as amended): its postinstall
-  # downloads the licensed components with HEROUI_AUTH_TOKEN, which `pnpm install:pro` (locally) and
-  # release.yml's OIDC step (CI) fill from Infisical's HEROUI_PERSONAL_TOKEN; without it the
-  # install fails.
-  heroui-pro: true
-  "@heroui-pro/react": true
+  # Blocked after review: validate and build pass without their build steps.
+  # Install-time usage telemetry (through @mintlify/cli and the Spectral linter).
+  "@scarf/scarf": false
+  # Native keychain binding for the Mintlify CLI's login, which the docs build never uses.
+  keytar: false
+  # Native XML validator, an optional peer of @cyclonedx/cyclonedx-library; the SBOM is JSON.
+  libxmljs2: false

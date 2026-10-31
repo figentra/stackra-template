@@ -1,0 +1,10 @@
+# The data the app collects, one row per data type; the same file in every locale (store-build checks it).
+# Stores' privacy answers (Apple App Privacy, Play Data safety) are generated from it.
+collects:
+  # The push notification token, to deliver the notifications the app sends.
+  - type: device_id
+    purposes: [app_functionality]
+    consent: necessary
+    source: push
+    linked: true
+    tracking: false

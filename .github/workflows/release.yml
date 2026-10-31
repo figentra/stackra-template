@@ -1,18 +1,20 @@
 # Stackra file contract:
 # Purpose: release. With pending changesets it opens or updates the "version packages" pull request;
 #          when that pull request merges it publishes every package that is not marked
-#          `"private": true` to npm with provenance, then builds a CycloneDX SBOM of the released
-#          tree. Apps and services deploy by commit SHA, not from here.
+#          `"private": true` to the Stackra registry (npm.stackra.figentra.com, ADR 0453) with
+#          provenance, then builds a CycloneDX SBOM of the released tree. Apps and services deploy
+#          by commit SHA, not from here.
 # Boundary: triggers are every push to main and workflow_dispatch with `dry_run` for a publish dry
 #           run. Needs the `release` environment (protected, main only), contents and pull-requests
-#           write, and id-token write for npm trusted publishing and the Infisical login that
-#           reads the HeroUI Pro licence token (HEROUI_PERSONAL_TOKEN, /ci); no npm token and no repository
-#           secret. Until the repository commits pnpm-lock.yaml (`preflight` below) every job is
-#           skipped and the run is green: `pnpm install --frozen-lockfile` cannot run without a
-#           lockfile, which is the case while `@stackra/*` is unpublished.
+#           write, and id-token write for the registry's OIDC exchange; no registry token and no
+#           repository secret. Never publishes to npmjs. Until the repository commits
+#           pnpm-lock.yaml (`preflight` below) every job is skipped and the run is green:
+#           `pnpm install --frozen-lockfile` cannot run without a lockfile, which is the case while
+#           `@stackra/*` is unpublished.
 # Runtime: node
 # Governing contract: Stackra ADR 0013 (versioning and release), Stackra ADR 0019 (supply-chain
-#                     hardening), Stackra ADR 0177 (npm distribution). Runbook:
+#                     hardening), Stackra ADR 0177 (npm distribution), Stackra ADR 0453 (the
+#                     registry, decisions 6 and 7). Runbook:
 #                     https://docs.stackra.figentra.com/runbooks/release
 name: Release
 
@@ -76,7 +78,7 @@ jobs:
     permissions:
       contents: write # push the version-PR branch and the version tags
       pull-requests: write # open and update the version PR
-      id-token: write # pnpm trusted publishing and provenance; the Infisical login for the install
+      id-token: write # the registry's OIDC exchange and the provenance of each tarball
     outputs:
       published: ${{ steps.changesets.outputs.published }}
 
@@ -93,37 +95,8 @@ jobs:
         with:
           install_args: node pnpm
 
-      # HeroUI Pro (the console's @heroui-pro/react, Stackra ADR 0197 as amended): the install's
-      # postinstall downloads the licensed artifacts with HEROUI_AUTH_TOKEN. This job's GitHub OIDC
-      # token is exchanged with Infisical for HEROUI_PERSONAL_TOKEN from /ci, the licence token (the
-      # secret-name filter keeps every other /ci value out); no repository secret holds it. Needs the
-      # repository variables INFISICAL_CI_IDENTITY_ID, INFISICAL_PROJECT_ID and INFISICAL_DOMAIN.
-      - name: HeroUI Pro token (Infisical OIDC)
-        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
-        with:
-          method: oidc
-          identity-id: ${{ vars.INFISICAL_CI_IDENTITY_ID }}
-          domain: ${{ vars.INFISICAL_DOMAIN }}
-          project-id: ${{ vars.INFISICAL_PROJECT_ID }}
-          env-slug: prod
-          secret-path: /ci
-          secret-name: HEROUI_PERSONAL_TOKEN
-          export-type: env
-
-      # The postinstall reads only HEROUI_AUTH_TOKEN and, without it, exits 0 with an empty package;
-      # the guard fails the step before the install when the token is missing and after it when the
-      # licensed components were not downloaded.
       - name: Install dependencies
-        run: |
-          node .github/scripts/heroui-pro.mjs token
-          pnpm install --frozen-lockfile
-          node .github/scripts/heroui-pro.mjs installed
-        env:
-          HEROUI_AUTH_TOKEN: ${{ env.HEROUI_PERSONAL_TOKEN }}
-
-      # The token is for the install alone: blank it so no later step (build, publish, SBOM) reads it.
-      - name: Drop the HeroUI Pro token
-        run: echo "HEROUI_PERSONAL_TOKEN=" >> "$GITHUB_ENV"
+        run: pnpm install --frozen-lockfile
 
       # STA-1393: Turborepo remote cache (turbo.stackra.figentra.com). Exports TURBO_API, TURBO_TOKEN,
       # TURBO_TEAM and TURBO_REMOTE_CACHE_SIGNATURE_KEY from /ci/turbo; skipped when the variable is
@@ -143,12 +116,50 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # ADR 0453 decision 6, as core's runway-npm.yml: no registry token exists. Per package the
+      # publish script exchanges the job's GitHub ID token (audience `npm:<registry host>`) at the
+      # registry for a short-lived token bound to that one name; `~/.npmrc` names the variable only.
+      - name: Registry
+        env:
+          REGISTRY: https://npm.stackra.figentra.com/
+        run: |
+          host="${REGISTRY#https://}"
+          # shellcheck disable=SC2016 # the literal ${NODE_AUTH_TOKEN} is the point
+          printf '//%s:_authToken=${NODE_AUTH_TOKEN}\n' "$host" >> ~/.npmrc
+          cat > "$RUNNER_TEMP/registry-publish.sh" <<'SH'
+          set -euo pipefail
+          REGISTRY=https://npm.stackra.figentra.com/
+          host="${REGISTRY#https://}"
+          pnpm -r ls --depth -1 --json |
+            jq -r '.[] | select(.private != true) | [.name, .version, .path] | @tsv' |
+            while IFS=$'\t' read -r name version dir; do
+              encoded="${name/\//%2f}"
+              # Versions are immutable (ADR 0453 decision 7): one already there is skipped.
+              if curl -fsS -o /dev/null "${REGISTRY}${encoded}/${version}"; then
+                echo "skip ${name}@${version}: already on the registry"
+                continue
+              fi
+              id_token="$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+                "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=npm:${host%/}" | jq -r '.value')"
+              echo "::add-mask::${id_token}"
+              NODE_AUTH_TOKEN="$(curl -fsS -X POST -H "Authorization: Bearer ${id_token}" \
+                "${REGISTRY}-/npm/v1/oidc/token/exchange/package/${encoded}" | jq -r '.token')"
+              echo "::add-mask::${NODE_AUTH_TOKEN}"
+              export NODE_AUTH_TOKEN
+              (cd "$dir" && pnpm publish --no-git-checks --provenance --registry "$REGISTRY")
+              unset NODE_AUTH_TOKEN
+              git tag "${name}@${version}"
+              # changesets/action reads this line to push the tag and create the GitHub release.
+              echo "New tag: ${name}@${version}"
+            done
+          SH
+
       - name: Publish dry run
         if: inputs.dry_run == true
-        run: pnpm -r publish --dry-run --no-git-checks
+        run: pnpm -r publish --dry-run --no-git-checks --registry https://npm.stackra.figentra.com/
 
       # With pending changesets this opens or updates the "version packages" PR; when that PR merges,
-      # `changeset publish` publishes every package not marked `"private": true` to npm with
+      # the registry script above publishes every package not marked `"private": true` with
       # provenance. The inputs are changesets/action's own names at this SHA.
       - name: Version PR / publish
         id: changesets
@@ -156,22 +167,15 @@ jobs:
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           version-script: pnpm changeset version
-          publish-script: pnpm changeset publish
+          publish-script: bash ${{ runner.temp }}/registry-publish.sh
           pr-title: "chore(release): version packages"
           commit-message: "chore(release): version packages"
           # GITHUB_TOKEN works, but a PR it opens does not trigger the Quality Gate. Swap in a GitHub App
           # token (actions/create-github-app-token) when the version PR must run the gate.
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          # changesets runs pnpm 12's native publish (`pnpm changeset publish` -> `pnpm publish`): it
-          # resolves workspace:/catalog: versions and does the OIDC exchange and provenance itself, not
-          # the npm CLI. No NPM_TOKEN exists anywhere (Stackra ADR 0177).
-          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
-          NPM_CONFIG_PROVENANCE: "true"
 
   # The SBOM of what was just released. It runs only when the release job published something, and
-  # holds no write permission: it reads the repository, and its id-token serves only the Infisical
-  # login for the install.
+  # holds no write permission: it only reads the repository.
   sbom:
     name: SBOM
     runs-on: ubuntu-24.04
@@ -179,7 +183,6 @@ jobs:
     if: needs.release.outputs.published == 'true'
     permissions:
       contents: read
-      id-token: write # the Infisical login for the install (HeroUI Pro token)
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -192,37 +195,8 @@ jobs:
         with:
           install_args: node pnpm
 
-      # HeroUI Pro (the console's @heroui-pro/react, Stackra ADR 0197 as amended): the install's
-      # postinstall downloads the licensed artifacts with HEROUI_AUTH_TOKEN. This job's GitHub OIDC
-      # token is exchanged with Infisical for HEROUI_PERSONAL_TOKEN from /ci, the licence token (the
-      # secret-name filter keeps every other /ci value out); no repository secret holds it. Needs the
-      # repository variables INFISICAL_CI_IDENTITY_ID, INFISICAL_PROJECT_ID and INFISICAL_DOMAIN.
-      - name: HeroUI Pro token (Infisical OIDC)
-        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
-        with:
-          method: oidc
-          identity-id: ${{ vars.INFISICAL_CI_IDENTITY_ID }}
-          domain: ${{ vars.INFISICAL_DOMAIN }}
-          project-id: ${{ vars.INFISICAL_PROJECT_ID }}
-          env-slug: prod
-          secret-path: /ci
-          secret-name: HEROUI_PERSONAL_TOKEN
-          export-type: env
-
-      # The postinstall reads only HEROUI_AUTH_TOKEN and, without it, exits 0 with an empty package;
-      # the guard fails the step before the install when the token is missing and after it when the
-      # licensed components were not downloaded.
       - name: Install dependencies
-        run: |
-          node .github/scripts/heroui-pro.mjs token
-          pnpm install --frozen-lockfile
-          node .github/scripts/heroui-pro.mjs installed
-        env:
-          HEROUI_AUTH_TOKEN: ${{ env.HEROUI_PERSONAL_TOKEN }}
-
-      # The token is for the install alone: blank it so no later step (build, publish, SBOM) reads it.
-      - name: Drop the HeroUI Pro token
-        run: echo "HEROUI_PERSONAL_TOKEN=" >> "$GITHUB_ENV"
+        run: pnpm install --frozen-lockfile
 
       # `pnpm sbom` runs the CycloneDX CLI at its catalog version (catalog `release`). It reads what
       # was installed (node_modules); `--ignore-npm-errors` is needed because it shells out to

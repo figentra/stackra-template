@@ -1,9 +1,0 @@
-{
-  "cases": [
-    {
-      "arguments": { "orderId": "ord_01JA0000000000000000000003" },
-      "mustMention": ["pending", "payment"],
-      "mustNotMention": ["refund"]
-    }
-  ]
-}
