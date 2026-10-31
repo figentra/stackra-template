@@ -22,7 +22,7 @@ export class AcmeDocsConfig extends DocsConfig {
     "How Acme is built on Stackra: the lean starter, its programming model, tests and decisions.";
 
   /** The brand colours Mintlify themes the site with. */
-  override readonly colors = { primary: "#2F6DF6", light: "#F7F7F5", dark: "#1C1E22" };
+  override readonly colors = { primary: "#2F6DF6", light: "#F7F7F5", dark: "#2563EB" };
 
   /** The light and dark logos under src/assets, linking home. */
   override readonly logo = { light: "logo/light.svg", dark: "logo/dark.svg", href: "/" };
