@@ -6,5 +6,5 @@ This project is MIT-licensed (LICENSE), with these exclusions:
   Fulers Technologies L.L.C.
 - A font committed to this repository keeps its own licence, and that licence text sits beside the
   font file.
-- Code from paid licences (HeroUI Pro, Uniwind Pro and similar) is never committed or depended on
+- Code from paid licences (Uniwind Pro and similar) is never committed or depended on
   (Stackra ADR 0469).

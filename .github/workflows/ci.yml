@@ -3,10 +3,10 @@
 #          (merge_group) and every push to main. The main ruleset (.github/rulesets/main.json)
 #          requires the `Quality Gate` job by name, so keep that name unchanged.
 # Boundary: checks only; nothing here deploys, writes to the repository or holds a secret or an OIDC
-#           token (contents: read). Tools come from mise.toml. Until `@stackra/cli` 0.1.0 resolves from
-#           the Stackra registry only the install-free pre-release gate runs; from then on the job also
-#           installs and runs OSV-Scanner, lint, typecheck, test, build, gen, validate and Squawk, the
-#           shape of core's Quality Gate.
+#           token (contents: read). Tools come from mise.toml. Until the catalog's `@stackra/cli`
+#           resolves from the Stackra registry only the install-free pre-release gate runs; from then on
+#           the job also installs and runs OSV-Scanner, lint, typecheck, test, build, gen, validate
+#           and Squawk, the shape of core's Quality Gate.
 # Runtime: node
 # Governing contract: Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0027 (toolchain from
 #                     mise.toml), Stackra ADR 0174 (OSV), Stackra ADR 0159 (Squawk). Runbook: https://docs.stackra.figentra.com/runbooks/ci
