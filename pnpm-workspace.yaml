@@ -262,6 +262,7 @@ overrides:
   fflate@>=0.8 <0.8.3: 0.8.3
   adm-zip@<0.6.1: 0.6.1
   zod@>=4 <4.6.6: 4.6.7
+  smol-toml@<1.9.0: 1.9.1
 
 # Dependency lifecycle scripts are blocked by default (pnpm supply-chain security). Every entry here was
 # reviewed; a new one must be, too. Install fails (ERR_PNPM_IGNORED_BUILDS) until it is.
