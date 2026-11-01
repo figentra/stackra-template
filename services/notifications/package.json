@@ -71,6 +71,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@stackra/cli": "catalog:stackra",
     "@stackra/runway": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
     "@stackra/typescript-config": "workspace:*",
