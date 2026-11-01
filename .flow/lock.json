@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "preset": "neutral",
+  "files": {
+    ".claude/skills/flow-specify/SKILL.md": "b5b4e9fa401ca7aa182ba1fc23fa37eb2c315bb3372ed460530c97e8c6665d97",
+    ".opencode/commands/flow-specify.md": "63158f381079bff63df3453936ad01decab56b54febbcd5eff50a3622c8af7c8",
+    ".claude/skills/flow-clarify/SKILL.md": "5b49b993457a59c2751bee57f674f0e0c6990c8edbd46718a73581af573e0d37",
+    ".opencode/commands/flow-clarify.md": "4875b5dbba787a411b3c361e0fa8104cdb0531b329809550f3986c2ab38bb678",
+    ".claude/skills/flow-plan/SKILL.md": "8271483a3c3a524003e8974cc0dc6bc78cde85cd9da4e716b77c3839c6b32db6",
+    ".opencode/commands/flow-plan.md": "829d0e35e0a45d97db12fa585276368054141d896041354fbf6b0407f0ead9a2",
+    ".claude/skills/flow-tasks/SKILL.md": "342f2076602db9ff21b8ee56c5106ec196ecc0701baf4cfe6ab8d89978caff45",
+    ".opencode/commands/flow-tasks.md": "616e0872dc25b24c3fd3202f49c5b3eeaf5b155e9968e1b8a577419d5c8bb14a",
+    ".claude/skills/flow-analyze/SKILL.md": "04065787e4aec95007fe2aa4fa9587c070c5699d76dcd11d5c29dcc0a40341b5",
+    ".opencode/commands/flow-analyze.md": "1163572f5d0f868fb216f1ea3076b8c616f04ae40544031251b3dda85525b11f",
+    ".claude/skills/flow-checklist/SKILL.md": "173b42bb8ab8fcdac663ce59aee997683a49b133a7a8d4858aeab809759f1abc",
+    ".opencode/commands/flow-checklist.md": "fd0053c52013e9045020b03e129492e1adfe7869a5ed262e6ecafaf7ea0717c7",
+    ".claude/skills/flow-implement/SKILL.md": "97f4ba5c5a36e790fa310d72f56692632f0cedde96c339fd78c993f46da253c8",
+    ".opencode/commands/flow-implement.md": "150f58a8ac63400351619bc565593b6e439a43b8d664fce1b685fd35c58f7570",
+    ".claude/skills/flow-converge/SKILL.md": "f7d9519c6cc75f61990c34099e8c769d9ff6a8bbfd5daf9adea90f2da3d176d9",
+    ".opencode/commands/flow-converge.md": "5676fe8e5200075dd9f6792f49707cd06544a12a364f6754018504d507c24964"
+  }
+}

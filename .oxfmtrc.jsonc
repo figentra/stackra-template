@@ -37,6 +37,10 @@
     "**/CHANGELOG.md",
     "pnpm-lock.yaml",
     // rendered from .mcp.yaml by `stackra mcp sync` (gitignored)
-    ".mcp.json"
+    ".mcp.json",
+    // rendered by `figentra-flow sync`; `figentra-flow gate ci` compares them byte for byte with .flow/lock.json
+    ".flow/**",
+    ".claude/skills/flow-*/**",
+    ".opencode/commands/flow-*.md"
   ]
 }

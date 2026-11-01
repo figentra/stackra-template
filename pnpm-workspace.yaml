@@ -213,6 +213,8 @@ catalogs:
     oxfmt: 0.71.0
     cspell: 10.4.0
     "@lhci/cli": 0.15.1
+    # Figentra Flow, the spec CLI (Stackra ADR 0510); from the Figentra registry (.npmrc).
+    "@figentra-oss/flow": 0.2.0
   # Release tooling: changesets, commitlint, git hooks and the release SBOM (CycloneDX).
   release:
     "@changesets/cli": 3.0.3

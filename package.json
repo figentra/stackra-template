@@ -38,13 +38,17 @@
     "secrets:scan": "gitleaks git . --config .gitleaks.toml --no-banner --redact",
     "sbom": "cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file sbom.cdx.json",
     "agents:setup": "stackra agents setup",
-    "install:pro": "infisical run --env=dev --path=/install --silent --command 'export HEROUI_AUTH_TOKEN=\"$HEROUI_PERSONAL_TOKEN\" && node .github/scripts/heroui-pro.mjs token && pnpm install && node .github/scripts/heroui-pro.mjs installed'"
+    "install:pro": "infisical run --env=dev --path=/install --silent --command 'export HEROUI_AUTH_TOKEN=\"$HEROUI_PERSONAL_TOKEN\" && node .github/scripts/heroui-pro.mjs token && pnpm install && node .github/scripts/heroui-pro.mjs installed'",
+    "spec:gate": "figentra-flow gate",
+    "spec:trace": "figentra-flow trace",
+    "spec:sync": "figentra-flow sync --direct"
   },
   "devDependencies": {
     "@changesets/changelog-git": "catalog:release",
     "@changesets/cli": "catalog:release",
     "@commitlint/cli": "catalog:release",
     "@cyclonedx/cyclonedx-npm": "catalog:release",
+    "@figentra-oss/flow": "catalog:quality",
     "@stackra/cli": "catalog:stackra",
     "@stackra/commitlint-config": "workspace:*",
     "@stackra/runway": "catalog:stackra",
