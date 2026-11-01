@@ -6,8 +6,8 @@
 #          by commit SHA, not from here.
 # Boundary: triggers are every push to main and workflow_dispatch with `dry_run` for a publish dry
 #           run. Needs the `release` environment (protected, main only), contents and pull-requests
-#           write, and id-token write for the registry's OIDC exchange; no registry token and no
-#           repository secret. Never publishes to npmjs. Until the repository commits
+#           write, and id-token write for the registry's OIDC exchange; the one token is the registry
+#           read token for installs (.github/actions/registry-auth), never a publish token. Never publishes to npmjs. Until the repository commits
 #           pnpm-lock.yaml (`preflight` below) every job is skipped and the run is green:
 #           `pnpm install --frozen-lockfile` cannot run without a lockfile, which is the case while
 #           `@stackra/*` is unpublished.
@@ -88,6 +88,15 @@ jobs:
         with:
           fetch-depth: 0 # changesets diffs against history and reads existing tags
           submodules: false
+
+      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
+      # .github/actions/registry-auth.
+      - name: Registry auth
+        uses: ./.github/actions/registry-auth
+        with:
+          token: ${{ secrets.STACKRA_REGISTRY_TOKEN }}
+          identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
+          project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
 
       # Stackra ADR 0027: node and pnpm come from mise.toml.
       - name: Toolchain (mise)
@@ -183,12 +192,22 @@ jobs:
     if: needs.release.outputs.published == 'true'
     permissions:
       contents: read
+      id-token: write # Infisical OIDC for the registry read token
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
           submodules: false
+
+      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
+      # .github/actions/registry-auth.
+      - name: Registry auth
+        uses: ./.github/actions/registry-auth
+        with:
+          token: ${{ secrets.STACKRA_REGISTRY_TOKEN }}
+          identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
+          project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
 
       - name: Toolchain (mise)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0

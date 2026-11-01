@@ -29,6 +29,11 @@ Governing contract: Stackra ADR 0019 (least privilege, pinned actions), ADR 0027
   OIDC with the org variable `INFISICAL_TURBO_IDENTITY_ID` and exports `TURBO_API`, `TURBO_TOKEN`,
   `TURBO_TEAM` and `TURBO_REMOTE_CACHE_SIGNATURE_KEY` from `/ci/turbo`. Without the variable the
   step is skipped and turbo uses its local cache only.
+- Registry read token: pnpm 12 ignores the token line in the repository `.npmrc`, so every job
+  that installs runs `.github/actions/registry-auth` first. It reads `STACKRA_REGISTRY_TOKEN` from
+  Infisical (`/ci/registry`) by OIDC with the org variables `INFISICAL_GATE_IDENTITY_ID` and
+  `INFISICAL_GATE_PROJECT_ID`, else from the repository secret, masks it and writes `~/.npmrc`.
+  Without either it warns and reads of `@figentra/*` are refused.
 
 ## Branch rules
 
