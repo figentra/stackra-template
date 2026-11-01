@@ -4,7 +4,7 @@
 #          @stackra-pro/*. pnpm 12 ignores tokens in the repository's .npmrc, so the project-level
 #          `_authToken=${STACKRA_REGISTRY_TOKEN}` line alone is not enough.
 # Boundary: one read-only token, masked, never echoed. It comes from Infisical (project
-#           figentra-ci-gate, prod /ci/registry, STACKRA_REGISTRY_TOKEN) over GitHub OIDC when the
+#           figentra-ci, prod /ci/registry, STACKRA_REGISTRY_TOKEN) over GitHub OIDC when the
 #           org variables are set, else from the repository secret of the same name. Without
 #           either it warns and the @figentra reads answer 401. The job needs `id-token: write`
 #           for the OIDC route.
@@ -49,7 +49,7 @@ runs:
       run: |
         token="${STACKRA_REGISTRY_TOKEN:-$FALLBACK_TOKEN}"
         if [ -z "$token" ]; then
-          echo "::warning title=Registry::no read token (Infisical figentra-ci-gate prod /ci/registry, or the STACKRA_REGISTRY_TOKEN secret); @figentra reads will be refused"
+          echo "::warning title=Registry::no read token (Infisical figentra-ci prod /ci/registry, or the STACKRA_REGISTRY_TOKEN secret); @figentra reads will be refused"
           exit 0
         fi
         echo "::add-mask::$token"
