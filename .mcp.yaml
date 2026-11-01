@@ -57,7 +57,7 @@ mcpServers:
     url: https://mintlify.com/docs/mcp
 
   # --------------------------------------------------------------------------------------------
-  # 04. UI: HeroUI (web and native, open source and Pro), Uniwind, Expo, Figma
+  # 04. UI: HeroUI (web and native, open source), Uniwind, Expo, Figma
   # --------------------------------------------------------------------------------------------
   heroui-react:
     command: npx
@@ -65,34 +65,6 @@ mcpServers:
   heroui-native:
     command: npx
     args: [-y, "@heroui/native-mcp@1.1.2"]
-  heroui-pro:
-    command: pnpm
-    args:
-      - exec
-      - stackra
-      - mcp
-      - exec
-      - --
-      - npx
-      - -y
-      - mcp-remote@0.14.3
-      - https://mcp.heroui.pro/mcp
-      - --header
-      - x-heroui-personal-token:$HEROUI_PERSONAL_TOKEN
-  heroui-native-pro:
-    command: pnpm
-    args:
-      - exec
-      - stackra
-      - mcp
-      - exec
-      - --
-      - npx
-      - -y
-      - mcp-remote@0.14.3
-      - https://native-mcp.heroui.pro/mcp
-      - --header
-      - x-heroui-personal-token:$HEROUI_PERSONAL_TOKEN
   uniwind:
     type: http
     url: https://docs.uniwind.dev/mcp

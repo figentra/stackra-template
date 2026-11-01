@@ -1,0 +1,43 @@
+---
+title: "Quickstart"
+description: "From clone to a generated, running workspace."
+icon: "rocket"
+---
+
+{/* Stackra file contract: Purpose: the first steps in a repository started from the lean template: toolchain, the one-time secret store setup, gen, dev, the gate and the examples. Boundary: the starter's own commands and members only; each command is a root package.json script or the stackra CLI. Runtime: docs. Governing contract: Stackra ADR 0002 (2026-10-27 amendment); Stackra ADR 0173 (secrets); stackra-15 (the lean starter); stackra-177. */}
+
+<Steps>
+  <Step title="Install the toolchain">
+    `mise install` pins Node, pnpm, the Encore CLI and gitleaks. Then `pnpm install`, which also
+    installs the git hooks and writes `.mcp.json` (`stackra mcp sync`).
+  </Step>
+  <Step title="Connect the secret store (once per repository)">
+    Secret values live only in Infisical (ADR 0173); files hold names, never values. A person with
+    access sets this up once, not an agent: create the Infisical project and put its id in the root
+    `runway.yaml` (`providers.infisical.workspace`); create the `dev`, `preview`, `staging` and `prod`
+    environments and the `/runtime`, `/ci` and `/agents` folders that `providers.infisical` names; add
+    one machine identity for local development and one GitHub OIDC identity per workflow that reads
+    `/ci`. The first person runs `infisical init` and commits `.infisical.yaml` (the project id, no
+    value); every developer then runs `infisical login`. Never set a value directly in Encore, a Worker or EAS: Runway syncs
+    them from Infisical on deploy (`secrets.sync`).
+  </Step>
+  <Step title="Generate">
+    `pnpm gen` runs `stackra gen` in every member and writes `.stackra/` (gitignored): each member's
+    wiring, entries and tool configs, and this site under `apps/docs/.stackra/site`.
+  </Step>
+  <Step title="Run everything">
+    `pnpm dev` starts every member on the port its own `runway.yaml` names; `stackra dev` prints them
+    and writes them to `.stackra/dev/ports.json`. Secrets come through `infisical run`; nothing is in
+    a file.
+  </Step>
+  <Step title="Make the examples yours">
+    Rename `services/example` and `packages/application/example` to your first service and package,
+    or write new ones with `stackra new service <name> --area app` and
+    `stackra new package <name> --category <category>`, then delete the examples. `pnpm validate`
+    fails while an example drifts from what `stackra new` writes.
+  </Step>
+  <Step title="Verify before you push">
+    `pnpm verify` is the gate: format, lint, typecheck, test, build, `stackra gen --check`, `stackra
+    validate`.
+  </Step>
+</Steps>

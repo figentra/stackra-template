@@ -1,0 +1,9 @@
+{
+  // Stackra file contract:
+  // Purpose: TypeScript settings of the docs app: the node preset and nothing local. Only `stackra.config.ts` and
+  //          `src/config/docs.config.ts` are TypeScript here; the pages are MDX.
+  // Boundary: one preset (ADR 0003); gen reads the two files, nothing runs them in a browser.
+  // Runtime: node
+  // Governing contract: ADR 0003 (one preset per member), Stackra ADR 0002 (2026-10-27 amendment)
+  "extends": "@stackra/typescript-config/node"
+}

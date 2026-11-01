@@ -1,15 +1,15 @@
 // Stackra file contract:
-// Purpose: root oxlint entry: extends the boundaries preset of packages/tooling/oxlint
-//          (@stackra/oxlint-config), which carries the tier dependency rule, so it applies to every
+// Purpose: root oxlint entry: extends the boundaries preset of the core @stackra/oxlint-config
+//          package (root devDependency, catalog:stackra), which carries the tier dependency rule, so it applies to every
 //          member from here.
-// Boundary: one `extends` line and repo-level ignores. Rules are never written in this file; change
-//           the preset. A preset's ignorePatterns resolve relative to the preset file, so the repo-level
-//           ones live here. The path is relative because oxlint resolves `extends` as a file path.
+// Boundary: one `extends` line and repo-level ignores. Rules are never written in this file; the
+//           preset is changed in Stackra core. A preset's ignorePatterns resolve relative to the preset file, so the repo-level
+//           ones live here. The path runs through node_modules because oxlint resolves `extends` as a file path.
 // Runtime: node
 // Governing contract: Stackra ADR 0003 (tier direction), Stackra ADR 0129 (house lint rules)
 {
   "$schema": "https://unpkg.com/oxlint@1.86.0/configuration_schema.json",
-  "extends": ["./packages/tooling/oxlint/src/boundaries.jsonc"],
+  "extends": ["./node_modules/@stackra/oxlint-config/src/boundaries.jsonc"],
   "ignorePatterns": [
     // oxlint follows workspace symlinks; a bare name pattern stops the traversal
     "node_modules",
@@ -27,5 +27,12 @@
     // declaration files, as in the base preset: an `export {}` there turns `declare module` into an
     // augmentation, which a source-file rule would remove
     "**/*.d.ts"
+  ],
+  "overrides": [
+    {
+      // the repo scripts are CLIs: stdout and stderr are their output, as in the preset's tools/
+      "files": ["**/.github/scripts/**"],
+      "rules": { "no-console": "off" }
+    }
   ]
 }

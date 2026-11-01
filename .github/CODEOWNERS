@@ -12,7 +12,7 @@
 * @acme/platform-team
 
 # Decisions: the project's ADRs.
-apps/docs/src/adr/ @acme/platform-team
+apps/docs/src/docs/adr/ @acme/platform-team
 
 # The contracts consumers generate their clients from, at each member root.
 **/stackra.manifest.json @acme/platform-team
