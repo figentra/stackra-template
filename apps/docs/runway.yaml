@@ -5,19 +5,20 @@
 #          does not name itself.
 # Boundary: a member runway. WHERE the site runs is the root runway: `destinations.docs` places it
 #           on Mintlify in production, and `targets.mintlify` says how CI deploys it (after
-#           `mint validate`, `mint broken-links` and `mint a11y` pass on the pull request, then a
-#           smoke test of the published pages) and which CI secret the deploy job reads. The DNS
+#           `stackra build` and `stackra lint` pass on the pull request: gen assembles `.stackra/site`,
+#           then `mint validate`, `mint broken-links` and `mint a11y`; then a smoke test of the
+#           published pages) and which CI secret the deploy job reads. The DNS
 #           record of the host is written by `stackra infra`, never by hand. The site holds no var
 #           and no runtime secret: it is static documentation. `stackra dev` reads the port and
 #           records it in `.stackra/dev/ports.json`; nothing else in the docs names a port.
 # Runtime: node
 # Governing contract: ADR 0299 (docs runway), ADR 0296 (member runway), ADR 0002 (docs on
-#                     Mintlify), ADR 0175 (domains), ADR 0170
+#                     Mintlify, 2026-10-27 amendment), ADR 0175 (domains), ADR 0170
 $schema: "@stackra/runway/schema/app.json"
 version: 3
 environments:
   dev:
-    # `mint dev` on this port, through `stackra dev`
+    # `mint dev` in .stackra/site on this port, through `stackra dev`
     port: 3333
   # The one published site: CI deploys each merge to main once the checks pass. `acme.example` is a
   # reserved example domain; put a host under your own zone (root `providers.cloudflare.zones`).

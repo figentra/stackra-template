@@ -1,0 +1,57 @@
+# Stackra file contract:
+# Purpose: give the job a read token for the Stackra registry (npm.stackra.figentra.com) in the
+#          user-level ~/.npmrc, so pnpm, npm and `stackra build` can read @figentra/* (internal) and
+#          @stackra-pro/*. pnpm 12 ignores tokens in the repository's .npmrc, so the project-level
+#          `_authToken=${STACKRA_REGISTRY_TOKEN}` line alone is not enough.
+# Boundary: one read-only token, masked, never echoed. It comes from Infisical (project
+#           figentra-ci-gate, prod /ci/registry, STACKRA_REGISTRY_TOKEN) over GitHub OIDC when the
+#           org variables are set, else from the repository secret of the same name. Without
+#           either it warns and the @figentra reads answer 401. The job needs `id-token: write`
+#           for the OIDC route.
+# Runtime: GitHub Actions (composite)
+# Governing contract: Stackra ADR 0453 (the registry); ADR 0173 (secrets by name only); ADR 0019.
+name: Registry auth
+description: Write a masked Stackra registry read token to the user-level ~/.npmrc.
+inputs:
+  token:
+    description: Fallback token (the STACKRA_REGISTRY_TOKEN secret) when Infisical is not configured.
+    required: false
+    default: ""
+  identity-id:
+    description: Infisical machine identity for GitHub OIDC (vars.INFISICAL_GATE_IDENTITY_ID).
+    required: false
+    default: ""
+  project-id:
+    description: Infisical project holding /ci/registry (vars.INFISICAL_GATE_PROJECT_ID).
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Registry token (Infisical OIDC)
+      if: inputs.identity-id != '' && inputs.project-id != ''
+      # Until the token is placed at /ci/registry, the lookup fails; the next step then warns.
+      continue-on-error: true
+      uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+      with:
+        method: oidc
+        identity-id: ${{ inputs.identity-id }}
+        domain: https://eu.infisical.com
+        project-id: ${{ inputs.project-id }}
+        env-slug: prod
+        secret-path: /ci/registry
+        export-type: env
+
+    - name: Registry token (user .npmrc)
+      shell: bash
+      env:
+        FALLBACK_TOKEN: ${{ inputs.token }}
+      run: |
+        token="${STACKRA_REGISTRY_TOKEN:-$FALLBACK_TOKEN}"
+        if [ -z "$token" ]; then
+          echo "::warning title=Registry::no read token (Infisical figentra-ci-gate prod /ci/registry, or the STACKRA_REGISTRY_TOKEN secret); @figentra reads will be refused"
+          exit 0
+        fi
+        echo "::add-mask::$token"
+        umask 077
+        printf '//npm.stackra.figentra.com/:_authToken=%s\n' "$token" >> "$HOME/.npmrc"

@@ -13,17 +13,9 @@
   "workspaces": {
     ".": {
       // Run by lefthook's pre-commit hook and by the stackra CLI, neither of which knip reads.
-      "ignoreDependencies": ["oxfmt", "@stackra/cli"],
+      // @stackra/oxlint-config: .oxlintrc.jsonc extends its file by path, which knip does not trace.
+      "ignoreDependencies": ["oxfmt", "@stackra/cli", "@stackra/oxlint-config"],
       "ignoreBinaries": ["stackra"]
-    },
-    "packages/tooling/*": {
-      // Config packages export presets by subpath (package.json exports); the only TS besides them is their test.
-      "entry": ["src/*.ts", "src/**/__tests__/**/*.test.ts"],
-      "project": ["*.ts", "src/**/*.ts"],
-      // Extended by each preset package's tsconfig.json, which knip doesn't trace where no typecheck script runs.
-      // jsdom: vitest loads it by name for the presets' `environment: "jsdom"`; nothing imports it.
-      // @vitest/coverage-v8: vitest loads the provider by name for `coverage.provider: "v8"`.
-      "ignoreDependencies": ["@stackra/typescript-config", "jsdom", "@vitest/coverage-v8"]
     },
     "packages/*/*": {
       // package.json `exports` are entries already; the root module is src/node/<key>.module.ts.

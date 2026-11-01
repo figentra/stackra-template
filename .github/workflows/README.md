@@ -1,3 +1,13 @@
+<!--
+Stackra file contract:
+Purpose: the index of the repository's GitHub workflows and the scripts they run (the pre-release
+         gate and the example drift check).
+Boundary: documentation only; the workflow files are the source of truth.
+Runtime: none (documentation)
+Governing contract: Stackra ADR 0019 (least privilege, pinned actions), ADR 0027 (toolchain from
+                    mise.toml), stackra-15 (the example drift check)
+-->
+
 # `.github/workflows/`
 
 | Workflow      | Runs on                                                                        | Does                                                                                                                                                                                                                                                                                                            |
@@ -19,6 +29,11 @@
   OIDC with the org variable `INFISICAL_TURBO_IDENTITY_ID` and exports `TURBO_API`, `TURBO_TOKEN`,
   `TURBO_TEAM` and `TURBO_REMOTE_CACHE_SIGNATURE_KEY` from `/ci/turbo`. Without the variable the
   step is skipped and turbo uses its local cache only.
+- Registry read token: pnpm 12 ignores the token line in the repository `.npmrc`, so every job that
+  installs runs `.github/actions/registry-auth` first. It reads `STACKRA_REGISTRY_TOKEN` from
+  Infisical (`/ci/registry`) by OIDC with the org variables `INFISICAL_GATE_IDENTITY_ID` and
+  `INFISICAL_GATE_PROJECT_ID`, else from the repository secret, masks it and writes `~/.npmrc`.
+  Without either it warns and reads of `@figentra/*` are refused.
 
 ## Branch rules
 
@@ -32,9 +47,14 @@ and the `Quality Gate` check from GitHub Actions passing on an up-to-date branch
 
 `node .github/scripts/preview-gate.mjs` runs the same checks as the pre-release Quality Gate (the
 pull request title when `PR_TITLE` is set, commit messages against `origin/main`, format, spelling,
-config files parse, secrets scan); name checks to run a subset, for example
-`node .github/scripts/preview-gate.mjs format spelling`. It needs only Node and the gitleaks pinned
-in `mise.toml`.
+config files parse, secrets scan, the `node:test` suites under `.github/scripts/__tests__`); name
+checks to run a subset, for example `node .github/scripts/preview-gate.mjs format spelling`. It
+needs only Node and the gitleaks pinned in `mise.toml`.
+
+`node .github/scripts/example-drift.mjs` (the second half of `pnpm validate`) fails when
+`services/example` differs from what `stackra new` writes for it today (the example package carries
+the OS shells' entries, so it is not checked); it needs the workspace install (the `stackra` CLI)
+and skips an example the product deleted.
 
 Runbooks: [CI](https://docs.stackra.figentra.com/runbooks/ci) and
 [release](https://docs.stackra.figentra.com/runbooks/release).

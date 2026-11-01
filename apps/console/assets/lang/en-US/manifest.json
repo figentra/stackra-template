@@ -1,4 +1,0 @@
-{
-  "$comment": "Stackra file contract — Purpose: the en-US overlay of `manifest::`: only the words American English spells differently from the base `en` (catalog); Boundary: an overlay holds differing keys only; every other key falls back along en-US → en; Runtime: node; Governing contract: ADR 0080, ADR 0234 d9",
-  "description": "Orders, catalog and stock for your store, online or offline."
-}

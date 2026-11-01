@@ -1,20 +1,29 @@
+<!--
+Stackra file contract:
+Purpose: what lives under apps/ in a product repository started from the lean starter.
+Boundary: placement only; the grammar is the root AGENTS.md.
+Runtime: none (documentation)
+Governing contract: Stackra ADR 0294 and 0295 (apps and their generated entries), D16 (products ship
+                    packages, no apps by default), stackra-15
+-->
+
 # apps
 
-Client members (`@acme/<name>`, `tier:app`). An app renders what services declare (resources,
-widgets, documents, settings pages) and adds its own routes, layouts, panels, menus, shortcuts,
-stores, blocks and documents. Each is a class whose base is its kind (`extends Route({ path })`,
-`extends Component<Props>` for a component, compiled by gen to a function component), in the group
-folder its suffix belongs to (ADR 0294 as amended by programming model v3.1, see the root
-`AGENTS.md`). Apps never import a service: they import its generated classes by name from
-`#stackra/clients/<service>`, built from the producer's committed `stackra.manifest.json`, and gen
-copies the consumed services' lang files into `.stackra/lang/` (ADR 0003, 0261).
+Client members (`tier:app`). The lean starter ships one, `apps/docs`; a product adds an app only
+when it needs one (D16), and its web and mobile surfaces usually come from the OS shells through the
+root runway's `surfaces` and `mobile` blocks (ADR 0441) instead. An app renders what services
+declare (resources, widgets, documents, settings pages) and adds its own routes, layouts, panels,
+menus, shortcuts, stores, blocks and documents. Each is a class whose base is its kind
+(`extends Route({ path })`, `extends Component<Props>` for a component, compiled by gen to a
+function component), in the group folder its suffix belongs to (ADR 0294 as amended by programming
+model v3.1, see the root `AGENTS.md`). Apps never import a service: they import its generated
+classes by name from `#stackra/clients/<service>`, built from the producer's committed
+`stackra.manifest.json`, and gen copies the consumed services' lang files into `.stackra/lang/` (ADR
+0003, 0261).
 
-| App       | Targets                               | Shows                                                                                                          |
-| --------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `console` | web, pwa, desktop                     | the tenant console: two panels, resources from services, the flag-gated quick order, shortcuts, Electron       |
-| `web`     | web (server-rendered on Workers), pwa | the public site and storefront: L2 blocks, `StorefrontProductView`, the contact form, SEO routes (ADR 0297)    |
-| `mobile`  | ios, android                          | Expo with native tabs from routes and one tab-bar menu, chrome as a config class, offline queue, barcode, push |
-| `docs`    | Mintlify                              | the project docs; the API reference is generated from the service manifests                                    |
+| App    | Targets  | What it is                                                                  |
+| ------ | -------- | --------------------------------------------------------------------------- |
+| `docs` | Mintlify | the project docs; the API reference is generated from the service manifests |
 
 Layout per app (not docs, which has no TypeScript runtime and no root module, rule R12):
 
