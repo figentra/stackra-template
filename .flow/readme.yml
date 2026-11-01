@@ -1,0 +1,65 @@
+# The README's data (STA-1879): `figentra-flow readme` renders README.md from this file through the preset's
+# readme-template. Edit here, never README.md.
+# Stackra file contract:
+# Purpose: the data the root README.md is rendered from: name, tagline, status and the short sections.
+# Boundary: front-page content only; the long-form guide is docs/template-guide.md.
+# Runtime: none (read by figentra-flow)
+# Governing contract: STA-1879
+name: Stackra template
+repo: figentra/stackra-template
+tagline: "The starting workspace for a new Stackra product (services, packages, docs)."
+banner:
+  light: .github/assets/brand/banner-light.png
+  dark: .github/assets/brand/banner-dark.png
+status: In progress
+statusNote: "the lean starter, on the `@stackra/*` 0.3.0 catalog."
+docs: https://docs.stackra.figentra.com
+what: |
+  Stackra is a TypeScript framework for products that ship one backend to many surfaces. You declare
+  behaviour as kind classes (actions, queries, models, events, routes), each extending the base of its
+  kind in the folder of its kind, and `stackra gen` derives the rest: the identities, the dependency
+  wiring, the HTTP and MCP endpoints, typed clients for every consumer, the runtime entries and the
+  tool configs for web, PWA, desktop and mobile.
+
+  This repository is the **lean starter** for a product repository, in the programming model v3.1: the
+  root config, the docs site, one example service and one example package. It is a starting point, not
+  a sample product. Both examples are written by `stackra new` and nothing else, and `pnpm validate`
+  fails when they drift from what `stackra new` writes today. The tool presets are the core
+  `@stackra/*-config` packages, from `catalog:stackra`. Products ship packages and add apps only when
+  they need one (D16). The placeholder product is **Acme** (`product.key: acme` in `runway.yaml`).
+  Nothing generated is committed: `.stackra/` is gitignored and `stackra gen` writes it.
+
+  The full guide (the programming model, the tree, which file owns which fact, how each member kind is
+  created, the test layout and what to replace) is [docs/template-guide.md](docs/template-guide.md).
+quickstart: |
+  1. Click **Use this template** on GitHub, then clone your new repository.
+  2. Run:
+
+     ```sh
+     mise install                 # node, pnpm, gitleaks, infisical, maestro, encore, eas-cli, pinned
+     pnpm install                 # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`)
+     stackra agents setup         # once per machine: Stackra skills, sub-agents and guard hooks for your assistant
+     pnpm gen && pnpm dev         # generate .stackra/ and run every member
+     pnpm verify                  # the gate CI runs
+     ```
+
+  3. Replace the example identity, see [Make it yours](docs/template-guide.md#make-it-yours), then
+     rename or delete the examples (see
+     [How each member kind is created](docs/template-guide.md#how-each-member-kind-is-created)).
+architecture: |
+  | Path                               | What it holds                                                                           |
+  | ---------------------------------- | --------------------------------------------------------------------------------------- |
+  | `services/example`                 | `@figentra/acme-service-example`: the example service, as `stackra new` wrote it        |
+  | `packages/application/example`     | `@figentra/acme-example`: the example package, with console, native and landing entries |
+  | `apps/docs`                        | Mintlify docs: guides, ADRs and the API reference generated from manifests              |
+  | `assets/`                          | brand, mobile, store, landing and lang sources (ADR 0441)                               |
+  | `runway.yaml`, `stackra.lock.yaml` | product key, infrastructure and topology; pinned external producer manifests            |
+
+  > **The path says the kind, the base class is the kind, the type gives the shape, and the names give
+  > identity.** Actions are the only behaviour; gen derives the identities, locks them in
+  > `stackra.manifest.json` and writes the wiring, the entries and the tool configs.
+
+  The full annotated tree, the reading order and the package map are in the
+  [template guide](docs/template-guide.md#tree); the grammar and rules are in [AGENTS.md](AGENTS.md).
+  The bundled Stackra brand images, fonts and paid-licence code are excluded from the MIT licence: see
+  [NOTICE](NOTICE).
