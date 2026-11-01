@@ -289,7 +289,7 @@ environments:
       # Used by aws-ecs, and by Encore Cloud's own VPC settings where it accepts them.
       network:
         vpc:
-          cidr: 10.59.0.0/16  # template placeholder: replace with this product's slot, staging 10.(60+n), see the family allocation
+          cidr: 10.59.0.0/16 # template placeholder: replace with this product's slot, staging 10.(60+n), see the family allocation
           azs: 2
           natGateways: 1
         loadBalancer:
@@ -391,7 +391,7 @@ environments:
     shared:
       network:
         vpc:
-          cidr: 10.159.0.0/16  # template placeholder: production 10.(160+n)
+          cidr: 10.159.0.0/16 # template placeholder: production 10.(160+n)
           azs: 3
           natGateways: 3
         loadBalancer:
