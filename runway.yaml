@@ -146,11 +146,11 @@ providers:
       preview: preview
       staging: staging
       production: prod
-    # Default secret paths; a member may name `path: ci`.
+    # This product's own project holds only runtime secrets, one folder per member: /runtime/<member>
+    # (Stackra ADR 0512). CI and agent secrets live in the shared figentra-ci, figentra-ci-deploy and
+    # figentra-agents projects, bound by the org variables and .infisical.yaml.
     paths:
       runtime: /runtime
-      ci: /ci
-      agents: /agents
   sentry:
     # Projects are named per member (app runway `telemetry.sentryProject`).
     org: acme
