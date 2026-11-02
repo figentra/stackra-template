@@ -143,12 +143,13 @@ providers:
     # Runway environment → Infisical environment.
     environments:
       dev: dev
-      preview: preview
+      # The Infisical plan allows three environments: preview deploys read dev (Stackra ADR 0512).
+      preview: dev
       staging: staging
       production: prod
     # This product's own project holds only runtime secrets, one folder per member: /runtime/<member>
-    # (Stackra ADR 0512). CI and agent secrets live in the shared figentra-ci, figentra-ci-deploy and
-    # figentra-agents projects, bound by the org variables and .infisical.yaml.
+    # (Stackra ADR 0512). CI and agent secrets live in the shared ci-build, ci-deploy and
+    # agents projects, bound by the org variables and .infisical.yaml.
     paths:
       runtime: /runtime
   sentry:
