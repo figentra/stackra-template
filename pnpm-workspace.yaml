@@ -244,6 +244,9 @@ catalogs:
   # The Mintlify CLI that builds and previews apps/docs.
   docs:
     mint: 4.2.1184
+  # The EAS CLI mise.toml pins for the mobile app's builds; repo-checks/tool-pins wants each mise npm pin in a catalog.
+  deploy:
+    eas-cli: 25.3.0
 
 # @react-router/dev 7.18.4 declares `typescript: ^5.1.0 || ^6.0.0` as a peer, while the workspace
 # compiles with TypeScript 7 (catalog `build`). The plugin only reads tsconfig paths and runs typegen,
