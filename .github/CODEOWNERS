@@ -1,37 +1,41 @@
-# Stackra file contract:
-# Purpose: who reviews which paths. GitHub requests a review from the owners of every file a pull
-#          request touches, and the main ruleset (.github/rulesets/main.json) requires one of them to
-#          approve.
-# Boundary: path → owner only. The last matching line wins, so specific paths come after `*`.
-# Runtime: node
-# Governing contract: Stackra ADR 0158 (the committed manifests are contracts other members build
-#                     from, https://docs.stackra.figentra.com/adr/0158-gen-artefacts-openapi-manifest-and-client),
-#                     Stackra ADR 0294 decision 10 (committed at the member root)
-
-# Everything defaults to the platform team.
-* @acme/platform-team
-
-# Decisions: the project's ADRs.
-apps/docs/src/docs/adr/ @acme/platform-team
-
-# The contracts consumers generate their clients from, at each member root.
-**/stackra.manifest.json @acme/platform-team
-**/openapi.json @acme/platform-team
-
-# Infrastructure, environments and pinned producer revisions.
-runway.yaml @acme/platform-team
-stackra.lock.yaml @acme/platform-team
-
-# CI, release, rulesets, issue and pull request templates.
-.github/ @acme/platform-team
-
-# Governance: versions, toolchain, task graph, hooks, secret scanning, release notes and the
-# security policy.
-pnpm-workspace.yaml @acme/platform-team
-mise.toml @acme/platform-team
-.node-version @acme/platform-team
-turbo.jsonc @acme/platform-team
-lefthook.yml @acme/platform-team
-.gitleaks.toml @acme/platform-team
-.changeset/ @acme/platform-team
-SECURITY.md @acme/platform-team
+# Written by `fflow sync` from the owner-only list (STA-1856); change that list, not this file.
+# GitHub matches these case-sensitively; land and the approval check also catch other cases.
+/.github/workflows/** @figentra-usr
+/.github/actions/** @figentra-usr
+**/action.yml @figentra-usr
+**/action.yaml @figentra-usr
+**/wrangler.toml @figentra-usr
+**/wrangler.json @figentra-usr
+**/wrangler.jsonc @figentra-usr
+**/eas.json @figentra-usr
+**/runway.yaml @figentra-usr
+/.changeset/config.json @figentra-usr
+/.github/rulesets/** @figentra-usr
+/.github/branch-protection.json @figentra-usr
+/.github/settings.yml @figentra-usr
+**/CODEOWNERS @figentra-usr
+/pnpm-workspace.yaml @figentra-usr
+**/.npmrc @figentra-usr
+/flow.config.json @figentra-usr
+/figentra-flow.config.json @figentra-usr
+**/.infisical.* @figentra-usr
+/.gitleaks.toml @figentra-usr
+**/.env* @figentra-usr
+**/.dev.vars @figentra-usr
+**/*.pem @figentra-usr
+**/*.key @figentra-usr
+**/*.p8 @figentra-usr
+**/*.p12 @figentra-usr
+/.agents/hooks/** @figentra-usr
+/.agents/rules/secrets.md @figentra-usr
+/.claude/settings.json @figentra-usr
+/.claude/settings.local.json @figentra-usr
+/opencode.jsonc @figentra-usr
+/.opencode/plugins/guard/** @figentra-usr
+**/billing/** @figentra-usr
+**/legal/** @figentra-usr
+**/LICENSE* @figentra-usr
+**/LICENCE* @figentra-usr
+**/NOTICE* @figentra-usr
+**/COPYRIGHT* @figentra-usr
+/package.json @figentra-usr

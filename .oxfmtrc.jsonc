@@ -22,6 +22,13 @@
     }
   ],
   "ignorePatterns": [
+    // rendered by `fflow sync`; .flow/lock.json pins their bytes (`fflow gate ci` fails on a reformatted file)
+    ".agents/skills/**",
+    ".agents/agents/**",
+    ".agents/rules/**",
+    ".github/workflows/fflow-approve.yml",
+    ".github/workflows/fflow-baseline.yml",
+    "README.md",
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
