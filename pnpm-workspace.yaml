@@ -256,6 +256,9 @@ peerDependencyRules:
 # Security fixes for transitive dependencies (OSV-Scanner, Stackra ADR 0174), each within the major
 # its parent asks for. Drop an entry once the parent's own range resolves the fixed version.
 overrides:
+  # @stackra/cli pins its own repo-checks; 0.5.1 is the first that accepts Flow's flow.config.json (STA-1942).
+  # Drop this when @stackra/cli moves to 0.5.1 or later.
+  "@stackra/repo-checks": 0.5.1
   axios@<1.20.0: 1.20.0
   qs@<6.16.1: 6.16.1
   js-yaml@>=4 <4.3.2: 4.3.2
