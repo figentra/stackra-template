@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "preset": "stackra",
+  "apps": {
+    "owner": "figentra-usr"
+  }
+}

@@ -14,6 +14,12 @@ language: en-GB,en
 # Files git ignores are never checked (node_modules, build output, local caches).
 useGitignore: true
 ignorePaths:
+  # Rendered by `fflow sync` from its preset, never hand-edited (.flow/lock.json pins them).
+  - ".agents/skills/flow-*/**"
+  - ".agents/agents/**"
+  - ".agents/rules/**"
+  - .github/workflows/fflow-approve.yml
+  - .github/workflows/fflow-baseline.yml
   - "**/node_modules/**"
   - "**/dist/**"
   - "**/.turbo/**"
@@ -42,6 +48,7 @@ ignoreRegExpList:
   - "/\\b[0-9a-f]{40}\\b/g"
   - "/sha256:[0-9a-f]{64}/g"
 words:
+  - fflow
   - "mintlify's"
   - "zitadel's"
   - acme
