@@ -28,6 +28,7 @@ engineStrict: true
 minimumReleaseAge: 1440
 # First-party packages, published from our own CI with provenance; third-party packages keep the day.
 minimumReleaseAgeExclude:
+  - "@figentra-oss/*"
   - "@stackra/*"
   - "@stackra-pro/*"
   - "@figentra/*"
@@ -138,6 +139,8 @@ catalogs:
   # renderer version react-native 0.86 (Expo SDK 57) ships with, so every member and every package
   # with a React entry resolves one React.
   default:
+    # Figentra Flow: its sync renders the flow-* skills, the approval workflow and CODEOWNERS.
+    "@figentra-oss/flow": 0.2.3
     react: 19.2.3
     react-dom: 19.2.3
     react-router: 7.18.4
@@ -241,6 +244,9 @@ catalogs:
   # The Mintlify CLI that builds and previews apps/docs.
   docs:
     mint: 4.2.1184
+  # The EAS CLI mise.toml pins for the mobile app's builds; repo-checks/tool-pins wants each mise npm pin in a catalog.
+  deploy:
+    eas-cli: 25.3.0
 
 # @react-router/dev 7.18.4 declares `typescript: ^5.1.0 || ^6.0.0` as a peer, while the workspace
 # compiles with TypeScript 7 (catalog `build`). The plugin only reads tsconfig paths and runs typegen,
@@ -253,6 +259,9 @@ peerDependencyRules:
 # Security fixes for transitive dependencies (OSV-Scanner, Stackra ADR 0174), each within the major
 # its parent asks for. Drop an entry once the parent's own range resolves the fixed version.
 overrides:
+  # @stackra/cli pins its own repo-checks; 0.5.1 is the first that accepts Flow's flow.config.json (STA-1942).
+  # Drop this when @stackra/cli moves to 0.5.1 or later.
+  "@stackra/repo-checks": 0.5.1
   axios@<1.20.0: 1.20.0
   qs@<6.16.1: 6.16.1
   js-yaml@>=4 <4.3.2: 4.3.2

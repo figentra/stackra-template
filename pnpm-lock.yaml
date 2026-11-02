@@ -174,6 +174,9 @@ catalogs:
       specifier: 7.0.2
       version: 7.0.2
   default:
+    '@figentra-oss/flow':
+      specifier: 0.2.3
+      version: 0.2.3
     '@types/node':
       specifier: 24.19.2
       version: 24.19.2
@@ -283,6 +286,7 @@ catalogs:
       version: 0.3.0
 
 overrides:
+  '@stackra/repo-checks': 0.5.1
   axios@<1.20.0: 1.20.0
   qs@<6.16.1: 6.16.1
   js-yaml@>=4 <4.3.2: 4.3.2
@@ -310,6 +314,9 @@ importers:
       '@cyclonedx/cyclonedx-npm':
         specifier: catalog:release
         version: 6.0.1(supports-color@8.1.1)
+      '@figentra-oss/flow':
+        specifier: 'catalog:'
+        version: 0.2.3
       '@stackra/cli':
         specifier: catalog:stackra
         version: 0.3.0(@internationalized/date@3.12.4)(@stackra/testing@0.3.0(react-native@0.86.3(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@types/node@26.6.6)(jiti@2.7.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react-router@7.18.4(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(terser@5.51.2)(vitest@5.0.5)
@@ -1411,6 +1418,11 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@figentra-oss/flow@0.2.3':
+    resolution: {integrity: sha512-92p50IwVCWOndbkTLpYSw91WF5P3jptHGXzfjArzwrMqaoD1JxHPZpiXLRV6cvlU3O6bKkAwKmGSz+YL5QMcmQ==, tarball: https://npm.stackra.figentra.com/@figentra-oss/flow/-/flow-0.2.3.tgz}
+    engines: {node: '>=24.0.0'}
+    hasBin: true
 
   '@floating-ui/core@1.8.0':
     resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
@@ -3111,8 +3123,8 @@ packages:
       react:
         optional: true
 
-  '@stackra/repo-checks@0.3.0':
-    resolution: {integrity: sha512-jnbBmfI0QGx1h/Fg/O7LlvuXLbRh5Pq52aLzB4jzVczZvBl14PGbW49szn7QK7UX9BqNCEUC9fcIwX7IaQ345g==, tarball: https://npm.stackra.figentra.com/@stackra/repo-checks/-/repo-checks-0.3.0.tgz}
+  '@stackra/repo-checks@0.5.1':
+    resolution: {integrity: sha512-LRFdM0pbhRD3LUgh1C7aDizSDzmTeSnfRkU3FxonOn92jx4qeGo88XVTTohPdUMpieZk/GNvlLQ5yZGmeOLu1Q==, tarball: https://npm.stackra.figentra.com/@stackra/repo-checks/-/repo-checks-0.5.1.tgz}
     engines: {node: '>=24.0.0'}
 
   '@stackra/rules@0.3.0':
@@ -7802,6 +7814,10 @@ packages:
     resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
     engines: {node: '>=20.18.1'}
 
+  undici@8.12.2:
+    resolution: {integrity: sha512-XtuDWVdqTLr3NAxm2ly9/hU6kUsJOgGh1RASzMBbsw6aWCOaQzHdW+QQDfdERjfJ2V5vL5pRPa4RetO9UfivDg==}
+    engines: {node: '>=22.19.0'}
+
   undici@8.12.3:
     resolution: {integrity: sha512-+fdndUTwBP86cVjihTp21hZHo7d6oj1c/47XPA3lL8mM0XHs+C4EkcjmgRsFnFk2f/UONGDy9ItBItmXsLOQHw==}
     engines: {node: '>=22.19.0'}
@@ -9379,6 +9395,10 @@ snapshots:
   '@exodus/bytes@1.16.0(@noble/hashes@1.8.0)':
     optionalDependencies:
       '@noble/hashes': 1.8.0
+
+  '@figentra-oss/flow@0.2.3':
+    dependencies:
+      undici: 8.12.2
 
   '@floating-ui/core@1.8.0':
     dependencies:
@@ -11305,7 +11325,7 @@ snapshots:
       '@stackra/contracts': 0.3.0
       '@stackra/gen': 0.3.0(@stackra/testing@0.3.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
       '@stackra/mcp': 0.3.0(@internationalized/date@3.12.4)(@stackra/testing@0.3.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react-router@7.18.4(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(vitest@5.0.5)
-      '@stackra/repo-checks': 0.3.0
+      '@stackra/repo-checks': 0.5.1
       '@stackra/runway': 0.3.0(@internationalized/date@3.12.4)(@stackra/testing@0.3.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react-router@7.18.4(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(vitest@5.0.5)
       '@stackra/skills': 0.3.0
       '@stackra/support': 0.3.0
@@ -11407,7 +11427,7 @@ snapshots:
       '@stackra/contracts': 0.3.0
       '@stackra/gen': 0.3.0(@stackra/testing@0.3.0(react-native@0.86.3(@types/react@19.3.0)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)(vitest@5.0.5))(react@19.2.3)
       '@stackra/mcp': 0.3.0(@internationalized/date@3.12.4)(@stackra/testing@0.3.0(react-native@0.86.3(@types/react@19.3.0)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)(vitest@5.0.5))(react-dom@19.3.1(react@19.2.3))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.2.3))(react-native@0.86.3(@types/react@19.3.0)(react@19.2.3)(supports-color@8.1.1))(react-router@7.18.4(react-dom@19.3.1(react@19.2.3))(react@19.2.3))(react@19.2.3)(supports-color@8.1.1)(vitest@5.0.5)
-      '@stackra/repo-checks': 0.3.0
+      '@stackra/repo-checks': 0.5.1
       '@stackra/runway': 0.3.0(@internationalized/date@3.12.4)(@stackra/testing@0.3.0(react-native@0.86.3(@types/react@19.3.0)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)(vitest@5.0.5))(react-dom@19.3.1(react@19.2.3))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.2.3))(react-native@0.86.3(@types/react@19.3.0)(react@19.2.3)(supports-color@8.1.1))(react-router@7.18.4(react-dom@19.3.1(react@19.2.3))(react@19.2.3))(react@19.2.3)(supports-color@8.1.1)(vitest@5.0.5)
       '@stackra/skills': 0.3.0
       '@stackra/support': 0.3.0
@@ -11509,7 +11529,7 @@ snapshots:
       '@stackra/contracts': 0.3.0
       '@stackra/gen': 0.3.0(@stackra/testing@0.3.0(react-native@0.86.3(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
       '@stackra/mcp': 0.3.0(@internationalized/date@3.12.4)(@stackra/testing@0.3.0(react-native@0.86.3(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react-router@7.18.4(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(vitest@5.0.5)
-      '@stackra/repo-checks': 0.3.0
+      '@stackra/repo-checks': 0.5.1
       '@stackra/runway': 0.3.0(@internationalized/date@3.12.4)(@stackra/testing@0.3.0(react-native@0.86.3(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react-router@7.18.4(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(vitest@5.0.5)
       '@stackra/skills': 0.3.0
       '@stackra/support': 0.3.0
@@ -14935,7 +14955,7 @@ snapshots:
       - expo
       - supports-color
 
-  '@stackra/repo-checks@0.3.0':
+  '@stackra/repo-checks@0.5.1':
     dependencies:
       typescript6: typescript@6.0.3
       yaml: 2.9.1
@@ -22295,6 +22315,8 @@ snapshots:
   undici-types@8.9.0: {}
 
   undici@7.30.1: {}
+
+  undici@8.12.2: {}
 
   undici@8.12.3: {}
 

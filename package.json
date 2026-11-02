@@ -41,6 +41,7 @@
     "@changesets/cli": "catalog:release",
     "@commitlint/cli": "catalog:release",
     "@cyclonedx/cyclonedx-npm": "catalog:release",
+    "@figentra-oss/flow": "catalog:",
     "@stackra/cli": "catalog:stackra",
     "@stackra/commitlint-config": "catalog:stackra",
     "@stackra/oxlint-config": "catalog:stackra",
