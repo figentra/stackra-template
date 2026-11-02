@@ -165,9 +165,21 @@ providers:
   mintlify:
     project: ref:mintlify.project
 
+# ── Regions: the places a deployment names in `environments.<env>.regions` (Stackra ADR 0186, 0517) ─
+# One region per environment; `me` is AWS me-central-1, as `providers.aws.region`.
+regions:
+  me:
+    cloud: aws
+    location: me-central-1
+
 # ── Environments: exactly these four names in every tool (Stackra ADR 0170; `local` is `dev`) ─────
 environments:
   dev:
+    # The region platform hosts send API calls to; a product deploy refuses an environment without one.
+    regions: [me]
+    # Hosts resolve under the same zone in every environment.
+    domains:
+      zone: acme.example
     # Where each kind of member runs; a member runway may override its own destination.
     destinations:
       # `stackra dev` = gen --watch + `encore run` + the compose infra below.
@@ -246,6 +258,7 @@ environments:
 
   # Optional per-pull-request environments; delete the block if you do not use them.
   preview:
+    regions: [me]
     destinations:
       services: encore-cloud
     # One Encore environment per pull request.
@@ -310,12 +323,15 @@ environments:
       gate: health
 
   staging:
+    regions: [me]
     destinations:
       services: encore-cloud
     # Encore Cloud process allocation = the groups of `topology` below.
     encore:
       env: staging
       account: nonprod
+      # The branch this Encore Cloud environment deploys from: staging follows main.
+      branch: main
       processAllocation: from-topology
     shared:
       # Used by aws-ecs, and by Encore Cloud's own VPC settings where it accepts them.
@@ -408,9 +424,12 @@ environments:
       services: encore-cloud
       # The docs member; it follows main, not the promotion (`targets.mintlify.deployOn`).
       docs: mintlify
+    regions: [me]
     encore:
       env: production
       account: prod
+      # A promotion moves the `production` branch to the promoted commit; Encore Cloud deploys from it.
+      branch: production
       processAllocation: from-topology
     shared:
       network:
@@ -533,6 +552,8 @@ targets:
   # Mintlify's GitHub app is switched off, so nothing deploys twice.
   mintlify:
     deployOn: merge-to-main
+    # The branch Runway publishes the assembled site to and Mintlify's GitHub app builds.
+    branch: docs-site
     checks: [validate, broken-links, a11y]
     pushDeploy: false
     # The admin key's NAME; only the deploy job reads it, from the `ci` path (`secrets.ci`).
