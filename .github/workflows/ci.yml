@@ -6,7 +6,7 @@
 #           credential is the Stackra registry read token (.github/actions/registry-auth, Infisical
 #           over OIDC, so the gate job has id-token: write). Tools come from mise.toml. Until the catalog's `@stackra/cli`
 #           resolves from the Stackra registry only the install-free pre-release gate runs; from then on
-#           the job also installs and runs OSV-Scanner, lint, typecheck, test, build, gen, validate
+#           the job also installs and runs OSV-Scanner, lint, typecheck, build, gen, validate
 #           and Squawk, the shape of core's Quality Gate.
 # Runtime: node
 # Governing contract: Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0027 (toolchain from
@@ -111,17 +111,21 @@ jobs:
         if: steps.registry.outputs.published == 'true'
         run: pnpm lint
 
+      # STA-2064: no test step; tests run on the box (CONTRIBUTING.md). On a pull request typecheck and
+      # build run for the members the change affects, against the base commit.
       - name: Typecheck
         if: steps.registry.outputs.published == 'true'
-        run: pnpm typecheck
-
-      - name: Test
-        if: steps.registry.outputs.published == 'true'
-        run: pnpm test
+        env:
+          AFFECTED: ${{ github.event_name == 'pull_request' && '1' || '' }}
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
+        run: pnpm exec turbo run typecheck ${AFFECTED:+--affected}
 
       - name: Build
         if: steps.registry.outputs.published == 'true'
-        run: pnpm build
+        env:
+          AFFECTED: ${{ github.event_name == 'pull_request' && '1' || '' }}
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
+        run: pnpm exec turbo run build ${AFFECTED:+--affected}
 
       # .stackra/ is gitignored: gen writes each member's generated tree (the compiled migrations
       # Squawk reads included), then the check fails on a committed manifest or openapi.json that
