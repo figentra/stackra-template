@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * Stackra file contract:
- * Purpose: the example-member drift check, run by `pnpm validate` after `stackra validate`: each example member
- *          (`services/example`) must equal what `stackra new` writes for it today; the example package carries the
- *          entries the OS shells load, so it is no longer generated as it is.
+ * Purpose: the example-member drift check, run by `pnpm validate` after `stackra validate`: each example member listed
+ *          in EXAMPLES must equal what `stackra new` writes for it today. None is listed now: the example service
+ *          carries the starter's notes module and the example package the entries the OS shells load, so neither is
+ *          generated as it is (see EXAMPLES).
  *          It runs `stackra new <kind> <name> ... --over` per example, which writes any missing file and prints a
  *          line diff for each authored file that differs from the template; any written file or diff fails.
  * Boundary: the examples and their `stackra new` arguments are listed in EXAMPLES; an example whose folder is gone
@@ -21,17 +22,10 @@ import { pathToFileURL } from "node:url";
 
 /** Each example: its folder and the `stackra new` arguments that wrote it (product scope from runway.yaml). */
 const EXAMPLES = [
-  {
-    folder: "services/example",
-    args: [
-      "service",
-      "example",
-      "--area",
-      "app",
-      "--description",
-      "An example service: rename it to the product's first service or delete it.",
-    ],
-  },
+  // services/example is not here: it carries the starter's notes module (STA-1952), whose dependencies its
+  // package.json names, so it no longer equals what `stackra new service` writes; `stackra new service --data`
+  // writes the same module only once the catalog holds its PGlite test peers (owner decision). A renamed app
+  // (`stackra create`) also names the service under its own scope, which `stackra new` would not.
   // packages/application/example is not here: it carries the hand-written console, native and landing entries the
   // OS shells load (STA-1604), so it no longer equals what `stackra new package` writes.
 ];

@@ -1,0 +1,71 @@
+{
+  "name": "@figentra/acme-console",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The web console of the app: the panel shell that renders what the services declare.",
+  "keywords": [
+    "stackra"
+  ],
+  "license": "UNLICENSED",
+  "type": "module",
+  "imports": {
+    "#src/*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts"
+    ],
+    "#stackra/*": [
+      "./.stackra/gen/*",
+      "./.stackra/gen/*.ts",
+      "./.stackra/gen/*.tsx",
+      "./.stackra/gen/*/index.ts"
+    ]
+  },
+  "scripts": {
+    "dev": "vite --port 3710 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --port 3710 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
+    "clean": "rm -rf dist coverage .turbo"
+  },
+  "dependencies": {
+    "@heroui/styles": "catalog:ui",
+    "@stackra/app": "catalog:stackra",
+    "@stackra/container": "catalog:stackra",
+    "@stackra/navigation": "catalog:stackra",
+    "@stackra/tokens": "catalog:stackra",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:"
+  },
+  "devDependencies": {
+    "@stackra/testing": "catalog:stackra",
+    "@stackra/typescript-config": "catalog:stackra",
+    "@stackra/vitest-config": "catalog:stackra",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "jsdom": "catalog:quality",
+    "oxfmt": "catalog:quality",
+    "oxlint": "catalog:quality",
+    "tailwindcss": "catalog:frontend",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vitest": "catalog:quality"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "stackra": {
+    "kind": "package",
+    "tier": "app",
+    "runtimes": [
+      "browser"
+    ]
+  }
+}

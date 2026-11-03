@@ -40,6 +40,9 @@ maestro-report/
 # its `.stackra/` file, and tsconfig.build.json is a package's declaration build.
 /apps/*/vitest.config.ts
 /apps/*/vite.config.ts
+# Until gen writes an app's Vite and Vitest configs (STA-339), the console authors both (`stackra new app:console`).
+!/apps/console/vitest.config.ts
+!/apps/console/vite.config.ts
 /apps/*/react-router.config.ts
 /apps/*/playwright.config.ts
 /apps/*/wrangler.jsonc

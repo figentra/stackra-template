@@ -56,12 +56,23 @@
     "clean": "rm -rf dist coverage .turbo .stackra"
   },
   "dependencies": {
+    "@stackra/actions": "catalog:stackra",
     "@stackra/app": "catalog:stackra",
+    "@stackra/console": "catalog:stackra",
     "@stackra/container": "catalog:stackra",
-    "@stackra/contracts": "catalog:stackra"
+    "@stackra/contracts": "catalog:stackra",
+    "@stackra/database": "catalog:stackra",
+    "@stackra/events": "catalog:stackra",
+    "@stackra/iam": "catalog:stackra",
+    "@stackra/model": "catalog:stackra",
+    "@stackra/queue": "catalog:stackra",
+    "@stackra/scheduler": "catalog:stackra",
+    "@stackra/validation": "catalog:stackra",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@stackra/cli": "catalog:stackra",
+    "@stackra/testing": "catalog:stackra",
     "@stackra/tsdown-config": "catalog:stackra",
     "@stackra/typescript-config": "catalog:stackra",
     "@stackra/vitest-config": "catalog:stackra",

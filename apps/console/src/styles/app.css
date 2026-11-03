@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+@import "@stackra/tokens/fonts/fonts.css";
+@import "@stackra/tokens/themes/stackra/web.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
