@@ -1,9 +1,13 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/v2.2.2/schema.json
 # Stackra file contract:
 # Purpose: git hooks. pre-commit: format, lint and spelling on staged files plus a secret scan;
-#          commit-msg: conventional commits; pre-push: the committed contracts check and the affected
-#          gate. The lefthook package installs the hooks itself on `pnpm install` (its install script
-#          is allowed in pnpm-workspace.yaml `allowBuilds`; it skips when CI is set).
+#          commit-msg: conventional commits; pre-push: the committed contracts check. The lefthook
+#          package installs the hooks itself on `pnpm install` (its install script is allowed in
+#          pnpm-workspace.yaml `allowBuilds`; it skips when CI is set). No hook installs or tests: oxfmt,
+#          oxlint and cspell are the mise-pinned binaries (named, so mise fetches only that tool), a job
+#          that needs node_modules runs only where they already exist, and typecheck and tests run on the
+#          box and in the Quality Gate, never on a Mac (pnpm 12's exec installed whole workspaces from
+#          hooks, 2026-11-03).
 # Boundary: advisory only; the CI Quality Gate (.github/workflows/ci.yml) is the gate, so a commit
 #           made with `--no-verify` still meets every check before it reaches main.
 # Runtime: node
@@ -11,7 +15,8 @@
 #                     git), Stackra ADR 0300 decision 5 (spell checking in the hook and the gate)
 
 pre-commit:
-  # The jobs read staged files only and never write, so they run side by side.
+  # The jobs read staged files only and never write, so they run side by side. Where mise is missing a job
+  # prints a skip line and passes; the Quality Gate runs every check on the pull request.
   parallel: true
   jobs:
     # Formatting: every type oxfmt formats (CONTRIBUTING.md, "Formatting"); .oxfmtrc.jsonc ignores
@@ -23,16 +28,24 @@ pre-commit:
         - "*.{css,html}"
       # --check, not --write: stage_fixed would stash unstaged work. oxfmt exits 2 when every staged file
       # is on its ignore list (pnpm-lock.yaml alone): that is not a finding.
-      run: sh -c 'pnpm exec oxfmt --check "$@"; s=$?; [ $s -eq 2 ] && exit 0; exit $s' -- {staged_files}
-    # Lint: every JavaScript and TypeScript extension oxlint reads, against .oxlintrc.jsonc.
+      run: >-
+        sh -c 'command -v mise >/dev/null 2>&1 || { echo "oxfmt skipped: mise not installed; CI checks"; exit 0; };
+        mise exec npm:oxfmt -- oxfmt --check "$@"; s=$?; [ $s -eq 2 ] && exit 0; exit $s' -- {staged_files}
+    # Lint: every JavaScript and TypeScript extension oxlint reads, against .oxlintrc.jsonc. That config
+    # extends @stackra/oxlint-config from node_modules, so without a workspace install the job is skipped.
     - name: oxlint
       glob: "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"
-      run: pnpm exec oxlint {staged_files}
+      run: >-
+        sh -c 'command -v mise >/dev/null 2>&1 && [ -d node_modules/@stackra/oxlint-config ] ||
+        { echo "oxlint skipped: no mise or no workspace install here; CI lints this commit"; exit 0; };
+        exec mise exec npm:oxlint -- oxlint "$@"' -- {staged_files}
     # Spelling: British English plus the project words in cspell.config.yaml; the files it ignores
     # (translations outside English, generated output) are listed there.
     - name: cspell
       glob: "*.{md,mdx,ts,tsx,css,yaml,yml}"
-      run: pnpm exec cspell lint --no-progress --no-must-find-files --dot {staged_files}
+      run: >-
+        sh -c 'command -v mise >/dev/null 2>&1 || { echo "cspell skipped: mise not installed; CI checks"; exit 0; };
+        exec mise exec npm:cspell -- cspell lint --no-progress --no-must-find-files --dot "$@"' -- {staged_files}
     # Secrets: the staged diff only, with the repository policy; findings are redacted.
     - name: gitleaks
       run: |
@@ -45,14 +58,24 @@ pre-commit:
 commit-msg:
   jobs:
     # Conventional commits with the house rules of @stackra/commitlint-config (.commitlintrc.yaml).
+    # It reads the workspace preset, so it needs an install; without one the Quality Gate checks the commits.
     - name: commitlint
-      run: pnpm exec commitlint --edit {1}
+      run: |
+        if [ -x node_modules/.bin/commitlint ]; then
+          node_modules/.bin/commitlint --edit {1}
+        else
+          echo "commitlint not installed (pnpm install): the Quality Gate checks the pull request's commits"
+        fi
 
 pre-push:
   jobs:
-    # Each member's committed stackra.manifest.json and openapi.json equal what gen derives now.
+    # Each member's committed stackra.manifest.json and openapi.json equal what gen derives now. It reads
+    # the members through the installed CLI, so it runs only where node_modules exists. The affected
+    # typecheck and tests are not here: they run on the box and in the Quality Gate, never on a Mac.
     - name: gen-check
-      run: pnpm exec stackra gen --check
-    # The full gate over the members the pushed commits touch.
-    - name: verify-affected
-      run: pnpm exec stackra verify --affected
+      run: |
+        if [ -x node_modules/.bin/stackra ]; then
+          node_modules/.bin/stackra gen --check
+        else
+          echo 'gen-check skipped: no workspace install here; the Quality Gate runs "stackra gen --check"'
+        fi
