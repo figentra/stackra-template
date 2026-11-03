@@ -21,8 +21,8 @@ in the [Stackra docs](https://docs.stackra.figentra.com). The short version:
    ([`.changeset/README.md`](.changeset/README.md)). Apps and services need none; they deploy by
    commit.
 5. Use conventional commits (`.commitlintrc.yaml`, rules from `@stackra/commitlint-config`).
-6. `pnpm verify` must be green (format, lint, typecheck, test, build, gen check, validate,
-   boundaries, knip), and `pnpm spell` clean.
+6. `pnpm verify` must be green on the box (format, lint, typecheck, test, build, gen check,
+   validate, boundaries, knip; "Tests run on the box" below), and `pnpm spell` clean.
 7. Open a pull request using the template and state its change risk (below). A reviewer other than
    the author approves; the code owners in `.github/CODEOWNERS` review the files they own.
 
@@ -65,3 +65,13 @@ Report unacceptable behaviour privately to a member of the maintainers team (`@a
 `.github/CODEOWNERS`); reports are handled confidentially.
 
 Report security issues privately, as described in [`SECURITY.md`](SECURITY.md).
+
+## Tests run on the box
+
+GitHub CI runs no tests: no unit `test`, no integration (`test:int`, Postgres), no Playwright e2e,
+no `encore test`. It checks (format, lint, typecheck, validate and the rest), builds and deploys
+(owner decision 2026-11-03, STA-2064). Before a pull request is marked ready, its tests run on the
+box: `ci-box run "<who> <what>" <dir> "<cmd>"`, for example
+`ci-box run "template STA-n" . "pnpm verify"` (box 1 today; `stackra testbed run` once the testbed
+is live). The pull request body carries the box evidence: the command, the commit it ran on and the
+result. Nothing installs or tests on a workstation.
