@@ -21,8 +21,8 @@ in the [Stackra docs](https://docs.stackra.figentra.com). The short version:
    ([`.changeset/README.md`](.changeset/README.md)). Apps and services need none; they deploy by
    commit.
 5. Use conventional commits (`.commitlintrc.yaml`, rules from `@stackra/commitlint-config`).
-6. `pnpm verify` must be green on the box (format, lint, typecheck, test, build, gen check,
-   validate, boundaries, knip; "Tests run on the box" below), and `pnpm spell` clean.
+6. `pnpm verify` (format, lint, typecheck, test, build, gen check, validate, boundaries, knip) runs
+   on the box after the merge, not before it ("Tests run later" below); `pnpm spell` clean.
 7. Open a pull request using the template and state its change risk (below). A reviewer other than
    the author approves; the code owners in `.github/CODEOWNERS` review the files they own.
 
@@ -66,12 +66,12 @@ Report unacceptable behaviour privately to a member of the maintainers team (`@a
 
 Report security issues privately, as described in [`SECURITY.md`](SECURITY.md).
 
-## Tests run on the box
+## Tests run later: merge now, label `needs-testing`
 
-GitHub CI runs no tests: no unit `test`, no integration (`test:int`, Postgres), no Playwright e2e,
-no `encore test`. It checks (format, lint, typecheck, validate and the rest), builds and deploys
-(owner decision 2026-11-03, STA-2064). Before a pull request is marked ready, its tests run on the
-box: `ci-box run "<who> <what>" <dir> "<cmd>"`, for example
-`ci-box run "template STA-n" . "pnpm verify"` (box 1 today; `stackra testbed run` once the testbed
-is live). The pull request body carries the box evidence: the command, the commit it ran on and the
-result. Nothing installs or tests on a workstation.
+Owner decision 2026-11-03 (STA-2083, replaces "Tests run on the box"): nothing waits on tests before
+it lands. No box run before the merge and no waiting on CI: open the pull request and merge it right
+away (`gh pr merge --squash --admin`), then add the Linear label `needs-testing` to its STA issue
+and a `Needs testing: <what to run>` line to the pull request body. The tester lane later runs those
+tests on the box (`ci-box run "template STA-n" . "pnpm verify"`; `stackra testbed run` once the
+testbed is live) and removes the label. GitHub CI runs no tests; its checks still run after the
+merge and stay visible. Nothing installs or tests on a workstation.
