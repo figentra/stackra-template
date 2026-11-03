@@ -1,0 +1,78 @@
+# Stackra file contract:
+# Purpose: the starter profile file `stackra create` reads from the published @stackra/starter (ADR 0515
+#          decision 5): the names it rewrites and, per profile, which tracked files it writes. `minimal` is the
+#          standalone app (the web console, one service with one module, the root toolchain and CI); `full` is
+#          this whole template, the Figentra product shape (surfaces in runway.yaml, no app member, ADR 0515
+#          decision 6). Both carry a root runway.yaml Runway reads the same way.
+# Boundary: data only; `create` implements it. It writes only the git-tracked files a profile's `include` globs
+#           match (POSIX globs from the repository root, Node `path.matchesGlob` semantics: `*` and `**` skip dot
+#           files, so dot paths are listed), then copies each `overlay` source over its target path, applies
+#           `rename` to every text file, drops this file, pnpm-lock.yaml and starter/, pins catalog `stackra` to
+#           the CLI's own version and installs fresh. Every overlay source lives under `starter/<profile>/`.
+# Runtime: node
+# Governing contract: Stackra ADR 0515 (decisions 3, 5 and 6); ADR 0349 (product package names); ADR 0441
+#                     (the product shape, kept by `full`).
+version: 1
+
+# Ordered literal replacements, most specific first, applied to every text file `create` writes. Placeholders:
+# {name} the app's package name (kebab), {scope} its npm scope ("@kebab"), {key} the product key ({name} without
+# the characters outside [a-z0-9]). The last rule turns every remaining `acme` (the runway product key, hosts,
+# bundle ids, organisations, the cspell word) into the key, so no placeholder value is left behind. Display text
+# ("Acme") is prose and stays.
+rename:
+  # Member packages: @figentra/acme-service-example, @figentra/acme-console, @figentra/acme-example.
+  - from: "@figentra/acme-"
+    to: "{scope}/"
+  # The docs app (@acme/docs, and the root `docs` script's filter) and GitHub team handles.
+  - from: "@acme/"
+    to: "{scope}/"
+  # The root package, runway `project`, the Encore app, the repository and the Helm namespace.
+  - from: acme-platform
+    to: "{name}"
+  # runway `product.key` and every name derived from it.
+  - from: acme
+    to: "{key}"
+
+profiles:
+  minimal:
+    include:
+      # The root files and the repository tooling.
+      - "*"
+      - ".*"
+      - ".agents/**"
+      - ".changeset/**"
+      - ".claude/**"
+      - ".flow/**"
+      - ".github/**"
+      - ".vscode/**"
+      - "docs/**"
+      # The web console and the one service with its notes module.
+      - "apps/README.md"
+      - "apps/console/**"
+      - "services/**"
+      - "services/**/.*"
+      # The brand and language sources; no mobile, store or landing assets.
+      - "assets/.gitkeep"
+      - "assets/README.md"
+      - "assets/brand/**"
+      - "assets/brand/.gitkeep"
+      - "assets/lang/**"
+      - "assets/lang/.gitkeep"
+    overlay:
+      # No surfaces, mobile app or docs site; the console's `web` destinations instead.
+      runway.yaml: starter/minimal/root-runway.yaml
+  full:
+    # Everything tracked except the minimal profile's console (ADR 0515 decision 6: no app member here).
+    include:
+      - "*"
+      - ".*"
+      - ".*/**"
+      - "apps/README.md"
+      - "apps/docs/**"
+      - "assets/**"
+      - "assets/**/.*"
+      - "docs/**"
+      - "packages/**"
+      - "packages/**/.*"
+      - "services/**"
+      - "services/**/.*"

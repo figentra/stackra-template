@@ -29,8 +29,9 @@ tool configs for web, PWA, desktop and mobile.
 
 This repository is the **lean starter** for a product repository, in the programming model v3.1: the
 root config, the docs site, one example service and one example package. It is a starting point, not
-a sample product. Both examples are written by `stackra new` and nothing else, and `pnpm validate`
-fails when they drift from what `stackra new` writes today. The tool presets are the core
+a sample product. The example service holds one small module, `notes` (a model, an action, a query and
+a migration), and `apps/console` is the web console of the minimal starter profile (see
+below). The tool presets are the core
 `@stackra/*-config` packages, from `catalog:stackra`. Products ship packages and add apps only when
 they need one (D16). The placeholder product is **Acme** (`product.key: acme` in `runway.yaml`).
 Nothing generated is committed: `.stackra/` is gitignored and `stackra gen` writes it.
@@ -40,7 +41,7 @@ created, the test layout and what to replace) is [docs/template-guide.md](docs/t
 
 ## Status
 
-**In progress**: the lean starter, on the `@stackra/*` 0.3.0 catalog.
+**In progress**: the lean starter, on the `@stackra/*` 0.5.1 catalog.
 
 The states: **Live** (serving customers), **In progress** (being built), **Planned** (no build yet).
 
@@ -65,11 +66,28 @@ The states: **Live** (serving customers), **In progress** (being built), **Plann
 
 | Path                               | What it holds                                                                           |
 | ---------------------------------- | --------------------------------------------------------------------------------------- |
-| `services/example`                 | `@figentra/acme-service-example`: the example service, as `stackra new` wrote it        |
+| `services/example`                 | `@figentra/acme-service-example`: the example service, with the `notes` module          |
 | `packages/application/example`     | `@figentra/acme-example`: the example package, with console, native and landing entries |
 | `apps/docs`                        | Mintlify docs: guides, ADRs and the API reference generated from manifests              |
+| `apps/console`                     | `@figentra/acme-console`: the web console, in the minimal starter profile only          |
 | `assets/`                          | brand, mobile, store, landing and lang sources (ADR 0441)                               |
 | `runway.yaml`, `stackra.lock.yaml` | product key, infrastructure and topology; pinned external producer manifests            |
+| `stackra.starter.yaml`, `starter/` | the starter profiles `stackra create` reads, and the minimal profile's overlays         |
+
+### Starter profiles
+
+`stackra create` (Stackra ADR 0515) writes a new app from this template, published on each release as
+`@stackra/starter` at the `@stackra/*` version it pins. `stackra.starter.yaml` names two profiles,
+both filters over this one tree:
+
+- **minimal** (the default): the web console (`apps/console`), the example service with its `notes`
+  module, and the root toolchain and CI; no docs app, example package or mobile and store assets. Its
+  root `runway.yaml` comes from `starter/minimal/`.
+- **full**: the whole template, the Figentra product shape: surfaces and the mobile app in
+  `runway.yaml` and no app member, so `apps/console` is left out.
+
+Both carry a root `runway.yaml` that Runway reads the same way. `create` renames `acme` and the
+example scopes to the app's name, scope and product key (the `rename` list in the same file).
 
 > **The path says the kind, the base class is the kind, the type gives the shape, and the names give
 > identity.** Actions are the only behaviour; gen derives the identities, locks them in

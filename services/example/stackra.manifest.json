@@ -6,16 +6,188 @@
   "area": "app",
   "modules": [
     {
-      "key": "example",
-      "class": "ExampleModule",
+      "key": "notes",
       "exports": [],
       "dependsOn": []
     }
   ],
-  "actions": [],
-  "events": [],
-  "permissions": [],
+  "actions": [
+    {
+      "key": "notes.note.create@1",
+      "kind": "action",
+      "module": "notes",
+      "class": "CreateNoteAction",
+      "file": "src/modules/notes/actions/create-note.action.ts",
+      "permission": "notes.note.create",
+      "risk": "L1",
+      "actors": ["user", "agent"],
+      "endpoint": {
+        "method": "POST",
+        "path": "/notes",
+        "derived": true
+      },
+      "tool": {
+        "name": "notes_note_create",
+        "default": true,
+        "hints": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "#/schemas/notes.CreateNoteInput"
+      },
+      "output": {
+        "$ref": "#/schemas/notes.CreateNoteOutput"
+      }
+    },
+    {
+      "key": "notes.note.list@1",
+      "kind": "query",
+      "module": "notes",
+      "class": "ListNotesQuery",
+      "file": "src/modules/notes/queries/list-notes.query.ts",
+      "permission": "notes.note.read",
+      "risk": "L0",
+      "actors": ["user", "agent"],
+      "endpoint": {
+        "method": "GET",
+        "path": "/notes",
+        "derived": true
+      },
+      "tool": {
+        "name": "notes_note_list",
+        "default": true,
+        "hints": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "#/schemas/notes.ListNotesInput"
+      },
+      "output": {
+        "$ref": "#/schemas/notes.ListNotesOutput"
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "actions.analytics.tracked.v1",
+      "module": "actions",
+      "class": "AnalyticsTracked",
+      "file": "src/core/events/analytics-tracked.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/actions#/schemas/actions.AnalyticsTracked"
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "name": "actions.audit_entry.recorded.v1",
+      "module": "actions",
+      "class": "AuditEntryRecorded",
+      "file": "src/core/events/audit-entry-recorded.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/actions#/schemas/actions.AuditEntryRecorded"
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "name": "actions.usage.recorded.v1",
+      "module": "actions",
+      "class": "UsageRecorded",
+      "file": "src/core/events/usage-recorded.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/actions#/schemas/actions.UsageRecorded"
+      },
+      "from": "@stackra/actions"
+    }
+  ],
+  "permissions": [
+    {
+      "key": "notes.note.read",
+      "risk": "L0",
+      "class": "NotePermissions",
+      "module": "notes",
+      "member": "read",
+      "file": "src/modules/notes/access/note.permissions.ts"
+    },
+    {
+      "key": "notes.note.create",
+      "risk": "L1",
+      "class": "NotePermissions",
+      "module": "notes",
+      "member": "create",
+      "file": "src/modules/notes/access/note.permissions.ts"
+    }
+  ],
   "errors": [
+    {
+      "code": "approval_required",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "ApprovalRequiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "device_revoked",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "actions",
+      "class": "DeviceRevokedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "device_sequence_out_of_order",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "actions",
+      "class": "DeviceSequenceOutOfOrderError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "idempotency_key_required",
+      "kind": "validation",
+      "category": "validation",
+      "module": "actions",
+      "class": "IdempotencyKeyRequiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "idempotency_store_not_transactional",
+      "kind": "internal",
+      "category": "internal",
+      "module": "actions",
+      "class": "IdempotencyStoreNotTransactionalError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "input_invalid",
+      "kind": "validation",
+      "category": "validation",
+      "module": "actions",
+      "class": "InputInvalidError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "offline_cap_reached",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "OfflineCapReachedError",
+      "from": "@stackra/actions"
+    },
     {
       "code": "app_draining",
       "kind": "unavailable",
@@ -55,10 +227,434 @@
       "module": "app",
       "class": "OriginNotAllowedError",
       "from": "@stackra/app"
+    },
+    {
+      "code": "append_only_write",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "database",
+      "class": "AppendOnlyWriteError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "constraint_violated",
+      "kind": "validation",
+      "category": "validation",
+      "module": "database",
+      "class": "ConstraintViolatedError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "duplicate_record",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "database",
+      "class": "DuplicateRecordError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "metadata_invalid",
+      "kind": "validation",
+      "category": "validation",
+      "module": "database",
+      "class": "MetadataInvalidError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "mixed_currency",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "database",
+      "class": "MixedCurrencyError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "model_invalid",
+      "kind": "validation",
+      "category": "validation",
+      "module": "database",
+      "class": "ModelInvalidError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "record_held",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "database",
+      "class": "RecordHeldError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "sequence_block_closed",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "database",
+      "class": "SequenceBlockClosedError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "sequence_not_reservable",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "database",
+      "class": "SequenceNotReservableError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "sequence_number_out_of_order",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "database",
+      "class": "SequenceNumberOutOfOrderError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "stale_version",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "database",
+      "class": "StaleVersionError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "system_field_write",
+      "kind": "validation",
+      "category": "validation",
+      "module": "database",
+      "class": "SystemFieldWriteError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "table_filter_invalid",
+      "kind": "validation",
+      "category": "validation",
+      "module": "database",
+      "class": "TableFilterInvalidError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "transaction_conflict",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "database",
+      "class": "TransactionConflictError",
+      "from": "@stackra/database"
+    },
+    {
+      "code": "job_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "queue",
+      "class": "JobIsolationMissingError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "job_not_due",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "queue",
+      "class": "JobNotDueError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "job_timed_out",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "queue",
+      "class": "JobTimedOutError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "scope_not_platform_written",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "queue",
+      "class": "ScopeNotPlatformWrittenError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "unknown_job",
+      "kind": "internal",
+      "category": "internal",
+      "module": "queue",
+      "class": "UnknownJobError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "invalid_cron",
+      "kind": "validation",
+      "category": "validation",
+      "module": "scheduler",
+      "class": "InvalidCronError",
+      "from": "@stackra/scheduler"
+    },
+    {
+      "code": "invalid_time_zone",
+      "kind": "validation",
+      "category": "validation",
+      "module": "scheduler",
+      "class": "InvalidTimeZoneError",
+      "from": "@stackra/scheduler"
     }
   ],
-  "models": [],
+  "models": [
+    {
+      "key": "notes.note",
+      "class": "Note",
+      "file": "src/modules/notes/models/note.model.ts",
+      "table": "notes.notes",
+      "publicId": "not",
+      "traits": ["HasPublicId", "Timestamps"],
+      "entity": {
+        "module": "notes",
+        "fields": [
+          {
+            "name": "text",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "not"
+            }
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": ["createdAt", "id", "updatedAt"],
+        "computed": []
+      }
+    }
+  ],
   "drivers": [
+    {
+      "port": "DeviceSequenceStore",
+      "key": "actions.DeviceSequenceStore",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryDeviceSequenceStoreDriver",
+          "from": "@stackra/actions"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "DeviceStatusReader",
+      "key": "actions.DeviceStatusReader",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryDeviceStatusReaderDriver",
+          "from": "@stackra/actions"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "IdempotencyStore",
+      "key": "actions.IdempotencyStore",
+      "candidates": ["memory", "valkey"],
+      "classes": {
+        "memory": {
+          "class": "MemoryIdempotencyStoreDriver",
+          "from": "@stackra/actions",
+          "deps": [
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        },
+        "valkey": {
+          "class": "ValkeyIdempotencyStoreDriver",
+          "from": "@stackra/actions/node",
+          "deps": [
+            {
+              "class": {
+                "name": "StoresConfig",
+                "from": "@stackra/actions"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:actions.stores.idempotency",
+      "config": {
+        "class": "StoresConfig",
+        "from": "@stackra/actions"
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "OfflineCapStore",
+      "key": "actions.OfflineCapStore",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryOfflineCapStoreDriver",
+          "from": "@stackra/actions"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "RateLimitStore",
+      "key": "actions.RateLimitStore",
+      "candidates": ["memory", "valkey"],
+      "classes": {
+        "memory": {
+          "class": "MemoryRateLimitStoreDriver",
+          "from": "@stackra/actions"
+        },
+        "valkey": {
+          "class": "ValkeyRateLimitStoreDriver",
+          "from": "@stackra/actions/node",
+          "deps": [
+            {
+              "class": {
+                "name": "StoresConfig",
+                "from": "@stackra/actions"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:actions.stores.rateLimit",
+      "config": {
+        "class": "StoresConfig",
+        "from": "@stackra/actions"
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ReplicaLog",
+      "key": "actions.ReplicaLog",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryReplicaLogDriver",
+          "from": "@stackra/actions"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ReviewItemSink",
+      "key": "actions.ReviewItemSink",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryReviewItemSinkDriver",
+          "from": "@stackra/actions"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ApprovalGate",
+      "key": "actions.ApprovalGate",
+      "candidates": ["open"],
+      "classes": {
+        "open": {
+          "class": "OpenApprovalGateDriver",
+          "from": "@stackra/actions"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "AuditTrail",
+      "key": "actions.AuditTrail",
+      "candidates": ["outbox", "recording"],
+      "classes": {
+        "outbox": {
+          "class": "OutboxAuditTrailDriver",
+          "from": "@stackra/actions",
+          "deps": [
+            {
+              "class": {
+                "name": "EventOutbox",
+                "from": "@stackra/events/contracts"
+              }
+            }
+          ]
+        },
+        "recording": {
+          "class": "RecordingAuditTrailDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ListenerAuditTrail",
+      "key": "events.ListenerAuditTrail",
+      "candidates": ["outbox"],
+      "classes": {
+        "outbox": {
+          "class": "OutboxListenerAuditTrailDriver",
+          "from": "@stackra/actions",
+          "deps": [
+            {
+              "class": {
+                "name": "EventOutbox",
+                "from": "@stackra/events/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ContextStorage",
+      "key": "actions.ContextStorage",
+      "candidates": ["async"],
+      "classes": {
+        "async": {
+          "class": "AsyncContextStorageDriver",
+          "from": "@stackra/actions/node"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "AccessControl",
+      "key": "actions.AccessControl",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryAccessControlDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
     {
       "port": "EdgeNonceStore",
       "key": "app.EdgeNonceStore",
@@ -94,10 +690,30 @@
         },
         "oidc": {
           "class": "OidcJsonWebKeysDriver",
-          "from": "@stackra/app/server"
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "BearerConfig",
+                "from": "@stackra/app"
+              }
+            }
+          ]
         }
       },
       "from": "@stackra/app"
+    },
+    {
+      "port": "CommandAudit",
+      "key": "console.CommandAudit",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryCommandAuditDriver",
+          "from": "@stackra/console/testing"
+        }
+      },
+      "from": "@stackra/console"
     },
     {
       "port": "Clock",
@@ -110,6 +726,567 @@
         }
       },
       "from": "@stackra/container"
+    },
+    {
+      "port": "Logger",
+      "key": "contracts.Logger",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryLoggerDriver",
+          "from": "@stackra/container/testing"
+        }
+      },
+      "from": "@stackra/container"
+    },
+    {
+      "port": "HealthIndicator",
+      "key": "contracts.HealthIndicator",
+      "candidates": ["database"],
+      "classes": {
+        "database": {
+          "class": "DatabaseHealthIndicatorDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "DatabaseConfig",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "QueryBudget",
+      "key": "actions.QueryBudget",
+      "candidates": ["database"],
+      "classes": {
+        "database": {
+          "class": "DatabaseQueryBudgetDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "DatabaseConfig",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "Logger",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "ReplicaReads",
+      "key": "actions.ReplicaReads",
+      "candidates": ["database"],
+      "classes": {
+        "database": {
+          "class": "DatabaseReplicaReadsDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "DatabaseConfig",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "UnitOfWork",
+      "key": "actions.UnitOfWork",
+      "candidates": ["database"],
+      "classes": {
+        "database": {
+          "class": "DatabaseUnitOfWorkDriver",
+          "from": "@stackra/database/node"
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "QueryObserver",
+      "key": "database.QueryObserver",
+      "candidates": ["logger"],
+      "classes": {
+        "logger": {
+          "class": "LoggerQueryObserverDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "DatabaseConfig",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "Logger",
+                "from": "@stackra/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ContextStorage",
+                "from": "@stackra/actions/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "Database",
+      "key": "database.Database",
+      "candidates": ["postgres", "memory"],
+      "classes": {
+        "postgres": {
+          "class": "PostgresDatabaseDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "PostgreSqlMikroORM",
+                "from": "@mikro-orm/postgresql"
+              }
+            }
+          ]
+        },
+        "memory": {
+          "class": "MemoryDatabaseDriver",
+          "from": "@stackra/database/testing"
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "IdempotencyStore",
+      "key": "actions.IdempotencyStore",
+      "candidates": ["postgres"],
+      "classes": {
+        "postgres": {
+          "class": "PostgresIdempotencyStoreDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "RateLimitStore",
+      "key": "actions.RateLimitStore",
+      "candidates": ["postgres"],
+      "classes": {
+        "postgres": {
+          "class": "PostgresRateLimitStoreDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "ConnectionResolver",
+      "key": "database.ConnectionResolver",
+      "candidates": ["primary"],
+      "classes": {
+        "primary": {
+          "class": "PrimaryConnectionResolverDriver",
+          "from": "@stackra/database/node"
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "HoldRegistry",
+      "key": "database.HoldRegistry",
+      "candidates": ["service"],
+      "classes": {
+        "service": {
+          "class": "ServiceHoldRegistryDriver",
+          "from": "@stackra/database/node",
+          "deps": [
+            {
+              "class": {
+                "name": "HoldChannel",
+                "from": "@stackra/database/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/database"
+    },
+    {
+      "port": "AccessControl",
+      "key": "actions.AccessControl",
+      "candidates": ["iam"],
+      "classes": {
+        "iam": {
+          "class": "IamAccessControlDriver",
+          "from": "@stackra/iam",
+          "deps": [
+            {
+              "class": {
+                "name": "PolicyDecisionPointService",
+                "from": "@stackra/iam"
+              }
+            },
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/iam"
+    },
+    {
+      "port": "GrantedScopes",
+      "key": "scope.GrantedScopes",
+      "candidates": ["iam"],
+      "classes": {
+        "iam": {
+          "class": "IamGrantedScopesDriver",
+          "from": "@stackra/iam",
+          "deps": [
+            {
+              "class": {
+                "name": "PolicySource",
+                "from": "@stackra/iam/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/iam"
+    },
+    {
+      "port": "RolesAtNode",
+      "key": "iam.RolesAtNode",
+      "candidates": ["iam"],
+      "classes": {
+        "iam": {
+          "class": "IamRolesAtNodeDriver",
+          "from": "@stackra/iam",
+          "deps": [
+            {
+              "class": {
+                "name": "PolicySource",
+                "from": "@stackra/iam/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/iam"
+    },
+    {
+      "port": "DimensionValues",
+      "key": "iam.DimensionValues",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryDimensionValuesDriver",
+          "from": "@stackra/iam"
+        }
+      },
+      "from": "@stackra/iam"
+    },
+    {
+      "port": "PolicySnapshotStore",
+      "key": "iam.PolicySnapshotStore",
+      "candidates": ["memory", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemoryPolicySnapshotStoreDriver",
+          "from": "@stackra/iam"
+        },
+        "postgres": {
+          "class": "PostgresPolicySnapshotStoreDriver",
+          "from": "@stackra/iam/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/iam"
+    },
+    {
+      "port": "PolicySource",
+      "key": "iam.PolicySource",
+      "candidates": ["memory", "store"],
+      "classes": {
+        "memory": {
+          "class": "MemoryPolicySourceDriver",
+          "from": "@stackra/iam"
+        },
+        "store": {
+          "class": "StorePolicySourceDriver",
+          "from": "@stackra/iam",
+          "deps": [
+            {
+              "class": {
+                "name": "PolicySnapshotStore",
+                "from": "@stackra/iam/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/iam"
+    },
+    {
+      "port": "VisibilityFilter",
+      "key": "database.VisibilityFilter",
+      "candidates": ["iam"],
+      "classes": {
+        "iam": {
+          "class": "IamVisibilityFilterDriver",
+          "from": "@stackra/iam/node",
+          "deps": [
+            {
+              "class": {
+                "name": "PolicyDecisionPointService",
+                "from": "@stackra/iam"
+              }
+            },
+            {
+              "class": {
+                "name": "ContextStorage",
+                "from": "@stackra/actions/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/iam"
+    },
+    {
+      "port": "BrokerPublisher",
+      "key": "queue.BrokerPublisher",
+      "candidates": ["memory", "topic", "valkey"],
+      "classes": {
+        "memory": {
+          "class": "MemoryBrokerPublisherDriver",
+          "from": "@stackra/queue"
+        },
+        "topic": {
+          "class": "TopicBrokerPublisherDriver",
+          "from": "@stackra/queue"
+        },
+        "valkey": {
+          "class": "ValkeyBrokerPublisherDriver",
+          "from": "@stackra/queue/node",
+          "deps": [
+            {
+              "class": {
+                "name": "BrokerConfig",
+                "from": "@stackra/queue"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:queue.broker.driver",
+      "config": {
+        "class": "BrokerConfig",
+        "from": "@stackra/queue"
+      },
+      "from": "@stackra/queue"
+    },
+    {
+      "port": "QueueDriver",
+      "key": "queue.QueueDriver",
+      "candidates": ["memory", "broker", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemoryQueueDriver",
+          "from": "@stackra/queue"
+        },
+        "broker": {
+          "class": "BrokerQueueDriver",
+          "from": "@stackra/queue/node",
+          "deps": [
+            {
+              "class": {
+                "name": "BrokerPublisher",
+                "from": "@stackra/queue/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        },
+        "postgres": {
+          "class": "PostgresQueueDriver",
+          "from": "@stackra/queue/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:queue.driver",
+      "config": {
+        "class": "QueueConfig",
+        "from": "@stackra/queue"
+      },
+      "from": "@stackra/queue"
+    },
+    {
+      "port": "HealthIndicator",
+      "key": "contracts.HealthIndicator",
+      "candidates": ["queue"],
+      "classes": {
+        "queue": {
+          "class": "QueueHealthIndicatorDriver",
+          "from": "@stackra/queue",
+          "deps": [
+            {
+              "class": {
+                "name": "QueueDriver",
+                "from": "@stackra/queue/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "QueueConfig",
+                "from": "@stackra/queue"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/queue"
+    },
+    {
+      "port": "JobDispatcher",
+      "key": "actions.JobDispatcher",
+      "candidates": ["queue"],
+      "classes": {
+        "queue": {
+          "class": "QueueJobDispatcherDriver",
+          "from": "@stackra/queue",
+          "deps": [
+            {
+              "class": {
+                "name": "QueueService",
+                "from": "@stackra/queue"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/queue"
+    },
+    {
+      "port": "CronScopes",
+      "key": "scheduler.CronScopes",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryCronScopesDriver",
+          "from": "@stackra/scheduler"
+        }
+      },
+      "from": "@stackra/scheduler"
+    },
+    {
+      "port": "ScheduleDriver",
+      "key": "scheduler.ScheduleDriver",
+      "candidates": ["memory", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemoryScheduleDriver",
+          "from": "@stackra/scheduler"
+        },
+        "postgres": {
+          "class": "PostgresScheduleDriver",
+          "from": "@stackra/scheduler/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:scheduler.driver",
+      "config": {
+        "class": "SchedulerConfig",
+        "from": "@stackra/scheduler"
+      },
+      "from": "@stackra/scheduler"
     }
   ],
   "integrations": [],
@@ -118,5 +1295,183 @@
   "agents": [],
   "passes": [],
   "entitlements": [],
-  "schemas": {}
+  "roles": [],
+  "commands": [
+    {
+      "name": "db:migrate",
+      "aliases": [],
+      "hidden": false,
+      "audit": true,
+      "bin": false,
+      "class": "DbMigrateCommand",
+      "file": "src/node/commands/db-migrate.command.ts",
+      "entry": "node",
+      "from": "@stackra/database"
+    },
+    {
+      "name": "db:rollback",
+      "aliases": [],
+      "hidden": false,
+      "audit": true,
+      "bin": false,
+      "class": "DbRollbackCommand",
+      "file": "src/node/commands/db-rollback.command.ts",
+      "entry": "node",
+      "from": "@stackra/database"
+    },
+    {
+      "name": "db:status",
+      "aliases": [],
+      "hidden": false,
+      "audit": true,
+      "bin": false,
+      "class": "DbStatusCommand",
+      "file": "src/node/commands/db-status.command.ts",
+      "entry": "node",
+      "from": "@stackra/database"
+    },
+    {
+      "name": "seed-pack:status",
+      "aliases": [],
+      "hidden": false,
+      "audit": true,
+      "bin": false,
+      "class": "SeedPackStatusCommand",
+      "file": "src/node/commands/seed-pack-status.command.ts",
+      "entry": "node",
+      "from": "@stackra/database"
+    },
+    {
+      "name": "queue:failed",
+      "aliases": [],
+      "hidden": false,
+      "audit": false,
+      "bin": false,
+      "class": "QueueFailedCommand",
+      "file": "src/node/commands/queue-failed.command.ts",
+      "entry": "node",
+      "from": "@stackra/queue"
+    },
+    {
+      "name": "queue:retry",
+      "aliases": [],
+      "hidden": false,
+      "audit": false,
+      "bin": false,
+      "class": "QueueRetryCommand",
+      "file": "src/node/commands/queue-retry.command.ts",
+      "entry": "node",
+      "from": "@stackra/queue"
+    },
+    {
+      "name": "queue:work",
+      "aliases": [],
+      "hidden": false,
+      "audit": false,
+      "bin": false,
+      "class": "QueueWorkCommand",
+      "file": "src/node/commands/queue-work.command.ts",
+      "entry": "node",
+      "from": "@stackra/queue"
+    }
+  ],
+  "schemas": {
+    "notes.Note": {
+      "type": "object",
+      "required": ["text", "id", "createdAt", "updatedAt"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "notes.CreateNoteInput": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "notes.CreateNoteOutput": {
+      "type": "object",
+      "required": ["id", "text", "createdAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
+        },
+        "text": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "notes.ListNotesInput": {
+      "type": "object",
+      "required": ["limit"],
+      "properties": {
+        "limit": {
+          "type": "number"
+        },
+        "cursor": {
+          "type": "string"
+        }
+      }
+    },
+    "notes.ListNotesOutput": {
+      "type": "object",
+      "required": ["items", "hasMore"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/notes.NoteView"
+          }
+        },
+        "nextCursor": {
+          "type": "string"
+        },
+        "hasMore": {
+          "type": "boolean"
+        }
+      }
+    },
+    "notes.NoteView": {
+      "type": "object",
+      "required": ["id", "text", "createdAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
+        },
+        "text": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
 }
