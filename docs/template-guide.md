@@ -237,9 +237,9 @@ folder.
 .
 ├── AGENTS.md                     agent entry: grammar, group folders, kind table, identities,
 │                                 dictionary and rules
-├── README.md                     the front page, rendered by figentra-flow from .flow/readme.yml
+├── README.md                     the front page, rendered by fflow from .flow/readme.yml
 ├── docs/template-guide.md        this guide
-├── figentra-flow.config.json     Figentra Flow settings (the stackra preset)
+├── flow.config.json              Figentra Flow settings (the stackra preset)
 ├── package.json                  root scripts over `stackra` and turbo (`validate` adds the example
 │                                 drift check); the core `@stackra/*-config` presets
 ├── pnpm-workspace.yaml           members + the only source of versions (catalogs, `workspace:*`)
@@ -542,7 +542,7 @@ first push (`pnpm create stackra` asks for them and rewrites them for you):
 | `acme` organisation                                    | `runway.yaml` (GitHub, Sentry), `.github/ISSUE_TEMPLATE/config.yml` (security advisory URL)                                      | your GitHub and Sentry organisations                                          |
 | `@acme/platform-team`                                  | `.github/CODEOWNERS`, `runway.yaml` (production reviewers), `CONTRIBUTING.md` (conduct reports)                                  | your GitHub team                                                              |
 | `acme.example`, `*.acme.example`                       | `runway.yaml`, app `runway.yaml`, config defaults                                                                                | your domains                                                                  |
-| `figentra/stackra-template` (CI badge, repository URL) | `.flow/readme.yml` (`repo`, then `figentra-flow readme`)                                                                         | your repository                                                               |
+| `figentra/stackra-template` (CI badge, repository URL) | `.flow/readme.yml` (`repo`, then `fflow readme`)                                                                                 | your repository                                                               |
 | copyright holder                                       | `LICENSE` and the copy in each package (`stackra new` copies it)                                                                 | yours                                                                         |
 | Stackra brand assets (all rights reserved)             | `.github/assets/` (see its `NOTICE`), the README banner (`banner` in `.flow/readme.yml`), the brand line in `NOTICE`             | remove them, or keep them unmodified to say the project is built with Stackra |
 | social preview image                                   | `.github/assets/social-preview.png`, uploaded by hand under **Settings → General → Social preview**                              | your own image; GitHub has no file setting for it                             |
