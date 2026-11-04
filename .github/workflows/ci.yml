@@ -78,7 +78,7 @@ jobs:
         id: registry
         run: |
           version="$(sed -n 's/^    "@stackra\/cli": //p' pnpm-workspace.yaml)"
-          if npm view "@stackra/cli@${version}" version --registry https://npm.stackra.figentra.com/ >/dev/null 2>&1; then
+          if npm view "@stackra/cli@${version}" version --registry https://registry.figentra.com/ >/dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
           else
             echo "published=false" >> "$GITHUB_OUTPUT"

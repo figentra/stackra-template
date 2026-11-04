@@ -21,7 +21,7 @@ import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 
 /** The registry the starter is published to (ADR 0453). */
-const REGISTRY = "https://npm.stackra.figentra.com/";
+const REGISTRY = "https://registry.figentra.com/";
 
 /** Where the template's files sit inside the package, so its own package.json never meets the starter's. */
 const TEMPLATE_DIR = "template";
