@@ -1,20 +1,24 @@
 # Stackra file contract:
-# Purpose: give the job a read token for the Stackra registry (npm.stackra.figentra.com) in the
-#          user-level ~/.npmrc, so pnpm, npm and `stackra build` can read @figentra/* (internal) and
-#          @stackra-pro/*. pnpm 12 ignores tokens in the repository's .npmrc, so the project-level
-#          `_authToken=${STACKRA_REGISTRY_TOKEN}` line alone is not enough.
+# Purpose: give the job a read token for the Figentra registry (npm.stackra.figentra.com and,
+#          from the STA-1733 move, registry.figentra.com) in the user-level ~/.npmrc, so pnpm,
+#          npm and `stackra build` can read @figentra/* (internal) and @stackra-pro/*. pnpm 12
+#          ignores tokens in the repository's .npmrc, so its `_authToken=${...}` line alone is not
+#          enough; both token names also go to $GITHUB_ENV for the steps that read that line.
 # Boundary: one read-only token, masked, never echoed. It comes from Infisical (project
-#           ci-build, prod /ci/registry, STACKRA_REGISTRY_TOKEN) over GitHub OIDC when the
-#           org variables are set, else from the repository secret of the same name. Without
-#           either it warns and the @figentra reads answer 401. The job needs `id-token: write`
-#           for the OIDC route.
+#           ci-build, prod /ci/registry, FIGENTRA_REGISTRY_TOKEN, or STACKRA_REGISTRY_TOKEN
+#           until the owner removes the old name, STA-1733) over GitHub OIDC when the org
+#           variables are set, else from the `token` input (the repository secret). Without either
+#           it warns and the @figentra reads answer 401. The job needs `id-token: write` for the
+#           OIDC route.
 # Runtime: GitHub Actions (composite)
 # Governing contract: Stackra ADR 0453 (the registry); ADR 0173 (secrets by name only); ADR 0019.
 name: Registry auth
 description: Write a masked Stackra registry read token to the user-level ~/.npmrc.
 inputs:
   token:
-    description: Fallback token (the STACKRA_REGISTRY_TOKEN secret) when Infisical is not configured.
+    description: >-
+      Fallback token (the FIGENTRA_REGISTRY_TOKEN secret, else STACKRA_REGISTRY_TOKEN) when Infisical
+      is not configured.
     required: false
     default: ""
   identity-id:
@@ -47,11 +51,16 @@ runs:
       env:
         FALLBACK_TOKEN: ${{ inputs.token }}
       run: |
-        token="${STACKRA_REGISTRY_TOKEN:-$FALLBACK_TOKEN}"
+        # FIGENTRA_REGISTRY_TOKEN is the name from STA-1733; STACKRA_REGISTRY_TOKEN is read until the
+        # owner removes it.
+        token="${FIGENTRA_REGISTRY_TOKEN:-${STACKRA_REGISTRY_TOKEN:-$FALLBACK_TOKEN}}"
         if [ -z "$token" ]; then
-          echo "::warning title=Registry::no read token (Infisical ci-build prod /ci/registry, or the STACKRA_REGISTRY_TOKEN secret); @figentra reads will be refused"
+          echo "::warning title=Registry::no read token (Infisical ci-build prod /ci/registry FIGENTRA_REGISTRY_TOKEN or STACKRA_REGISTRY_TOKEN, or either secret); @figentra reads will be refused"
           exit 0
         fi
         echo "::add-mask::$token"
         umask 077
-        printf '//npm.stackra.figentra.com/:_authToken=%s\n' "$token" >> "$HOME/.npmrc"
+        # Both hosts serve the same registry from the STA-1733 move on; the token goes to no other host.
+        printf '//%s/:_authToken=%s\n' npm.stackra.figentra.com "$token" registry.figentra.com "$token" >> "$HOME/.npmrc"
+        # A project .npmrc names one of the two variables (${VAR} has no fallback), so both carry it.
+        printf 'FIGENTRA_REGISTRY_TOKEN=%s\nSTACKRA_REGISTRY_TOKEN=%s\n' "$token" "$token" >> "$GITHUB_ENV"
