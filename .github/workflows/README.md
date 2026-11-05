@@ -26,7 +26,7 @@ Governing contract: Stackra ADR 0019 (least privilege, pinned actions), ADR 0027
 - Runner images are pinned (`ubuntu-24.04`), so an image upgrade is a reviewed change.
 - The toolchain comes from `mise.toml`, so CI runs the same versions as a contributor.
 - Turborepo remote cache (Stackra STA-1393): a job that runs turbo first logs in to Infisical by
-  OIDC with the org variable `INFISICAL_TURBO_IDENTITY_ID` and exports `TURBO_API`, `TURBO_TOKEN`,
+  OIDC with the org variable `INFISICAL_GATE_IDENTITY_ID` and exports `TURBO_API`, `TURBO_TOKEN`,
   `TURBO_TEAM` and `TURBO_REMOTE_CACHE_SIGNATURE_KEY` from `/ci/turbo`. Without the variable the
   step is skipped and turbo uses its local cache only.
 - Registry read token: pnpm 12 ignores the token line in the repository `.npmrc`, so every job that
