@@ -95,7 +95,6 @@ jobs:
       - name: Registry auth
         uses: ./.github/actions/registry-auth
         with:
-          token: ${{ secrets.STACKRA_REGISTRY_TOKEN }}
           identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
           project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
 
@@ -263,7 +262,6 @@ jobs:
       - name: Registry auth
         uses: ./.github/actions/registry-auth
         with:
-          token: ${{ secrets.STACKRA_REGISTRY_TOKEN }}
           identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
           project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
 
