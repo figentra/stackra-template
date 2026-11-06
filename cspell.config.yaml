@@ -50,6 +50,8 @@ ignoreRegExpList:
   - "/\\b[0-9a-f]{40}\\b/g"
   - "/sha256:[0-9a-f]{64}/g"
 words:
+  # the shell keyword, in workflow scripts (as the products have it)
+  - elif
   - fflow
   - "mintlify's"
   - "zitadel's"

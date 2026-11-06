@@ -654,8 +654,8 @@ platform's own credentials. A **Connection** is the shape of one stored credenti
 credential works and returns the account label) and optional `subscribe()` and `unsubscribe()`.
 
 - `@Secret` takes its home from its class: on an Integration or a Config it is a platform secret
-  (Infisical, synced by runway); on a Connection it is a tenant secret in the connection store,
-  envelope-encrypted and bound to tenant, connection and name.
+  (figentra/secrets, SOPS, synced by runway; Stackra ADR 0525); on a Connection it is a tenant
+  secret in the connection store, envelope-encrypted and bound to tenant, connection and name.
 - A `{field}` placeholder in `auth` or a URL resolves on the Connection first, then the Integration,
   so a tenant can bring its own key or OAuth app. A connection's webhook secret is the exception: it
   is a required Connection field and never falls back to the platform secret, so a platform-signed

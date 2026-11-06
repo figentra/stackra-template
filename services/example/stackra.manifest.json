@@ -30,7 +30,7 @@
         "name": "notes_note_create",
         "default": true,
         "hints": {
-          "readOnlyHint": true,
+          "readOnlyHint": false,
           "destructiveHint": false,
           "idempotentHint": false,
           "openWorldHint": false

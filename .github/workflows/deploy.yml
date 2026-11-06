@@ -1,0 +1,298 @@
+# Stackra file contract:
+# Purpose: deploy, per the owner deploy policy (2026-10-29). A push to main deploys dev and
+#          staging without approval; a pull request deploys nothing. Production deploys ONLY
+#          through "runway promote": a manual run (workflow_dispatch) with a required `sha` runs the
+#          `promote` job, bound to the `production` GitHub environment, which checks out that sha and
+#          passes `--approved`. It also needs the owner's own dispatch from main (job `owner-gate`).
+#          Nothing deploys production on push. A manual run with `environment` (dev or staging, never
+#          production) and no sha is `fflow ship <env>`: it redeploys main's tip to that environment.
+#          runway.yaml: `deploy.on` is `merge-to-main` (dev, staging) and `promote` with
+#          `approval: github-environment` (production). Each job fails first on an empty deploy
+#          variable, runs `pnpm build` and `pnpm gen` as the gate does, builds the product for its
+#          environment (`stackra build --product --env <env>`), then `stackra deploy --product --env
+#          <env>` publishes the bundles and host rows (wrangler) and submits the mobile builds (eas-cli).
+#          dev and preview build and deploy with --surfaces-only (no EAS build, no store submit).
+#          The template repository itself deploys nothing: the probe skips every job there, and a
+#          product copied from it deploys once its GitHub environments and variables exist.
+# Boundary: secrets by name only, from figentra/secrets through core's pinned secrets-decrypt action
+#           (Workload Identity, ADR 0525): `ci/build/registry` (install and brand pull) and
+#           CLOUDFLARE_API_TOKEN from `ci/deploy` (dev, staging) or `ci/production` (production);
+#           figentra/infra grants each (repository, environment, deploy.yml) its scopes. The bot App
+#           (STACKRA_BOT_APP_ID, STACKRA_BOT_PRIVATE_KEY) gives a short-lived read token for
+#           figentra/brand. Repository variables, the OS facts the deploy reads: STACKRA_ASSETS_BUCKET,
+#           STACKRA_ASSETS_ORIGIN, STACKRA_EDGE_KV_NAMESPACE, STACKRA_SERVED_SHELLS,
+#           STACKRA_CANARY_SCOPES and STACKRA_REGION (passed as --region). wrangler and eas-cli at the
+#           versions mise.toml pins.
+# Runtime: node
+# Governing contract: Stackra ADR 0441 (surfaces, mobile and assets), Stackra ADR 0170 (deployment
+#                     environments), Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0027
+#                     (toolchain from mise.toml), Stackra ADR 0525 (secrets), Stackra ADR 0528 (the
+#                     template). Runbook: https://docs.stackra.figentra.com/runbooks/ci
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # "runway promote <sha>": the only way to production. With `environment` instead, `fflow ship
+  # dev|staging`: the deploy job for that one environment, never production.
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Commit SHA to promote to production (leave empty to ship to an environment)
+        required: false
+        type: string
+      environment:
+        description: "dev or staging: ship main to that environment instead of promoting"
+        required: false
+        type: string
+
+# One deploy per ref at a time; a newer push waits for the running one instead of cancelling it
+# mid-publish.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+# Stackra ADR 0019: nothing by default; each job asks for what it needs.
+permissions: {}
+
+jobs:
+  probe:
+    name: Registry probe
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      published: ${{ steps.registry.outputs.published }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          # The promoted sha on a manual run; empty (the event's commit) otherwise.
+          ref: ${{ inputs.sha }}
+          persist-credentials: false
+
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm
+
+      # The same probe as ci.yml, plus the template's own guard: nothing deploys from the template
+      # repository, and nothing installs before @stackra/cli is on the registry and pnpm-lock.yaml is
+      # committed.
+      - name: Registry probe
+        id: registry
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          version="$(sed -n 's/^    "@stackra\/cli": //p' pnpm-workspace.yaml)"
+          if [ "$REPOSITORY" = "figentra/stackra-template" ]; then
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Template::the template deploys nothing; a product copied from it does"
+          elif [ -f pnpm-lock.yaml ] && npm view "@stackra/cli@${version}" version --registry https://npm.stackra.figentra.com/ >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Pre-release::@stackra/cli@${version} is not on the registry or pnpm-lock.yaml is not committed yet; nothing is deployed"
+          fi
+
+  # A push to main deploys dev, then staging, one at a time; a ship (a manual run with
+  # `environment` dev or staging) deploys that one environment.
+  deploy:
+    name: Deploy (${{ matrix.env }})
+    needs: probe
+    if: >-
+      needs.probe.outputs.published == 'true' && (github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' &&
+      contains(fromJSON('["dev","staging"]'), inputs.environment)))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    # The GitHub environment is part of the job's Workload Identity principal (the decrypt grant)
+    # and its deployment record.
+    environment: ${{ matrix.env }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        env: >-
+          ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.environment) ||
+          '["dev","staging"]') }}
+    permissions:
+      contents: read
+      id-token: write # Workload Identity for secrets-decrypt
+    env: &deploy-env
+      STACKRA_ASSETS_BUCKET: ${{ vars.STACKRA_ASSETS_BUCKET }}
+      STACKRA_ASSETS_ORIGIN: ${{ vars.STACKRA_ASSETS_ORIGIN }}
+      STACKRA_EDGE_KV_NAMESPACE: ${{ vars.STACKRA_EDGE_KV_NAMESPACE }}
+      STACKRA_SERVED_SHELLS: ${{ vars.STACKRA_SERVED_SHELLS }}
+      STACKRA_CANARY_SCOPES: ${{ vars.STACKRA_CANARY_SCOPES }}
+      STACKRA_REGION: ${{ vars.STACKRA_REGION }}
+      # The Cloudflare account the deploy's wrangler calls use: the CI token reaches more than one,
+      # and wrangler refuses to choose non-interactively. Not a secret; the OS edge's account.
+      CLOUDFLARE_ACCOUNT_ID: d861f9ac9df28b7f0b1298cc0c89bc9d
+      DEPLOY_ENV: ${{ matrix.env }}
+      # The secrets scope holding this environment's Cloudflare token.
+      DEPLOY_SCOPE: ${{ matrix.env == 'production' && 'ci/production' || 'ci/deploy' }}
+      # `--approved` only in the production job, which the environment's reviewers released.
+      APPROVED: ${{ matrix.env == 'production' && '--approved' || '' }}
+      # dev and preview publish surfaces only: no EAS builds or store submits (see the header).
+      SURFACES_ONLY: ${{ (matrix.env == 'dev' || matrix.env == 'preview') && '--surfaces-only' || '' }}
+    steps: &deploy-steps
+      - name: Deploy variables set
+        run: |
+          # GitHub passes an unset variable as "", which the CLI takes as a value; fail on it here.
+          for name in STACKRA_ASSETS_BUCKET STACKRA_ASSETS_ORIGIN STACKRA_EDGE_KV_NAMESPACE \
+            STACKRA_SERVED_SHELLS STACKRA_REGION; do
+            if [ -z "${!name}" ]; then
+              echo "::error title=Missing deploy variable::$name is empty: set it in the $DEPLOY_ENV GitHub environment"
+              exit 1
+            fi
+          done
+
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          # The promoted sha in the promote job; empty (the event's commit) in the deploy job.
+          ref: ${{ inputs.sha }}
+          persist-credentials: false
+
+      # wrangler and eas-cli at the versions mise.toml pins; mise also serves sops to secrets-decrypt.
+      - name: Toolchain (mise, wrangler, eas-cli)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm npm:eas-cli npm:wrangler
+
+      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
+      # .github/actions/registry-auth.
+      - name: Registry auth
+        uses: ./.github/actions/registry-auth
+
+      # A short-lived read token for figentra/brand from the Stackra bot app, scoped to that one repository.
+      - name: Brand read token (GitHub App)
+        id: brand-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.STACKRA_BOT_APP_ID }}
+          private-key: ${{ secrets.STACKRA_BOT_PRIVATE_KEY }}
+          owner: figentra
+          repositories: brand
+          permission-contents: read
+
+      - name: Checkout the brand CLI
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          repository: figentra/brand
+          ref: brand-figentra@1.0.3 # the CLI at the kit tag brand.json pins
+          path: .figentra-brand
+          sparse-checkout: cli
+          persist-credentials: false
+          token: ${{ steps.brand-token.outputs.token }}
+
+      # Icons, splash screens and store frames for the mobile build come from the pulled kit.
+      - name: Pull brand
+        env:
+          GITHUB_TOKEN: ${{ steps.brand-token.outputs.token }}
+        run: node .figentra-brand/cli/bin/figentra-brand.mjs pull --out .brand
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      # The same gen the gate runs, so the product build sees the .stackra output.
+      - name: Gen
+        run: pnpm gen
+
+      # Writes dist/bundles/<surface>/<sha12>/ and dist/product/build.json for this environment;
+      # staging and production also start each app's EAS build (dev and preview: surfaces only).
+      # `--scope`: the npm scope of the OS lines runway.yaml names; runway names no owner's scope itself
+      # (Stackra ADR 0481 decision 4).
+      - name: Build the product
+        run: pnpm exec stackra build --product --scope @figentra --env "$DEPLOY_ENV" ${SURFACES_ONLY:-}
+
+      # The Cloudflare token for wrangler, decrypted from this environment's scope only, never from a
+      # repository secret (ADR 0525).
+      - name: Cloudflare token (sops)
+        uses: figentra/stackra/.github/actions/secrets-decrypt@c8563c852108bb4759827e132b7e5b82b6ae33f4 # @stackra/runway@0.15.0
+        with:
+          scope: ${{ env.DEPLOY_SCOPE }}
+          names: CLOUDFLARE_API_TOKEN
+
+      - name: Deploy
+        run: |
+          pnpm exec stackra deploy --product --env "$DEPLOY_ENV" --region "$STACKRA_REGION" \
+            ${APPROVED:-} ${SURFACES_ONLY:-}
+
+      # The run's outcome for Flow (Runway delivery contract): status and commit, written even when an
+      # earlier step failed, so Flow records a result without reading logs. Names, ids and states only.
+      # cspell:ignore tonumber
+      - name: Outcome record
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          mkdir -p dist/product
+          sha="$(git rev-parse HEAD 2>/dev/null || echo "$GITHUB_SHA")"
+          status=failed
+          [ "$JOB_STATUS" = success ] && status=deployed
+          [ "$JOB_STATUS" = cancelled ] && status=cancelled
+          jq -n --arg repository "$REPOSITORY" --arg environment "$DEPLOY_ENV" --arg sha "$sha" --arg status "$status" \
+            --arg url "$RUN_URL" --arg id "$RUN_ID" --arg attempt "$RUN_ATTEMPT" \
+            '{schema: "runway.outcome/v1", repository: $repository, environment: $environment, sourceSha: $sha,
+              status: $status, workflowRun: {id: ($id | tonumber), attempt: ($attempt | tonumber), url: $url},
+              manifest: ("deploy-" + $environment + ".json")}' > dist/product/runway-outcome.json
+
+      - name: Outcome artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: runway-outcome-${{ matrix.env }}
+          path: |
+            dist/product/runway-outcome.json
+            dist/product/deploy-${{ matrix.env }}.json
+            dist/product/build.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  # Production starts only from the owner's own dispatch on main. ADR 0523's approval record replaces
+  # this check.
+  owner-gate:
+    name: Owner gate
+    if: github.event_name == 'workflow_dispatch' && inputs.sha != '' && inputs.environment == ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Triggered by the owner
+        env:
+          ACTOR: ${{ github.triggering_actor }}
+          REF: ${{ github.ref }}
+        run: |
+          [ "$ACTOR" = "figentra-usr" ] || { echo "::error::production starts only from the owner (got $ACTOR)"; exit 1; }
+          [ "$REF" = "refs/heads/main" ] || { echo "::error::production runs main's deploy.yml only (got $REF)"; exit 1; }
+
+  # "runway promote <sha>": production only, from a manual run with the sha to promote. The job
+  # waits for the `production` GitHub environment's reviewers; that approval is what `--approved`
+  # attests. It runs the full build (mobile included), never on a push, a pull request or a ship.
+  promote:
+    name: Promote (production)
+    needs: [probe, owner-gate]
+    if: >-
+      github.event_name == 'workflow_dispatch' && inputs.sha != '' && inputs.environment == '' &&
+      needs.probe.outputs.published == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: production
+    permissions:
+      contents: read
+      id-token: write # Workload Identity for secrets-decrypt
+    # A one-entry matrix so the job shares the deploy job's env and steps (YAML aliases).
+    strategy:
+      matrix:
+        env: [production]
+    env: *deploy-env
+    steps: *deploy-steps
