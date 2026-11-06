@@ -37,7 +37,7 @@ quickstart: |
   2. Run:
 
      ```sh
-     mise install                 # node, pnpm, gitleaks, infisical, maestro, encore, eas-cli, pinned
+     mise install                 # node, pnpm, gitleaks, maestro, encore, eas-cli, pinned
      pnpm install                 # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`)
      stackra agents setup         # once per machine: Stackra skills, sub-agents and guard hooks for your assistant
      pnpm gen && pnpm dev         # generate .stackra/ and run every member
