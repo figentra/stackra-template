@@ -80,7 +80,6 @@ jobs:
       # The same probe as ci.yml, plus the template's own guard: nothing deploys from the template
       # repository, and nothing installs before @stackra/cli is on the registry and pnpm-lock.yaml is
       # committed.
-      # cspell:ignore elif
       - name: Registry probe
         id: registry
         env:
