@@ -15,7 +15,7 @@ language: en-GB,en
 useGitignore: true
 ignorePaths:
   # Rendered by `fflow sync` from its preset, never hand-edited (.flow/lock.json pins them).
-  - ".agents/skills/flow-*/**"
+  - ".agents/skills/**"
   - ".agents/agents/**"
   - ".agents/rules/**"
   - .github/workflows/fflow-approve.yml
