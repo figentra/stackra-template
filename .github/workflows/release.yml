@@ -107,7 +107,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # STA-1393: Turborepo remote cache (turbo.stackra.figentra.com). Exports TURBO_API, TURBO_TOKEN,
+      # STA-1393: Turborepo remote cache (turbo.figentra.com). Exports TURBO_API, TURBO_TOKEN,
       # TURBO_TEAM and TURBO_REMOTE_CACHE_SIGNATURE_KEY from figentra-ci prod /ci/turbo (ADR 0512); skipped
       # when either org variable is unset (local cache only).
       - name: Turborepo remote cache (Infisical OIDC)
