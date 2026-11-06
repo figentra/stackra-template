@@ -36,7 +36,7 @@ placeholder product is **Acme** (`product.key: acme` in `runway.yaml`).
 2. Run:
 
    ```sh
-   mise install                 # node, pnpm, gitleaks, infisical, maestro, encore, eas-cli, pinned
+   mise install                 # node, pnpm, gitleaks, maestro, encore, eas-cli, pinned
    pnpm install                 # dependencies, git hooks (lefthook) and .mcp.json (`stackra mcp sync`)
    stackra agents setup         # once per machine: Stackra skills, sub-agents and guard hooks for your assistant
    pnpm gen && pnpm dev         # generate .stackra/ and run every member
@@ -323,8 +323,8 @@ The test that places it:
 
 A package has no runway: publishing is `publishConfig` (with `exports` pointing at `dist`) plus a
 changeset. A member file may override a root default, never the reverse. Secret values live only in
-Infisical
-([Stackra ADR 0173](https://docs.stackra.figentra.com/adr/0173-secrets-infisical-is-the-source-of-production-secrets));
+figentra/secrets, encrypted with SOPS and Cloud KMS
+([Stackra ADR 0525](https://docs.stackra.figentra.com/adr/0525-secrets-sops-and-cloud-kms-replace-infisical));
 files name them. Wrong place, for each row: a port number is runway, not config; a TTL is config,
 not runway; the list of targets is `stackra.config.ts`; a group's cpu is the root runway, never a
 member's; a column is the model, never a hand-written migration.
@@ -557,7 +557,7 @@ in `.github/workflows/ci.yml` with `.github/scripts/preview-gate.mjs`.
 
 Secret values never go in a file: a config's options schema marks a field `@Secret("NAME")` (or its
 `env` map names an environment variable), `runway.yaml` names the secret, and the value lives in
-your secret store (Infisical by default, Stackra ADR 0173).
+figentra/secrets (SOPS and Cloud KMS, Stackra ADR 0525).
 
 ## Docs
 

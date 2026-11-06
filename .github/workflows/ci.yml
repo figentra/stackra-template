@@ -3,8 +3,8 @@
 #          (merge_group) and every push to main. The main ruleset (.github/rulesets/main.json)
 #          requires the `Quality Gate` job by name, so keep that name unchanged.
 # Boundary: checks only; nothing here deploys or writes to the repository (contents: read). The one
-#           credential is the Stackra registry read token (.github/actions/registry-auth, Infisical
-#           over OIDC, so the gate job has id-token: write). Tools come from mise.toml. Until the catalog's `@stackra/cli`
+#           credential is the Stackra registry read token (.github/actions/registry-auth, SOPS through
+#           Workload Identity, so the gate job has id-token: write). Tools come from mise.toml. Until the catalog's `@stackra/cli`
 #           resolves from the Stackra registry only the install-free pre-release gate runs; from then on
 #           the job also installs and runs OSV-Scanner, lint, typecheck, build, gen, validate
 #           and Squawk, the shape of core's Quality Gate.
@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: read
-      id-token: write # Infisical OIDC for the registry read token
+      id-token: write # Workload Identity for the registry read token (secrets-decrypt)
 
     steps:
       # Stackra ADR 0019: every action is pinned to a full commit SHA, the version in the trailing
@@ -57,19 +57,16 @@ jobs:
           persist-credentials: false
           submodules: false
 
-      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
-      # .github/actions/registry-auth.
-      - name: Registry auth
-        uses: ./.github/actions/registry-auth
-        with:
-          identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
-          project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
-
       # Stackra ADR 0027: node and gitleaks come from mise.toml, not per-tool setup actions.
       - name: Toolchain (mise)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           install_args: node pnpm gitleaks aqua:google/osv-scanner
+
+      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
+      # .github/actions/registry-auth.
+      - name: Registry auth
+        uses: ./.github/actions/registry-auth
 
       # Whether the framework is installable yet: the install-based steps below run only once the
       # `@stackra/cli` version the catalog pins resolves from the registry the .npmrc maps.
@@ -158,9 +155,10 @@ jobs:
             if head -n 1 "$file" | grep -qx -- '-- stackra:transactional=false'; then online+=("$file"); else transactional+=("$file"); fi
           done
           lint() {
-            mise exec github:sbdchd/squawk@2.0.0 -- squawk --pg-version=18.0 \
+            mise exec github:sbdchd/squawk@2.71.0 -- squawk --pg-version=18.0 \
               --exclude=prefer-robust-stmts --exclude=prefer-text-field --exclude=ban-char-field \
-              --exclude=prefer-bigint-over-int "$@"
+              --exclude=prefer-bigint-over-int \
+              --exclude=require-lock-timeout --exclude=require-statement-timeout "$@"
           }
           if [ "${#transactional[@]}" -gt 0 ]; then lint --assume-in-transaction "${transactional[@]}"; fi
           if [ "${#online[@]}" -gt 0 ]; then lint "${online[@]}"; fi

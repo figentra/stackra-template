@@ -13,7 +13,10 @@
       "detail": "Full gate: format, lint, typecheck, test, build, gen check, validate, boundaries, knip",
       "type": "shell",
       "command": "pnpm verify",
-      "group": { "kind": "build", "isDefault": true },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "problemMatcher": []
     },
     {
@@ -28,7 +31,10 @@
       "detail": "Every member's vitest suite",
       "type": "shell",
       "command": "pnpm test",
-      "group": { "kind": "test", "isDefault": true },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
       "problemMatcher": []
     },
     {
@@ -51,6 +57,38 @@
       "detail": "cspell over Markdown, TypeScript, CSS and YAML (cspell.config.yaml)",
       "type": "shell",
       "command": "pnpm spell",
+      "problemMatcher": []
+    },
+    {
+      "label": "dev: surface-console",
+      "detail": "Start surface-console on http://localhost:4173 (written by stackra gen from the runways)",
+      "type": "shell",
+      "command": "pnpm exec stackra build --product --surfaces-only && exec pnpm exec stackra preview serve --surface console --port 4173",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "dev: surface-landing",
+      "detail": "Start surface-landing on http://localhost:4174 (written by stackra gen from the runways)",
+      "type": "shell",
+      "command": "pnpm exec stackra build --product --surfaces-only && exec pnpm exec stackra preview serve --surface landing --port 4174",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "dev: console",
+      "detail": "Start console on http://localhost:3710 (written by stackra gen from the runways)",
+      "type": "shell",
+      "command": "pnpm turbo run build --output-logs=errors-only --filter=@figentra/acme-console^... && exec pnpm --filter @figentra/acme-console run dev",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "dev: docs",
+      "detail": "Start docs on http://localhost:3333 (written by stackra gen from the runways)",
+      "type": "shell",
+      "command": "pnpm turbo run build --output-logs=errors-only --filter=@acme/docs^... && exec pnpm --filter @acme/docs run dev",
+      "isBackground": true,
       "problemMatcher": []
     }
   ]

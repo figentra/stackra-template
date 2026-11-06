@@ -4,11 +4,12 @@
 #          `"private": true` to the Stackra registry (npm.stackra.figentra.com, ADR 0453) with
 #          provenance, then builds a CycloneDX SBOM of the released tree; it also publishes the
 #          template itself as @stackra/starter (the `starter` job) when the pinned `@stackra/*`
-#          version has none yet. Apps and services deploy by commit SHA, not from here.
+#          version has none yet, and packs or publishes each service's contract (the `contracts` job, ADR 0511).
+#          Apps and services deploy by commit SHA, not from here.
 # Boundary: triggers are every push to main and workflow_dispatch with `dry_run` for a publish dry
 #           run. Needs the `release` environment (protected, main only), contents and pull-requests
 #           write, and id-token write for the registry's OIDC exchange; the one token is the registry
-#           read token for installs (.github/actions/registry-auth), never a publish token. Never publishes to npmjs. Until the repository commits
+#           read token for installs (.github/actions/registry-auth, decrypted from figentra/secrets), never a publish token. Never publishes to npmjs. Until the repository commits
 #           pnpm-lock.yaml (`preflight` below) every job is skipped and the run is green:
 #           `pnpm install --frozen-lockfile` cannot run without a lockfile, which is the case while
 #           `@stackra/*` is unpublished. The `starter` job needs no lockfile: it packs with Node built-ins.
@@ -90,37 +91,29 @@ jobs:
           fetch-depth: 0 # changesets diffs against history and reads existing tags
           submodules: false
 
-      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
-      # .github/actions/registry-auth.
-      - name: Registry auth
-        uses: ./.github/actions/registry-auth
-        with:
-          identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
-          project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
-
       # Stackra ADR 0027: node and pnpm come from mise.toml.
       - name: Toolchain (mise)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           install_args: node pnpm
 
+      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
+      # .github/actions/registry-auth.
+      - name: Registry auth
+        uses: ./.github/actions/registry-auth
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # STA-1393: Turborepo remote cache (turbo.stackra.figentra.com). Exports TURBO_API, TURBO_TOKEN,
-      # TURBO_TEAM and TURBO_REMOTE_CACHE_SIGNATURE_KEY from figentra-ci prod /ci/turbo (ADR 0512); skipped
-      # when either org variable is unset (local cache only).
-      - name: Turborepo remote cache (Infisical OIDC)
-        if: vars.INFISICAL_GATE_IDENTITY_ID != '' && vars.INFISICAL_GATE_PROJECT_ID != ''
-        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+      # STA-1393: Turborepo remote cache. Exports TURBO_API, TURBO_TOKEN, TURBO_TEAM and
+      # TURBO_REMOTE_CACHE_SIGNATURE_KEY from figentra/secrets' `ci/build/turbo` scope (ADR 0525); this workflow in the
+      # `release` environment is a caller of that scope (figentra/infra estate/secret-callers.mjs). Without the grant the
+      # build uses the local cache instead of failing the release.
+      - name: Turborepo remote cache (sops)
+        continue-on-error: true
+        uses: figentra/stackra/.github/actions/secrets-decrypt@c8563c852108bb4759827e132b7e5b82b6ae33f4 # @stackra/runway@0.15.0
         with:
-          method: oidc
-          identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
-          domain: https://eu.infisical.com
-          project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
-          env-slug: prod
-          secret-path: /ci/turbo
-          export-type: env
+          scope: ci/build/turbo
 
       - name: Build
         run: pnpm build
@@ -240,6 +233,34 @@ jobs:
           printf '//%s:_authToken=${NODE_AUTH_TOKEN}\n' "$host" >> ~/.npmrc
           NODE_AUTH_TOKEN="$token" npm publish "$TARBALL" --access public --provenance --registry "$REGISTRY"
 
+  # Stackra ADR 0511: each service's contract package (manifest, OpenAPI, lang; no source), published at the service's
+  # version so other repositories generate their clients from it. The template's example service is packed as a dry
+  # run only (no registry publisher row exists for it); a product copied from the template publishes, once the
+  # registry's publisher row names its release.yml in the `release` environment.
+  contracts:
+    name: Service contracts
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: read
+      id-token: write # registry OIDC exchange and provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      # Stackra ADR 0027: node and pnpm come from mise.toml; pnpm packs and publishes each contract.
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm
+
+      - name: Publish
+        env:
+          DRY_RUN: ${{ inputs.dry_run == true || github.repository == 'figentra/stackra-template' }}
+        run: bash .github/scripts/publish-service-contracts.sh
+
   # The SBOM of what was just released. It runs only when the release job published something, and
   # holds no write permission: it only reads the repository.
   sbom:
@@ -249,7 +270,7 @@ jobs:
     if: needs.release.outputs.published == 'true'
     permissions:
       contents: read
-      id-token: write # Infisical OIDC for the registry read token
+      id-token: write # Workload Identity for the registry read token (secrets-decrypt)
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -257,18 +278,15 @@ jobs:
           persist-credentials: false
           submodules: false
 
-      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
-      # .github/actions/registry-auth.
-      - name: Registry auth
-        uses: ./.github/actions/registry-auth
-        with:
-          identity-id: ${{ vars.INFISICAL_GATE_IDENTITY_ID }}
-          project-id: ${{ vars.INFISICAL_GATE_PROJECT_ID }}
-
       - name: Toolchain (mise)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           install_args: node pnpm
+
+      # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):
+      # .github/actions/registry-auth.
+      - name: Registry auth
+        uses: ./.github/actions/registry-auth
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

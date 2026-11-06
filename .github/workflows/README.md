@@ -25,15 +25,18 @@ Governing contract: Stackra ADR 0019 (least privilege, pinned actions), ADR 0027
   (`renovate.json5`) proposes the updates.
 - Runner images are pinned (`ubuntu-24.04`), so an image upgrade is a reviewed change.
 - The toolchain comes from `mise.toml`, so CI runs the same versions as a contributor.
-- Turborepo remote cache (Stackra STA-1393): a job that runs turbo first logs in to Infisical by
-  OIDC with the org variable `INFISICAL_GATE_IDENTITY_ID` and exports `TURBO_API`, `TURBO_TOKEN`,
-  `TURBO_TEAM` and `TURBO_REMOTE_CACHE_SIGNATURE_KEY` from `/ci/turbo`. Without the variable the
-  step is skipped and turbo uses its local cache only.
+- Secrets (Stackra ADR 0525): no repository secret and no secret store login. A job that needs a value
+  runs core's pinned `secrets-decrypt` action, which signs in to Google Cloud as the job itself
+  (Workload Identity, `id-token: write`), decrypts one figentra/secrets scope with sops and exports
+  the values, masked. figentra/infra (`estate/secret-callers.mjs`) grants each (repository,
+  environment, workflow) its scopes. mise must be on PATH first, for sops.
+- Turborepo remote cache (Stackra STA-1393): release.yml decrypts `ci/build/turbo` (`TURBO_API`,
+  `TURBO_TOKEN`, `TURBO_TEAM`, `TURBO_REMOTE_CACHE_SIGNATURE_KEY`). Without the grant the step
+  fails softly and turbo uses its local cache only.
 - Registry read token: pnpm 12 ignores the token line in the repository `.npmrc`, so every job that
-  installs runs `.github/actions/registry-auth` first. It reads `STACKRA_REGISTRY_TOKEN` from
-  Infisical (`/ci/registry`) by OIDC with the org variables `INFISICAL_GATE_IDENTITY_ID` and
-  `INFISICAL_GATE_PROJECT_ID`, else from the repository secret, masks it and writes `~/.npmrc`.
-  Without either it warns and reads of `@figentra/*` are refused.
+  installs runs `.github/actions/registry-auth` first. It decrypts `STACKRA_REGISTRY_TOKEN` from
+  `ci/build/registry`, which every figentra repository may read, masks it and writes `~/.npmrc`.
+  Without it it warns and reads of `@figentra/*` are refused.
 
 ## Branch rules
 
