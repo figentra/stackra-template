@@ -15,11 +15,22 @@ language: en-GB,en
 useGitignore: true
 ignorePaths:
   # Rendered by `fflow sync` from its preset, never hand-edited (.flow/lock.json pins them).
-  - ".agents/skills/flow-*/**"
+  - ".agents/skills/**"
   - ".agents/agents/**"
   - ".agents/rules/**"
   - .github/workflows/fflow-approve.yml
   - .github/workflows/fflow-baseline.yml
+  - AGENTS.md
+  - CLAUDE.md
+  - .mcp.yaml
+  - lefthook.yml
+  - opencode.jsonc
+  - .claude/settings.json
+  - ".agents/hooks/**"
+  - ".agents/reference/**"
+  - .agents/models.yaml
+  - .agents/routing.yaml
+  - ".opencode/plugins/**"
   - "**/node_modules/**"
   - "**/dist/**"
   - "**/.turbo/**"
