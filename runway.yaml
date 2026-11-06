@@ -180,10 +180,8 @@ environments:
     # Hosts resolve under the same zone in every environment.
     domains:
       zone: acme.example
-    # Where each kind of member runs; a member runway may override its own destination.
-    destinations:
-      # `stackra dev` = gen --watch + `encore run` + the compose infra below.
-      services: compose
+    # No destinations: dev runs locally (`stackra dev` = gen --watch + `encore run` + the infra
+    # below); no driver ships it.
     # The shared containers `stackra dev` brings. A driver's own container (Valkey, object storage,
     # mail capture, antivirus) comes from the package that ships the driver and starts only when a
     # member selects it; the identity provider comes with the identity member.
@@ -323,6 +321,8 @@ environments:
       gate: health
 
   staging:
+    # The tenant region this environment lives in (me, eu or ksa); figentra/infra places it there.
+    region: me
     regions: [me]
     destinations:
       services: encore-cloud
@@ -334,7 +334,7 @@ environments:
       branch: main
       processAllocation: from-topology
     shared:
-      # Used by aws-ecs, and by Encore Cloud's own VPC settings where it accepts them.
+      # Used by Encore Cloud's own VPC settings where it accepts them.
       network:
         vpc:
           cidr: 10.59.0.0/16 # template placeholder: replace with this product's slot, staging 10.(60+n), see the family allocation
@@ -420,10 +420,10 @@ environments:
 
   production:
     destinations:
-      # Switch `services` to aws-ecs, helm or compose and the matching `targets.*` block applies.
       services: encore-cloud
       # The docs member; it follows main, not the promotion (`targets.mintlify.deployOn`).
       docs: mintlify
+    region: me
     regions: [me]
     encore:
       env: production
@@ -524,28 +524,6 @@ targets:
   # Managed hosting; sizes come from `shared` and the groups of each environment's `topology`.
   encore-cloud:
     cloud: aws
-  # Self-hosting on AWS (the @stackra-pro runtime stack, Stackra ADR 0171).
-  aws-ecs:
-    # fargate | ec2
-    compute: fargate
-    # In front of static apps that do not run on Workers.
-    cloudfront:
-      enabled: true
-    images:
-      arch: [amd64, arm64]
-  # Single-host on-premises (Stackra ADR 0179) and dev.
-  compose:
-    # The shared containers every install runs; driver containers and the identity provider join
-    # when a member selects that driver or the identity member is installed.
-    bundled: [postgres, otel-lgtm]
-    # Or the customer's registry, or `docker load` for an air-gapped install (Stackra ADR 0179).
-    registry: ghcr.io/acme
-  # Kubernetes on-premises; Zarf packages the air-gapped install (Stackra ADR 0179).
-  helm:
-    namespace: acme-platform
-    ingressClass: nginx
-    storageClass: default
-    zarf: true
   # The docs site (Stackra ADR 0299). CI deploys each merge to main once `mint validate`,
   # `mint broken-links` and `mint a11y` passed on its pull request, then smoke-tests the
   # published site; a failed smoke test fails the deploy job. The deploy on every push through
@@ -628,7 +606,7 @@ release:
   # Where every release is recorded.
   records: [github-deployments, linear-release, "slack:#deploys"]
   # Build and publish order across destinations.
-  buildOrder: [npm, encore-cloud, aws-ecs, compose, helm, mintlify]
+  buildOrder: [npm, encore-cloud, mintlify]
   # On-premises upgrades (Stackra ADR 0179).
   onPrem:
     upgrades: sequential-minor
