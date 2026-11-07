@@ -3,53 +3,32 @@
 #          user-level ~/.npmrc, so pnpm, npm and `stackra build` can read @figentra/* (internal) and
 #          @stackra-pro/*. pnpm 12 ignores tokens in the repository's .npmrc, so the project-level
 #          `_authToken=${STACKRA_REGISTRY_TOKEN}` line alone is not enough.
-# Boundary: one read-only token, masked, never echoed. It comes from Infisical (project
-#           ci-build, prod /ci/registry, STACKRA_REGISTRY_TOKEN) over GitHub OIDC when the
-#           org variables are set, else from the repository secret of the same name. Without
-#           either it warns and the @figentra reads answer 401. The job needs `id-token: write`
-#           for the OIDC route.
+# Boundary: one read-only token, masked, never echoed. It comes only from figentra/secrets' `ci/build/registry` scope
+#           (SOPS, Cloud KMS), decrypted in the job by core's pinned secrets-decrypt action over Workload Identity; every
+#           figentra repository may read that scope (figentra/infra REGISTRY_READERS). No repository secret is read.
+#           Without it the step warns and the @figentra reads answer 401. The job needs `id-token: write`.
 # Runtime: GitHub Actions (composite)
-# Governing contract: Stackra ADR 0453 (the registry); ADR 0173 (secrets by name only); ADR 0019.
+# Governing contract: Stackra ADR 0453 (the registry); ADR 0525 (SOPS and Cloud KMS); ADR 0019.
 name: Registry auth
 description: Write a masked Stackra registry read token to the user-level ~/.npmrc.
-inputs:
-  token:
-    description: Fallback token (the STACKRA_REGISTRY_TOKEN secret) when Infisical is not configured.
-    required: false
-    default: ""
-  identity-id:
-    description: Infisical machine identity for GitHub OIDC (vars.INFISICAL_GATE_IDENTITY_ID).
-    required: false
-    default: ""
-  project-id:
-    description: Infisical project holding /ci/registry (vars.INFISICAL_GATE_PROJECT_ID).
-    required: false
-    default: ""
 runs:
   using: composite
   steps:
-    - name: Registry token (Infisical OIDC)
-      if: inputs.identity-id != '' && inputs.project-id != ''
-      # Until the token is placed at /ci/registry, the lookup fails; the next step then warns.
+    # Pinned to a commit of core, as core's own workflows pin it (stackra#570); sops comes through mise.
+    - name: Registry token (sops)
+      # A failed decrypt leaves the token unset; the next step then warns.
       continue-on-error: true
-      uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+      uses: figentra/stackra/.github/actions/secrets-decrypt@c8563c852108bb4759827e132b7e5b82b6ae33f4 # @stackra/runway@0.15.0
       with:
-        method: oidc
-        identity-id: ${{ inputs.identity-id }}
-        domain: https://eu.infisical.com
-        project-id: ${{ inputs.project-id }}
-        env-slug: prod
-        secret-path: /ci/registry
-        export-type: env
+        scope: ci/build/registry
+        names: STACKRA_REGISTRY_TOKEN
 
     - name: Registry token (user .npmrc)
       shell: bash
-      env:
-        FALLBACK_TOKEN: ${{ inputs.token }}
       run: |
-        token="${STACKRA_REGISTRY_TOKEN:-$FALLBACK_TOKEN}"
+        token="${STACKRA_REGISTRY_TOKEN:-}"
         if [ -z "$token" ]; then
-          echo "::warning title=Registry::no read token (Infisical ci-build prod /ci/registry, or the STACKRA_REGISTRY_TOKEN secret); @figentra reads will be refused"
+          echo "::warning title=Registry::no read token (figentra/secrets ci/build/registry STACKRA_REGISTRY_TOKEN); @figentra reads will be refused"
           exit 0
         fi
         echo "::add-mask::$token"
