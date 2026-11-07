@@ -1,9 +1,9 @@
-# The README's data (STA-1879): `figentra-flow readme` renders README.md from this file through the preset's
+# The README's data (STA-1879): `fflow readme` renders README.md from this file through the preset's
 # readme-template. Edit here, never README.md.
 # Stackra file contract:
 # Purpose: the data the root README.md is rendered from: name, tagline, status and the short sections.
 # Boundary: front-page content only; the long-form guide is docs/template-guide.md.
-# Runtime: none (read by figentra-flow)
+# Runtime: none (read by fflow)
 # Governing contract: STA-1879
 name: Stackra template
 repo: figentra/stackra-template
