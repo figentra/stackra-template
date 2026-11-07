@@ -1,0 +1,28 @@
+# stackra-template
+
+> The lean starter workspace for a new Stackra product: docs app, web console, one example service and one example package on the @stackra/* 0.15.0 catalog.
+
+## Docs
+
+- [STATE.md](STATE.md): what is proven by a real run, what is only declared, and open risks (2026-11-07)
+- [README.md](README.md): front page, quick start and starter profiles
+- [AGENTS.md](AGENTS.md): agent rules and the programming model v3.1 (rendered by fflow; do not edit)
+- [docs/template-guide.md](docs/template-guide.md): the full guide: tree, file ownership, member kinds, what to replace
+- [apps/docs/src/docs/adr/index.mdx](apps/docs/src/docs/adr/index.mdx): this project's ADR index
+- [CONTRIBUTING.md](CONTRIBUTING.md): how changes land
+
+## Entry points
+
+- [package.json](package.json): root scripts (gen, verify, validate, new)
+- [pnpm-workspace.yaml](pnpm-workspace.yaml): members and catalogs
+- [flow.config.json](flow.config.json): Figentra Flow preset; source of AGENTS.md
+- [runway.yaml](runway.yaml): product key, surfaces, mobile, environments and targets
+- [stackra.starter.yaml](stackra.starter.yaml): the minimal and full starter profiles
+- [services/example/README.md](services/example/README.md): the example service and its notes module
+- [packages/application/example/README.md](packages/application/example/README.md): the example package
+- [apps/console/README.md](apps/console/README.md): the web console
+- [apps/docs/README.md](apps/docs/README.md): the docs app
+- [.github/workflows/ci.yml](.github/workflows/ci.yml): the Quality Gate
+- [.github/workflows/release.yml](.github/workflows/release.yml): release and the @stackra/starter publish
+- [.github/workflows/deploy.yml](.github/workflows/deploy.yml): deploy policy (dev, staging, promote)
+- [.github/scripts/example-drift.mjs](.github/scripts/example-drift.mjs): the example drift check
