@@ -607,16 +607,17 @@ fail gen (`identity_collision`) and a second override of one base in a member fa
 it as `Base<Name>` and only sets `override` field defaults:
 
 ```ts
-import { LoyaltyKitConfig as BaseLoyaltyKitConfig } from "@stackra/loyalty-kit";
+import { CspConfig as BaseCspConfig } from "@stackra/csp";
 
-/** This host keeps its points ledger in memory instead of the kit's default. */
-export class LoyaltyKitConfig extends BaseLoyaltyKitConfig {
-  override ledger = "memory" as const;
+/** The storefront's browser also calls the payment provider's API. */
+export class CspConfig extends BaseCspConfig {
+  override extraConnectSrc = ["https://api.provider.example"];
 }
 ```
 
-A config override carries no `schema` and no `env` of its own. An app keeps every public environment
-value in its one `EnvConfig`
+A config override carries no `schema` and no `env` of its own. It holds deploy-time values only:
+anything a scope tunes (a loyalty redemption cap, an earn rate) is a setting, never config. An app
+keeps every public environment value in its one `EnvConfig`
 (`export class EnvConfig extends Config({ schema: EnvOptions, env: { identityIssuer: "VITE_IDENTITY_ISSUER" } }) {}`,
 the shape in `src/schemas/env-options.schema.ts`); a field named after a package config field feeds
 that field (`identityIssuer` feeds `identity.issuer`, `analyticsPosthogKey` feeds
