@@ -37,6 +37,36 @@ permissions:
   contents: read
 
 jobs:
+  # ADR 0174: known vulnerabilities in the lockfile, as their own job. A finding fails this job and never skips the
+  # gate's code steps: as a gate step it failed first on a lockfile finding and skipped install, lint, typecheck,
+  # build and tests (2026-11-09).
+  dependency-scan:
+    name: Dependency scan (OSV-Scanner)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      # mise runs before checkout, as in the gate, so the repository's mise.toml is not loaded.
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          version: 2026.11.4
+          install_args: aqua:google/osv-scanner@2.7.0
+          cache: false
+
+      - name: Put osv-scanner on PATH
+        run: dirname "$(mise exec aqua:google/osv-scanner@2.7.0 -- which osv-scanner)" >> "$GITHUB_PATH"
+
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - name: Dependency scan (OSV-Scanner)
+        run: osv-scanner scan source --lockfile=pnpm-lock.yaml
+
   gate:
     name: Quality Gate
     # Pinned runner image, so an image upgrade is a reviewed change.
@@ -93,11 +123,6 @@ jobs:
           PR_BRANCH: ${{ github.head_ref }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: node .github/scripts/preview-gate.mjs
-
-      # ADR 0174: known vulnerabilities in the lockfile, before anything is installed.
-      - name: Dependency scan (OSV-Scanner)
-        if: steps.registry.outputs.published == 'true'
-        run: osv-scanner scan source --lockfile=pnpm-lock.yaml
 
       - name: Install dependencies
         if: steps.registry.outputs.published == 'true'
