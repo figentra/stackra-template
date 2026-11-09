@@ -116,7 +116,7 @@
     "opencode.jsonc": "sha256:82b878ed115407d141feb459b3aec21fc14d7fa0a78517323fac6079c47e0ada",
     ".opencode/plugins/fflow-guard.mjs": "sha256:9071c0ff2f3408eb32c223b5bf9cff6e9d5935ef2d86658864157bf8a05d7943",
     ".mcp.yaml": "sha256:5afbb0eb9cdeefd9eb6c5fd34f5e4c933915ff1fc385a4fb81763fab1c0c8187",
-    "AGENTS.md": "sha256:4feaf5c6154f676a1cbaa8a75ac50da251d27aef9c5c6bbe5006ce98fa7a52d9",
+    "AGENTS.md": "sha256:c5999dcde45d34b586f351cb4eacd6f02f169f34ef57f257ba679f04b70606f3",
     "CLAUDE.md": "sha256:c2741334372c07601d3660ee612654d97afa091d84b3ce8c23ed3175a36f0279",
     "lefthook.yml": "sha256:e4b971b3bf0939f7f0ecb94ce47ba1c70f1c89cac637f9f5babcc9e27a29f1c4",
     "README.md": "sha256:366c04838ed930055e8f629efe15155158d02c457fa5847fc321532e0694ed78",

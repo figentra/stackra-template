@@ -125,7 +125,7 @@ repository.
 | R8   | A type that an exported signature needs is its own `types/<name>.type.ts` (`contracts/types/` when a package exports it). Enums always get their own file. No anonymous object type of two or more members in an exported signature.                                                                                                                                                                                                                                                                                                                                                                                          |
 | R9   | One blank line between class members; an object of two or more properties in decorator or base-factory arguments goes one property per line. Every file opens with the four-field header; every member has a one-line TSDoc.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | R10  | `.stackra/` is generated and fully gitignored. The committed contracts sit at the member root: `stackra.manifest.json` and `openapi.json`. A tool that reads only the member root reads a gitignored shim there.                                                                                                                                                                                                                                                                                                                                                                                                              |
-| R11  | **Partners by type argument**: the class a declaration is typed against is a type argument (`Policy<Order>`, `Resource<Order>({…})`, `Widget<OrderKpisQuery>({…})`, a slot as `Extension<Point["slot"]>`; `Resource<Order, OrderView>` names a differing list row only until gen writes the model-to-row map); a sibling of the same stem is found by name. A value argument only where members are inherited (`Driver(MailTransport)`, `Widget.place(BaseX, {…})`, `extends BaseX`). Inside a decorator a model is a thunk (`@ManyToOne(() => Variant)`); same module `Ref<T>` or `Collection<T>`, another module `Link<T>`. |
+| R11  | **Partners by type argument**: the class a declaration is typed against is a type argument (`Policy<Order>`, `Resource<Order>({…})`, `Widget<OrderStatsQuery>({…})`, a slot as `Extension<Point["slot"]>`; `Resource<Order, OrderView>` names a differing list row only until gen writes the model-to-row map); a sibling of the same stem is found by name. A value argument only where members are inherited (`Driver(MailTransport)`, `Widget.place(BaseX, {…})`, `extends BaseX`). Inside a decorator a model is a thunk (`@ManyToOne(() => Variant)`); same module `Ref<T>` or `Collection<T>`, another module `Link<T>`. |
 | R12  | Every member authors `stackra.config.ts`. `<key>.module.ts` is written only when it says something gen cannot derive ([Modules](#modules)). Nobody writes `main.ts`, an `*.app.ts`, an entry barrel or an `index.ts` beside a root module. Exempt from `stackra.config.ts`: the core `@stackra/*-config` presets.                                                                                                                                                                                                                                                                                                             |
 
 ## Group folders
@@ -229,7 +229,7 @@ A declaration that works on another class names it once, in the place TypeScript
 
 - The subject is the type argument: `Policy<Order>`, `Resource<Order>({…})`
   (`Resource<Order, OrderView>` when the list row differs from the model), `Factory<Order>`,
-  `CrudService<Order>`, `StateMachine<Order>({ field })`, `Facts<Order>`, `Widget<OrderKpisQuery>`,
+  `CrudService<Order>`, `StateMachine<Order>({ field })`, `Facts<Order>`, `Widget<OrderStatsQuery>`,
   `Connection<ResendIntegration>`, `Extension<OrderExtensionPoint["adjustTotals"]>`,
   `Change<OrderView>({…})`, `Projection<Source>({…})`, `WebhookEvent<ResendIntegration>({ type })`.
 - A sibling of the same stem is bound by name: `OrderPolicy` reads `OrderPermissions`,
@@ -517,14 +517,14 @@ dashboard has two slots, `Slots.Dashboard.Header` (a Band of KPIs) and `Slots.Da
 widgets with the Banner and Check displays in `Slots.Shell.Banner` and `Slots.Shell.Checklist`.
 
 ```ts
-// orders/resources/order/order-kpis.widget.ts (abridged)
-export class OrderKpisWidget extends Widget<OrderKpisQuery>({
+// orders/resources/order/order-stats.widget.ts (abridged)
+export class OrderStatsWidget extends Widget<OrderStatsQuery>({
   slot: Slots.Dashboard.Header,
   ranges: [TimeRange.Today, TimeRange.Last7Days, TimeRange.ThisMonth],
   range: TimeRange.Today,
 }) {
   /** Format, trend, sparkline and target come from the metric types. */
-  display(d: Display<OrderKpisOutput>) {
+  display(d: Display<OrderStatsOutput>) {
     return d.kpiGroup([d.kpi("revenue").icon("banknote"), d.kpi("orders").icon("receipt")]);
   }
 }
