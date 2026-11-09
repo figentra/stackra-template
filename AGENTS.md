@@ -540,20 +540,20 @@ reads it with `SettingsReader#get(OrdersSettings)`.
 
 Everything that changes code or assets the member does not own lives in one tree,
 `src/overrides/<owner>/…`, mirroring the owner's own paths. `<owner>` is the package name with its
-scope (`@figentra/acme-loyalty-kit`) or `<service>/<module>` for a consumed service module. A file
+scope (`@stackra/loyalty-kit`) or `<service>/<module>` for a consumed service module. A file
 there shadows the owner's file at the same path: no keyword, no `.override.tsx` suffix.
 
 ```text
-apps/mobile/src/overrides/commerce/orders/assets/lang/ar/orders.json                              keys merged over the owner's
-apps/console/src/overrides/@figentra/acme-loyalty-kit/src/react/points-balance/points-balance.tsx  renderer shadow
-apps/console/src/overrides/@figentra/acme-loyalty-kit/src/node/resources/loyalty-account/points-balance.widget.ts
+apps/mobile/src/overrides/commerce/orders/assets/lang/ar/orders.json                         keys merged over the owner's
+apps/console/src/overrides/@stackra/loyalty-kit/src/react/points-balance/points-balance.tsx  renderer shadow
+apps/console/src/overrides/@stackra/loyalty-kit/src/node/resources/loyalty-account/points-balance.widget.ts
 ```
 
 A shadow keeps its base's name and imports the base under a `Base` alias; there are no
 `<Host><Base>` names:
 
 ```ts
-import { PointsBalanceWidget as BasePointsBalanceWidget } from "@figentra/acme-loyalty-kit/node";
+import { PointsBalanceWidget as BasePointsBalanceWidget } from "@stackra/loyalty-kit/node";
 
 /** On the console dashboard's grid instead of the account page. */
 export class PointsBalanceWidget extends Widget.place(BasePointsBalanceWidget, {
@@ -607,17 +607,17 @@ fail gen (`identity_collision`) and a second override of one base in a member fa
 it as `Base<Name>` and only sets `override` field defaults:
 
 ```ts
-import { LoyaltyKitConfig as BaseLoyaltyKitConfig } from "@figentra/acme-loyalty-kit";
+import { CspConfig as BaseCspConfig } from "@stackra/csp";
 
-/** Points may cover at most 30 % of an order, below the kit's 50 %. */
-export class LoyaltyKitConfig extends BaseLoyaltyKitConfig {
-  /** Largest share of an order total points may cover, as a whole percentage. */
-  override maxRedeemPercent = 30;
+/** The storefront's browser also calls the payment provider's API. */
+export class CspConfig extends BaseCspConfig {
+  override extraConnectSrc = ["https://api.provider.example"];
 }
 ```
 
-A config override carries no `schema` and no `env` of its own. An app keeps every public environment
-value in its one `EnvConfig`
+A config override carries no `schema` and no `env` of its own. It holds deploy-time values only:
+anything a scope tunes (a loyalty redemption cap, an earn rate) is a setting, never config. An app
+keeps every public environment value in its one `EnvConfig`
 (`export class EnvConfig extends Config({ schema: EnvOptions, env: { identityIssuer: "VITE_IDENTITY_ISSUER" } }) {}`,
 the shape in `src/schemas/env-options.schema.ts`); a field named after a package config field feeds
 that field (`identityIssuer` feeds `identity.issuer`, `analyticsPosthogKey` feeds
