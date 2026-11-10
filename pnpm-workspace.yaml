@@ -275,6 +275,9 @@ overrides:
   adm-zip@<0.6.1: 0.6.1
   zod@>=4 <4.6.6: 4.6.7
   smol-toml@<1.9.0: 1.9.1
+  # OSV: undici below 7.30.1 and sharp below 0.35.5 carry advisories (leader, 2026-11-09); every product starts clean.
+  undici@>=7 <7.30.1: 7.30.1
+  sharp@<0.35.5: 0.35.5
 
 # Dependency lifecycle scripts are blocked by default (pnpm supply-chain security). Every entry here was
 # reviewed; a new one must be, too. Install fails (ERR_PNPM_IGNORED_BUILDS) until it is.
