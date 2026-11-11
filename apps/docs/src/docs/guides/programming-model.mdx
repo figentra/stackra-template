@@ -34,20 +34,20 @@ a workflow step, a state transition, or a class facet such as `@Searchable`.
 
 ## Grammar
 
-| Rule | What it says                                                                                                                                                                                                            |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R1   | A file is `<scope>/<group>/<name>.<kind>.ts(x)`; a route, block or component is a folder, `<group>/<name>/<name>.<kind>.ts(x)`. Each suffix has one home group. Tests sit in `__tests__/`.                              |
-| R2   | Strictly one exported declaration per file. Input and Output are `schemas/<name>-input.schema.ts` and `-output.schema.ts`; Props are `<name>.props.ts`; a hook's result type is `types/<name>.type.ts`.                 |
-| R3   | The base class is the kind; its options are the argument. Bare without options (`extends Schema`), called with them (`extends Refusal({ kind })`). Kind bases are `PascalCase(kind)`, never `define*`.                  |
-| R4   | The type gives the shape: the initializer is the default, `?:` optional, `\| null` nullable, and a `number` carries `@Int` or `@Num`. A literal union or `any` fails gen.                                               |
-| R5   | Names give identity, written once and locked; a rename carries `@Renamed(old)`.                                                                                                                                         |
-| R6   | Decorators are field decorators (constraints, transforms, `@Classified`, relations, `@Secret("NAME")`, `@Setting`), `@Step` and `@Transition`, or class facets (`@Index`, `@Searchable`, `@AccessLogged`, `@Lifetime`). |
-| R7   | Components are classes, `extends Component<Props>`, compiled by gen to function components; a `.mail.tsx` mail body is one too. React hooks, plain functions and server helpers stay functions.                         |
-| R8   | A type an exported signature needs is its own `types/<name>.type.ts`; enums have their own file.                                                                                                                        |
-| R9   | One blank line between class members; a base-factory argument of two or more properties goes one per line; a four-field header and a one-line TSDoc on every member.                                                    |
-| R10  | `.stackra/` is generated and gitignored; the committed contracts are `stackra.manifest.json` and `openapi.json` at the member root.                                                                                     |
-| R11  | A partner is a type argument (`Policy<Order>`, `Resource<Order>({…})`, `Widget<OrderKpisQuery>({…})`); a value argument only where members are inherited (`Driver(Port)`, `Widget.place(BaseX, {…})`, `extends BaseX`). |
-| R12  | Every member authors `stackra.config.ts`; a `<key>.module.ts` exists only when it says something gen cannot derive. Nobody writes `main.ts`, an entry barrel or an `index.ts` beside a root module.                     |
+| Rule | What it says                                                                                                                                                                                                             |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R1   | A file is `<scope>/<group>/<name>.<kind>.ts(x)`; a route, block or component is a folder, `<group>/<name>/<name>.<kind>.ts(x)`. Each suffix has one home group. Tests sit in `__tests__/`.                               |
+| R2   | Strictly one exported declaration per file. Input and Output are `schemas/<name>-input.schema.ts` and `-output.schema.ts`; Props are `<name>.props.ts`; a hook's result type is `types/<name>.type.ts`.                  |
+| R3   | The base class is the kind; its options are the argument. Bare without options (`extends Schema`), called with them (`extends Refusal({ kind })`). Kind bases are `PascalCase(kind)`, never `define*`.                   |
+| R4   | The type gives the shape: the initializer is the default, `?:` optional, `\| null` nullable, and a `number` carries `@Int` or `@Num`. A literal union or `any` fails gen.                                                |
+| R5   | Names give identity, written once and locked; a rename carries `@Renamed(old)`.                                                                                                                                          |
+| R6   | Decorators are field decorators (constraints, transforms, `@Classified`, relations, `@Secret("NAME")`, `@Setting`), `@Step` and `@Transition`, or class facets (`@Index`, `@Searchable`, `@AccessLogged`, `@Lifetime`).  |
+| R7   | Components are classes, `extends Component<Props>`, compiled by gen to function components; a `.mail.tsx` mail body is one too. React hooks, plain functions and server helpers stay functions.                          |
+| R8   | A type an exported signature needs is its own `types/<name>.type.ts`; enums have their own file.                                                                                                                         |
+| R9   | One blank line between class members; a base-factory argument of two or more properties goes one per line; a four-field header and a one-line TSDoc on every member.                                                     |
+| R10  | `.stackra/` is generated and gitignored; the committed contracts are `stackra.manifest.json` and `openapi.json` at the member root.                                                                                      |
+| R11  | A partner is a type argument (`Policy<Order>`, `Resource<Order>({…})`, `Widget<OrderStatsQuery>({…})`); a value argument only where members are inherited (`Driver(Port)`, `Widget.place(BaseX, {…})`, `extends BaseX`). |
+| R12  | Every member authors `stackra.config.ts`; a `<key>.module.ts` exists only when it says something gen cannot derive. Nobody writes `main.ts`, an entry barrel or an `index.ts` beside a root module.                      |
 
 ## A feature, end to end
 
@@ -64,7 +64,7 @@ a workflow step, a state transition, or a class facet such as `@Searchable`.
 | the reaction to an event   | `loyalty/listeners/earn-on-order-paid.listener.ts`                 | `extends Listener`, `handle(event: OrderPaid, ctx)`                      |
 | the message to the buyer   | `orders/resources/order/order-receipt.notification.ts`             | `extends Notification({ category })`, `mail()` channel                   |
 | the console screen         | `orders/resources/order/order.resource.ts`                         | `extends Resource<Order, OrderView>({ area, navigation, operations })`   |
-| the dashboard numbers      | `orders/resources/order/order-kpis.widget.ts`                      | `extends Widget<OrderKpisQuery>({ slot: Slots.Dashboard.Header })`       |
+| the dashboard numbers      | `orders/resources/order/order-stats.widget.ts`                     | `extends Widget<OrderStatsQuery>({ slot: Slots.Dashboard.Header })`      |
 | what gen derived           | `services/<name>/.stackra/gen/wiring.ts`, `stackra.manifest.json`  | generated, never edited                                                  |
 
 ```ts
@@ -178,8 +178,8 @@ export class Dashboard extends Component<RouteProps<typeof DashboardRoute>> {
   /** The translator of the active locale. */
   i18n = useTranslation();
 
-  /** Today's KPIs, warm from the loader. */
-  kpis = useQuery(OrderKpisQuery, { range: TimeRange.Today });
+  /** Today's stats, warm from the loader. */
+  stats = useQuery(OrderStatsQuery, { range: TimeRange.Today });
 
   /** The heading, the loading and error states, then the panel's grid. */
   render() {
@@ -187,9 +187,9 @@ export class Dashboard extends Component<RouteProps<typeof DashboardRoute>> {
     return (
       <div className="flex flex-col gap-6">
         <h1 className="sr-only">{t(I18n.pages.dashboard.title)}</h1>
-        {this.kpis.isPending && <LoadingState label={I18n.pages.dashboard.loading} rows={2} />}
-        {this.kpis.error && (
-          <ErrorState error={this.kpis.error} onRetry={() => this.kpis.refetch()} />
+        {this.stats.isPending && <LoadingState label={I18n.pages.dashboard.loading} rows={2} />}
+        {this.stats.error && (
+          <ErrorState error={this.stats.error} onRetry={() => this.stats.refetch()} />
         )}
         <PanelDashboard panel={Panels.TenantAdmin} slots={[Slots.Dashboard.Main]} overridable />
       </div>
@@ -229,8 +229,8 @@ read with a hook field or `use(Ctx)`; a provider is a component that renders `<C
 Endpoints follow the key the way Rails resource routing does: `order.list` is `GET /orders`,
 `order.get` is `GET /orders/:orderId`, `order.create` is `POST /orders`, any other verb whose input
 names `orderId` is `PUT /orders/:orderId/<verb>`, and any other query is `GET /orders/<name>`
-(`order.kpis` is `GET /orders/kpis`). `endpoint: { method, path }` keeps a path the convention would
-not give.
+(`order.stats` is `GET /orders/stats`). `endpoint: { method, path }` keeps a path the convention
+would not give.
 
 ## Words that mean one thing
 
