@@ -1,0 +1,6 @@
+# Fingerprints of findings that only look like secrets. One entry per finding, so any new leak in the same
+# file still fails the scan (`gitleaks git`, `pnpm secrets:scan`, the secrets phase of `pnpm verify`).
+# - apps/console/README.md line 23 in the 2026-10-22 snapshot commit: prose in a tree comment ("secret names,
+#   PWA/Electron channels") that the generic-api-key rule reads as a key name followed by a value. The line is
+#   no longer in the file; only that historical commit matches.
+aea7e2064ce26d513709f8b6d27f4bbc79331eae:apps/console/README.md:generic-api-key:23
