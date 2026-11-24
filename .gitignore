@@ -38,6 +38,8 @@ maestro-report/
 .stackra/
 # The Encore app file gen writes at each service's root (ADR 0091).
 /services/*/encore.app
+# The Encore services gen writes at the member root, outside .stackra, because Encore skips dot folders (ADR 0091).
+**/stackra-encore/*
 # The root shims gen writes for the tools that read only the member root; each re-exports or copies
 # its `.stackra/` file, and tsconfig.build.json is a package's declaration build.
 /apps/*/vitest.config.ts
