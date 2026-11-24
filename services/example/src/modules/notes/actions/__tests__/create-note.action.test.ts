@@ -7,6 +7,7 @@
  * Runtime: node (vitest)
  * Governing contract: ADR 0022 (test placement); ADR 0098; ADR 0294 (as amended by programming model v3.1, AGENTS.md).
  */
+import { Idempotency } from "@stackra/actions";
 import { fakeActionContext } from "@stackra/actions/testing";
 import { kindOf } from "@stackra/container";
 import { ActorKind, type PublicId } from "@stackra/contracts";
@@ -28,6 +29,11 @@ describe(CreateNoteAction, () => {
       key: "note.create",
       actors: [ActorKind.User, ActorKind.Agent],
     });
+  });
+
+  /** A client retries a POST over a flaky link; a repeat with the same key must not add a second note. */
+  it("accepts an Idempotency-Key, without requiring one", () => {
+    expect(kindOf(CreateNoteAction)?.options).toMatchObject({ idempotency: Idempotency.Optional });
   });
 
   /** The service gets exactly the text, and the answer is the stored row. */

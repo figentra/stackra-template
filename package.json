@@ -61,6 +61,7 @@
   },
   "packageManager": "pnpm@12.16.1",
   "stackra": {
+    "encore": "1.58.8",
     "layout": {
       "allow": {
         "apps": "apps/docs, the product's published docs site (ADR 0526 decisions 2 and 3)",

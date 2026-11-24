@@ -75,6 +75,8 @@ jobs:
       - name: Toolchain (mise)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
+          # Pinned: the action otherwise fetches its cached mise, whose release asset GitHub answered 504 for.
+          version: 2026.11.4
           install_args: node pnpm
 
       # The same probe as ci.yml, plus the template's own guard: nothing deploys from the template
@@ -159,6 +161,8 @@ jobs:
       - name: Toolchain (mise, wrangler, eas-cli)
         uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
+          # Pinned: the action otherwise fetches its cached mise, whose release asset GitHub answered 504 for.
+          version: 2026.11.4
           install_args: node pnpm npm:eas-cli npm:wrangler
 
       # The Stackra registry read token in ~/.npmrc (pnpm 12 ignores the repo .npmrc's token):

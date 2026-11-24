@@ -71,6 +71,35 @@
   "models": [],
   "drivers": [
     {
+      "port": "EdgeSigningKeys",
+      "key": "app.EdgeSigningKeys",
+      "candidates": ["env", "memory"],
+      "classes": {
+        "env": {
+          "class": "EnvEdgeSigningKeysDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "EdgeConfig",
+                "from": "@stackra/app/server"
+              }
+            }
+          ]
+        },
+        "memory": {
+          "class": "MemoryEdgeSigningKeysDriver",
+          "from": "@stackra/app/server"
+        }
+      },
+      "selectedBy": "config:app.edge.keys",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
+      },
+      "from": "@stackra/app"
+    },
+    {
       "port": "EdgeNonceStore",
       "key": "app.EdgeNonceStore",
       "candidates": ["memory"],
@@ -80,17 +109,10 @@
           "from": "@stackra/app/server"
         }
       },
-      "from": "@stackra/app"
-    },
-    {
-      "port": "EdgeSigningKeys",
-      "key": "app.EdgeSigningKeys",
-      "candidates": ["memory"],
-      "classes": {
-        "memory": {
-          "class": "MemoryEdgeSigningKeysDriver",
-          "from": "@stackra/app/server"
-        }
+      "selectedBy": "config:app.edge.nonces",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
       },
       "from": "@stackra/app"
     },
@@ -110,7 +132,33 @@
             {
               "class": {
                 "name": "BearerConfig",
-                "from": "@stackra/app"
+                "from": "@stackra/app/server"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/app"
+    },
+    {
+      "port": "ClientSession",
+      "key": "clients.ClientSession",
+      "candidates": ["service"],
+      "classes": {
+        "service": {
+          "class": "ServiceClientSessionDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "ServiceTokens",
+                "from": "@stackra/identity/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ClientsConfig",
+                "from": "@stackra/clients"
               }
             }
           ]
@@ -126,18 +174,6 @@
         "system": {
           "class": "SystemClockDriver",
           "from": "@stackra/container"
-        }
-      },
-      "from": "@stackra/container"
-    },
-    {
-      "port": "Logger",
-      "key": "contracts.Logger",
-      "candidates": ["memory"],
-      "classes": {
-        "memory": {
-          "class": "MemoryLoggerDriver",
-          "from": "@stackra/container/testing"
         }
       },
       "from": "@stackra/container"

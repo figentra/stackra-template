@@ -7,14 +7,15 @@
     "x-stackra-member": "example"
   },
   "paths": {
-    "/notes": {
+    "/app/notes": {
       "post": {
         "operationId": "notes_note_create",
         "summary": "CreateNoteAction",
         "tags": ["notes"],
         "x-stackra-action": "notes.note.create@1",
         "x-stackra-permission": "notes.note.create",
-        "x-stackra-risk": "L1",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
         "requestBody": {
           "required": true,
           "content": {
