@@ -26,5 +26,8 @@ gitleaks = "8.30.1"
 # Encore CLI behind `stackra dev` and the Encore MCP server. Its GitHub releases carry no binaries,
 # so the aqua backend (which downloads from Encore's own release host) installs it.
 "aqua:encoredev/encore" = "1.58.8"
+# Pulumi CLI behind `stackra infra` and the root runway's infrastructure; `stackra doctor` fails without it. The same
+# version as the `@pulumi/pulumi` SDK pin in figentra/stackra's catalog.
+"aqua:pulumi/pulumi" = "3.268.0"
 # EAS CLI for mobile builds, submissions and over-the-air updates.
 "npm:eas-cli" = "25.3.0"
