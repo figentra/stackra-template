@@ -7,6 +7,7 @@
  * Runtime: node (vitest)
  * Governing contract: ADR 0022 (test placement); ADR 0098; ADR 0294 (as amended by programming model v3.1, AGENTS.md).
  */
+import { Idempotency } from "@stackra/actions";
 import { fakeActionContext } from "@stackra/actions/testing";
 import { kindOf } from "@stackra/container";
 import { ActorKind, type PublicId } from "@stackra/contracts";
@@ -22,11 +23,12 @@ const createdAt = new Date("2026-11-02T08:00:00.000Z");
 
 /** The note.create action. */
 describe(CreateNoteAction, () => {
-  /** Its key and actors are what gen derives the route, permission and tool from. */
+  /** Its key, actors and idempotency are what gen derives the route, permission, tool and retry rule from. */
   it("is the note.create action for users and agents", () => {
     expect(kindOf(CreateNoteAction)?.options).toMatchObject({
       key: "note.create",
       actors: [ActorKind.User, ActorKind.Agent],
+      idempotency: Idempotency.Optional,
     });
   });
 

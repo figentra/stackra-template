@@ -19,8 +19,9 @@
       "class": "CreateNoteAction",
       "file": "src/modules/notes/actions/create-note.action.ts",
       "permission": "notes.note.create",
-      "risk": "L1",
+      "risk": "L2",
       "actors": ["user", "agent"],
+      "idempotency": "optional",
       "endpoint": {
         "method": "POST",
         "path": "/notes",
@@ -32,7 +33,7 @@
         "hints": {
           "readOnlyHint": false,
           "destructiveHint": false,
-          "idempotentHint": false,
+          "idempotentHint": true,
           "openWorldHint": false
         }
       },
@@ -124,7 +125,7 @@
     },
     {
       "key": "notes.note.create",
-      "risk": "L1",
+      "risk": "L2",
       "class": "NotePermissions",
       "module": "notes",
       "member": "create",

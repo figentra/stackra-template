@@ -602,6 +602,9 @@ importers:
       '@stackra/validation':
         specifier: catalog:stackra
         version: 0.15.0(react@19.3.0)
+      encore.dev:
+        specifier: 1.58.8
+        version: 1.58.8
       zod:
         specifier: 'catalog:'
         version: 4.6.7
@@ -4978,6 +4981,10 @@ packages:
   encoding@0.1.14:
     resolution: {integrity: sha512-pqH+jIxIhwX5U4w+Tnu3jjowTo5QTACbqef2C5Cw2RhApr7COQqgnai53u8VbtqjWRcSoAcTf7uZ62dO5kC8Iw==}
     engines: {node: '>=20.0.0'}
+
+  encore.dev@1.58.8:
+    resolution: {integrity: sha512-tay5Hh+26vbZI1NXnIPzWErMnvspBUiFIro2LUHuiEvlQK+S9GhBV6qHWbX0A5mQhmXw3GijDplsxF7HX9hWLA==}
+    engines: {node: '>=18.0.0'}
 
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
@@ -17123,6 +17130,8 @@ snapshots:
     dependencies:
       iconv-lite: 0.7.3
     optional: true
+
+  encore.dev@1.58.8: {}
 
   end-of-stream@1.4.5:
     dependencies:
