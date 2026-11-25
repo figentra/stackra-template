@@ -13,6 +13,6 @@ export class NotePermissions extends Permissions {
   /** List the notes. */
   static readonly read = Permission.L0;
 
-  /** Add a note. */
-  static readonly create = Permission.L1;
+  /** Add a note: a write, so at least L2. */
+  static readonly create = Permission.L2;
 }

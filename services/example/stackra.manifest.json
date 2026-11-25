@@ -19,11 +19,13 @@
       "class": "CreateNoteAction",
       "file": "src/modules/notes/actions/create-note.action.ts",
       "permission": "notes.note.create",
-      "risk": "L1",
+      "risk": "L2",
       "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "POST",
-        "path": "/notes",
+        "path": "/app/notes",
         "derived": true
       },
       "tool": {
@@ -52,9 +54,10 @@
       "permission": "notes.note.read",
       "risk": "L0",
       "actors": ["user", "agent"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/notes",
+        "path": "/app/notes",
         "derived": true
       },
       "tool": {
@@ -76,6 +79,18 @@
     }
   ],
   "events": [
+    {
+      "name": "actions.approval.granted.v1",
+      "module": "actions",
+      "class": "ApprovalGranted",
+      "file": "src/contracts/events/approval-granted.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/actions#/schemas/actions.ApprovalGranted"
+      },
+      "from": "@stackra/actions"
+    },
     {
       "name": "actions.analytics.tracked.v1",
       "module": "actions",
@@ -124,7 +139,7 @@
     },
     {
       "key": "notes.note.create",
-      "risk": "L1",
+      "risk": "L2",
       "class": "NotePermissions",
       "module": "notes",
       "member": "create",
@@ -133,11 +148,75 @@
   ],
   "errors": [
     {
+      "code": "approval_consumed",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "actions",
+      "class": "ApprovalConsumedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_expired",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "ApprovalExpiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_identity_unavailable",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "actions",
+      "class": "ApprovalIdentityUnavailableError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_mismatch",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "actions",
+      "class": "ApprovalMismatchError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_not_granted",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "ApprovalNotGrantedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_pending_limit",
+      "kind": "rate_limited",
+      "category": "rate_limited",
+      "module": "actions",
+      "class": "ApprovalPendingLimitError",
+      "from": "@stackra/actions"
+    },
+    {
       "code": "approval_required",
       "kind": "failed_precondition",
       "category": "precondition_failed",
       "module": "actions",
       "class": "ApprovalRequiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_settings_unavailable",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "actions",
+      "class": "ApprovalSettingsUnavailableError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "actions",
+      "class": "ClaimNotLoadedError",
       "from": "@stackra/actions"
     },
     {
@@ -186,6 +265,30 @@
       "category": "precondition_failed",
       "module": "actions",
       "class": "OfflineCapReachedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "RowIsolationMissingError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approver_refused",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "actions",
+      "class": "ApproverRefusedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "step_up_required",
+      "kind": "unauthenticated",
+      "category": "unauthenticated",
+      "module": "actions",
+      "class": "StepUpRequiredError",
       "from": "@stackra/actions"
     },
     {
@@ -341,6 +444,14 @@
       "from": "@stackra/database"
     },
     {
+      "code": "job_claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "queue",
+      "class": "JobClaimNotLoadedError",
+      "from": "@stackra/queue"
+    },
+    {
       "code": "job_isolation_missing",
       "kind": "failed_precondition",
       "category": "precondition_failed",
@@ -354,6 +465,14 @@
       "category": "unavailable",
       "module": "queue",
       "class": "JobNotDueError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "job_row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "queue",
+      "class": "JobRowIsolationMissingError",
       "from": "@stackra/queue"
     },
     {
@@ -394,6 +513,22 @@
       "category": "validation",
       "module": "scheduler",
       "class": "InvalidTimeZoneError",
+      "from": "@stackra/scheduler"
+    },
+    {
+      "code": "schedule_claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "scheduler",
+      "class": "ScheduleClaimNotLoadedError",
+      "from": "@stackra/scheduler"
+    },
+    {
+      "code": "schedule_row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "scheduler",
+      "class": "ScheduleRowIsolationMissingError",
       "from": "@stackra/scheduler"
     }
   ],
@@ -578,11 +713,29 @@
     {
       "port": "ApprovalGate",
       "key": "actions.ApprovalGate",
-      "candidates": ["open"],
+      "candidates": ["open", "memory"],
       "classes": {
         "open": {
           "class": "OpenApprovalGateDriver",
           "from": "@stackra/actions"
+        },
+        "memory": {
+          "class": "MemoryApprovalGateDriver",
+          "from": "@stackra/actions/testing",
+          "deps": [
+            {
+              "class": {
+                "name": "IdentityResolver",
+                "from": "@stackra/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
         }
       },
       "from": "@stackra/actions"
@@ -656,6 +809,83 @@
       "from": "@stackra/actions"
     },
     {
+      "port": "ActorStatusCheck",
+      "key": "actions.ActorStatusCheck",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryActorStatusCheckDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ApprovalBindingStore",
+      "key": "actions.ApprovalBindingStore",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryApprovalBindingStoreDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "JobDispatcher",
+      "key": "actions.JobDispatcher",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryJobDispatcherDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "StepUpCheck",
+      "key": "actions.StepUpCheck",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryStepUpCheckDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "EdgeSigningKeys",
+      "key": "app.EdgeSigningKeys",
+      "candidates": ["env", "memory"],
+      "classes": {
+        "env": {
+          "class": "EnvEdgeSigningKeysDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "EdgeConfig",
+                "from": "@stackra/app/server"
+              }
+            }
+          ]
+        },
+        "memory": {
+          "class": "MemoryEdgeSigningKeysDriver",
+          "from": "@stackra/app/server"
+        }
+      },
+      "selectedBy": "config:app.edge.keys",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
+      },
+      "from": "@stackra/app"
+    },
+    {
       "port": "EdgeNonceStore",
       "key": "app.EdgeNonceStore",
       "candidates": ["memory"],
@@ -665,17 +895,10 @@
           "from": "@stackra/app/server"
         }
       },
-      "from": "@stackra/app"
-    },
-    {
-      "port": "EdgeSigningKeys",
-      "key": "app.EdgeSigningKeys",
-      "candidates": ["memory"],
-      "classes": {
-        "memory": {
-          "class": "MemoryEdgeSigningKeysDriver",
-          "from": "@stackra/app/server"
-        }
+      "selectedBy": "config:app.edge.nonces",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
       },
       "from": "@stackra/app"
     },
@@ -695,13 +918,99 @@
             {
               "class": {
                 "name": "BearerConfig",
-                "from": "@stackra/app"
+                "from": "@stackra/app/server"
               }
             }
           ]
         }
       },
       "from": "@stackra/app"
+    },
+    {
+      "port": "ClientSession",
+      "key": "clients.ClientSession",
+      "candidates": ["service"],
+      "classes": {
+        "service": {
+          "class": "ServiceClientSessionDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "ServiceTokens",
+                "from": "@stackra/identity/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ClientsConfig",
+                "from": "@stackra/clients"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/app"
+    },
+    {
+      "port": "Renderer",
+      "key": "console.Renderer",
+      "candidates": ["text", "ink"],
+      "classes": {
+        "text": {
+          "class": "TextRendererDriver",
+          "from": "@stackra/console",
+          "deps": [
+            {
+              "class": {
+                "name": "RenderContext",
+                "from": "@stackra/console"
+              }
+            }
+          ]
+        },
+        "ink": {
+          "class": "InkRendererDriver",
+          "from": "@stackra/console/node",
+          "deps": [
+            {
+              "class": {
+                "name": "RenderContext",
+                "from": "@stackra/console"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
+      "port": "ProcessRunner",
+      "key": "console.ProcessRunner",
+      "candidates": ["node", "memory"],
+      "classes": {
+        "node": {
+          "class": "NodeProcessRunnerDriver",
+          "from": "@stackra/console/node"
+        },
+        "memory": {
+          "class": "MemoryProcessRunnerDriver",
+          "from": "@stackra/console/testing"
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
+      "port": "Completions",
+      "key": "console.Completions",
+      "candidates": ["tab"],
+      "classes": {
+        "tab": {
+          "class": "TabCompletionsDriver",
+          "from": "@stackra/console/node"
+        }
+      },
+      "from": "@stackra/console"
     },
     {
       "port": "CommandAudit",
@@ -716,6 +1025,18 @@
       "from": "@stackra/console"
     },
     {
+      "port": "OperatorBreakGlass",
+      "key": "console.OperatorBreakGlass",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryOperatorBreakGlassDriver",
+          "from": "@stackra/console/testing"
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
       "port": "Clock",
       "key": "contracts.Clock",
       "candidates": ["system"],
@@ -723,18 +1044,6 @@
         "system": {
           "class": "SystemClockDriver",
           "from": "@stackra/container"
-        }
-      },
-      "from": "@stackra/container"
-    },
-    {
-      "port": "Logger",
-      "key": "contracts.Logger",
-      "candidates": ["memory"],
-      "classes": {
-        "memory": {
-          "class": "MemoryLoggerDriver",
-          "from": "@stackra/container/testing"
         }
       },
       "from": "@stackra/container"
@@ -1296,6 +1605,88 @@
   "passes": [],
   "entitlements": [],
   "roles": [],
+  "env": [
+    {
+      "name": "ACTIONS_VALKEY_URL",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "actions.stores",
+      "class": "StoresConfig",
+      "field": "valkeyUrl",
+      "from": "@stackra/actions"
+    },
+    {
+      "name": "QUEUE_BROKER_VALKEY_URL",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "queue.broker",
+      "class": "BrokerConfig",
+      "field": "valkeyUrl",
+      "from": "@stackra/queue"
+    },
+    {
+      "name": "STACKRA_BEARER_AUDIENCE",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "app.bearer",
+      "class": "BearerConfig",
+      "field": "audience",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_BEARER_ISSUER",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "app.bearer",
+      "class": "BearerConfig",
+      "field": "issuer",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_CORS_ALLOWED_ORIGINS",
+      "kind": "config",
+      "type": "array",
+      "required": false,
+      "config": "app.cors",
+      "class": "CorsConfig",
+      "field": "allowedOrigins",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_EDGE_SIGNING_KEYS",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.edge",
+      "class": "EdgeConfig",
+      "field": "signingKeys",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_VISITOR_SIGNING_KEY",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.visitor",
+      "class": "VisitorConfig",
+      "field": "signingKey",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_VISITOR_SIGNING_KEY_PREVIOUS",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.visitor",
+      "class": "VisitorConfig",
+      "field": "previousSigningKey",
+      "from": "@stackra/app"
+    }
+  ],
   "commands": [
     {
       "name": "db:migrate",

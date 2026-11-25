@@ -3,19 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "description": "An example service: rename it to the product's first service or delete it.",
-  "keywords": [
-    "stackra"
-  ],
+  "keywords": ["stackra"],
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": false,
   "imports": {
-    "#src/*": [
-      "./src/*",
-      "./src/*.ts",
-      "./src/*.tsx",
-      "./src/*/index.ts"
-    ],
+    "#src/*": ["./src/*", "./src/*.ts", "./src/*.tsx", "./src/*/index.ts"],
     "#config/*": [
       "./src/config/*",
       "./src/config/*.ts",
@@ -68,7 +61,8 @@
     "@stackra/queue": "catalog:stackra",
     "@stackra/scheduler": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "encore.dev": "1.58.8"
   },
   "devDependencies": {
     "@stackra/cli": "catalog:stackra",
@@ -89,8 +83,6 @@
   "stackra": {
     "kind": "package",
     "tier": "service",
-    "runtimes": [
-      "node"
-    ]
+    "runtimes": ["node"]
   }
 }

@@ -12,7 +12,7 @@ banner:
   light: .github/assets/brand/banner-light.png
   dark: .github/assets/brand/banner-dark.png
 status: In progress
-statusNote: "the lean starter, on the `@stackra/*` 0.5.1 catalog."
+statusNote: "the lean starter, on the `@stackra/*` 0.33.0 catalog."
 docs: https://docs.stackra.figentra.com
 what: |
   Stackra is a TypeScript framework for products that ship one backend to many surfaces. You declare

@@ -1,3 +1,36 @@
-// TypeScript project for this member: extends exactly one @stackra/typescript-config preset and sets nothing else.
+// TypeScript project for this member: extends exactly one @stackra/typescript-config preset; `paths` mirrors the
+// package.json `imports` for Encore (`stackra encore:prepare` writes it, do not edit by hand).
 // Owner: release-operations · Secrets: forbidden
-{ "extends": "@stackra/typescript-config/service" }
+{
+  "extends": "@stackra/typescript-config/service",
+  "compilerOptions": {
+    "paths": {
+      "#src/*": ["./src/*", "./src/*.ts", "./src/*.tsx", "./src/*/index.ts"],
+      "#config/*": [
+        "./src/config/*",
+        "./src/config/*.ts",
+        "./src/config/*.tsx",
+        "./src/config/*/index.ts"
+      ],
+      "#contracts/*": [
+        "./src/contracts/*",
+        "./src/contracts/*.ts",
+        "./src/contracts/*.tsx",
+        "./src/contracts/*/index.ts"
+      ],
+      "#modules/*": [
+        "./src/modules/*",
+        "./src/modules/*.ts",
+        "./src/modules/*.tsx",
+        "./src/modules/*/index.ts"
+      ],
+      "#assets/*": ["./assets/*"],
+      "#stackra/*": [
+        "./.stackra/gen/*",
+        "./.stackra/gen/*.ts",
+        "./.stackra/gen/*.tsx",
+        "./.stackra/gen/*/index.ts"
+      ]
+    }
+  }
+}

@@ -53,6 +53,9 @@
     "gen": {
       "description": "stackra gen: .stackra/ (gen modules, runtime entries, tool configs) and the committed stackra.manifest.json and openapi.json at the member root.",
       "dependsOn": ["^gen"],
+      // STACKRA_GEN_STRICT=1 turns the staged gen findings into refusals; turbo's strict env mode drops any variable
+      // not listed here, and listing it also keeps a strict run from replaying a lenient run's cached output.
+      "env": ["STACKRA_GEN_STRICT"],
       // An app's clients come from the in-repo service manifests (committed outputs of their own
       // `gen`) plus the external manifests pinned in stackra.lock.yaml. The `*.extend.ts` hatches
       // change the tool configs gen writes.

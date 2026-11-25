@@ -2,22 +2,24 @@
  * Stackra file contract:
  * Purpose: `CreateNoteAction`, `notes.note.create@1`: add a note. `POST /notes` by the endpoint convention, an MCP
  *          tool by default (its actors include a user); the Create page of the note resource.
- * Boundary: single aggregate, inline `handle`; its permission is `NotePermissions.create` (L1), derived from the key.
- *           `NoteService` writes the row inside the action's transaction.
+ * Boundary: single aggregate, inline `handle`; its permission is `NotePermissions.create` (L2, a write), derived from
+ *           the key. A client may retry with an `Idempotency-Key`, so a repeat answers the first note instead of adding a
+ *           second. `NoteService` writes the row inside the action's transaction.
  * Runtime: node
  * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md); ADR 0098; ADR 0360 (decision 4).
  */
-import { Action, type ActionContext } from "@stackra/actions";
+import { Action, type ActionContext, Idempotency } from "@stackra/actions";
 import { ActorKind } from "@stackra/contracts";
 
 import type { CreateNoteInput } from "#modules/notes/schemas/create-note-input.schema";
 import { CreateNoteOutput } from "#modules/notes/schemas/create-note-output.schema";
 import type { NoteService } from "#modules/notes/services/note.service";
 
-/** Not idempotent (POST): each call adds a note. */
+/** A POST: each call adds a note, unless the client repeats it with the same `Idempotency-Key`. */
 export class CreateNoteAction extends Action({
   key: "note.create",
   actors: [ActorKind.User, ActorKind.Agent],
+  idempotency: Idempotency.Optional,
 }) {
   /**
    * @param notes - writes the row.
