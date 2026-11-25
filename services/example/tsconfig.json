@@ -1,3 +1,17 @@
-// TypeScript project for this member: extends exactly one @stackra/typescript-config preset and sets nothing else.
+// TypeScript project for this member: extends exactly one @stackra/typescript-config preset. Its compilerOptions
+// hold only paths: each package.json imports key with its first target (no baseUrl), because Encore ignores imports,
+// reads paths only here and honours one target per key (ADR 0091); `stackra encore:prepare` writes them.
 // Owner: release-operations · Secrets: forbidden
-{ "extends": "@stackra/typescript-config/service" }
+{
+  "extends": "@stackra/typescript-config/service",
+  "compilerOptions": {
+    "paths": {
+      "#src/*": ["./src/*"],
+      "#config/*": ["./src/config/*"],
+      "#contracts/*": ["./src/contracts/*"],
+      "#modules/*": ["./src/modules/*"],
+      "#assets/*": ["./assets/*"],
+      "#stackra/*": ["./.stackra/gen/*"]
+    }
+  }
+}

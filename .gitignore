@@ -52,6 +52,10 @@ maestro-report/
 /apps/*/metro.config.js
 /apps/*/babel.config.js
 /services/*/vitest.config.ts
+# The Encore app file gen writes at a service's root, so the member is the Encore app root (ADR 0091).
+/services/*/encore.app
+# The Encore services gen writes beside it, outside .stackra since Encore skips dot folders (ADR 0091).
+**/stackra-encore/*
 /packages/*/*/vitest.config.ts
 /packages/*/*/tsdown.config.ts
 /packages/*/*/tsconfig.build.json
