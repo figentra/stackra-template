@@ -56,6 +56,13 @@ maestro-report/
 /services/*/encore.app
 # The Encore services gen writes beside it, outside .stackra since Encore skips dot folders (ADR 0091).
 **/stackra-encore/*
+# What `encore run` generates in a service, the Encore app root: its build cache and generated client code, at any
+# depth. Each service also commits a .gitignore holding these lines, since Encore appends any of them its app root's
+# .gitignore lacks (and writes one when there is none), which would leave git status dirty after `pnpm run dev`.
+.encore/
+encore.gen/
+encore.gen.go
+encore.gen.cue
 /packages/*/*/vitest.config.ts
 /packages/*/*/tsdown.config.ts
 /packages/*/*/tsconfig.build.json

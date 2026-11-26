@@ -8,7 +8,6 @@
   ],
   "license": "UNLICENSED",
   "type": "module",
-  "sideEffects": false,
   "imports": {
     "#src/*": [
       "./src/*",
