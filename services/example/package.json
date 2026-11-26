@@ -2,7 +2,7 @@
   "name": "@figentra/acme-service-example",
   "version": "0.0.0",
   "private": true,
-  "description": "An example service: rename it to the product's first service or delete it.",
+  "description": "An example service: one tenant-owned resource (notes) through the actions pipeline; rename it to the product's first service or delete it.",
   "keywords": [
     "stackra"
   ],
@@ -50,6 +50,7 @@
     "typecheck": "stackra typecheck",
     "lint": "stackra lint",
     "test": "stackra test",
+    "test:int": "stackra test --tier int",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "clean": "rm -rf dist coverage .turbo .stackra"
@@ -61,24 +62,31 @@
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
     "@stackra/database": "catalog:stackra",
+    "@stackra/entitlements": "catalog:stackra",
+    "@stackra/errors": "catalog:stackra",
     "@stackra/events": "catalog:stackra",
     "@stackra/iam": "catalog:stackra",
     "@stackra/model": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
     "@stackra/scheduler": "catalog:stackra",
+    "@stackra/scope": "catalog:stackra",
+    "@stackra/tenancy": "catalog:stackra",
     "@stackra/validation": "catalog:stackra",
     "encore.dev": "1.58.8",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "catalog:",
     "@stackra/cli": "catalog:stackra",
     "@stackra/testing": "catalog:stackra",
     "@stackra/tsdown-config": "catalog:stackra",
     "@stackra/typescript-config": "catalog:stackra",
     "@stackra/vitest-config": "catalog:stackra",
+    "@testcontainers/postgresql": "catalog:",
     "@types/node": "catalog:",
     "oxfmt": "catalog:quality",
     "oxlint": "catalog:quality",
+    "testcontainers": "catalog:",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:quality"

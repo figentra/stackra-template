@@ -75,6 +75,7 @@ words:
   - axllent
   - betterstack
   - blockmaps
+  - bypassrls
   - changeset
   - changesets
   - clamav
@@ -164,9 +165,11 @@ words:
   - modeline
   - monorepo
   - nnnn
+  - nobypassrls
   - nodenv
   - noeviction
   - noindex
+  - nologin
   - nonprod
   - npmjs
   - nsis
@@ -199,6 +202,7 @@ words:
   - prerendered
   - prerendering
   - pressable
+  - protobufjs
   - provenanced
   - pulumi
   - pwa
@@ -208,9 +212,13 @@ words:
   - redrive
   - redriven
   - refetches
+  - regclass
+  - relforcerowsecurity
+  - relrowsecurity
   - retryable
   - revalidator
   - riyals
+  - rolname
   - rtl
   - runway
   - sbdchd

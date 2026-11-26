@@ -4,8 +4,7 @@
  * Boundary: a shape class in its own file; `Page.of` gives `items`, `nextCursor` (absent on the last page) and
  *           `hasMore`.
  * Runtime: node
- * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md); the HTTP conventions (cursor
- *                     pagination).
+ * Governing contract: ADR 0294 (as amended by programming model v3.1, AGENTS.md); ADR 0305 (one declaration per file).
  */
 import { Page } from "@stackra/validation";
 

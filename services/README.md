@@ -18,7 +18,7 @@ generated from the producer's committed `stackra.manifest.json`.
 
 | Service   | What it is                                                                                              |
 | --------- | ------------------------------------------------------------------------------------------------------- |
-| `example` | `@figentra/acme-service-example`, written by `stackra new service example --area app`; rename or delete |
+| `example` | `@figentra/acme-service-example`: the tenant-owned `notes` resource, the golden path; rename or delete  |
 
 Create a service with `stackra new service <name> --area <public|app|admin|platform>`. It writes
 package.json, `stackra.config.ts` (`defineService({ area })`), `runway.yaml` (what it needs, per
@@ -27,5 +27,7 @@ nothing under `src/`: feature modules go in `src/modules/<key>/<group>/<name>.<k
 writes `main.ts` or a root module that only lists what gen can derive: gen writes
 `.stackra/entry/server.ts`. Every service is placed in a group of the root runway's production
 topology (`environments.production.topology.groups`) before `stackra validate` passes; the example
-sits in the `example` group. `pnpm validate` fails when the example drifts from what `stackra new`
-writes (`.github/scripts/example-drift.mjs`).
+sits in the `example` group. A service with tenant-owned tables depends on `@stackra/tenancy` and ships
+its isolation tests in `test:int`, as the example does. Its forced row policy isolates the rows; gen does
+not yet bind the pipeline's call isolation and tenancy check in a server (STA-2807), so until it does a
+deployed call fails closed (no row shown or written), as the example's README explains.

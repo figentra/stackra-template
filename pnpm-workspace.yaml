@@ -159,6 +159,12 @@ catalogs:
     # shapes depends on it; authored code never imports it, except through the `@Field(zod)` hatch.
     # 4.1 or later is needed for codecs and `.exactOptional()` (Stackra ADR 0294 decision 26).
     zod: 4.6.7
+    # The test-only peers @stackra/database/testing loads from a service's devDependencies: Faker for factories and
+    # Testcontainers for the integration tier's Postgres (`usePostgres`, the generated tenant-isolation test). The
+    # versions are the ones @stackra/database's own peers resolve, so one copy is installed.
+    "@faker-js/faker": 10.6.0
+    "@testcontainers/postgresql": 12.2.0
+    testcontainers: 12.2.1
   # HeroUI's design-system stylesheet (web and desktop).
   ui:
     "@heroui/styles": 3.2.6
@@ -300,3 +306,9 @@ allowBuilds:
   keytar: false
   # Native XML validator, an optional peer of @cyclonedx/cyclonedx-library; the SBOM is JSON.
   libxmljs2: false
+  # Pulled in by @testcontainers/postgresql (the example service's integration tier): its install only builds an
+  # optional native cpu-features binding.
+  ssh2: false
+  cpu-features: false
+  # Pulled in by @testcontainers/postgresql too: protobufjs wants a postinstall only for its CLI.
+  protobufjs: false
