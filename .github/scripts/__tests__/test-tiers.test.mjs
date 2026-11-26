@@ -12,7 +12,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
-import { intTierReason, isMember, tierGaps, workspaceGlobs } from "../test-tiers.mjs";
+import { TEST_TIERS } from "../test-tiers.mjs";
+
+const { intTierReason, isMember, tierGaps, workspaceGlobs } = TEST_TIERS;
 
 /** The repository root, two folders above this file. */
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));

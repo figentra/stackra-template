@@ -47,7 +47,7 @@ const ISOLATION_PACKAGES = ["@stackra/database", "@stackra/tenancy", "@stackra/t
  * @example
  * workspaceGlobs('packages:\n  - apps/*\n  - "services/*"\n'); // ["apps/*", "services/*"]
  */
-export function workspaceGlobs(yaml) {
+function workspaceGlobs(yaml) {
   const globs = [];
   let inside = false;
   for (const line of yaml.split("\n")) {
@@ -70,11 +70,11 @@ export function workspaceGlobs(yaml) {
  * @example
  * isMember("services/example", ["services/*"]); // true
  */
-export function isMember(folder, globs) {
+function isMember(folder, globs) {
   return globs.some((glob) => {
     const pattern = glob
       .split("/")
-      .map((segment) => segment.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]+"))
+      .map((segment) => segment.replaceAll(/[.+?^${}()|[\]\\]/g, "\\$&").replaceAll("*", "[^/]+"))
       .join("/");
     return new RegExp(`^${pattern}$`).test(folder);
   });
@@ -89,7 +89,7 @@ export function isMember(folder, globs) {
  * intTierReason({ files: ["src/a/__tests__/a.int.test.ts"], manifest: {}, read: () => "" });
  * // "it has src/a/__tests__/a.int.test.ts"
  */
-export function intTierReason({ files, manifest, read }) {
+function intTierReason({ files, manifest, read }) {
   const authored = files.find((file) => AUTHORED_INT_TEST.test(file));
   if (authored) return `it has ${authored}`;
   const tier = manifest.stackra?.tier;
@@ -112,7 +112,7 @@ export function intTierReason({ files, manifest, read }) {
  * @example
  * tierGaps({ scripts: {}, turbo: "", ci: "", members: [] }).length; // 5
  */
-export function tierGaps({ scripts, turbo, ci, members }) {
+function tierGaps({ scripts, turbo, ci, members }) {
   const gaps = [];
   if (!/^turbo run test(\s|$)/.test(scripts.test ?? ""))
     gaps.push('package.json: the root `test` script is not "turbo run test"');
@@ -134,6 +134,9 @@ export function tierGaps({ scripts, turbo, ci, members }) {
   }
   return gaps;
 }
+
+/** The check's parts, one export (ADR 0305): the readers, the member rule and the gap list. */
+export const TEST_TIERS = { workspaceGlobs, isMember, intTierReason, tierGaps };
 
 /** The tracked files of the repository. */
 function trackedFiles() {
