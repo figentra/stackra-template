@@ -7,8 +7,9 @@
 # Boundary: data only; `create` implements it. It writes only the git-tracked files a profile's `include` globs
 #           match (POSIX globs from the repository root, Node `path.matchesGlob` semantics: `*` and `**` skip dot
 #           files, so dot paths are listed), then copies each `overlay` source over its target path, applies
-#           `rename` to every text file, drops this file, pnpm-lock.yaml and starter/, pins catalog `stackra` to
-#           the CLI's own version and installs fresh. Every overlay source lives under `starter/<profile>/`.
+#           `rename` to every text file, drops this file, pnpm-lock.yaml, starter/ and this repository's own
+#           workflows (`.github/workflows/starter-*.yml`), pins catalog `stackra` to the CLI's own version and
+#           installs fresh. Every overlay source lives under `starter/<profile>/`.
 # Runtime: node
 # Governing contract: Stackra ADR 0515 (decisions 3, 5 and 6); ADR 0349 (product package names); ADR 0441
 #                     (the product shape, kept by `full`).
