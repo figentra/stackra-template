@@ -1,0 +1,102 @@
+# Stackra file contract:
+# Purpose: the starter's create smoke test (Stackra STA-2829): on each change to this template, makes an app from it
+#          the way a user does and calls it signed in. Checks out Stackra core (`main`, or the ref a dispatch names),
+#          builds it and runs core's `tools/scripts/create-smoke.mjs` with this checkout as the starter: `stackra
+#          create` on packed tarballs of every publishable package, `stackra dev` (Encore and its Postgres in Docker),
+#          `/healthz` and `/readyz`, a dev sign-in (`stackra dev token`), 401 for a missing and a forged token, and an
+#          authenticated list, create, idempotent replay and read-back of a note in the example service. Core runs the
+#          same script on its own changes (its create-smoke.yml).
+# Boundary: the template repository's own CI: `stackra create` never writes a `starter-*.yml` workflow into an app,
+#           and the job runs only in stackra-inc/stackra-template. Read-only (`contents: read`), no secret; the dev
+#           token is minted and used inside the job and never logged. Advisory, not a required check. The summary is
+#           the step summary, the logs an artifact.
+# Runtime: GitHub Actions
+# Governing contract: Stackra ADR 0515 (`stackra create`); Stackra ADR 0206 (the dev issuer); Stackra ADR 0019
+#                     (least privilege, pinned actions); Stackra ADR 0027 (toolchain from mise.toml); STA-2829.
+name: Starter create smoke test
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      core-ref:
+        description: "The Stackra core branch, tag or commit to build and create with"
+        type: string
+        default: main
+
+permissions: {}
+
+concurrency:
+  group: starter-create-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  smoke:
+    name: Starter create smoke test
+    if: github.repository == 'stackra-inc/stackra-template'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      # Stackra ADR 0019: every action is pinned to a full commit SHA, the version in the trailing comment.
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+          submodules: false
+
+      # Stackra ADR 0027: node, pnpm and the Encore CLI `stackra dev` runs come from this mise.toml.
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          version: 2026.11.4
+
+      - name: Checkout Stackra core
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          repository: stackra-inc/stackra
+          ref: ${{ inputs.core-ref || 'main' }}
+          path: .create-smoke-core
+          persist-credentials: false
+          submodules: false
+
+      # Core leaves this checkout, so the starter the script reads is this repository alone. As core's Quality Gate,
+      # the two members that alias `uniwind` to Uniwind Pro are left out (a licensed download).
+      - name: Build Stackra core
+        run: |
+          set -euo pipefail
+          mv .create-smoke-core "$RUNNER_TEMP/core"
+          cd "$RUNNER_TEMP/core"
+          pnpm install --frozen-lockfile --filter='!@figentra/mobile' --filter='!@figentra/playground'
+          pnpm exec turbo run build --filter='./packages/**'
+
+      # --out sits outside both trees, as the script requires.
+      - name: Smoke test
+        run: |
+          node "$RUNNER_TEMP/core/tools/scripts/create-smoke.mjs" \
+            --core "$RUNNER_TEMP/core" --template "$GITHUB_WORKSPACE" --out "$RUNNER_TEMP/create-smoke"
+
+      - name: Step summary
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/create-smoke/create-smoke.md" ]; then
+            cat "$RUNNER_TEMP/create-smoke/create-smoke.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No create smoke summary: the run stopped before its first step (see the Smoke test step)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the summary and logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: starter-create-smoke
+          path: |
+            ${{ runner.temp }}/create-smoke/create-smoke.*
+            ${{ runner.temp }}/create-smoke/logs/
+          if-no-files-found: warn
+          retention-days: 14

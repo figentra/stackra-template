@@ -203,6 +203,7 @@ words:
   - pulumi
   - pwa
   - qdrant
+  - readyz
   - realtime
   - redpanda
   - redrive
