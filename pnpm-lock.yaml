@@ -258,6 +258,9 @@ catalogs:
       specifier: 2.2.1
       version: 2.2.1
   stackra:
+    '@stackra/access-log':
+      specifier: 0.15.0
+      version: 0.15.0
     '@stackra/actions':
       specifier: 0.15.0
       version: 0.15.0
@@ -270,6 +273,9 @@ catalogs:
     '@stackra/commitlint-config':
       specifier: 0.15.0
       version: 0.15.0
+    '@stackra/config':
+      specifier: 0.15.0
+      version: 0.15.0
     '@stackra/console':
       specifier: 0.15.0
       version: 0.15.0
@@ -277,6 +283,9 @@ catalogs:
       specifier: 0.15.0
       version: 0.15.0
     '@stackra/contracts':
+      specifier: 0.15.0
+      version: 0.15.0
+    '@stackra/data-maintenance':
       specifier: 0.15.0
       version: 0.15.0
     '@stackra/database':
@@ -294,6 +303,9 @@ catalogs:
     '@stackra/experience':
       specifier: 0.15.0
       version: 0.15.0
+    '@stackra/filesystem':
+      specifier: 0.15.0
+      version: 0.15.0
     '@stackra/gen':
       specifier: 0.15.0
       version: 0.15.0
@@ -303,6 +315,9 @@ catalogs:
     '@stackra/icons':
       specifier: 0.15.0
       version: 0.15.0
+    '@stackra/logger':
+      specifier: 0.15.0
+      version: 0.15.0
     '@stackra/model':
       specifier: 0.15.0
       version: 0.15.0
@@ -310,6 +325,9 @@ catalogs:
       specifier: 0.15.0
       version: 0.15.0
     '@stackra/oxlint-config':
+      specifier: 0.15.0
+      version: 0.15.0
+    '@stackra/privacy':
       specifier: 0.15.0
       version: 0.15.0
     '@stackra/queue':
@@ -587,12 +605,18 @@ importers:
 
   services/example:
     dependencies:
+      '@stackra/access-log':
+        specifier: catalog:stackra
+        version: 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
       '@stackra/actions':
         specifier: catalog:stackra
         version: 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)
       '@stackra/app':
         specifier: catalog:stackra
         version: 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react-router@7.18.4(react-dom@19.2.3(react@19.3.0))(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))(vitest@5.0.5)
+      '@stackra/config':
+        specifier: catalog:stackra
+        version: 0.15.0(react@19.3.0)
       '@stackra/console':
         specifier: catalog:stackra
         version: 0.15.0(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)
@@ -602,6 +626,9 @@ importers:
       '@stackra/contracts':
         specifier: catalog:stackra
         version: 0.15.0
+      '@stackra/data-maintenance':
+        specifier: catalog:stackra
+        version: 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
       '@stackra/database':
         specifier: catalog:stackra
         version: 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
@@ -614,12 +641,21 @@ importers:
       '@stackra/events':
         specifier: catalog:stackra
         version: 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
+      '@stackra/filesystem':
+        specifier: catalog:stackra
+        version: 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)(supports-color@8.1.1)
       '@stackra/iam':
         specifier: catalog:stackra
         version: 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/logger':
+        specifier: catalog:stackra
+        version: 0.15.0(react@19.3.0)
       '@stackra/model':
         specifier: catalog:stackra
         version: 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
+      '@stackra/privacy':
+        specifier: catalog:stackra
+        version: 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
       '@stackra/queue':
         specifier: catalog:stackra
         version: 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
@@ -2988,6 +3024,15 @@ packages:
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
 
+  '@stackra/access-log@0.15.0':
+    resolution: {integrity: sha512-a8H68CZIh/L+tTejVVdyUvre1hp/34677WxVfhoaI3bC/PU+yMDlF46tf3t3gRgTqkK+iZBu3YblubriJjNx0A==}
+    engines: {node: '>=24.0.0'}
+    peerDependencies:
+      '@stackra/testing': 0.15.0
+    peerDependenciesMeta:
+      '@stackra/testing':
+        optional: true
+
   '@stackra/actions@0.15.0':
     resolution: {integrity: sha512-bXHcjx+nUk/1rW2S65CElPLmWV5mKv9B8LOFuKH6OkUNuBBh1J7Ji7Oos+VouQOCz5NaZJeo2Y3HkMYxahtEgQ==}
     engines: {node: '>=24.0.0'}
@@ -3128,6 +3173,10 @@ packages:
     peerDependenciesMeta:
       react:
         optional: true
+
+  '@stackra/data-maintenance@0.15.0':
+    resolution: {integrity: sha512-ct27Hoo7Yk1IRhgmXt+oIeIqwJvj4d9u+JVXcwNDW89YhfhLXE4vmzljGcVAoZ+mhmcVwJzsZ8ewZkS+7I83ng==}
+    engines: {node: '>=24.0.0'}
 
   '@stackra/data-transfer@0.15.0':
     resolution: {integrity: sha512-S2sWOe0nAPEsZ8KrmXnYiXc25WMwZW8xskeZsspj0g+F6STiGOINq3wUbY9cTz6qpT9ZUlSSTSWkKHaIHg6sXQ==}
@@ -11486,6 +11535,87 @@ snapshots:
 
   '@socket.io/component-emitter@3.1.2': {}
 
+  '@stackra/access-log@0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))':
+    dependencies:
+      '@stackra/actions': 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)
+      '@stackra/config': 0.15.0(react@19.3.0)
+      '@stackra/console': 0.15.0(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)
+      '@stackra/container': 0.15.0(react@19.3.0)
+      '@stackra/contracts': 0.15.0
+      '@stackra/database': 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/errors': 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
+      '@stackra/events': 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
+      '@stackra/iam': 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/model': 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
+      '@stackra/outbox': 0.15.0(@faker-js/faker@10.6.0)(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/queue': 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/scheduler': 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/support': 0.15.0
+      '@stackra/tenancy': 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/validation': 0.15.0(react@19.3.0)
+      zod: 4.6.7
+    optionalDependencies:
+      '@stackra/testing': 0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5)
+    transitivePeerDependencies:
+      - '@10play/tentap-editor'
+      - '@aws-sdk/client-secrets-manager'
+      - '@electric-sql/pglite'
+      - '@electric-sql/pglite-pgvector'
+      - '@expo/ui'
+      - '@faker-js/faker'
+      - '@heroui/react'
+      - '@internationalized/date'
+      - '@internationalized/number'
+      - '@mikro-orm/pglite'
+      - '@shopify/react-native-skia'
+      - '@testcontainers/postgresql'
+      - '@tiptap/core'
+      - '@tiptap/extensions'
+      - '@tiptap/pm'
+      - '@tiptap/react'
+      - '@tiptap/starter-kit'
+      - '@types/react'
+      - cac
+      - citty
+      - commander
+      - dataloader
+      - electron
+      - expo-blur
+      - expo-clipboard
+      - expo-constants
+      - expo-document-picker
+      - expo-file-system
+      - expo-glass-effect
+      - expo-haptics
+      - expo-image-picker
+      - expo-intent-launcher
+      - expo-localization
+      - expo-secure-store
+      - expo-updates
+      - expo-video
+      - heroui-native
+      - lucide-react
+      - lucide-react-native
+      - motion
+      - pg-native
+      - react
+      - react-aria
+      - react-aria-components
+      - react-devtools-core
+      - react-dom
+      - react-hook-form
+      - react-native
+      - react-native-mmkv
+      - react-native-reanimated
+      - react-native-safe-area-context
+      - react-native-svg
+      - react-native-webview
+      - recharts
+      - supports-color
+      - testcontainers
+      - uniwind
+      - victory-native
+
   '@stackra/actions@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)(vitest@5.0.5))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.2.3)(supports-color@8.1.1)':
     dependencies:
       '@stackra/cache': 0.15.0(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.2.3)(supports-color@8.1.1)
@@ -12521,6 +12651,84 @@ snapshots:
       react: 19.3.0
     transitivePeerDependencies:
       - '@aws-sdk/client-secrets-manager'
+
+  '@stackra/data-maintenance@0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))':
+    dependencies:
+      '@stackra/actions': 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)
+      '@stackra/container': 0.15.0(react@19.3.0)
+      '@stackra/contracts': 0.15.0
+      '@stackra/database': 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/errors': 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
+      '@stackra/iam': 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/model': 0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0)
+      '@stackra/outbox': 0.15.0(@faker-js/faker@10.6.0)(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/queue': 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/scheduler': 0.15.0(@faker-js/faker@10.6.0)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/search': 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/tenancy': 0.15.0(@faker-js/faker@10.6.0)(@internationalized/date@3.12.4)(@stackra/events@0.15.0(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(react@19.3.0))(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react-dom@19.2.3(react@19.3.0))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.0))(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))
+      '@stackra/validation': 0.15.0(react@19.3.0)
+      zod: 4.6.7
+    transitivePeerDependencies:
+      - '@10play/tentap-editor'
+      - '@aws-sdk/client-secrets-manager'
+      - '@electric-sql/pglite'
+      - '@electric-sql/pglite-pgvector'
+      - '@expo/ui'
+      - '@faker-js/faker'
+      - '@heroui/react'
+      - '@internationalized/date'
+      - '@internationalized/number'
+      - '@mikro-orm/pglite'
+      - '@shopify/react-native-skia'
+      - '@stackra/events'
+      - '@stackra/testing'
+      - '@testcontainers/postgresql'
+      - '@tiptap/core'
+      - '@tiptap/extensions'
+      - '@tiptap/pm'
+      - '@tiptap/react'
+      - '@tiptap/starter-kit'
+      - '@types/react'
+      - cac
+      - citty
+      - commander
+      - dataloader
+      - electron
+      - expo-blur
+      - expo-clipboard
+      - expo-constants
+      - expo-document-picker
+      - expo-file-system
+      - expo-glass-effect
+      - expo-haptics
+      - expo-image-picker
+      - expo-intent-launcher
+      - expo-localization
+      - expo-secure-store
+      - expo-updates
+      - expo-video
+      - heroui-native
+      - lucide-react
+      - lucide-react-native
+      - motion
+      - pg-native
+      - react
+      - react-aria
+      - react-aria-components
+      - react-devtools-core
+      - react-dom
+      - react-hook-form
+      - react-native
+      - react-native-mmkv
+      - react-native-reanimated
+      - react-native-safe-area-context
+      - react-native-svg
+      - react-native-webview
+      - recharts
+      - supports-color
+      - testcontainers
+      - uniwind
+      - victory-native
 
   '@stackra/data-transfer@0.15.0(@faker-js/faker@10.6.0)(@stackra/testing@0.15.0(react-native@0.86.3(@babel/core@8.0.7)(@types/react@19.3.0)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)(vitest@5.0.5))(@testcontainers/postgresql@12.2.0(bare-buffer@3.7.3)(supports-color@8.1.1))(@types/react@19.3.0)(cac@7.1.0)(commander@15.0.0)(react-devtools-core@6.1.5)(react@19.2.3)(supports-color@8.1.1)(testcontainers@12.2.1(bare-buffer@3.7.3)(supports-color@8.1.1))':
     dependencies:

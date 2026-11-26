@@ -45,19 +45,56 @@ The routes are in the service's API area (`ApiArea.App`, `stackra.config.ts`). C
 | Events      | `events/note-*.event.ts`: integration events recorded on the model (`note.record(...)`), ids only, sent with the row      |
 | Errors      | `errors/empty-note-update.error.ts`: a typed refusal with a stable code (`empty_note_update`, HTTP 400)                   |
 | Factory     | `database/factories/note.factory.ts`, for tests and demo data                                                             |
+| Privacy     | `privacy/note.personal-data.ts`: a note's subject is its author (`authorId`, the call's originating principal, never input); a data-subject export copies the title and text, an erasure deletes the row |
+| Retention   | `constants/note-retention.constant.ts`: `Retention` on `Note`; the nightly `data_maintenance.record.prune@1` job deletes a note two years after its last change |
+| Legal holds | `compliance/drivers/postgres-hold-registry.driver.ts`: a hold on a note, or on its author, keeps it from the prune and the erasure |
+| Audit       | `compliance/drivers/postgres-audit-trail.driver.ts`: every note action, done or refused, is the next entry of its tenant's audit chain |
+
+## Privacy, retention and audit
+
+A note is personal data: its text may name anyone, and its author is a person. The service wires the four pieces a
+product needs for GDPR and PDPL from day one, in its own `compliance` module so renaming or deleting `notes` keeps them.
+
+| Concern                      | How                                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Access and portability       | `privacy.subject.export@1` (`@stackra/privacy`) writes a zip of every declared model's rows for a person, in the running tenant, behind a signed link that lives 7 days; `privacy.subject_export.purge@1` deletes older zips nightly at 04:00 UTC |
+| Erasure                      | `privacy.subject.erase@1` runs the erasure saga: the person's notes are deleted, a held note is kept and counted in the receipt, and `privacy.subject.erased.v1` is recorded                                                |
+| Storage limit                | `Retention(NOTE_RETENTION)` on `Note`: `data_maintenance.record.prune@1` (`@stackra/data-maintenance`, 03:00 UTC, once per tenant) deletes a note nobody changed for two years                                             |
+| Legal holds                  | `privacy.hold.place@1` holds one note (`model: "Note"`) or every note of a person (their public id, through the `authorId` hold link); the prune and the erasure keep held rows and log each refusal                        |
+| Write audit                  | `AuditTrail` is `@stackra/access-log`'s Postgres chain: `access_log.audit_log_entry.search@1` reads it, `access_log.audit_log_entry.export@1` ships it to a SIEM                                                             |
+
+A product sets its own retention in `note-retention.constant.ts` and gives each new model with personal data its own
+`privacy/<model>.personal-data.ts`, registered the way `NoteService` loads the notes one. The export disk is
+`filesystem.disk` from runway's config layer (`local` in dev, which cannot sign a link; `s3` in preview, staging and
+production). Nothing here holds a secret.
+
+> **Known gap (STA-1583, core).** `@stackra/access-log` 0.33.x cannot append to the audit chain on Postgres: its
+> drivers read the chain head with `findOne({})`, which MikroORM refuses, and its entity maps `outcome` as json, which
+> fails the column's check. The fix is in core (`figentra/sta-1583-access-log-chain-head`); until the template's pin
+> carries it, every audited write fails, so `note-privacy.int.test.ts` keeps the audit case as `it.fails`. Drop the
+> `.fails` when the pin moves past the fix.
+>
+> **Needs the 0.33 line.** At the `@stackra/*` 0.15.0 pin, gen writes imports that `@stackra/access-log` and
+> `@stackra/data-maintenance` 0.15.0 do not export (their manifests predate the `file` field), so the service cannot
+> pass typecheck or run its tests until the catalog moves to 0.33 (stackra-template#58). A `stackra create` app pins the
+> CLI's own line and is not affected.
 
 ## Tests
 
 - `pnpm test`, the unit tier: each action and query with a stand-in service, the view mapping, the refusal, the
   recorded events, the module's contract as gen derived it (a tenant-owned model, a permission per operation,
-  writes at L2 or above, the required key on create), and `note-wiring`, which checks the generated wiring for the
-  pipeline's tenant ports (each still `it.fails`, the known gap of STA-2807).
+  writes at L2 or above, the required key on create), `note-wiring`, which checks the generated wiring for the
+  pipeline's tenant ports (each still `it.fails`, the known gap of STA-2807), `note.personal-data` (the declaration
+  and the retention) and `compliance-wiring` (the audit trail, hold and salt drivers bound, the prune and purge jobs
+  scheduled).
 - `pnpm test:int`, the integration tier on Postgres (Docker): `note-pipeline` runs the five operations through the real
   actions pipeline with the real idempotency store, call isolation and unit of work, bound by the test itself (a
   retried create, a create without its key, the permission asked before the write); `note-isolation` proves, as the
   `NOBYPASSRLS` service role, that tenant B cannot list, get, update or delete tenant A's notes, that a read with no
   tenant returns none and that a write naming another tenant is refused by the policy (Postgres error 42501); and gen's
-  `.stackra/tests/tenant-isolation.int.test.ts` audits every table of the service.
+  `.stackra/tests/tenant-isolation.int.test.ts` audits every table of the service; `note-privacy` exports and erases a
+  person's notes in their tenant only (a held note kept), runs the prune job (a note untouched for two years deleted, a
+  held author's kept) and checks the audit chain of a done and a refused call.
 
 How IAM decides a permission is IAM's own test: the integration tests bind an allow-all access control, or one that
 records the permission asked and refuses, so what they prove is the service's behaviour and the database's isolation.

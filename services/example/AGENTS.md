@@ -31,10 +31,18 @@ resource (`notes`) through the actions pipeline. Read the README for what each f
 - A new tenant-owned resource ships its isolation test in the integration tier (`pnpm test:int`, Postgres, the
   `NOBYPASSRLS` role), never in the unit tier.
 - One declaration per file; each file sits in its kind's group folder under `src/modules/notes/`.
+- A model that holds personal data ships a `privacy/<model>.personal-data.ts` (`PersonalData`, its subject and each
+  field's erasure method), loaded by the model's service, and a `Retention`; the subject is a public id taken from the
+  call's actor, never from input.
+- Keep the `compliance` drivers (audit trail, legal holds, subject salts): without them writes are not audited and
+  nothing is held. A host inside Figentra OS replaces the hold registry with the compliance service's driver.
 
 ## PII
 
 | Data                    | Where                           | Handling                                                                                                                                                                     |
 | ----------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A note's title and text | `notes.notes` (`title`, `body`) | Free text a user writes, so it may hold personal data. Stored under the tenant's row-level policy, returned only to that tenant, never put in an event, a log or an error. |
-| The author's identity   | not stored                      | A note does not record its author; only the owning tenant (`tenant_id`).                                                                                                     |
+| The author's identity   | `notes.notes` (`author_id`)     | The public id of the call's originating principal (a user, also when an agent writes for them); the subject of export, erasure and holds. Never a name or an email.         |
+| Write audit             | `access_log.audit_log_entries`  | Per tenant, append-only, hash-chained: action key, actor ids, outcome, refusal code and the ids a handler adds. Never a title or a text. Read with `access_log.audit_log_entry.read`. |
+| Legal holds, salts      | `privacy.legal_holds`, `privacy.subject_salts` | Per tenant: the held record or person id, the reason and who placed it; the per-subject key salt destroyed on erasure.                                              |
+| Subject exports         | the `filesystem.disk` export folder | A zip per request under a random name, behind a signed link that lives 7 days, deleted by the nightly purge.                                                            |

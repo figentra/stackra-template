@@ -72,6 +72,7 @@ catalogs:
     "@stackra/contracts": 0.15.0
     "@stackra/coordinator": 0.15.0
     "@stackra/csp": 0.15.0
+    "@stackra/data-maintenance": 0.15.0
     "@stackra/data-transfer": 0.15.0
     "@stackra/database": 0.15.0
     "@stackra/devices": 0.15.0
@@ -107,6 +108,7 @@ catalogs:
     "@stackra/peripherals": 0.15.0
     "@stackra/platform": 0.15.0
     "@stackra/pricing": 0.15.0
+    "@stackra/privacy": 0.15.0
     "@stackra/query": 0.15.0
     "@stackra/queue": 0.15.0
     "@stackra/realtime": 0.15.0

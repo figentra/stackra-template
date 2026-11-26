@@ -61,12 +61,15 @@ async function stored(): Promise<{ title: string; owner: string }[]> {
   }[];
 }
 
+/** The author of every hand-inserted row. */
+const author = "usr_01ja0000000000000000000070";
+
 /** Inserts a note row by hand under the current role and tenant, past the model, as a forged write would. */
 function insert(id: string, owner: string, title: string): Promise<unknown> {
   return postgres.database
     .em()
     .execute(
-      `insert into "notes"."notes" (id, tenant_id, title, body) values ('${id}', '${owner}', '${title}', '')`,
+      `insert into "notes"."notes" (id, tenant_id, author_id, title, body) values ('${id}', '${owner}', '${author}', '${title}', '')`,
     );
 }
 
