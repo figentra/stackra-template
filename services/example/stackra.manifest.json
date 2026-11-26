@@ -21,7 +21,7 @@
       "permission": "notes.note.create",
       "risk": "L2",
       "actors": ["user", "agent"],
-      "idempotency": "optional",
+      "idempotency": "required",
       "endpoint": {
         "method": "POST",
         "path": "/notes",
@@ -41,7 +41,103 @@
         "$ref": "#/schemas/notes.CreateNoteInput"
       },
       "output": {
-        "$ref": "#/schemas/notes.CreateNoteOutput"
+        "$ref": "#/schemas/notes.NoteView"
+      }
+    },
+    {
+      "key": "notes.note.delete@1",
+      "kind": "action",
+      "module": "notes",
+      "class": "DeleteNoteAction",
+      "file": "src/modules/notes/actions/delete-note.action.ts",
+      "permission": "notes.note.delete",
+      "risk": "L2",
+      "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "endpoint": {
+        "method": "DELETE",
+        "path": "/notes/:noteId",
+        "derived": true
+      },
+      "tool": {
+        "name": "notes_note_delete",
+        "default": true,
+        "hints": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "#/schemas/notes.DeleteNoteInput"
+      },
+      "output": {
+        "$ref": "#/schemas/notes.DeleteNoteOutput"
+      }
+    },
+    {
+      "key": "notes.note.update@1",
+      "kind": "action",
+      "module": "notes",
+      "class": "UpdateNoteAction",
+      "file": "src/modules/notes/actions/update-note.action.ts",
+      "permission": "notes.note.update",
+      "risk": "L2",
+      "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "endpoint": {
+        "method": "PATCH",
+        "path": "/notes/:noteId",
+        "derived": true
+      },
+      "tool": {
+        "name": "notes_note_update",
+        "default": true,
+        "hints": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "#/schemas/notes.UpdateNoteInput"
+      },
+      "output": {
+        "$ref": "#/schemas/notes.NoteView"
+      },
+      "refusals": ["empty_note_update"]
+    },
+    {
+      "key": "notes.note.get@1",
+      "kind": "query",
+      "module": "notes",
+      "class": "GetNoteQuery",
+      "file": "src/modules/notes/queries/get-note.query.ts",
+      "permission": "notes.note.read",
+      "risk": "L0",
+      "actors": ["user", "agent"],
+      "endpoint": {
+        "method": "GET",
+        "path": "/notes/:noteId",
+        "derived": true
+      },
+      "tool": {
+        "name": "notes_note_get",
+        "default": true,
+        "hints": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "#/schemas/notes.GetNoteInput"
+      },
+      "output": {
+        "$ref": "#/schemas/notes.NoteView"
       }
     },
     {
@@ -74,9 +170,67 @@
       "output": {
         "$ref": "#/schemas/notes.ListNotesOutput"
       }
+    },
+    {
+      "key": "tenancy.approval_binding.prune@1",
+      "kind": "action",
+      "module": "tenancy",
+      "class": "PruneApprovalBindingsAction",
+      "file": "src/node/actions/prune-approval-bindings.action.ts",
+      "permission": "tenancy.approval_binding.prune",
+      "risk": "L4",
+      "actors": ["system"],
+      "job": {
+        "unique": true,
+        "timeout": "5m",
+        "cron": {
+          "schedule": "15 4 * * *",
+          "perScope": true
+        }
+      },
+      "input": {
+        "$ref": "@stackra/tenancy#/schemas/tenancy.PruneApprovalBindingsInput"
+      },
+      "output": {
+        "$ref": "@stackra/tenancy#/schemas/tenancy.PruneApprovalBindingsOutput"
+      },
+      "from": "@stackra/tenancy"
     }
   ],
   "events": [
+    {
+      "name": "notes.note.created.v1",
+      "module": "notes",
+      "class": "NoteCreated",
+      "file": "src/modules/notes/events/note-created.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "#/schemas/notes.NoteCreated"
+      }
+    },
+    {
+      "name": "notes.note.deleted.v1",
+      "module": "notes",
+      "class": "NoteDeleted",
+      "file": "src/modules/notes/events/note-deleted.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "#/schemas/notes.NoteDeleted"
+      }
+    },
+    {
+      "name": "notes.note.updated.v1",
+      "module": "notes",
+      "class": "NoteUpdated",
+      "file": "src/modules/notes/events/note-updated.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "#/schemas/notes.NoteUpdated"
+      }
+    },
     {
       "name": "actions.analytics.tracked.v1",
       "module": "actions",
@@ -112,6 +266,18 @@
         "$ref": "@stackra/actions#/schemas/actions.UsageRecorded"
       },
       "from": "@stackra/actions"
+    },
+    {
+      "name": "scope.node.moved.v1",
+      "module": "scope",
+      "class": "ScopeMoved",
+      "file": "src/node/events/scope-moved.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/scope#/schemas/scope.ScopeMoved"
+      },
+      "from": "@stackra/scope"
     }
   ],
   "permissions": [
@@ -130,9 +296,42 @@
       "module": "notes",
       "member": "create",
       "file": "src/modules/notes/access/note.permissions.ts"
+    },
+    {
+      "key": "notes.note.update",
+      "risk": "L2",
+      "class": "NotePermissions",
+      "module": "notes",
+      "member": "update",
+      "file": "src/modules/notes/access/note.permissions.ts"
+    },
+    {
+      "key": "notes.note.delete",
+      "risk": "L2",
+      "class": "NotePermissions",
+      "module": "notes",
+      "member": "delete",
+      "file": "src/modules/notes/access/note.permissions.ts"
+    },
+    {
+      "key": "tenancy.approval_binding.prune",
+      "risk": "L4",
+      "class": "ApprovalBindingPermissions",
+      "module": "tenancy",
+      "member": "prune",
+      "file": "src/node/access/approval-binding.permissions.ts",
+      "system": true,
+      "from": "@stackra/tenancy"
     }
   ],
   "errors": [
+    {
+      "code": "empty_note_update",
+      "kind": "validation",
+      "category": "validation",
+      "module": "notes",
+      "class": "EmptyNoteUpdateError"
+    },
     {
       "code": "approval_required",
       "kind": "failed_precondition",
@@ -342,6 +541,126 @@
       "from": "@stackra/database"
     },
     {
+      "code": "catalogue_change_backdated",
+      "kind": "validation",
+      "category": "validation",
+      "module": "entitlements",
+      "class": "CatalogueChangeBackdatedError",
+      "from": "@stackra/entitlements"
+    },
+    {
+      "code": "catalogue_version_not_pending",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "entitlements",
+      "class": "CatalogueVersionNotPendingError",
+      "from": "@stackra/entitlements"
+    },
+    {
+      "code": "limit_reached",
+      "kind": "entitlement_required",
+      "category": "entitlement_required",
+      "module": "entitlements",
+      "class": "LimitReachedError",
+      "from": "@stackra/entitlements"
+    },
+    {
+      "code": "quota_exceeded",
+      "kind": "entitlement_required",
+      "category": "entitlement_required",
+      "module": "entitlements",
+      "class": "QuotaExceededError",
+      "from": "@stackra/entitlements"
+    },
+    {
+      "code": "seat_limit_reached",
+      "kind": "entitlement_required",
+      "category": "entitlement_required",
+      "module": "entitlements",
+      "class": "SeatLimitReachedError",
+      "from": "@stackra/entitlements"
+    },
+    {
+      "code": "second_approver_required",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "entitlements",
+      "class": "SecondApproverRequiredError",
+      "from": "@stackra/entitlements"
+    },
+    {
+      "code": "bridge_rejected",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "errors",
+      "class": "BridgeRejectedError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "entitlement_required",
+      "kind": "entitlement_required",
+      "category": "entitlement_required",
+      "module": "errors",
+      "class": "EntitlementRequiredError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "forbidden",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "errors",
+      "class": "ForbiddenError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "idempotency_key_reused",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "errors",
+      "class": "IdempotencyKeyReusedError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "live_read_only",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "errors",
+      "class": "LiveReadOnlyError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "not_found",
+      "kind": "not_found",
+      "category": "not_found",
+      "module": "errors",
+      "class": "NotFoundError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "rate_limited",
+      "kind": "rate_limited",
+      "category": "rate_limited",
+      "module": "errors",
+      "class": "RateLimitedError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "unauthenticated",
+      "kind": "unauthenticated",
+      "category": "unauthenticated",
+      "module": "errors",
+      "class": "UnauthenticatedError",
+      "from": "@stackra/errors"
+    },
+    {
+      "code": "workflow_timed_out",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "errors",
+      "class": "WorkflowTimedOutError",
+      "from": "@stackra/errors"
+    },
+    {
       "code": "job_isolation_missing",
       "kind": "failed_precondition",
       "category": "precondition_failed",
@@ -396,6 +715,110 @@
       "module": "scheduler",
       "class": "InvalidTimeZoneError",
       "from": "@stackra/scheduler"
+    },
+    {
+      "code": "scope_label_invalid",
+      "kind": "validation",
+      "category": "validation",
+      "module": "scope",
+      "class": "ScopeLabelInvalidError",
+      "from": "@stackra/scope"
+    },
+    {
+      "code": "scope_level_invalid",
+      "kind": "validation",
+      "category": "validation",
+      "module": "scope",
+      "class": "ScopeLevelInvalidError",
+      "from": "@stackra/scope"
+    },
+    {
+      "code": "scope_move_invalid",
+      "kind": "validation",
+      "category": "validation",
+      "module": "scope",
+      "class": "ScopeMoveInvalidError",
+      "from": "@stackra/scope"
+    },
+    {
+      "code": "scope_unresolved",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "scope",
+      "class": "ScopeUnresolvedError",
+      "from": "@stackra/scope"
+    },
+    {
+      "code": "region_mismatch",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "RegionMismatchError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "sandbox_not_found",
+      "kind": "not_found",
+      "category": "not_found",
+      "module": "tenancy",
+      "class": "SandboxNotFoundError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "share_transition_invalid",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "ShareTransitionInvalidError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "tenant_membership_missing",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "tenancy",
+      "class": "TenantMembershipMissingError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "tenant_required",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "TenantRequiredError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "tenant_scope_mismatch",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "tenancy",
+      "class": "TenantScopeMismatchError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "tenant_scope_unresolved",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "TenantScopeUnresolvedError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "tenant_switch_refused",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "TenantSwitchRefusedError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "transfer_refused",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "tenancy",
+      "class": "TransferRefusedError",
+      "from": "@stackra/tenancy"
     }
   ],
   "models": [
@@ -405,12 +828,20 @@
       "file": "src/modules/notes/models/note.model.ts",
       "table": "notes.notes",
       "publicId": "not",
-      "traits": ["HasPublicId", "Timestamps"],
+      "traits": ["HasPublicId", "BelongsToTenant", "Timestamps"],
       "entity": {
         "module": "notes",
         "fields": [
           {
-            "name": "text",
+            "name": "title",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "body",
             "optional": false,
             "nullable": false,
             "type": {
@@ -441,12 +872,189 @@
             "type": {
               "kind": "date"
             }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
           }
         ],
         "relations": [],
-        "optional": ["createdAt", "id", "updatedAt"],
+        "optional": ["createdAt", "id", "tenantId", "updatedAt"],
         "computed": []
       }
+    },
+    {
+      "key": "scope.scope_node",
+      "class": "ScopeNode",
+      "file": "src/node/models/scope-node.model.ts",
+      "table": "scope.scope_nodes",
+      "publicId": "scp",
+      "traits": ["HasPublicId", "Timestamps"],
+      "from": "@stackra/scope"
+    },
+    {
+      "key": "tenancy.approval_binding",
+      "class": "ApprovalBinding",
+      "file": "src/node/models/approval-binding.model.ts",
+      "table": "tenancy.approval_bindings",
+      "publicId": "apr",
+      "traits": ["HasPublicId", "BelongsToTenant", "AppendOnly"],
+      "entity": {
+        "module": "tenancy",
+        "fields": [
+          {
+            "name": "approvals",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "number"
+            },
+            "int": true
+          },
+          {
+            "name": "scope",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "shipped",
+              "name": "ScopeRef",
+              "from": "@stackra/validation"
+            }
+          },
+          {
+            "name": "requester",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "shipped",
+              "name": "Actor",
+              "from": "@stackra/validation"
+            }
+          },
+          {
+            "name": "key",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "inputHash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "assuranceAmr",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "array",
+              "element": {
+                "kind": "string"
+              }
+            }
+          },
+          {
+            "name": "assuranceLevel",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "enum",
+              "name": "AssuranceLevel",
+              "values": ["aal1", "aal2", "aal3"]
+            }
+          },
+          {
+            "name": "assuranceAuthTime",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "requestedAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "expiresAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "permission",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "approverLevel",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "enum",
+              "name": "AssuranceLevel",
+              "values": ["aal1", "aal2", "aal3"]
+            }
+          },
+          {
+            "name": "confirm",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "boolean"
+            }
+          },
+          {
+            "name": "execute",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "apr"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
+      "from": "@stackra/tenancy"
     }
   ],
   "drivers": [
@@ -953,6 +1561,182 @@
       "from": "@stackra/database"
     },
     {
+      "port": "RateLimitBudget",
+      "key": "actions.RateLimitBudget",
+      "candidates": ["entitlement"],
+      "classes": {
+        "entitlement": {
+          "class": "EntitlementRateLimitBudgetDriver",
+          "from": "@stackra/entitlements",
+          "deps": [
+            {
+              "class": {
+                "name": "EntitlementSource",
+                "from": "@stackra/entitlements/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/entitlements"
+    },
+    {
+      "port": "CatalogueVersions",
+      "key": "entitlements.CatalogueVersions",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryCatalogueVersionsDriver",
+          "from": "@stackra/entitlements"
+        }
+      },
+      "from": "@stackra/entitlements"
+    },
+    {
+      "port": "PlanSnapshots",
+      "key": "entitlements.PlanSnapshots",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryPlanSnapshotsDriver",
+          "from": "@stackra/entitlements"
+        }
+      },
+      "from": "@stackra/entitlements"
+    },
+    {
+      "port": "SeatLedger",
+      "key": "entitlements.SeatLedger",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemorySeatLedgerDriver",
+          "from": "@stackra/entitlements"
+        }
+      },
+      "from": "@stackra/entitlements"
+    },
+    {
+      "port": "EntitlementCheck",
+      "key": "actions.EntitlementCheck",
+      "candidates": ["plan"],
+      "classes": {
+        "plan": {
+          "class": "PlanEntitlementCheckDriver",
+          "from": "@stackra/entitlements",
+          "deps": [
+            {
+              "class": {
+                "name": "EntitlementSource",
+                "from": "@stackra/entitlements/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "EntitlementUsage",
+                "from": "@stackra/entitlements/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "MeterTotals",
+                "from": "@stackra/entitlements/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "QuotaWarnings",
+                "from": "@stackra/entitlements/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/entitlements"
+    },
+    {
+      "port": "LimitReservation",
+      "key": "actions.LimitReservation",
+      "candidates": ["plan"],
+      "classes": {
+        "plan": {
+          "class": "PlanLimitReservationDriver",
+          "from": "@stackra/entitlements",
+          "deps": [
+            {
+              "class": {
+                "name": "LimitReservationService",
+                "from": "@stackra/entitlements"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/entitlements"
+    },
+    {
+      "port": "EntitlementSource",
+      "key": "entitlements.EntitlementSource",
+      "candidates": ["plan_snapshot"],
+      "classes": {
+        "plan_snapshot": {
+          "class": "PlanSnapshotEntitlementSourceDriver",
+          "from": "@stackra/entitlements",
+          "deps": [
+            {
+              "class": {
+                "name": "PlanSnapshots",
+                "from": "@stackra/entitlements/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/entitlements"
+    },
+    {
+      "port": "ErrorReporter",
+      "key": "errors.ErrorReporter",
+      "candidates": ["memory", "sentry"],
+      "classes": {
+        "memory": {
+          "class": "MemoryErrorReporterDriver",
+          "from": "@stackra/errors"
+        },
+        "sentry": {
+          "class": "SentryErrorReporterDriver",
+          "from": "@stackra/errors",
+          "deps": [
+            {
+              "class": {
+                "name": "SentryConfig",
+                "from": "@stackra/errors"
+              }
+            },
+            {
+              "class": {
+                "name": "SecretStore",
+                "from": "@stackra/config/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/errors"
+    },
+    {
       "port": "AccessControl",
       "key": "actions.AccessControl",
       "candidates": ["iam"],
@@ -1288,6 +2072,396 @@
         "from": "@stackra/scheduler"
       },
       "from": "@stackra/scheduler"
+    },
+    {
+      "port": "ScopeResolver",
+      "key": "scope.ScopeResolver",
+      "candidates": ["chain", "claim", "header", "memory", "root"],
+      "classes": {
+        "chain": {
+          "class": "ChainScopeResolverDriver",
+          "from": "@stackra/scope",
+          "deps": [
+            {
+              "class": {
+                "name": "HeaderScopeResolverDriver",
+                "from": "@stackra/scope"
+              }
+            },
+            {
+              "class": {
+                "name": "ClaimScopeResolverDriver",
+                "from": "@stackra/scope"
+              }
+            },
+            {
+              "class": {
+                "name": "RootScopeResolverDriver",
+                "from": "@stackra/scope"
+              }
+            }
+          ]
+        },
+        "claim": {
+          "class": "ClaimScopeResolverDriver",
+          "from": "@stackra/scope",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            }
+          ]
+        },
+        "header": {
+          "class": "HeaderScopeResolverDriver",
+          "from": "@stackra/scope",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "GrantedScopes",
+                "from": "@stackra/scope/contracts"
+              }
+            }
+          ]
+        },
+        "memory": {
+          "class": "MemoryScopeResolverDriver",
+          "from": "@stackra/scope",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ScopeConfig",
+                "from": "@stackra/scope"
+              }
+            }
+          ]
+        },
+        "root": {
+          "class": "RootScopeResolverDriver",
+          "from": "@stackra/scope",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ScopeConfig",
+                "from": "@stackra/scope"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/scope"
+    },
+    {
+      "port": "ScopeTree",
+      "key": "scope.ScopeTree",
+      "candidates": ["memory", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemoryScopeTreeDriver",
+          "from": "@stackra/scope"
+        },
+        "postgres": {
+          "class": "PostgresScopeTreeDriver",
+          "from": "@stackra/scope/node",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeNodeService",
+                "from": "@stackra/scope/node"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/scope"
+    },
+    {
+      "port": "CacheNamespace",
+      "key": "cache.CacheNamespace",
+      "candidates": ["scope"],
+      "classes": {
+        "scope": {
+          "class": "ScopeCacheNamespaceDriver",
+          "from": "@stackra/scope",
+          "deps": [
+            {
+              "class": {
+                "name": "ContextStorage",
+                "from": "@stackra/actions/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/scope"
+    },
+    {
+      "port": "SandboxTenants",
+      "key": "tenancy.SandboxTenants",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemorySandboxTenantsDriver",
+          "from": "@stackra/tenancy"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantBillingContacts",
+      "key": "tenancy.TenantBillingContacts",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantBillingContactsDriver",
+          "from": "@stackra/tenancy"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantDirectory",
+      "key": "tenancy.TenantDirectory",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantDirectoryDriver",
+          "from": "@stackra/tenancy"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantPlacement",
+      "key": "tenancy.TenantPlacement",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantPlacementDriver",
+          "from": "@stackra/tenancy"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantShares",
+      "key": "tenancy.TenantShares",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantSharesDriver",
+          "from": "@stackra/tenancy"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantTokens",
+      "key": "tenancy.TenantTokens",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantTokensDriver",
+          "from": "@stackra/tenancy"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenancyCheck",
+      "key": "actions.TenancyCheck",
+      "candidates": ["region_guard"],
+      "classes": {
+        "region_guard": {
+          "class": "RegionGuardDriver",
+          "from": "@stackra/tenancy",
+          "deps": [
+            {
+              "class": {
+                "name": "TenantPlacement",
+                "from": "@stackra/tenancy"
+              }
+            },
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "DatabaseConfig",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "CronScopes",
+      "key": "scheduler.CronScopes",
+      "candidates": ["tenancy"],
+      "classes": {
+        "tenancy": {
+          "class": "TenancyCronScopesDriver",
+          "from": "@stackra/tenancy",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ScopeConfig",
+                "from": "@stackra/scope"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "ConnectionResolver",
+      "key": "database.ConnectionResolver",
+      "candidates": ["tenant_placement"],
+      "classes": {
+        "tenant_placement": {
+          "class": "TenantPlacementConnectionResolverDriver",
+          "from": "@stackra/tenancy",
+          "deps": [
+            {
+              "class": {
+                "name": "TenantPlacement",
+                "from": "@stackra/tenancy"
+              }
+            },
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "ScopeOwnership",
+      "key": "actions.ScopeOwnership",
+      "candidates": ["tenant"],
+      "classes": {
+        "tenant": {
+          "class": "TenantScopeOwnershipDriver",
+          "from": "@stackra/tenancy",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "ScopeResolver",
+      "key": "scope.ScopeResolver",
+      "candidates": ["tenant"],
+      "classes": {
+        "tenant": {
+          "class": "TenantScopeResolverDriver",
+          "from": "@stackra/tenancy",
+          "deps": [
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "CallIsolation",
+      "key": "actions.CallIsolation",
+      "candidates": ["call_isolation"],
+      "classes": {
+        "call_isolation": {
+          "class": "CallIsolationDriver",
+          "from": "@stackra/tenancy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "TenantIsolationService",
+                "from": "@stackra/tenancy/node"
+              }
+            },
+            {
+              "class": {
+                "name": "ScopeTree",
+                "from": "@stackra/scope/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "ApprovalBindingStore",
+      "key": "actions.ApprovalBindingStore",
+      "candidates": ["postgres"],
+      "classes": {
+        "postgres": {
+          "class": "PostgresApprovalBindingStoreDriver",
+          "from": "@stackra/tenancy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/tenancy"
     }
   ],
   "integrations": [],
@@ -1295,7 +2469,18 @@
   "outcomes": [],
   "agents": [],
   "passes": [],
-  "entitlements": [],
+  "entitlements": [
+    {
+      "key": "scope.scope_depth",
+      "class": "ScopeDepthEntitlement",
+      "module": "scope",
+      "file": "src/node/access/scope-depth.entitlement.ts",
+      "kind": "limit",
+      "counts": "scope.scope_node",
+      "gates": [],
+      "from": "@stackra/scope"
+    }
+  ],
   "roles": [],
   "commands": [
     {
@@ -1374,16 +2559,73 @@
       "file": "src/node/commands/queue-work.command.ts",
       "entry": "node",
       "from": "@stackra/queue"
+    },
+    {
+      "name": "tenant:create",
+      "aliases": [],
+      "hidden": false,
+      "audit": true,
+      "bin": false,
+      "class": "TenantCreateCommand",
+      "file": "src/node/commands/tenant-create.command.ts",
+      "entry": "node",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "name": "tenant:list",
+      "aliases": [],
+      "hidden": false,
+      "audit": true,
+      "bin": false,
+      "class": "TenantListCommand",
+      "file": "src/node/commands/tenant-list.command.ts",
+      "entry": "node",
+      "from": "@stackra/tenancy"
     }
   ],
   "schemas": {
+    "notes.NoteCreated": {
+      "type": "object",
+      "required": ["noteId"],
+      "properties": {
+        "noteId": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
+        }
+      }
+    },
+    "notes.NoteDeleted": {
+      "type": "object",
+      "required": ["noteId"],
+      "properties": {
+        "noteId": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
+        }
+      }
+    },
+    "notes.NoteUpdated": {
+      "type": "object",
+      "required": ["noteId"],
+      "properties": {
+        "noteId": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
+        }
+      }
+    },
     "notes.Note": {
       "type": "object",
-      "required": ["text", "id", "createdAt", "updatedAt"],
+      "required": ["title", "body", "id", "createdAt", "updatedAt", "tenantId"],
       "properties": {
-        "text": {
+        "title": {
           "type": "string",
-          "maxLength": 500
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "body": {
+          "type": "string",
+          "maxLength": 2000
         },
         "id": {
           "type": "string",
@@ -1396,43 +2638,66 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "tenantId": {
+          "type": "string",
+          "pattern": "^scp_[0-9A-Za-z]{26}$"
         }
       }
     },
     "notes.CreateNoteInput": {
       "type": "object",
-      "required": ["text"],
+      "required": ["title"],
       "properties": {
-        "text": {
+        "title": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 500
+          "maxLength": 120
+        },
+        "body": {
+          "type": "string",
+          "maxLength": 2000
         }
       }
     },
-    "notes.CreateNoteOutput": {
+    "notes.DeleteNoteInput": {
       "type": "object",
-      "required": ["id", "text", "createdAt"],
+      "required": ["noteId"],
+      "properties": {
+        "noteId": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
+        }
+      }
+    },
+    "notes.DeleteNoteOutput": {
+      "type": "object",
+      "required": ["id"],
       "properties": {
         "id": {
           "type": "string",
           "pattern": "^not_[0-9A-Za-z]{26}$"
-        },
-        "text": {
-          "type": "string"
-        },
-        "createdAt": {
+        }
+      }
+    },
+    "notes.GetNoteInput": {
+      "type": "object",
+      "required": ["noteId"],
+      "properties": {
+        "noteId": {
           "type": "string",
-          "format": "date-time"
+          "pattern": "^not_[0-9A-Za-z]{26}$"
         }
       }
     },
     "notes.ListNotesInput": {
       "type": "object",
-      "required": ["limit"],
       "properties": {
         "limit": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
         },
         "cursor": {
           "type": "string"
@@ -1459,18 +2724,44 @@
     },
     "notes.NoteView": {
       "type": "object",
-      "required": ["id", "text", "createdAt"],
+      "required": ["id", "title", "body", "createdAt", "updatedAt"],
       "properties": {
         "id": {
           "type": "string",
           "pattern": "^not_[0-9A-Za-z]{26}$"
         },
-        "text": {
+        "title": {
+          "type": "string"
+        },
+        "body": {
           "type": "string"
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "notes.UpdateNoteInput": {
+      "type": "object",
+      "required": ["noteId"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "body": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "noteId": {
+          "type": "string",
+          "pattern": "^not_[0-9A-Za-z]{26}$"
         }
       }
     }

@@ -62,7 +62,7 @@ All on `main` at `12f5b42` unless stated.
 
 | Path                                                       | One line                                                                                  |
 | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `services/example/`                                        | `@figentra/acme-service-example`, the `notes` module; drift-checked against `stackra new` |
+| `services/example/`                                        | `@figentra/acme-service-example`: the tenant-owned `notes` module, the golden path to use |
 | `packages/application/example/`                            | `@figentra/acme-example`: console, native and landing entries                             |
 | `apps/console/`                                            | `@figentra/acme-console`, the web console of the minimal profile                          |
 | `apps/docs/`                                               | `@acme/docs`, docs pages and the project's ADR index (empty: no ADR yet)                  |
