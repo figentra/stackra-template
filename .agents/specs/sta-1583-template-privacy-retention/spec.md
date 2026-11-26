@@ -37,7 +37,8 @@ identities named in STA-1583 are the owner's and are not part of it.
 
 ## Impact
 
-- **Apps touched**: none
+- **Apps touched**: none by this change; the branch carries the `apps/console` changes of
+  stackra-template#58 and #61, which it stacks on
 - **Services touched**: `services/example` (notes module, a new `compliance` module, README,
   AGENTS.md)
 - **Packages touched**: none in this repo; core's `@stackra/access-log` fix is its own change

@@ -3,18 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "description": "An example service: one tenant-owned resource (notes) through the actions pipeline; rename it to the product's first service or delete it.",
-  "keywords": [
-    "stackra"
-  ],
+  "keywords": ["stackra"],
   "license": "UNLICENSED",
   "type": "module",
   "imports": {
-    "#src/*": [
-      "./src/*",
-      "./src/*.ts",
-      "./src/*.tsx",
-      "./src/*/index.ts"
-    ],
+    "#src/*": ["./src/*", "./src/*.ts", "./src/*.tsx", "./src/*/index.ts"],
     "#config/*": [
       "./src/config/*",
       "./src/config/*.ts",
@@ -103,8 +96,6 @@
   "stackra": {
     "kind": "package",
     "tier": "service",
-    "runtimes": [
-      "node"
-    ]
+    "runtimes": ["node"]
   }
 }
