@@ -17,6 +17,7 @@
     "format:check": "oxfmt --check .",
     "spell": "cspell lint --no-progress --dot --gitignore \"**/*.{md,mdx,ts,tsx,css,yaml,yml}\"",
     "test": "turbo run test",
+    "test:int": "turbo run test:int",
     "test:coverage": "turbo run test:coverage",
     "test:e2e": "turbo run test:e2e",
     "clean": "turbo run clean",

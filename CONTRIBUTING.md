@@ -21,8 +21,13 @@ in the [Stackra docs](https://docs.stackra.figentra.com). The short version:
    ([`.changeset/README.md`](.changeset/README.md)). Apps and services need none; they deploy by
    commit.
 5. Use conventional commits (`.commitlintrc.yaml`, rules from `@stackra/commitlint-config`).
-6. `pnpm verify` (format, lint, typecheck, test, build, gen check, validate, boundaries, knip) runs
-   on the box after the merge, not before it ("Tests run later" below); `pnpm spell` clean.
+6. The Quality Gate (`.github/workflows/ci.yml`) runs lint, typecheck, build, gen check, validate,
+   the unit tests (`pnpm test`) and the integration tests on a real Postgres (`pnpm test:int`,
+   Testcontainers, needs Docker); `pnpm verify` runs the same checks with format, boundaries and
+   knip. A member with `.int.test.ts` files, or with tables gen writes a tenant-isolation test for,
+   declares `"test:int": "stackra test --tier int"` (the gate's `tiers` check refuses one that does
+   not). Where the repository variable `CI_TESTS` is `off`, the tests run on the box after the merge
+   instead ("Tests run later" below); `pnpm spell` clean.
 7. Open a pull request using the template and state its change risk (below). A reviewer other than
    the author approves; the code owners in `.github/CODEOWNERS` review the files they own.
 
@@ -68,10 +73,14 @@ Report security issues privately, as described in [`SECURITY.md`](SECURITY.md).
 
 ## Tests run later: merge now, label `needs-testing`
 
+This section applies where the repository variable `CI_TESTS` is `off`: Figentra's own copy of this
+template, whose tests run on the testbed (STA-2064). A product created from the template leaves the
+variable unset, and its Quality Gate runs the unit and integration tests on every pull request.
+
 Owner decision 2026-11-03 (STA-2083, replaces "Tests run on the box"): nothing waits on tests before
 it lands. No box run before the merge and no waiting on CI: open the pull request and merge it right
 away (`gh pr merge --squash --admin`), then add the Linear label `needs-testing` to its STA issue
 and a `Needs testing: <what to run>` line to the pull request body. The tester lane later runs those
 tests on the box (`ci-box run "template STA-n" . "pnpm verify"`; `stackra testbed run` once the
-testbed is live) and removes the label. GitHub CI runs no tests; its checks still run after the
-merge and stay visible. Nothing installs or tests on a workstation.
+testbed is live) and removes the label. With `CI_TESTS=off` GitHub CI runs no tests; its other
+checks still run after the merge and stay visible. Nothing installs or tests on a workstation.
