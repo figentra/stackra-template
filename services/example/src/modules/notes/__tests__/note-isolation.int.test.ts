@@ -61,6 +61,15 @@ async function stored(): Promise<{ title: string; owner: string }[]> {
   }[];
 }
 
+/** Inserts a note row by hand under the current role and tenant, past the model, as a forged write would. */
+function insert(id: string, owner: string, title: string): Promise<unknown> {
+  return postgres.database
+    .em()
+    .execute(
+      `insert into "notes"."notes" (id, tenant_id, title, body) values ('${id}', '${owner}', '${title}', '')`,
+    );
+}
+
 /** Empties the table, then gives the service role (no login, no BYPASSRLS) the schema's table. */
 async function prepare(): Promise<void> {
   const em = postgres.database.em();
@@ -135,18 +144,26 @@ describe("notes tenant isolation", () => {
     expect(await asService(() => notes.find({}))).toHaveLength(0);
   });
 
-  /** A write cannot name another tenant: the row policy's check refuses it. */
+  /**
+   * A write cannot name another tenant: the row policy's check refuses it (Postgres error 42501). The same
+   * statement naming the writer's own tenant is stored first, so the refusal is the policy's and not a malformed
+   * row's.
+   */
   it("refuses a row written under one tenant that names another", async () => {
+    // A public id is `not_` and 26 characters, within the column's varchar(33).
+    await asOwner(tenantActor(b), () => insert("not_01ja0000000000000000000076", b, "b-own"));
     await expect(
-      asOwner(tenantActor(b), () =>
-        postgres.database
-          .em()
-          .execute(
-            `insert into "notes"."notes" (id, tenant_id, title, body) values (gen_random_uuid(), '${a}', 'forged', '')`,
-          ),
-      ),
-    ).rejects.toThrow();
-    expect(await stored()).toHaveLength(3);
+      asOwner(tenantActor(b), () => insert("not_01ja0000000000000000000077", a, "forged")),
+    ).rejects.toMatchObject({
+      code: "42501",
+      message: expect.stringMatching(/row-level security policy/),
+    });
+    expect((await stored()).map((row) => row.title)).toEqual([
+      "a-first",
+      "a-second",
+      "b-only",
+      "b-own",
+    ]);
   });
 
   /** The policy is forced, so even the table's owner reads nothing without a tenant. */
