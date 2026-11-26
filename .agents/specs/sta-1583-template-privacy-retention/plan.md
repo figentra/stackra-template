@@ -8,8 +8,9 @@
 ## Summary
 
 Record a note's author, declare the note's personal data and retention, and bind the Postgres
-drivers the core privacy and audit packages leave to the host. Gen then registers the export,
-erasure, purge and prune jobs from the new dependencies.
+drivers the core privacy package leaves to the host. Gen then registers the export, erasure, purge
+and prune jobs from the new dependencies. The audit package's `AuditTrail` is not bound until core
+releases its Postgres append fix; a smoke case keeps the note writes committing.
 
 ## Technical Context
 
@@ -27,7 +28,7 @@ erasure, purge and prune jobs from the new dependencies.
 | ------------------------------------- | ------ | ------------------------------------------------------------------- |
 | Boundaries (tier direction, ADR 0003) | PASS   | a service depends on core packages only                             |
 | Secrets (ADR 0009)                    | PASS   | none; the export disk's credentials are runway's                    |
-| Security                              | PASS   | adds erasure, holds, retention and the write audit                  |
+| Security                              | PASS   | adds erasure, holds and retention; the write audit waits for core   |
 | HTTP and events                       | PASS   | no note route changes; `privacy.subject.erased.v1` is the package's |
 | Tenancy                               | PASS   | the author comes from the actor; every new table is per tenant      |
 | Delegation                            | PASS   | Claude only                                                         |
@@ -56,8 +57,10 @@ erasure, purge and prune jobs from the new dependencies.
   AC-003, AC-004
 - **P-004**: a held note or a held author's note survives the prune and the erasure — Validates:
   AC-004, AC-005
-- **P-005**: the generated wiring replaces the four ports with the service's drivers — Validates:
-  AC-006
+- **P-005**: the generated wiring replaces the three privacy ports with the service's drivers and
+  binds no `AuditTrail` — Validates: AC-006, AC-007
+- **P-006**: a note's create, update and delete through the pipeline with the generated wiring's
+  ports commit — Validates: AC-008
 
 ## Architecture overview
 
@@ -73,8 +76,8 @@ hold registry.
 - `CreateNoteAction`: stores `authorId` from the call's actor.
 - `NotePersonalData`: the subject and erasure methods, and the hold link.
 - `NOTE_RETENTION`: two years from `updatedAt`, hard delete.
-- `PostgresAuditTrailDriver`, `PostgresHoldRegistryDriver`, `PostgresSubjectHoldsDriver`,
-  `PostgresSubjectSaltStoreDriver`: the service's bindings of the four ports.
+- `PostgresHoldRegistryDriver`, `PostgresSubjectHoldsDriver`, `PostgresSubjectSaltStoreDriver`:
+  the service's bindings of the three privacy ports. No `AuditTrail` binding yet (AC-007).
 
 ## Files and folders
 
@@ -85,7 +88,6 @@ services/example/
   package.json
   openapi.json
   stackra.manifest.json
-  src/modules/compliance/drivers/postgres-audit-trail.driver.ts
   src/modules/compliance/drivers/postgres-hold-registry.driver.ts
   src/modules/compliance/drivers/postgres-subject-holds.driver.ts
   src/modules/compliance/drivers/postgres-subject-salt-store.driver.ts
@@ -138,21 +140,22 @@ is handled per tenant.
 - AC-001: `create-note.action.test.ts` (a user and an agent on behalf of a user) and
   `note-author-of.function.test.ts`.
 - AC-002: `note.personal-data.test.ts` (registered through `NoteService`).
-- AC-003, AC-004, AC-005, AC-007: `note-privacy.int.test.ts` on Postgres.
-- AC-006: `compliance-wiring.test.ts`.
+- AC-003, AC-004, AC-005, AC-008: `note-privacy.int.test.ts` on Postgres.
+- AC-006, AC-007: `compliance-wiring.test.ts`.
 - Each test fails with its change reverted (shown in the PR).
 
 ## Rollout
 
 - The starter ships it to new apps; an app created before keeps its own code.
-- The audit case is `it.fails` until the template's pin carries the core access-log fix.
-- The service needs the 0.33 catalog (stackra-template#58); at 0.15.0 gen's imports for access-log
-  and data-maintenance do not resolve.
+- The `AuditTrail` driver and the audit-chain integration case come with the catalog bump to the
+  access-log release carrying the core fix; until then nothing is audited and every write commits.
+- The service needs the 0.33 catalog (stackra-template#58, merged into this branch); at 0.15.0
+  gen's imports for access-log and data-maintenance do not resolve.
 
 ## Known risks
 
 - Until the core fix ships, binding access-log's `AuditTrail` makes every audited write fail on
-  Postgres.
+  Postgres, so the service ships unaudited; `compliance-wiring.test.ts` refuses an early binding.
 - `filesystem.disk: local` (dev) cannot sign an export link.
 
 ## Delegation and risk plan

@@ -23,9 +23,10 @@ what: |
 
   This repository is the **lean starter** for a product repository, in the programming model v3.1: the
   root config, the docs site, one example service and one example package. It is a starting point, not
-  a sample product. The example service holds one small module, `notes` (a model, an action, a query and
-  a migration), and `apps/console` is the web console of the minimal starter profile (see
-  below). The tool presets are the core
+  a sample product. The example service holds one module, `notes`: a tenant-owned resource (create, get,
+  list, update, delete) with its row-level policy, permissions, a required idempotency key on create and
+  its isolation tests, the golden path to copy; `apps/console` is the web console of the minimal starter
+  profile (see below). The tool presets are the core
   `@stackra/*-config` packages, from `catalog:stackra`. Products ship packages and add apps only when
   they need one (D16). The placeholder product is **Acme** (`product.key: acme` in `runway.yaml`).
   Nothing generated is committed: `.stackra/` is gitignored and `stackra gen` writes it.

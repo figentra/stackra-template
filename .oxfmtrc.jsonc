@@ -39,6 +39,9 @@
     ".agents/hooks/**",
     ".agents/reference/**",
     ".agents/models.yaml",
+    // Flow specs: `fflow gate ci` (ADR 0502) reads each task and each acceptance criterion as one line, so a
+    // proseWrap split hides a task's files, `covers:` and `route:` and an EARS clause from the gate
+    ".agents/specs/**",
     ".agents/routing.yaml",
     ".opencode/plugins/**",
     "**/node_modules/**",

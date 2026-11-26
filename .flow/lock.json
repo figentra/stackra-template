@@ -116,10 +116,10 @@
     "opencode.jsonc": "sha256:c0579ded627787181784c885d1061731d9ad8272c542e49370a93c82f2da7594",
     ".opencode/plugins/fflow-guard.mjs": "sha256:e9c0756b94ecb296463f54b1d62c9953c3d36c989d3f30e6754513baefad6718",
     ".mcp.yaml": "sha256:eb64b514cc3a88009ebd176ca1c2f7f633a3f5a5c36adfa649f69fb43034df8f",
-    "AGENTS.md": "sha256:00df9c73d671f84ca3435cc543d3bc4919cd67148c24083e70c1d8078001ce65",
+    "AGENTS.md": "sha256:30df4003b5a696dc7d34feda65a0b358c3392cba224c08bd0c5e380f3ce51119",
     "CLAUDE.md": "sha256:be8b565699935f287e1c711cea7d88d45571f22eca009855e3f8dcbc2d275a08",
     "lefthook.yml": "sha256:69d83caab988d24a66d58758cc86745da3d134f09a6bece3df191044a59808c5",
-    "README.md": "sha256:23ccab05df2d70406536018cd004021b11b1aa3c3075706b4b80bff1a86f9dea",
+    "README.md": "sha256:9c3501f0fb2dea105d99b36c2096e274b68cd1872d0fe564f79e7e91765ec0d9",
     ".github/workflows/fflow-baseline.yml": "sha256:f60c64e0e020dde25e64fcbcacd2af9a0bd09ea004750d486368785e28998cf2",
     ".github/workflows/fflow-approve.yml": "sha256:e48530e7678d9af3e992f936ff28bde8a0e48259cb7029808c24da967057da13",
     ".github/CODEOWNERS": "sha256:ac35f2f7a8868da3be8c1eba0e07854550e62567551a4a4bc19583a126825b89"
