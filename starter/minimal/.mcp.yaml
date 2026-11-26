@@ -1,0 +1,21 @@
+# The MCP servers this app's coding agents use: Stackra's own CLI, the local Encore app and the HeroUI docs
+# the console is built with. `stackra mcp sync` (run by `prepare`) renders the gitignored .mcp.json from this
+# file; add a server here and run it again.
+mcpServers:
+  heroui-react:
+    command: npx
+    args:
+      - -y
+      - "@heroui/react-mcp@1.1.2"
+  stackra:
+    command: pnpm
+    args:
+      - exec
+      - stackra
+      - mcp
+  encore:
+    command: encore
+    args:
+      - mcp
+      - run
+      - --app=acme-platform

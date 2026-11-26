@@ -1,0 +1,298 @@
+# yaml-language-server: $schema=https://json.schemastore.org/pnpm-workspace.json
+# Stackra file contract:
+# Purpose: workspace members, the only source of versions (catalogs) and the install policy. Every
+#          version any member references is pinned here; a member's package.json names a catalog
+#          (`catalog:<name>`) or `workspace:*`, never a literal version.
+# Boundary: versions and install policy only; no scripts and no secret. Exact pins, no ranges.
+#           Workspace members (the example service and package) are `workspace:*`, never catalog
+#           entries; the tool presets are the core @stackra/*-config packages, from `catalog:stackra`.
+# Runtime: node
+# Governing contract: Stackra ADR 0013 (versions come only from catalogs and workspace references),
+#                     Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0294 (decisions 23 and
+#                     26: package names, the zod pin)
+packages:
+  - apps/*
+  - packages/*/*
+  - services/*
+
+# `strict`: `pnpm add` only accepts a version that already exists in a catalog. A new dependency is
+# added here first, then referenced by the member.
+catalogMode: strict
+
+# Refuse an unsupported Node (engines in package.json).
+engineStrict: true
+# A `pnpm <script>` or `pnpm exec` never installs on its own (pnpm 12 installed whole workspaces from commit hooks
+# on a Mac, 2026-11-03); it warns, and installs run on the box and in CI.
+verifyDepsBeforeRun: warn
+
+# Supply chain (Stackra ADR 0019): a version must be at least one day old before pnpm resolves it, so
+# a compromised release has time to be pulled; a dependency that loses its trusted-publisher
+# provenance between versions fails the install instead of downgrading silently.
+minimumReleaseAge: 1440
+# First-party packages, published from our own CI with provenance; third-party packages keep the day.
+minimumReleaseAgeExclude:
+  - "@stackra/*"
+  - "@stackra-pro/*"
+trustPolicy: no-downgrade
+# 2.2.2's npm wrapper was hand-published by the sole maintainer; gitHead eb4e504 = tag v2.2.2, the platform
+# binaries carry SLSA provenance, and the diff vs 2.2.1 is version bumps + android-arm64 (checked 2026-10-29).
+trustPolicyExclude:
+  - "lefthook@2.2.2"
+  # semver 6.3.1 (Babel 7 pins ^6.3.1): the 6.x line never had provenance and pnpm compares it with the
+  # provenanced 7.x line; published by npm CLI maintainer lukekarrys (CVE-2022-25883 fix), gitHead b717044 =
+  # "chore: release 6.3.1", diff vs 6.3.0 is tooling metadata plus the regex fix (checked 2026-10-29).
+  - "semver@6.3.1"
+
+catalogs:
+  # Stackra framework packages, one version line for the whole framework. Bumped together. Lists
+  # every framework package a product uses (the union of the products' members), so
+  # `catalogMode: strict` never blocks a product from adding one.
+  stackra:
+    "@stackra/access-log": 0.15.0
+    "@stackra/achievements": 0.15.0
+    "@stackra/actions": 0.15.0
+    "@stackra/ai": 0.15.0
+    "@stackra/analytics": 0.15.0
+    "@stackra/app": 0.15.0
+    "@stackra/assets": 0.15.0
+    "@stackra/builder": 0.15.0
+    "@stackra/cache": 0.15.0
+    "@stackra/calendar": 0.15.0
+    "@stackra/cli": 0.15.0
+    "@stackra/clients": 0.15.0
+    "@stackra/collaboration": 0.15.0
+    "@stackra/commitlint-config": 0.15.0
+    "@stackra/config": 0.15.0
+    "@stackra/console": 0.15.0
+    "@stackra/consent": 0.15.0
+    "@stackra/container": 0.15.0
+    "@stackra/content": 0.15.0
+    "@stackra/contracts": 0.15.0
+    "@stackra/coordinator": 0.15.0
+    "@stackra/csp": 0.15.0
+    "@stackra/data-transfer": 0.15.0
+    "@stackra/database": 0.15.0
+    "@stackra/devices": 0.15.0
+    "@stackra/documents": 0.15.0
+    "@stackra/entitlements": 0.15.0
+    "@stackra/errors": 0.15.0
+    "@stackra/events": 0.15.0
+    "@stackra/experience": 0.15.0
+    "@stackra/feature-flags": 0.15.0
+    "@stackra/filesystem": 0.15.0
+    "@stackra/fiscal": 0.15.0
+    "@stackra/gen": 0.15.0
+    "@stackra/i18n": 0.15.0
+    "@stackra/iam": 0.15.0
+    "@stackra/icons": 0.15.0
+    "@stackra/identity": 0.15.0
+    "@stackra/integrations": 0.15.0
+    "@stackra/ledger": 0.15.0
+    "@stackra/licensing": 0.15.0
+    "@stackra/locking": 0.15.0
+    "@stackra/logger": 0.15.0
+    "@stackra/loyalty-kit": 0.15.0
+    "@stackra/market-packs": 0.15.0
+    "@stackra/media": 0.15.0
+    "@stackra/model": 0.15.0
+    "@stackra/money": 0.15.0
+    "@stackra/navigation": 0.15.0
+    "@stackra/notifications": 0.15.0
+    "@stackra/outbox": 0.15.0
+    "@stackra/oxlint-config": 0.15.0
+    "@stackra/panel": 0.15.0
+    "@stackra/payments": 0.15.0
+    "@stackra/peripherals": 0.15.0
+    "@stackra/platform": 0.15.0
+    "@stackra/pricing": 0.15.0
+    "@stackra/query": 0.15.0
+    "@stackra/queue": 0.15.0
+    "@stackra/realtime": 0.15.0
+    "@stackra/registry": 0.15.0
+    "@stackra/rules": 0.15.0
+    "@stackra/runway": 0.15.0
+    "@stackra/scheduler": 0.15.0
+    "@stackra/scope": 0.15.0
+    "@stackra/search": 0.15.0
+    "@stackra/segments": 0.15.0
+    "@stackra/seo": 0.15.0
+    "@stackra/settings": 0.15.0
+    "@stackra/shipping": 0.15.0
+    "@stackra/shortcuts": 0.15.0
+    "@stackra/state": 0.15.0
+    "@stackra/state-machine": 0.15.0
+    "@stackra/storage": 0.15.0
+    "@stackra/support": 0.15.0
+    "@stackra/tenancy": 0.15.0
+    "@stackra/testing": 0.15.0
+    "@stackra/theming": 0.15.0
+    "@stackra/tokens": 0.15.0
+    "@stackra/transport": 0.15.0
+    "@stackra/tsdown-config": 0.15.0
+    "@stackra/typescript-config": 0.15.0
+    "@stackra/ui": 0.15.0
+    "@stackra/validation": 0.15.0
+    "@stackra/versioning": 0.15.0
+    "@stackra/vitest-config": 0.15.0
+    "@stackra/vite-plugin": 0.15.0
+    "@stackra/webhooks": 0.15.0
+    "@stackra/workflow": 0.15.0
+  # Shared by web, desktop and mobile members (`catalog:`). react and react-dom stay on the exact
+  # renderer version react-native 0.86 (Expo SDK 57) ships with, so every member and every package
+  # with a React entry resolves one React.
+  default:
+    react: 19.2.3
+    react-dom: 19.2.3
+    react-router: 7.18.4
+    isbot: 5.1.31
+    "@react-email/components": 0.5.2
+    # Node 24 is the runtime (mise.toml, .node-version); the types follow its major.
+    "@types/node": 26.6.4
+    # React's types follow the React 19.2 line above, for web, desktop and mobile alike.
+    "@types/react": 19.3.0
+    "@types/react-dom": 19.3.0
+    # The schemas `stackra gen` compiles from shape classes import zod, so every member that authors
+    # shapes depends on it; authored code never imports it, except through the `@Field(zod)` hatch.
+    # 4.1 or later is needed for codecs and `.exactOptional()` (Stackra ADR 0294 decision 26).
+    zod: 4.6.7
+  # HeroUI's design-system stylesheet (web and desktop).
+  ui:
+    "@heroui/styles": 3.2.6
+  # Web and PWA build-time styling and the service-worker runtime (Workbox).
+  frontend:
+    tailwindcss: 4.3.3
+    workbox-expiration: 7.3.0
+    workbox-navigation-preload: 7.3.0
+    workbox-precaching: 7.3.0
+    workbox-routing: 7.3.0
+    workbox-strategies: 7.3.0
+  # Expo SDK 57 (a mobile app member). Expo-owned packages are pinned to the versions expo 57.0.31 bundles
+  # (`expo install --check` reports any drift); bump them together, in one change, with
+  # `expo install --fix`. React Navigation and the native tab bar are code-based navigation (no
+  # expo-router, Stackra ADR 0227). heroui-native's peers (expo-blur, @gorhom/bottom-sheet,
+  # tailwind-merge, tailwind-variants) are pinned beside it.
+  mobile:
+    expo: 57.0.31
+    react-native: 0.86.3
+    # jsdom tests of React Native components (a package's src/native) render through it.
+    react-native-web: 0.21.2
+    "@react-navigation/native": 7.5.1
+    "@react-navigation/native-stack": 7.21.0
+    react-native-bottom-tabs: 1.4.0
+    "@bottom-tabs/react-navigation": 1.4.0
+    react-native-screens: 4.26.2
+    react-native-safe-area-context: 5.7.0
+    heroui-native: 1.0.10
+    uniwind: 1.12.1
+    "@gorhom/bottom-sheet": 5.2.14
+    tailwind-merge: 3.7.0
+    tailwind-variants: 3.3.1
+    react-native-reanimated: 4.5.1
+    react-native-gesture-handler: 2.32.0
+    react-native-worklets: 0.10.1
+    react-native-svg: 15.15.4
+    # react-native-mmkv 3.x: TurboModule build; 4.x moves to Nitro modules (another native dependency).
+    react-native-mmkv: 3.3.3
+    expo-auth-session: 57.0.16
+    expo-blur: 57.0.3
+    expo-camera: 57.0.6
+    expo-constants: 57.0.22
+    expo-crypto: 57.0.4
+    expo-dev-client: 57.0.20
+    expo-device: 57.0.2
+    expo-glass-effect: 57.0.4
+    expo-linking: 57.0.13
+    expo-network: 57.0.3
+    expo-notifications: 57.0.23
+    expo-secure-store: 57.0.4
+    expo-splash-screen: 57.0.10
+    expo-sqlite: 57.0.4
+    expo-status-bar: 57.0.1
+    expo-updates: 57.0.26
+    expo-web-browser: 57.0.3
+    "@sentry/react-native": 7.11.0
+  # Toolchain that compiles and bundles: TypeScript, Turborepo, Vite, tsdown, Electron and the
+  # React Router build plugin. The core @stackra/*-config presets are written against these pins.
+  build:
+    turbo: 2.11.9
+    typescript: 7.0.2
+    vite: 8.3.3
+    tsdown: 0.23.1
+    electron: 38.2.0
+    "@react-router/dev": 7.18.4
+  # Format, lint, spelling and test tools every member's scripts run.
+  quality:
+    vitest: 5.0.5
+    "@vitest/coverage-v8": 5.0.3
+    jsdom: 30.1.0
+    knip: 6.41.0
+    "@playwright/test": 1.56.1
+    oxlint: 1.86.0
+    oxfmt: 0.71.0
+    cspell: 10.4.0
+    "@lhci/cli": 0.15.1
+  # Release tooling: changesets, commitlint, git hooks and the release SBOM (CycloneDX).
+  release:
+    "@changesets/cli": 3.0.3
+    "@changesets/changelog-git": 1.0.0
+    "@commitlint/cli": 21.2.3
+    "@commitlint/config-conventional": 21.2.3
+    # 2.2.2 was published by hand without the SLSA provenance 2.2.0 and 2.2.1 carry, so trustPolicy refuses it;
+    # stay on the last trusted release until a version with provenance ships.
+    lefthook: 2.2.1
+    "@cyclonedx/cyclonedx-npm": 6.0.1
+  # The Mintlify CLI that builds and previews apps/docs.
+  docs:
+    mint: 4.2.1184
+  # The EAS CLI mise.toml pins for the mobile app's builds; repo-checks/tool-pins wants each mise npm pin in a catalog.
+  deploy:
+    eas-cli: 25.3.0
+
+# @react-router/dev 7.18.4 declares `typescript: ^5.1.0 || ^6.0.0` as a peer, while the workspace
+# compiles with TypeScript 7 (catalog `build`). The plugin only reads tsconfig paths and runs typegen,
+# which TypeScript 7 serves; check a web app's typegen whenever either version moves, and drop this
+# entry once the peer range includes 7.
+peerDependencyRules:
+  allowedVersions:
+    "@react-router/dev>typescript": "7"
+
+# Security fixes for transitive dependencies (OSV-Scanner, Stackra ADR 0174), each within the major
+# its parent asks for. Drop an entry once the parent's own range resolves the fixed version.
+overrides:
+  # One @types/node across members and auto-installed peers, so vitest resolves to one instance.
+  "@types/node": 26.6.4
+  axios@<1.20.0: 1.20.0
+  qs@<6.16.1: 6.16.1
+  js-yaml@>=4 <4.3.2: 4.3.2
+  image-size@>=2 <2.0.3: 2.0.3
+  re2js@<2.8.7: 2.8.7
+  fflate@>=0.7 <0.7.5: 0.7.5
+  fflate@>=0.8 <0.8.3: 0.8.3
+  adm-zip@<0.6.1: 0.6.1
+  zod@>=4 <4.6.6: 4.6.7
+  smol-toml@<1.9.0: 1.9.1
+  # OSV: undici below 7.30.1 and sharp below 0.35.5 carry advisories (leader, 2026-11-09); every product starts clean.
+  undici@>=7 <7.30.1: 7.30.1
+  sharp@<0.35.5: 0.35.5
+
+# Dependency lifecycle scripts are blocked by default (pnpm supply-chain security). Every entry here was
+# reviewed; a new one must be, too. Install fails (ERR_PNPM_IGNORED_BUILDS) until it is.
+allowBuilds:
+  # Native binary for the Vite and tsdown transforms.
+  esbuild: true
+  # Installs the git hooks from lefthook.yml on `pnpm install` (skipped when CI is set).
+  lefthook: true
+  # Native image library behind icon and splash generation.
+  sharp: true
+  # Downloads the Electron binary the desktop target runs and packages.
+  electron: true
+  # Downloads the Sentry CLI that uploads native and JavaScript source maps (pulled in by
+  # @sentry/react-native).
+  "@sentry/cli": true
+  # Blocked after review: validate and build pass without their build steps.
+  # Install-time usage telemetry (through @mintlify/cli and the Spectral linter).
+  "@scarf/scarf": false
+  # Native keychain binding for the Mintlify CLI's login, which the docs build never uses.
+  keytar: false
+  # Native XML validator, an optional peer of @cyclonedx/cyclonedx-library; the SBOM is JSON.
+  libxmljs2: false

@@ -1,0 +1,68 @@
+{
+  "name": "acme-platform",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Stackra product repository starter in the programming model v3.1: one pnpm + Turborepo workspace with the docs app, one example service and one example package (both written by `stackra new`), and the core @stackra/*-config presets from catalog:stackra.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "prepare": "stackra mcp sync",
+    "dev": "stackra dev",
+    "gen": "stackra gen",
+    "gen:check": "stackra gen --check",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "spell": "cspell lint --no-progress --dot --gitignore \"**/*.{md,mdx,ts,tsx,css,yaml,yml}\"",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:e2e": "turbo run test:e2e",
+    "clean": "turbo run clean",
+    "verify": "stackra verify",
+    "validate": "stackra validate && node .github/scripts/example-drift.mjs",
+    "new": "stackra new",
+    "structure": "stackra structure",
+    "doctor": "stackra doctor",
+    "db:diff": "stackra db diff",
+    "db:migrate": "stackra db migrate",
+    "db:seed": "stackra db seed",
+    "infra": "stackra infra preview",
+    "docs": "turbo run dev --filter=@acme/docs",
+    "changeset": "changeset",
+    "changeset:status": "changeset status",
+    "secrets:scan": "gitleaks git . --config .gitleaks.toml --no-banner --redact",
+    "sbom": "cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file sbom.cdx.json"
+  },
+  "devDependencies": {
+    "@changesets/changelog-git": "catalog:release",
+    "@changesets/cli": "catalog:release",
+    "@commitlint/cli": "catalog:release",
+    "@cyclonedx/cyclonedx-npm": "catalog:release",
+    "@stackra/cli": "catalog:stackra",
+    "@stackra/commitlint-config": "catalog:stackra",
+    "@stackra/oxlint-config": "catalog:stackra",
+    "@stackra/runway": "catalog:stackra",
+    "@stackra/typescript-config": "catalog:stackra",
+    "cspell": "catalog:quality",
+    "knip": "catalog:quality",
+    "lefthook": "catalog:release",
+    "oxfmt": "catalog:quality",
+    "oxlint": "catalog:quality",
+    "turbo": "catalog:build",
+    "typescript": "catalog:build"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=12.0.0"
+  },
+  "packageManager": "pnpm@12.16.1",
+  "stackra": {
+    "layout": {
+      "allow": {
+        "apps": "apps/docs, the product's published docs site (ADR 0526 decisions 2 and 3)"
+      }
+    }
+  }
+}

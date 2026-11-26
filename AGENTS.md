@@ -38,16 +38,22 @@ created, the test layout and what to replace) is [docs/template-guide.md](docs/t
 ### Starter profiles
 
 `stackra create` (Stackra ADR 0515) writes a new app from this template, published on each release as
-`@stackra/starter` at the `@stackra/*` version it pins. `stackra.starter.yaml` names two profiles,
-both filters over this one tree:
+`@stackra/starter` at the `@stackra/*` version it pins. `stackra.starter.yaml` names three
+profiles, all filters over this one tree:
 
-- **minimal** (the default): the web console (`apps/console`), the example service with its `notes`
-  module, and the root toolchain and CI; no docs app, example package or mobile and store assets. Its
-  root `runway.yaml` comes from `starter/minimal/`.
-- **full**: the whole template, the Figentra product shape: surfaces and the mobile app in
-  `runway.yaml` and no app member, so `apps/console` is left out.
+- **minimal** (the default): an app that belongs to whoever creates it. The web console
+  (`apps/console`), the example service with its `notes` module, the root toolchain and one Quality
+  Gate workflow; no docs app, example package, mobile or store assets, and none of Figentra's own
+  setup (Figentra Flow, code owners, the deploy, release and Flow workflows, the registry-token
+  action, the agent guard hooks, Figentra's registry scopes and MCP servers). Its root `runway.yaml`,
+  `README.md`, `package.json` and the other replaced root files come from `starter/minimal/`;
+  `node .github/scripts/starter-overlays.mjs` derives six of them from their root file.
+- **internal** (opt in: `stackra create --profile internal`): the minimal app with Figentra's own
+  setup kept, for an app Figentra builds and runs itself.
+- **full**: the whole template, the Figentra product shape with that setup: surfaces and the mobile
+  app in `runway.yaml` and no app member, so `apps/console` is left out.
 
-Both carry a root `runway.yaml` that Runway reads the same way. `create` renames `acme` and the
+Each carries a root `runway.yaml` that Runway reads the same way. `create` renames `acme` and the
 example scopes to the app's name, scope and product key (the `rename` list in the same file).
 
 > **The path says the kind, the base class is the kind, the type gives the shape, and the names give
