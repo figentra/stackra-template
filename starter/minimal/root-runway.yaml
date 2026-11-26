@@ -560,14 +560,14 @@ release:
     kind: all-at-once
     healthGate: true
     autoRollback: true
-  # The rollback window after a promotion, and who triggers a rollback: an agent may (owner decision
-  # 2026-10-28). A production rollback runs in the `production` environment, so it takes that
-  # environment's one owner approval like a promotion.
+  # The rollback window after a promotion, and who triggers a rollback: here an agent may. A
+  # production rollback runs in the `production` environment, so it takes that environment's
+  # approval like a promotion.
   rollback:
     withinMinutes: 15
     by: agent
-  # Where every release is recorded.
-  records: [github-deployments, linear-release, "slack:#deploys"]
+  # Where every release is recorded; add your tracker or chat channel here.
+  records: [github-deployments]
   # Build and publish order across destinations.
   buildOrder: [npm, encore-cloud, cloudflare-workers, aws-ecs, compose, helm]
   # On-premises upgrades (Stackra ADR 0179).

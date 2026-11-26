@@ -6,7 +6,7 @@
  *          removes what it names even from a reshaped file or refuses it.
  * Boundary: reads this checkout (git ls-files, stackra.starter.yaml, the root files and starter/minimal/); writes
  *           nothing. `stackra create` itself is covered by the CLI's own tests; the glob semantics here are the ones
- *           its `starterFiles` applies (Node `path.matchesGlob` on undotted paths).
+ *           its `starterFiles` applies (Node `path.matchesGlob` on dot-stripped paths).
  * Runtime: node (`node --test ".github/scripts/__tests__/*.test.mjs"`, the `scripts` check of preview-gate.mjs)
  * Governing contract: Stackra ADR 0515 (decisions 5 and 6); STA-2877
  */
@@ -42,6 +42,50 @@ const toolingPaths = tracked.filter((path) => !path.includes("/") || path.starts
 
 /** Root files no profile writes for an app, or that only exist for this template. */
 const TEMPLATE_ONLY = new Set(["stackra.starter.yaml", "pnpm-lock.yaml", ".infisical.yaml"]);
+
+/**
+ * What no file of a minimal app may say: Figentra's own process and tools (Figentra Flow, its rendered-file headers and
+ * overrides, the Linear and bot scripts, delegation, Figentra's build box and secrets repository, and the agent paths
+ * only Figentra's setup has). Held here, not in the script, so a transform cannot weaken the check it is judged by.
+ * The docs.stackra.figentra.com links match none of them.
+ */
+const OUTSIDE_REFUSED = [
+  "fflow",
+  "Figentra Flow",
+  ".flow/",
+  "flow.config.json",
+  /figentra (agents|linear|delegate|bot)\b/,
+  "pnpm linear",
+  /\bbot(?::gh|:git|:token|-token)/,
+  "linear.app",
+  "linear-release",
+  ".agents/agents/",
+  ".agents/hooks/",
+  ".agents/reference/",
+  "ci-box",
+  "on the box",
+  "box run",
+  "STA-2064",
+  "figentra/sta-",
+  "figentra/secrets",
+];
+
+/** The agent material only Figentra's own setup uses: personas, model routing, process rules and skills. */
+const PROCESS_AGENT_FILES = [
+  ".agents/agents/git-steward.md",
+  ".agents/agents/linear-steward.md",
+  ".agents/agents/ci-steward.md",
+  ".agents/agents/spec-writer.md",
+  ".agents/agents/release-operations.md",
+  ".agents/agents/releaser.md",
+  ".agents/models.yaml",
+  ".agents/routing.yaml",
+  ".agents/rules/linear.md",
+  ".agents/rules/worktrees.md",
+  ".agents/rules/concurrent-sessions.md",
+  ".agents/skills/docs-spec-flow/SKILL.md",
+  ".agents/skills/test-infra/SKILL.md",
+];
 
 /** A minimal app's file, as the profile writes it. */
 const text = (path) => read(minimal.get(path));
@@ -127,6 +171,59 @@ test("the app the minimal profile writes holds no Figentra registry scope, Flow,
     assert.doesNotMatch(read(path), /figentra-usr/, `${path} names no Figentra code owner`);
 });
 
+test("every file the minimal profile writes, overlays included, is free of Figentra's process and tools", () => {
+  const found = [];
+  for (const [target, source] of minimal) {
+    const bytes = readFileSync(source);
+    if (bytes.includes(0)) continue;
+    for (const [index, line] of bytes.toString("utf8").split("\n").entries()) {
+      const hit = OUTSIDE_REFUSED.find((pattern) =>
+        typeof pattern === "string" ? line.includes(pattern) : pattern.test(line),
+      );
+      if (hit !== undefined) found.push(`${target}:${index + 1} ${String(hit)}`);
+    }
+  }
+  assert.deepEqual(found, []);
+});
+
+test("the minimal app's agent setup is the framework's open rules and skills, with its own AGENTS.md", () => {
+  for (const path of PROCESS_AGENT_FILES)
+    assert.ok(!minimal.has(path), `minimal never writes ${path}`);
+  assert.deepEqual(
+    [...minimal.keys()].filter((path) => /^\.agents\/(agents|reference)\//.test(path)),
+    [],
+  );
+  for (const path of [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".agents/rules/tenancy.md",
+    ".agents/skills/backend-errors/SKILL.md",
+  ])
+    assert.equal(
+      minimal.get(path),
+      `starter/minimal/${path}`,
+      `${path} comes from starter/minimal/`,
+    );
+  const agents = text("AGENTS.md");
+  assert.match(agents, /^## Grammar$/m);
+  assert.match(agents, /^## Rules$/m);
+  assert.doesNotMatch(agents, /^## How work flows$|owner decision/m);
+  assert.equal(text("CLAUDE.md"), "@AGENTS.md\n");
+});
+
+test("the minimal Quality Gate runs the app's tests and says nothing of Figentra's build box", () => {
+  const ci = text(".github/workflows/ci.yml");
+  assert.match(
+    ci,
+    /^ {6}- name: Test\n {8}if: steps\.registry\.outputs\.published == 'true'\n(?: {8}.*\n)*? {8}run: pnpm exec turbo run test \$\{AFFECTED:\+--affected\}\n/m,
+  );
+  assert.doesNotMatch(ci, /STA-2064|on the box|ci-box/);
+  assert.throws(
+    () => transforms.ciWorkflow(`${read(".github/workflows/ci.yml")}# tests run on the box\n`),
+    /on the box/,
+  );
+});
+
 test("the minimal app's MCP servers are the outside set, the Encore entry exactly as the root has it", () => {
   const outside = read(minimal.get(".mcp.yaml"));
   assert.deepEqual(servers(outside).toSorted(), [...OUTSIDE_MCP].toSorted());
@@ -157,10 +254,19 @@ test("the internal profile keeps Figentra's setup for an app Figentra runs", () 
     ".github/workflows/fflow-approve.yml",
     ".github/workflows/deploy.yml",
     ".agents/hooks/fflow-guard.mjs",
+    ".agents/agents/git-steward.md",
+    ".agents/rules/linear.md",
     "flow.config.json",
   ])
     assert.equal(internal.get(path), path, `internal writes ${path}`);
-  for (const path of ["package.json", ".npmrc", ".mcp.yaml", ".claude/settings.json"])
+  for (const path of [
+    "package.json",
+    ".npmrc",
+    ".mcp.yaml",
+    ".claude/settings.json",
+    "AGENTS.md",
+    ".github/workflows/ci.yml",
+  ])
     assert.equal(internal.get(path), path, `internal keeps the root ${path}`);
   // The same app otherwise: the console and the service.
   for (const path of tracked.filter((file) => /^(apps\/console|services)\//.test(file)))

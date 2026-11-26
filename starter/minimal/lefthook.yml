@@ -13,7 +13,6 @@ pre-commit:
       glob: "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"
       exclude:
         - ".agents/skills/**"
-        - ".agents/reference/**"
       run: |
         if [ ! -d node_modules/@stackra/oxlint-config ] && grep -qs @stackra/oxlint-config .oxlintrc.json .oxlintrc.jsonc; then
           echo "oxlint skipped: its config extends @stackra/oxlint-config and no workspace install has it; CI lints this commit"
@@ -53,7 +52,7 @@ pre-push:
         } 2>&1 )"; s=$?
         printf '%s\n' "$out"
         if [ $s -ne 0 ] && printf '%s' "$out" | grep -qE 'ERR_PNPM_FETCH_401|(ERR_PNPM_META_FETCH_FAIL|Lockfile failed supply-chain policy check).*[^0-9]401([^0-9]|$)'; then
-          echo "pre-push skipped: pnpm cannot read the registry on this machine (401); the PR must cite a box run for this commit"
+          echo "pre-push skipped: pnpm cannot read the registry on this machine (401); the Quality Gate runs gen --check on the pull request"
           exit 0
         fi
         exit $s

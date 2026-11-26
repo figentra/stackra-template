@@ -124,7 +124,7 @@ jobs:
         if: steps.registry.outputs.published == 'true'
         run: pnpm lint
 
-      # On a pull request typecheck and build run for the members the change affects, against the base commit.
+      # On a pull request typecheck, build and test run for the members the change affects, against the base commit.
       - name: Typecheck
         if: steps.registry.outputs.published == 'true'
         env:
@@ -138,6 +138,15 @@ jobs:
           AFFECTED: ${{ github.event_name == 'pull_request' && '1' || '' }}
           TURBO_SCM_BASE: HEAD~1 # a PR checks out its merge into main, so HEAD~1 is main and the diff is the PR's own
         run: pnpm exec turbo run build ${AFFECTED:+--affected}
+
+      # Each member's vitest suite (`turbo run test`, after gen), for the members the change affects on a pull
+      # request and for every member on main and in the merge queue.
+      - name: Test
+        if: steps.registry.outputs.published == 'true'
+        env:
+          AFFECTED: ${{ github.event_name == 'pull_request' && '1' || '' }}
+          TURBO_SCM_BASE: HEAD~1 # a PR checks out its merge into main, so HEAD~1 is main and the diff is the PR's own
+        run: pnpm exec turbo run test ${AFFECTED:+--affected}
 
       # .stackra/ is gitignored: gen writes each member's generated tree (the compiled migrations
       # Squawk reads included), then the check fails on a committed manifest or openapi.json that
