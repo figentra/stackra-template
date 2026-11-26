@@ -10,8 +10,15 @@ and the Encore app into `.stackra/`. Nobody writes `main.ts`.
 
 A note is a title and a text a tenant's user wrote. It is **tenant-owned**: every row carries its tenant, taken from the
 call and never from the input, and the database's forced row-level policy refuses to show or change it for anyone else.
-Because the service depends on `@stackra/database`, `@stackra/tenancy` and `@stackra/testing`, gen wires the pipeline's
-tenancy check and call isolation and writes the generated tenant-isolation test.
+The policy is what isolates the rows. Because the service depends on `@stackra/database`, `@stackra/tenancy` and
+`@stackra/testing`, gen writes the generated tenant-isolation test.
+
+> **Known gap (STA-2807).** Gen does not yet bind the pipeline's `CallIsolation`, `TenancyCheck` or `UnitOfWork` in a
+> server, and no package binds them on its own. In a deployed server a call therefore runs without its tenant set, so
+> the forced policy shows no note and refuses every write: it fails closed and never leaks, but the service cannot
+> serve a note until a core gen change binds `@stackra/tenancy`'s drivers. The integration tests bind these drivers by
+> hand, so they prove the service's behaviour under the ports, not that a server has them. `note-wiring.test.ts` marks
+> each missing port with `it.fails`; drop the `.fails` when the template's core pin binds it.
 
 | Operation | Key                   | Route                    | Permission          | Risk | Notes                                              |
 | --------- | --------------------- | ------------------------ | ------------------- | ---- | -------------------------------------------------- |
@@ -42,12 +49,14 @@ The routes are in the service's API area (`ApiArea.App`, `stackra.config.ts`). C
 ## Tests
 
 - `pnpm test`, the unit tier: each action and query with a stand-in service, the view mapping, the refusal, the
-  recorded events, and the module's contract as gen derived it (a tenant-owned model, a permission per operation,
-  writes at L2 or above, the required key on create).
+  recorded events, the module's contract as gen derived it (a tenant-owned model, a permission per operation,
+  writes at L2 or above, the required key on create), and `note-wiring`, which checks the generated wiring for the
+  pipeline's tenant ports (each still `it.fails`, the known gap of STA-2807).
 - `pnpm test:int`, the integration tier on Postgres (Docker): `note-pipeline` runs the five operations through the real
-  actions pipeline with the real idempotency store, call isolation and unit of work (a retried create, a create without
-  its key, the permission asked before the write); `note-isolation` proves, as the `NOBYPASSRLS` service role, that
-  tenant B cannot list, get, update or delete tenant A's notes and that a read with no tenant returns none; and gen's
+  actions pipeline with the real idempotency store, call isolation and unit of work, bound by the test itself (a
+  retried create, a create without its key, the permission asked before the write); `note-isolation` proves, as the
+  `NOBYPASSRLS` service role, that tenant B cannot list, get, update or delete tenant A's notes, that a read with no
+  tenant returns none and that a write naming another tenant is refused by the policy (Postgres error 42501); and gen's
   `.stackra/tests/tenant-isolation.int.test.ts` audits every table of the service.
 
 How IAM decides a permission is IAM's own test: the integration tests bind an allow-all access control, or one that

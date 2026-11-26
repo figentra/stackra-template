@@ -17,10 +17,14 @@ resource (`notes`) through the actions pipeline. Read the README for what each f
 
 - The tenant is the call's, never the input's: no `tenantId` field on an input, no tenant read from a header or body.
   A tenant-owned table is declared with `BelongsToTenant` and `t.belongsToTenant()`; never hand-write its policy.
-- Keep `@stackra/tenancy` (and `@stackra/database`, `@stackra/testing`) in `package.json`: without it gen wires no
-  tenancy check or call isolation and writes no tenant-isolation test.
-- Every read and write of a note goes through `NoteService` inside an action or query, so the pipeline's isolation
-  transaction is open.
+- Keep `@stackra/tenancy` (and `@stackra/database`, `@stackra/testing`) in `package.json`: without it gen refuses the
+  `BelongsToTenant` model and writes no tenant-isolation test.
+- The forced row policy is what isolates the rows. Gen does not yet bind the pipeline's `CallIsolation`,
+  `TenancyCheck` or `UnitOfWork` in a server (STA-2807), so a deployed call runs with no tenant and the policy fails
+  closed: no note is shown or written. Never work around it by setting `app.tenant_id` yourself or by a session-level
+  `SET`; keep `note-wiring.test.ts` and drop each `.fails` once the core pin binds the port.
+- Every read and write of a note goes through `NoteService` inside an action or query, so it runs in the pipeline's
+  isolation transaction once `CallIsolation` is bound (STA-2807).
 - A write is at least L2 and declares its `idempotency`; a create is `Idempotency.Required`. A refusal is a class in
   `errors/` with a stable code.
 - Events are recorded on the model (`note.record(...)`) and carry ids only, never a title or a text.

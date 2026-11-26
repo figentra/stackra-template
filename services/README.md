@@ -28,4 +28,6 @@ writes `main.ts` or a root module that only lists what gen can derive: gen write
 `.stackra/entry/server.ts`. Every service is placed in a group of the root runway's production
 topology (`environments.production.topology.groups`) before `stackra validate` passes; the example
 sits in the `example` group. A service with tenant-owned tables depends on `@stackra/tenancy` and ships
-its isolation tests in `test:int`, as the example does.
+its isolation tests in `test:int`, as the example does. Its forced row policy isolates the rows; gen does
+not yet bind the pipeline's call isolation and tenancy check in a server (STA-2807), so until it does a
+deployed call fails closed (no row shown or written), as the example's README explains.
