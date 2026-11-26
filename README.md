@@ -13,10 +13,10 @@
 <p align="center"><strong>The starting workspace for a new Stackra product (services, packages, docs).</strong></p>
 
 <p align="center">
-  <a href="https://github.com/figentra/stackra-template/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/figentra/stackra-template/actions/workflows/ci.yml/badge.svg?branch=main" /></a>
-  <a href="https://github.com/figentra/stackra-template/releases/latest"><img alt="Release" src="https://img.shields.io/badge/release-latest-blue" /></a>
-  <a href="https://github.com/figentra/stackra-template/blob/main/LICENSE"><img alt="Licence: MIT" src="https://img.shields.io/badge/licence-MIT-green" /></a>
-  <a href="https://github.com/figentra/stackra-template#status"><img alt="Status: In progress" src="https://img.shields.io/badge/status-In%20progress-orange" /></a>
+  <a href="https://github.com/stackra-inc/stackra-template/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/stackra-inc/stackra-template/actions/workflows/ci.yml/badge.svg?branch=main" /></a>
+  <a href="https://github.com/stackra-inc/stackra-template/releases/latest"><img alt="Release" src="https://img.shields.io/badge/release-latest-blue" /></a>
+  <a href="https://github.com/stackra-inc/stackra-template/blob/main/LICENSE"><img alt="Licence: MIT" src="https://img.shields.io/badge/licence-MIT-green" /></a>
+  <a href="https://github.com/stackra-inc/stackra-template#status"><img alt="Status: In progress" src="https://img.shields.io/badge/status-In%20progress-orange" /></a>
   <a href="https://docs.stackra.figentra.com"><img alt="Docs" src="https://img.shields.io/badge/docs-read-0a7bd6" /></a>
 </p>
 
@@ -42,7 +42,7 @@ created, the test layout and what to replace) is [docs/template-guide.md](docs/t
 
 ## Status
 
-**In progress**: the lean starter, on the `@stackra/*` 0.5.1 catalog.
+**In progress**: the lean starter; `catalog:stackra` pins its `@stackra/*` version.
 
 The states: **Live** (serving customers), **In progress** (being built), **Planned** (no build yet).
 
@@ -133,7 +133,7 @@ Merging the version pull request that Changesets opens cuts the release.
 
 The notes are in [Releases][releases] and in each package's `CHANGELOG.md`.
 
-[releases]: https://github.com/figentra/stackra-template/releases
+[releases]: https://github.com/stackra-inc/stackra-template/releases
 
 ## Security
 
@@ -141,7 +141,7 @@ Report a vulnerability privately, as the [security policy][security] describes.
 
 Never report one in a public issue or pull request.
 
-[security]: https://github.com/figentra/stackra-template/security/policy
+[security]: https://github.com/stackra-inc/stackra-template/security/policy
 
 ## Licence
 

@@ -119,7 +119,7 @@
     "AGENTS.md": "sha256:4feaf5c6154f676a1cbaa8a75ac50da251d27aef9c5c6bbe5006ce98fa7a52d9",
     "CLAUDE.md": "sha256:c2741334372c07601d3660ee612654d97afa091d84b3ce8c23ed3175a36f0279",
     "lefthook.yml": "sha256:e4b971b3bf0939f7f0ecb94ce47ba1c70f1c89cac637f9f5babcc9e27a29f1c4",
-    "README.md": "sha256:366c04838ed930055e8f629efe15155158d02c457fa5847fc321532e0694ed78",
+    "README.md": "sha256:b31a8a3a5939044b3b460e35adac2161ea90f33501e6e918e3b2c81dbca6cdff",
     ".github/workflows/fflow-baseline.yml": "sha256:c3b7745853f0388034eeeb52ad1cfb023b68999af42af98eeab273fbe4f2d372",
     ".github/workflows/fflow-approve.yml": "sha256:495fbaabbdd8e76d7484a386250ee0e56377cb9761ac11c61d7cf8c8945186f1",
     ".github/CODEOWNERS": "sha256:be6defe2af4e5920651ba97872b1623c9f233c272ad7ed861886181769129b11"
