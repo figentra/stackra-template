@@ -27,12 +27,6 @@
   ],
   "replaces": [
     {
-      "class": "PostgresAuditTrailDriver",
-      "file": "src/modules/compliance/drivers/postgres-audit-trail.driver.ts",
-      "replaces": "AuditTrail",
-      "from": "@stackra/actions/contracts"
-    },
-    {
       "class": "PostgresHoldRegistryDriver",
       "file": "src/modules/compliance/drivers/postgres-hold-registry.driver.ts",
       "replaces": "HoldRegistry",

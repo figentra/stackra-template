@@ -4,7 +4,8 @@
  *          data-subject export holds the person's notes in the running tenant and nobody else's; an erasure deletes
  *          them there, keeps a note under a legal hold and leaves other people and other tenants alone; the nightly
  *          prune job deletes notes untouched for two years, keeps younger ones and keeps every note of an author under
- *          a hold; and every note action, done or refused, is the next entry of its tenant's audit chain.
+ *          a hold; and a note's create, update and delete commit through the actions pipeline with the ports the
+ *          generated wiring binds (it binds no audit trail yet: STA-1583, core).
  * Boundary: integration tier (`.int`, `stackra test --tier int`, Docker). The drivers are the ones this service binds
  *           (`#modules/compliance/drivers/*`) over the package declarations it registers (`NotePersonalData`,
  *           `Retention`); the export job, the erasure saga's `erase` step and the prune job are the packages' own
@@ -47,13 +48,14 @@ import { CallIsolationDriver, TenantIsolationService } from "@stackra/tenancy/no
 import { fakeTenantId, runAsTenant, tenantIsolationOptions } from "@stackra/tenancy/testing";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@stackra/testing";
 
-import { PostgresAuditTrailDriver } from "#modules/compliance/drivers/postgres-audit-trail.driver";
 import { PostgresHoldRegistryDriver } from "#modules/compliance/drivers/postgres-hold-registry.driver";
 import { PostgresSubjectSaltStoreDriver } from "#modules/compliance/drivers/postgres-subject-salt-store.driver";
 import { CreateNoteAction } from "#modules/notes/actions/create-note.action";
+import { DeleteNoteAction } from "#modules/notes/actions/delete-note.action";
 import { UpdateNoteAction } from "#modules/notes/actions/update-note.action";
 import { NoteFactory } from "#modules/notes/database/factories/note.factory";
 import { NoteService } from "#modules/notes/services/note.service";
+import { wiring } from "#stackra/wiring";
 
 const postgres = usePostgres({
   migrationsDirectory: fileURLToPath(new URL("../../../../.stackra/migrations", import.meta.url)),
@@ -134,38 +136,50 @@ class AllowAll extends Driver(AccessControl) {
 /** A logger that keeps nothing: every call in these tests has a tenant, so the driver never warns. */
 const silent = { debug() {}, info() {}, warn() {}, error() {} } as unknown as Logger;
 
-/** The pipeline over the real isolation, unit of work, idempotency store and this service's audit trail. */
+/** An `AuditTrail` driver as the container builds access-log's: the entries' repository, tenancy and a logger. */
+type AuditTrailClass = new (
+  entries: never,
+  tenancy: TenantIsolationService,
+  logger: Logger,
+) => object;
+
+/** The `AuditTrail` the generated wiring binds (`@Replaces`), built as the container builds it; none when unbound. */
+function auditTrail(tenancy: TenantIsolationService): object | undefined {
+  // read as a plain list: the generated tuple's type names only the ports bound today
+  const replaces: readonly { provide: unknown; override: unknown }[] = wiring.replaces;
+  const override = replaces.find((replacement) => replacement.provide === AuditTrail)?.override as
+    | AuditTrailClass
+    | undefined;
+  const AuditEntries = repositoryOf(AuditLogEntry) as unknown as new () => never;
+  return override === undefined ? undefined : new override(new AuditEntries(), tenancy, silent);
+}
+
+/**
+ * The pipeline over the real isolation, unit of work and idempotency store, with the audit trail this service's
+ * generated wiring binds, if any.
+ */
 function pipeline(): ActionPipeline {
   const { database } = postgres;
   const tenancy = new TenantIsolationService(database);
   const notes = new NoteService();
-  const AuditEntries = repositoryOf(AuditLogEntry) as unknown as new () => never;
   const bound = new Map<AnyClass, object>([
     [AccessControl, new AllowAll()],
     [UnitOfWork, new DatabaseUnitOfWorkDriver()],
     [IdempotencyStore, new PostgresIdempotencyStoreDriver(database)],
     [CallIsolation, new CallIsolationDriver(database, tenancy, new MemoryScopeTreeDriver())],
-    [AuditTrail, new PostgresAuditTrailDriver(new AuditEntries(), tenancy, silent)],
     [CreateNoteAction, new CreateNoteAction(notes)],
     [UpdateNoteAction, new UpdateNoteAction(notes)],
+    [DeleteNoteAction, new DeleteNoteAction(notes)],
   ]);
+  const trail = auditTrail(tenancy);
+  if (trail !== undefined) {
+    bound.set(AuditTrail, trail);
+  }
   const resolver: Resolver = {
     has: (type) => bound.has(type),
     get: <U extends object>(type: AnyClass<U>) => bound.get(type) as U,
   };
   return new ActionPipeline(resolver);
-}
-
-/** The audit chain of the tenant `scope`, oldest first, read as the container's user. */
-async function chain(
-  scope: PublicId<"scp">,
-): Promise<{ key: string; outcome: string; code: string | null }[]> {
-  return (await postgres.database
-    .em()
-    .execute(
-      'select key, outcome, code from "access_log"."audit_log_entries" where tenant_id = ? order by sequence',
-      [scope],
-    )) as { key: string; outcome: string; code: string | null }[];
 }
 
 /**
@@ -300,33 +314,35 @@ describe("the notes service's privacy, retention and audit", () => {
   });
 
   /**
-   * Each note action is audited in its tenant's chain, a refusal too; another tenant's chain holds none of it.
-   * Known gap (STA-1583, core): @stackra/access-log 0.33.x reads the chain head with `findOne({})`, which MikroORM
-   * refuses, and maps `outcome` as json, which fails its check, so every append throws. Remove `.fails` when the
-   * template's core pin carries the fix (`figentra/sta-1583-access-log-chain-head`); it passes on a copy patched with it.
+   * The golden path a created app keeps: a note's create, update and delete commit through the actions pipeline with
+   * the ports this service's generated wiring binds. The pipeline awaits the `AuditTrail` inside the call's unit of
+   * work, so a bound trail that cannot append on Postgres (`@stackra/access-log` 0.33.0, STA-1583) rolls every write
+   * back and fails this case.
    */
-  it.fails("appends every note action, done or refused, to its tenant's audit chain", async () => {
+  it("commits a note's create, update and delete with the service's own bindings", async () => {
     const a = fakeTenantId();
-    const b = fakeTenantId();
     const alice = person(a, "usr_01ja00000000000000000000a4");
-    const created = await asService(() =>
-      pipeline().execute(CreateNoteAction, { title: "audited" } as never, {
+    const kept = await asService(() =>
+      pipeline().execute(CreateNoteAction, { title: "kept" } as never, {
         actor: alice,
         idempotencyKey: randomUUID(),
       }),
     );
-    // caught inside the transaction, so the refusal's entry, written after the call's own work rolled back, stays
-    const refusal = await asService(() =>
-      pipeline()
-        .execute(UpdateNoteAction, { noteId: created.id } as never, { actor: alice })
-        .catch((error: unknown) => error),
+    const gone = await asService(() =>
+      pipeline().execute(CreateNoteAction, { title: "gone" } as never, {
+        actor: alice,
+        idempotencyKey: randomUUID(),
+      }),
     );
-    expect(refusal).toMatchObject({ code: "empty_note_update" });
+    await asService(() =>
+      pipeline().execute(UpdateNoteAction, { noteId: kept.id, title: "kept-changed" } as never, {
+        actor: alice,
+      }),
+    );
+    await asService(() =>
+      pipeline().execute(DeleteNoteAction, { noteId: gone.id } as never, { actor: alice }),
+    );
 
-    expect(await chain(a)).toEqual([
-      { key: "notes.note.create@1", outcome: "ok", code: null },
-      { key: "notes.note.update@1", outcome: "refused", code: "empty_note_update" },
-    ]);
-    expect(await chain(b)).toEqual([]);
+    expect(await titles(a)).toEqual(["kept-changed"]);
   });
 });
