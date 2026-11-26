@@ -1,0 +1,6 @@
+# What `encore run` generates in this service (the Encore app root). Encore appends any of these lines that is
+# missing, so all four stay here; the rest of the generated output is ignored by the repository's .gitignore.
+encore.gen.go
+encore.gen.cue
+/.encore
+/encore.gen
