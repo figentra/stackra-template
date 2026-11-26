@@ -62,9 +62,10 @@
       "risk": "L2",
       "actors": ["user", "agent"],
       "idempotency": "required",
+      "area": "app",
       "endpoint": {
         "method": "POST",
-        "path": "/notes",
+        "path": "/app/notes",
         "derived": true
       },
       "tool": {
@@ -94,9 +95,10 @@
       "risk": "L2",
       "actors": ["user", "agent"],
       "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "DELETE",
-        "path": "/notes/:noteId",
+        "path": "/app/notes/:noteId",
         "derived": true
       },
       "tool": {
@@ -105,7 +107,7 @@
         "hints": {
           "readOnlyHint": false,
           "destructiveHint": false,
-          "idempotentHint": true,
+          "idempotentHint": false,
           "openWorldHint": false
         }
       },
@@ -126,9 +128,10 @@
       "risk": "L2",
       "actors": ["user", "agent"],
       "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "PATCH",
-        "path": "/notes/:noteId",
+        "path": "/app/notes/:noteId",
         "derived": true
       },
       "tool": {
@@ -137,7 +140,7 @@
         "hints": {
           "readOnlyHint": false,
           "destructiveHint": false,
-          "idempotentHint": true,
+          "idempotentHint": false,
           "openWorldHint": false
         }
       },
@@ -158,9 +161,10 @@
       "permission": "notes.note.read",
       "risk": "L0",
       "actors": ["user", "agent"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/notes/:noteId",
+        "path": "/app/notes/:noteId",
         "derived": true
       },
       "tool": {
@@ -189,9 +193,10 @@
       "permission": "notes.note.read",
       "risk": "L0",
       "actors": ["user", "agent"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/notes",
+        "path": "/app/notes",
         "derived": true
       },
       "tool": {
@@ -220,12 +225,14 @@
       "permission": "access_log.audit_log_entry.export",
       "risk": "L2",
       "actors": ["user", "service", "system"],
+      "idempotency": "optional",
+      "area": "app",
       "job": {
         "timeout": "15m"
       },
       "endpoint": {
         "method": "POST",
-        "path": "/audit-log-entries/export",
+        "path": "/app/audit-log-entries/export",
         "derived": true
       },
       "tool": {
@@ -253,8 +260,9 @@
       "class": "PurgeAccessLogAction",
       "file": "src/node/actions/purge-access-log.action.ts",
       "permission": "access_log.access_log_entry.purge",
-      "risk": "L2",
+      "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "5m",
@@ -280,9 +288,10 @@
       "permission": "access_log.audit_log_entry.read",
       "risk": "L1",
       "actors": ["user", "service"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/audit-log-entries/search",
+        "path": "/app/audit-log-entries/search",
         "derived": true
       },
       "tool": {
@@ -310,18 +319,20 @@
       "class": "CreateSynonymAction",
       "file": "src/node/actions/create-synonym.action.ts",
       "permission": "data_maintenance.synonym.create",
-      "risk": "L1",
+      "risk": "L2",
       "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "POST",
-        "path": "/synonyms",
+        "path": "/app/synonyms",
         "derived": true
       },
       "tool": {
         "name": "data_maintenance_synonym_create",
         "default": true,
         "hints": {
-          "readOnlyHint": true,
+          "readOnlyHint": false,
           "destructiveHint": false,
           "idempotentHint": false,
           "openWorldHint": false
@@ -344,9 +355,11 @@
       "permission": "data_maintenance.synonym.delete",
       "risk": "L2",
       "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "DELETE",
-        "path": "/synonyms/:synonymId",
+        "path": "/app/synonyms/:synonymId",
         "derived": true
       },
       "tool": {
@@ -377,6 +390,7 @@
       "permission": "data_maintenance.change_log.maintain",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "5m",
@@ -401,6 +415,7 @@
       "permission": "data_maintenance.partition.maintain",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "10m",
@@ -425,6 +440,7 @@
       "permission": "data_maintenance.outbox_message.prune",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "5m",
@@ -449,6 +465,7 @@
       "permission": "data_maintenance.record.prune",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "10m",
@@ -474,6 +491,7 @@
       "permission": "data_maintenance.query.record",
       "risk": "L2",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "timeout": "30s",
         "retries": 3
@@ -492,6 +510,7 @@
       "permission": "data_maintenance.index.reindex",
       "risk": "L2",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "1h",
@@ -514,6 +533,7 @@
       "permission": "data_maintenance.index.reindex_semantic",
       "risk": "L2",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "2h",
@@ -536,6 +556,7 @@
       "permission": "data_maintenance.timeseries.rollup",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "10m",
@@ -559,18 +580,20 @@
       "class": "UpdateSynonymAction",
       "file": "src/node/actions/update-synonym.action.ts",
       "permission": "data_maintenance.synonym.update",
-      "risk": "L1",
+      "risk": "L2",
       "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "PATCH",
-        "path": "/synonyms/:synonymId",
+        "path": "/app/synonyms/:synonymId",
         "derived": true
       },
       "tool": {
         "name": "data_maintenance_synonym_update",
         "default": true,
         "hints": {
-          "readOnlyHint": true,
+          "readOnlyHint": false,
           "destructiveHint": false,
           "idempotentHint": false,
           "openWorldHint": false
@@ -593,9 +616,10 @@
       "permission": "data_maintenance.synonym.read",
       "risk": "L0",
       "actors": ["user", "agent"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/synonyms",
+        "path": "/app/synonyms",
         "derived": true
       },
       "tool": {
@@ -625,6 +649,7 @@
       "permission": "privacy.subject.erase",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "1h",
@@ -645,8 +670,9 @@
       "class": "ExportSubjectDataAction",
       "file": "src/node/actions/export-subject-data.action.ts",
       "permission": "privacy.subject.export",
-      "risk": "L1",
+      "risk": "L2",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "timeout": "10m",
         "retries": 2
@@ -668,9 +694,11 @@
       "permission": "privacy.hold.place",
       "risk": "L2",
       "actors": ["user", "service"],
+      "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "POST",
-        "path": "/holds/place",
+        "path": "/app/holds/place",
         "derived": true
       },
       "toolOff": "an agent never places or lifts a legal hold",
@@ -691,6 +719,7 @@
       "permission": "privacy.subject_export.purge",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "5m",
@@ -716,9 +745,11 @@
       "permission": "privacy.hold.release",
       "risk": "L4",
       "actors": ["user", "service"],
+      "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "PUT",
-        "path": "/holds/:holdId/release",
+        "path": "/app/holds/:holdId/release",
         "derived": true
       },
       "toolOff": "an agent never places or lifts a legal hold",
@@ -739,9 +770,10 @@
       "permission": "privacy.hold.read",
       "risk": "L1",
       "actors": ["user", "service"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/holds",
+        "path": "/app/holds",
         "derived": true
       },
       "toolOff": "legal holds are a compliance officer's surface, not an agent's",
@@ -762,6 +794,7 @@
       "permission": "tenancy.approval_binding.prune",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "5m",
@@ -826,6 +859,18 @@
       "from": "@stackra/access-log"
     },
     {
+      "name": "actions.approval.granted.v1",
+      "module": "actions",
+      "class": "ApprovalGranted",
+      "file": "src/contracts/events/approval-granted.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/actions#/schemas/actions.ApprovalGranted"
+      },
+      "from": "@stackra/actions"
+    },
+    {
       "name": "actions.analytics.tracked.v1",
       "module": "actions",
       "class": "AnalyticsTracked",
@@ -884,6 +929,17 @@
         "$ref": "@stackra/scope#/schemas/scope.ScopeMoved"
       },
       "from": "@stackra/scope"
+    },
+    {
+      "name": "tenancy.tenant_data_key_minted",
+      "module": "tenancy",
+      "class": "TenantDataKeyMinted",
+      "file": "src/core/events/tenant-data-key-minted.event.ts",
+      "kind": "domain",
+      "fields": {
+        "$ref": "@stackra/tenancy#/schemas/tenancy.TenantDataKeyMinted"
+      },
+      "from": "@stackra/tenancy"
     }
   ],
   "permissions": [
@@ -921,8 +977,11 @@
     },
     {
       "key": "access_log.access_log_entry.purge",
-      "risk": "L2",
+      "risk": "L4",
       "class": "AccessLogEntryPermissions",
+      "module": "access_log",
+      "member": "purge",
+      "file": "src/node/access/access-log-entry.permissions.ts",
       "system": true,
       "from": "@stackra/access-log"
     },
@@ -930,18 +989,27 @@
       "key": "access_log.audit_log_entry.read",
       "risk": "L1",
       "class": "AuditLogEntryPermissions",
+      "module": "access_log",
+      "member": "read",
+      "file": "src/node/access/audit-log-entry.permissions.ts",
       "from": "@stackra/access-log"
     },
     {
       "key": "access_log.audit_log_entry.export",
       "risk": "L2",
       "class": "AuditLogEntryPermissions",
+      "module": "access_log",
+      "member": "export",
+      "file": "src/node/access/audit-log-entry.permissions.ts",
       "from": "@stackra/access-log"
     },
     {
       "key": "data_maintenance.change_log.maintain",
       "risk": "L4",
       "class": "ChangeLogPermissions",
+      "module": "data_maintenance",
+      "member": "maintain",
+      "file": "src/core/access/change-log.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -949,6 +1017,9 @@
       "key": "data_maintenance.index.reindex",
       "risk": "L2",
       "class": "IndexPermissions",
+      "module": "data_maintenance",
+      "member": "reindex",
+      "file": "src/core/access/index.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -956,6 +1027,9 @@
       "key": "data_maintenance.index.reindex_semantic",
       "risk": "L2",
       "class": "IndexPermissions",
+      "module": "data_maintenance",
+      "member": "reindexSemantic",
+      "file": "src/core/access/index.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -963,6 +1037,9 @@
       "key": "data_maintenance.outbox_message.prune",
       "risk": "L4",
       "class": "OutboxMessagePermissions",
+      "module": "data_maintenance",
+      "member": "prune",
+      "file": "src/core/access/outbox-message.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -970,6 +1047,9 @@
       "key": "data_maintenance.partition.maintain",
       "risk": "L4",
       "class": "PartitionPermissions",
+      "module": "data_maintenance",
+      "member": "maintain",
+      "file": "src/core/access/partition.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -977,6 +1057,9 @@
       "key": "data_maintenance.query.record",
       "risk": "L2",
       "class": "QueryPermissions",
+      "module": "data_maintenance",
+      "member": "record",
+      "file": "src/core/access/query.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -984,6 +1067,9 @@
       "key": "data_maintenance.record.prune",
       "risk": "L4",
       "class": "RecordPermissions",
+      "module": "data_maintenance",
+      "member": "prune",
+      "file": "src/core/access/record.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -991,30 +1077,45 @@
       "key": "data_maintenance.synonym.read",
       "risk": "L0",
       "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "read",
+      "file": "src/core/access/synonym.permissions.ts",
       "from": "@stackra/data-maintenance"
     },
     {
       "key": "data_maintenance.synonym.create",
-      "risk": "L1",
+      "risk": "L2",
       "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "create",
+      "file": "src/core/access/synonym.permissions.ts",
       "from": "@stackra/data-maintenance"
     },
     {
       "key": "data_maintenance.synonym.update",
-      "risk": "L1",
+      "risk": "L2",
       "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "update",
+      "file": "src/core/access/synonym.permissions.ts",
       "from": "@stackra/data-maintenance"
     },
     {
       "key": "data_maintenance.synonym.delete",
       "risk": "L2",
       "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "delete",
+      "file": "src/core/access/synonym.permissions.ts",
       "from": "@stackra/data-maintenance"
     },
     {
       "key": "data_maintenance.timeseries.rollup",
       "risk": "L4",
       "class": "TimeseriesPermissions",
+      "module": "data_maintenance",
+      "member": "rollup",
+      "file": "src/core/access/timeseries.permissions.ts",
       "system": true,
       "from": "@stackra/data-maintenance"
     },
@@ -1022,24 +1123,36 @@
       "key": "privacy.hold.place",
       "risk": "L2",
       "class": "HoldPermissions",
+      "module": "privacy",
+      "member": "place",
+      "file": "src/node/access/hold.permissions.ts",
       "from": "@stackra/privacy"
     },
     {
       "key": "privacy.hold.release",
       "risk": "L4",
       "class": "HoldPermissions",
+      "module": "privacy",
+      "member": "release",
+      "file": "src/node/access/hold.permissions.ts",
       "from": "@stackra/privacy"
     },
     {
       "key": "privacy.hold.read",
       "risk": "L1",
       "class": "HoldPermissions",
+      "module": "privacy",
+      "member": "read",
+      "file": "src/node/access/hold.permissions.ts",
       "from": "@stackra/privacy"
     },
     {
       "key": "privacy.subject_export.purge",
       "risk": "L4",
       "class": "SubjectExportPermissions",
+      "module": "privacy",
+      "member": "purge",
+      "file": "src/node/access/subject-export.permissions.ts",
       "system": true,
       "from": "@stackra/privacy"
     },
@@ -1047,13 +1160,19 @@
       "key": "privacy.subject.erase",
       "risk": "L4",
       "class": "SubjectPermissions",
+      "module": "privacy",
+      "member": "erase",
+      "file": "src/node/access/subject.permissions.ts",
       "system": true,
       "from": "@stackra/privacy"
     },
     {
       "key": "privacy.subject.export",
-      "risk": "L1",
+      "risk": "L2",
       "class": "SubjectPermissions",
+      "module": "privacy",
+      "member": "export",
+      "file": "src/node/access/subject.permissions.ts",
       "system": true,
       "from": "@stackra/privacy"
     },
@@ -1093,6 +1212,14 @@
       "from": "@stackra/access-log"
     },
     {
+      "code": "command_audit_scope_invalid",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "access_log",
+      "class": "CommandAuditScopeInvalidError",
+      "from": "@stackra/access-log"
+    },
+    {
       "code": "command_audit_scope_missing",
       "kind": "failed_precondition",
       "category": "precondition_failed",
@@ -1101,11 +1228,75 @@
       "from": "@stackra/access-log"
     },
     {
+      "code": "approval_consumed",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "actions",
+      "class": "ApprovalConsumedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_expired",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "ApprovalExpiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_identity_unavailable",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "actions",
+      "class": "ApprovalIdentityUnavailableError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_mismatch",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "actions",
+      "class": "ApprovalMismatchError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_not_granted",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "ApprovalNotGrantedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_pending_limit",
+      "kind": "rate_limited",
+      "category": "rate_limited",
+      "module": "actions",
+      "class": "ApprovalPendingLimitError",
+      "from": "@stackra/actions"
+    },
+    {
       "code": "approval_required",
       "kind": "failed_precondition",
       "category": "precondition_failed",
       "module": "actions",
       "class": "ApprovalRequiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_settings_unavailable",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "actions",
+      "class": "ApprovalSettingsUnavailableError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "actions",
+      "class": "ClaimNotLoadedError",
       "from": "@stackra/actions"
     },
     {
@@ -1154,6 +1345,30 @@
       "category": "precondition_failed",
       "module": "actions",
       "class": "OfflineCapReachedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "RowIsolationMissingError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approver_refused",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "actions",
+      "class": "ApproverRefusedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "step_up_required",
+      "kind": "unauthenticated",
+      "category": "unauthenticated",
+      "module": "actions",
+      "class": "StepUpRequiredError",
       "from": "@stackra/actions"
     },
     {
@@ -1381,6 +1596,14 @@
       "from": "@stackra/errors"
     },
     {
+      "code": "idempotency_key_in_progress",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "errors",
+      "class": "IdempotencyKeyInProgressError",
+      "from": "@stackra/errors"
+    },
+    {
       "code": "idempotency_key_reused",
       "kind": "conflict",
       "category": "conflict",
@@ -1437,6 +1660,30 @@
       "from": "@stackra/filesystem"
     },
     {
+      "code": "file_retained",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "filesystem",
+      "class": "FileRetainedError",
+      "from": "@stackra/filesystem"
+    },
+    {
+      "code": "retention_unsupported",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "filesystem",
+      "class": "RetentionUnsupportedError",
+      "from": "@stackra/filesystem"
+    },
+    {
+      "code": "job_claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "queue",
+      "class": "JobClaimNotLoadedError",
+      "from": "@stackra/queue"
+    },
+    {
       "code": "job_isolation_missing",
       "kind": "failed_precondition",
       "category": "precondition_failed",
@@ -1450,6 +1697,14 @@
       "category": "unavailable",
       "module": "queue",
       "class": "JobNotDueError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "job_row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "queue",
+      "class": "JobRowIsolationMissingError",
       "from": "@stackra/queue"
     },
     {
@@ -1493,6 +1748,22 @@
       "from": "@stackra/scheduler"
     },
     {
+      "code": "schedule_claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "scheduler",
+      "class": "ScheduleClaimNotLoadedError",
+      "from": "@stackra/scheduler"
+    },
+    {
+      "code": "schedule_row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "scheduler",
+      "class": "ScheduleRowIsolationMissingError",
+      "from": "@stackra/scheduler"
+    },
+    {
       "code": "scope_label_invalid",
       "kind": "validation",
       "category": "validation",
@@ -1523,6 +1794,22 @@
       "module": "scope",
       "class": "ScopeUnresolvedError",
       "from": "@stackra/scope"
+    },
+    {
+      "code": "external_role_not_allowed",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "ExternalRoleNotAllowedError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "last_owner_refused",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "LastOwnerRefusedError",
+      "from": "@stackra/tenancy"
     },
     {
       "code": "region_mismatch",
@@ -1679,6 +1966,119 @@
       "table": "access_log.access_log_entries",
       "publicId": "acl",
       "traits": ["HasPublicId", "BelongsToTenant", "AppendOnly"],
+      "entity": {
+        "module": "access_log",
+        "fields": [
+          {
+            "name": "callId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "target",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "sequence",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "number"
+            },
+            "int": true
+          },
+          {
+            "name": "previousHash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "hash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "classification",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "enum",
+              "name": "DataClassification",
+              "values": [
+                "personal",
+                "financial",
+                "health",
+                "pseudonymous",
+                "regulated",
+                "credential"
+              ]
+            }
+          },
+          {
+            "name": "actor",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "shipped",
+              "name": "Actor",
+              "from": "@stackra/validation"
+            }
+          },
+          {
+            "name": "subjects",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "array",
+              "element": {
+                "kind": "string"
+              }
+            }
+          },
+          {
+            "name": "at",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "acl"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
       "from": "@stackra/access-log"
     },
     {
@@ -1688,6 +2088,179 @@
       "table": "access_log.audit_log_entries",
       "publicId": "aud",
       "traits": ["HasPublicId", "BelongsToTenant", "AppendOnly"],
+      "entity": {
+        "module": "access_log",
+        "fields": [
+          {
+            "name": "callId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "key",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "permission",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "risk",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "scopeId",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "originKind",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "originId",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "hatch",
+              "source": "z.enum([\"ok\", \"refused\"])",
+              "imports": [["z", "zod"]]
+            }
+          },
+          {
+            "name": "code",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "sequence",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "number"
+            },
+            "int": true
+          },
+          {
+            "name": "previousHash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "hash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "effects",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "array",
+              "element": {
+                "kind": "string"
+              }
+            }
+          },
+          {
+            "name": "actor",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "shipped",
+              "name": "Actor",
+              "from": "@stackra/validation"
+            }
+          },
+          {
+            "name": "scopePath",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "record",
+              "value": {
+                "kind": "json"
+              }
+            }
+          },
+          {
+            "name": "at",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "aud"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
       "from": "@stackra/access-log"
     },
     {
@@ -1697,6 +2270,74 @@
       "table": "data_maintenance.synonyms",
       "publicId": "syn",
       "traits": ["HasPublicId", "BelongsToTenant", "Timestamps"],
+      "entity": {
+        "module": "data_maintenance",
+        "fields": [
+          {
+            "name": "indexName",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "language",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "terms",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "hatch",
+              "source": "SYNONYM_FIELDS.shape.terms",
+              "imports": [["SYNONYM_FIELDS", "#node/constants/synonym-fields-schema.constant"]]
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "syn"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
       "from": "@stackra/data-maintenance"
     },
     {
@@ -1706,6 +2347,64 @@
       "table": "scope.scope_nodes",
       "publicId": "scp",
       "traits": ["HasPublicId", "Timestamps"],
+      "global": true,
+      "entity": {
+        "module": "scope",
+        "fields": [
+          {
+            "name": "level",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "scopePath",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
       "from": "@stackra/scope"
     },
     {
@@ -1866,6 +2565,66 @@
         "computed": []
       },
       "from": "@stackra/tenancy"
+    },
+    {
+      "key": "tenancy.tenant_data_key",
+      "class": "TenantDataKey",
+      "file": "src/node/models/tenant-data-key.model.ts",
+      "table": "tenancy.tenant_data_keys",
+      "publicId": "tdk",
+      "traits": ["HasPublicId", "BelongsToTenant", "AppendOnly"],
+      "entity": {
+        "module": "tenancy",
+        "fields": [
+          {
+            "name": "version",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "number"
+            },
+            "int": true
+          },
+          {
+            "name": "keyId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "wrapped",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "tdk"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": ["id", "tenantId"],
+        "computed": []
+      },
+      "from": "@stackra/tenancy"
     }
   ],
   "drivers": [
@@ -1945,6 +2704,12 @@
               "class": {
                 "name": "AccessLogConfig",
                 "from": "@stackra/access-log"
+              }
+            },
+            {
+              "class": {
+                "name": "TenantDirectory",
+                "from": "@stackra/tenancy"
               }
             }
           ]
@@ -2137,11 +2902,29 @@
     {
       "port": "ApprovalGate",
       "key": "actions.ApprovalGate",
-      "candidates": ["open"],
+      "candidates": ["open", "memory"],
       "classes": {
         "open": {
           "class": "OpenApprovalGateDriver",
           "from": "@stackra/actions"
+        },
+        "memory": {
+          "class": "MemoryApprovalGateDriver",
+          "from": "@stackra/actions/testing",
+          "deps": [
+            {
+              "class": {
+                "name": "IdentityResolver",
+                "from": "@stackra/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
         }
       },
       "from": "@stackra/actions"
@@ -2215,6 +2998,83 @@
       "from": "@stackra/actions"
     },
     {
+      "port": "ActorStatusCheck",
+      "key": "actions.ActorStatusCheck",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryActorStatusCheckDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ApprovalBindingStore",
+      "key": "actions.ApprovalBindingStore",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryApprovalBindingStoreDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "JobDispatcher",
+      "key": "actions.JobDispatcher",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryJobDispatcherDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "StepUpCheck",
+      "key": "actions.StepUpCheck",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryStepUpCheckDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "EdgeSigningKeys",
+      "key": "app.EdgeSigningKeys",
+      "candidates": ["env", "memory"],
+      "classes": {
+        "env": {
+          "class": "EnvEdgeSigningKeysDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "EdgeConfig",
+                "from": "@stackra/app/server"
+              }
+            }
+          ]
+        },
+        "memory": {
+          "class": "MemoryEdgeSigningKeysDriver",
+          "from": "@stackra/app/server"
+        }
+      },
+      "selectedBy": "config:app.edge.keys",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
+      },
+      "from": "@stackra/app"
+    },
+    {
       "port": "EdgeNonceStore",
       "key": "app.EdgeNonceStore",
       "candidates": ["memory"],
@@ -2224,17 +3084,10 @@
           "from": "@stackra/app/server"
         }
       },
-      "from": "@stackra/app"
-    },
-    {
-      "port": "EdgeSigningKeys",
-      "key": "app.EdgeSigningKeys",
-      "candidates": ["memory"],
-      "classes": {
-        "memory": {
-          "class": "MemoryEdgeSigningKeysDriver",
-          "from": "@stackra/app/server"
-        }
+      "selectedBy": "config:app.edge.nonces",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
       },
       "from": "@stackra/app"
     },
@@ -2254,7 +3107,7 @@
             {
               "class": {
                 "name": "BearerConfig",
-                "from": "@stackra/app"
+                "from": "@stackra/app/server"
               }
             }
           ]
@@ -2263,22 +3116,79 @@
       "from": "@stackra/app"
     },
     {
-      "port": "SecretStore",
-      "key": "config.SecretStore",
-      "candidates": ["infisical", "memory", "aws_secrets_manager"],
+      "port": "ClientSession",
+      "key": "clients.ClientSession",
+      "candidates": ["service"],
       "classes": {
-        "infisical": {
-          "class": "InfisicalSecretStoreDriver",
+        "service": {
+          "class": "ServiceClientSessionDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "ServiceTokens",
+                "from": "@stackra/identity/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ClientsConfig",
+                "from": "@stackra/clients"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/app"
+    },
+    {
+      "port": "Signer",
+      "key": "contracts.Signer",
+      "candidates": ["ephemeral", "kms"],
+      "classes": {
+        "ephemeral": {
+          "class": "EphemeralSignerDriver",
           "from": "@stackra/config",
           "deps": [
             {
               "class": {
-                "name": "InfisicalConfig",
+                "name": "SignerConfig",
                 "from": "@stackra/config"
               }
             }
           ]
         },
+        "kms": {
+          "class": "KmsSignerDriver",
+          "from": "@stackra/config",
+          "deps": [
+            {
+              "class": {
+                "name": "SignerConfig",
+                "from": "@stackra/config"
+              }
+            },
+            {
+              "class": {
+                "name": "KmsClient",
+                "from": "@stackra/config/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:config.signer.driver",
+      "config": {
+        "class": "SignerConfig",
+        "from": "@stackra/config"
+      },
+      "from": "@stackra/config"
+    },
+    {
+      "port": "SecretStore",
+      "key": "config.SecretStore",
+      "candidates": ["memory", "aws_secrets_manager"],
+      "classes": {
         "memory": {
           "class": "MemorySecretStoreDriver",
           "from": "@stackra/config"
@@ -2296,7 +3206,92 @@
           ]
         }
       },
+      "selectedBy": "config:config.secrets.store",
+      "config": {
+        "class": "SecretsConfig",
+        "from": "@stackra/config"
+      },
       "from": "@stackra/config"
+    },
+    {
+      "port": "KmsClient",
+      "key": "config.KmsClient",
+      "candidates": ["aws_sdk"],
+      "classes": {
+        "aws_sdk": {
+          "class": "AwsSdkKmsClientDriver",
+          "from": "@stackra/config/node",
+          "deps": [
+            {
+              "class": {
+                "name": "SignerConfig",
+                "from": "@stackra/config"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/config"
+    },
+    {
+      "port": "Renderer",
+      "key": "console.Renderer",
+      "candidates": ["text", "ink"],
+      "classes": {
+        "text": {
+          "class": "TextRendererDriver",
+          "from": "@stackra/console",
+          "deps": [
+            {
+              "class": {
+                "name": "RenderContext",
+                "from": "@stackra/console"
+              }
+            }
+          ]
+        },
+        "ink": {
+          "class": "InkRendererDriver",
+          "from": "@stackra/console/node",
+          "deps": [
+            {
+              "class": {
+                "name": "RenderContext",
+                "from": "@stackra/console"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
+      "port": "ProcessRunner",
+      "key": "console.ProcessRunner",
+      "candidates": ["node", "memory"],
+      "classes": {
+        "node": {
+          "class": "NodeProcessRunnerDriver",
+          "from": "@stackra/console/node"
+        },
+        "memory": {
+          "class": "MemoryProcessRunnerDriver",
+          "from": "@stackra/console/testing"
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
+      "port": "Completions",
+      "key": "console.Completions",
+      "candidates": ["tab"],
+      "classes": {
+        "tab": {
+          "class": "TabCompletionsDriver",
+          "from": "@stackra/console/node"
+        }
+      },
+      "from": "@stackra/console"
     },
     {
       "port": "CommandAudit",
@@ -2311,6 +3306,18 @@
       "from": "@stackra/console"
     },
     {
+      "port": "OperatorBreakGlass",
+      "key": "console.OperatorBreakGlass",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryOperatorBreakGlassDriver",
+          "from": "@stackra/console/testing"
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
       "port": "Clock",
       "key": "contracts.Clock",
       "candidates": ["system"],
@@ -2318,18 +3325,6 @@
         "system": {
           "class": "SystemClockDriver",
           "from": "@stackra/container"
-        }
-      },
-      "from": "@stackra/container"
-    },
-    {
-      "port": "Logger",
-      "key": "contracts.Logger",
-      "candidates": ["memory"],
-      "classes": {
-        "memory": {
-          "class": "MemoryLoggerDriver",
-          "from": "@stackra/container/testing"
         }
       },
       "from": "@stackra/container"
@@ -2627,11 +3622,29 @@
     {
       "port": "PlanSnapshots",
       "key": "entitlements.PlanSnapshots",
-      "candidates": ["memory"],
+      "candidates": ["memory", "service"],
       "classes": {
         "memory": {
           "class": "MemoryPlanSnapshotsDriver",
           "from": "@stackra/entitlements"
+        },
+        "service": {
+          "class": "ServicePlanSnapshotsDriver",
+          "from": "@stackra/entitlements",
+          "deps": [
+            {
+              "class": {
+                "name": "PlanServiceChannel",
+                "from": "@stackra/entitlements/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
         }
       },
       "from": "@stackra/entitlements"
@@ -3127,6 +4140,11 @@
           ]
         }
       },
+      "selectedBy": "config:logger.logging.reporter",
+      "config": {
+        "class": "LoggingConfig",
+        "from": "@stackra/logger"
+      },
       "from": "@stackra/logger"
     },
     {
@@ -3239,6 +4257,12 @@
               "class": {
                 "name": "Database",
                 "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "Container",
+                "from": "@stackra/container"
               }
             }
           ]
@@ -3626,6 +4650,35 @@
       "from": "@stackra/tenancy"
     },
     {
+      "port": "TenantDataKeyStore",
+      "key": "tenancy.TenantDataKeyStore",
+      "candidates": ["memory", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantDataKeyStoreDriver",
+          "from": "@stackra/tenancy"
+        },
+        "postgres": {
+          "class": "PostgresTenantDataKeyStoreDriver",
+          "from": "@stackra/tenancy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "TenantDataKeyService",
+                "from": "@stackra/tenancy/node"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:tenancy.tenant_keys.store",
+      "config": {
+        "class": "TenantKeysConfig",
+        "from": "@stackra/tenancy"
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
       "port": "TenantDirectory",
       "key": "tenancy.TenantDirectory",
       "candidates": ["memory"],
@@ -3830,6 +4883,47 @@
       "from": "@stackra/tenancy"
     },
     {
+      "port": "KeyProvider",
+      "key": "contracts.KeyProvider",
+      "candidates": ["ephemeral", "kms"],
+      "classes": {
+        "ephemeral": {
+          "class": "EphemeralKeyProviderDriver",
+          "from": "@stackra/tenancy/node"
+        },
+        "kms": {
+          "class": "KmsKeyProviderDriver",
+          "from": "@stackra/tenancy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "TenantKeysConfig",
+                "from": "@stackra/tenancy"
+              }
+            },
+            {
+              "class": {
+                "name": "KmsClient",
+                "from": "@stackra/config/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "TenantDataKeyStore",
+                "from": "@stackra/tenancy/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:tenancy.tenant_keys.driver",
+      "config": {
+        "class": "TenantKeysConfig",
+        "from": "@stackra/tenancy"
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
       "port": "ApprovalBindingStore",
       "key": "actions.ApprovalBindingStore",
       "candidates": ["postgres"],
@@ -3845,6 +4939,30 @@
               }
             }
           ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantMembers",
+      "key": "tenancy.TenantMembers",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantMembersDriver",
+          "from": "@stackra/tenancy/testing"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantProfile",
+      "key": "tenancy.TenantProfile",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantProfileDriver",
+          "from": "@stackra/tenancy/testing"
         }
       },
       "from": "@stackra/tenancy"
@@ -3868,6 +4986,137 @@
     }
   ],
   "roles": [],
+  "env": [
+    {
+      "name": "ACCESS_LOG_EXPORT_TOKEN",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "access_log",
+      "class": "AccessLogConfig",
+      "field": "exportToken",
+      "from": "@stackra/access-log"
+    },
+    {
+      "name": "ACTIONS_VALKEY_URL",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "actions.stores",
+      "class": "StoresConfig",
+      "field": "valkeyUrl",
+      "from": "@stackra/actions"
+    },
+    {
+      "name": "QUEUE_BROKER_VALKEY_URL",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "queue.broker",
+      "class": "BrokerConfig",
+      "field": "valkeyUrl",
+      "from": "@stackra/queue"
+    },
+    {
+      "name": "STACKRA_ACCESS_LOG_SINK",
+      "kind": "config",
+      "type": "enum",
+      "values": ["memory", "outbox", "postgres"],
+      "required": false,
+      "config": "access_log",
+      "class": "AccessLogConfig",
+      "field": "sink",
+      "from": "@stackra/access-log"
+    },
+    {
+      "name": "STACKRA_BEARER_AUDIENCE",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "app.bearer",
+      "class": "BearerConfig",
+      "field": "audience",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_BEARER_ISSUER",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "app.bearer",
+      "class": "BearerConfig",
+      "field": "issuer",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_COMMAND_AUDIT_SCOPE",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "access_log",
+      "class": "AccessLogConfig",
+      "field": "commandAuditScope",
+      "from": "@stackra/access-log"
+    },
+    {
+      "name": "STACKRA_CORS_ALLOWED_ORIGINS",
+      "kind": "config",
+      "type": "array",
+      "required": false,
+      "config": "app.cors",
+      "class": "CorsConfig",
+      "field": "allowedOrigins",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_EDGE_SIGNING_KEYS",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.edge",
+      "class": "EdgeConfig",
+      "field": "signingKeys",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_PRIVACY_STORE",
+      "kind": "config",
+      "type": "enum",
+      "values": ["memory", "repository"],
+      "required": false,
+      "config": "privacy",
+      "class": "PrivacyConfig",
+      "field": "store",
+      "from": "@stackra/privacy"
+    },
+    {
+      "name": "STACKRA_VISITOR_SIGNING_KEY",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.visitor",
+      "class": "VisitorConfig",
+      "field": "signingKey",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_VISITOR_SIGNING_KEY_PREVIOUS",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.visitor",
+      "class": "VisitorConfig",
+      "field": "previousSigningKey",
+      "from": "@stackra/app"
+    }
+  ],
+  "factories": [
+    {
+      "class": "NoteFactory",
+      "file": "src/modules/notes/database/factories/note.factory.ts",
+      "model": "Note"
+    }
+  ],
   "commands": [
     {
       "name": "db:migrate",

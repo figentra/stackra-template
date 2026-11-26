@@ -7,7 +7,7 @@
     "x-stackra-member": "example"
   },
   "paths": {
-    "/notes": {
+    "/app/notes": {
       "post": {
         "operationId": "notes_note_create",
         "summary": "CreateNoteAction",
@@ -87,7 +87,7 @@
         }
       }
     },
-    "/notes/{noteId}": {
+    "/app/notes/{noteId}": {
       "delete": {
         "operationId": "notes_note_delete",
         "summary": "DeleteNoteAction",
@@ -214,7 +214,7 @@
         }
       }
     },
-    "/audit-log-entries/export": {
+    "/app/audit-log-entries/export": {
       "post": {
         "operationId": "access_log_audit_log_entry_export",
         "summary": "ExportAuditAction",
@@ -222,6 +222,7 @@
         "x-stackra-action": "access_log.audit_log_entry.export@1",
         "x-stackra-permission": "access_log.audit_log_entry.export",
         "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
         "requestBody": {
           "required": true,
           "content": {
@@ -249,7 +250,7 @@
         }
       }
     },
-    "/audit-log-entries/search": {
+    "/app/audit-log-entries/search": {
       "get": {
         "operationId": "access_log_audit_log_entry_search",
         "summary": "AuditQuery",
@@ -274,14 +275,15 @@
         }
       }
     },
-    "/synonyms": {
+    "/app/synonyms": {
       "post": {
         "operationId": "data_maintenance_synonym_create",
         "summary": "CreateSynonymAction",
         "tags": ["data_maintenance"],
         "x-stackra-action": "data_maintenance.synonym.create@1",
         "x-stackra-permission": "data_maintenance.synonym.create",
-        "x-stackra-risk": "L1",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
         "requestBody": {
           "required": true,
           "content": {
@@ -332,7 +334,7 @@
         }
       }
     },
-    "/synonyms/{synonymId}": {
+    "/app/synonyms/{synonymId}": {
       "delete": {
         "operationId": "data_maintenance_synonym_delete",
         "summary": "DeleteSynonymAction",
@@ -340,6 +342,7 @@
         "x-stackra-action": "data_maintenance.synonym.delete@1",
         "x-stackra-permission": "data_maintenance.synonym.delete",
         "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
         "x-stackra-refusals": ["not_found"],
         "parameters": [
           {
@@ -383,7 +386,8 @@
         "tags": ["data_maintenance"],
         "x-stackra-action": "data_maintenance.synonym.update@1",
         "x-stackra-permission": "data_maintenance.synonym.update",
-        "x-stackra-risk": "L1",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
         "parameters": [
           {
             "name": "synonymId",
@@ -421,7 +425,7 @@
         }
       }
     },
-    "/holds/place": {
+    "/app/holds/place": {
       "post": {
         "operationId": "privacy_hold_place",
         "summary": "PlaceHoldAction",
@@ -429,6 +433,7 @@
         "x-stackra-action": "privacy.hold.place@1",
         "x-stackra-permission": "privacy.hold.place",
         "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
         "requestBody": {
           "required": true,
           "content": {
@@ -456,7 +461,7 @@
         }
       }
     },
-    "/holds/{holdId}/release": {
+    "/app/holds/{holdId}/release": {
       "put": {
         "operationId": "privacy_hold_release",
         "summary": "ReleaseHoldAction",
@@ -464,6 +469,7 @@
         "x-stackra-action": "privacy.hold.release@1",
         "x-stackra-permission": "privacy.hold.release",
         "x-stackra-risk": "L4",
+        "x-stackra-idempotency": "optional",
         "parameters": [
           {
             "name": "holdId",
@@ -501,7 +507,7 @@
         }
       }
     },
-    "/holds": {
+    "/app/holds": {
       "get": {
         "operationId": "privacy_hold_list",
         "summary": "ListHoldsQuery",
