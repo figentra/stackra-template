@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-26
 
-**Status**: Implementing
+**Status**: Tasked
 
 **Tier**: feature
 
@@ -63,21 +63,21 @@ Gate it copied ran no tests, because Figentra runs its tests on its own build bo
 - **AC-001**: THE default `minimal` profile SHALL write none of Figentra's furniture: Flow, code
   owners, the deploy, release and Flow workflows, the registry-token action, the agent hooks and
   personas, the model routing, the process rules and skills, and the OpenCode setup.
-- **AC-002**: THE minimal profile SHALL write the root files that carry Figentra's setup from
+- **AC-002**: THE `minimal` profile SHALL write the root files that carry Figentra's setup from
   `starter/minimal/`, and every derived overlay SHALL equal what `starter-overlays.mjs` derives from
   its root file.
-- **AC-003**: THE minimal app's AGENTS.md and CLAUDE.md SHALL be its own (no Flow header, no
+- **AC-003**: THE `minimal` app's AGENTS.md and CLAUDE.md SHALL be its own (no Flow header, no
   Figentra Flow section), and its `.agents/` SHALL hold only the framework's open rules and skills,
   without the Flow header.
-- **AC-004**: No file the minimal profile writes, overlays included, SHALL name Figentra's process
-  or tools: `fflow`, Figentra Flow, `.flow/`, `flow.config.json`,
+- **AC-004**: THE `minimal` profile SHALL write no file, overlays included, that names Figentra's
+  process or tools: `fflow`, Figentra Flow, `.flow/`, `flow.config.json`,
   `figentra agents|linear|delegate|bot`, `pnpm linear`, the bot scripts, Linear release records, the
   agent paths only Figentra's setup has, its build box, its secrets repository or its branch names.
-- **AC-005**: THE minimal Quality Gate SHALL run each member's tests (`turbo run test`, affected on
-  a pull request), and a transform SHALL refuse a root gate that still says the tests run on
+- **AC-005**: THE `minimal` Quality Gate SHALL run each member's tests (`turbo run test`, affected
+  on a pull request), and a transform SHALL refuse a root gate that still says the tests run on
   Figentra's box.
-- **AC-006**: Every root and tooling path of the template SHALL be a choice: written by minimal,
-  Figentra's furniture, or template-only.
+- **AC-006**: THE starter manifest SHALL make every root and tooling path of the template a choice:
+  written by `minimal`, listed as Figentra's furniture, or template-only.
 - **AC-007**: THE opt-in `internal` profile SHALL keep Figentra's setup for an app Figentra runs.
 
 ## Compatibility and migration
@@ -98,6 +98,6 @@ Gate it copied ran no tests, because Figentra runs its tests on its own build bo
 
 - 2026-11-26 → Clarified (STA-2877 and the batch 24 audit)
 - 2026-11-26 → Planned (plan.md)
-- 2026-11-26 → Tasked (tasks.md)
-- 2026-11-26 → Implementing (built in the same branch; review findings on the agent contract and the
-  gate's tests addressed)
+- 2026-11-26 → Tasked (tasks.md); the tasks marked done are on the branch, built with the review
+  findings on the agent contract and the gate's tests addressed. → Implementing waits for the
+  approver's Planned approval (ADR 0502), which only the CTO records.

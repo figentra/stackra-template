@@ -19,6 +19,12 @@
       // Prose wraps at printWidth, so the 100-column rule holds for docs too (.markdownlint.yaml MD013).
       "files": ["**/*.md", "**/*.mdx"],
       "options": { "proseWrap": "always" }
+    },
+    {
+      // A spec's task list keeps one task per line: the spec gate reads each task's covers, route
+      // and paths from its own line, so a wrapped task loses them.
+      "files": [".agents/specs/**/tasks.md"],
+      "options": { "proseWrap": "preserve" }
     }
   ],
   "ignorePatterns": [
