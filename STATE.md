@@ -1,7 +1,9 @@
 # State of figentra/stackra-template
 
-Dated 2026-11-07. This file reports what has been shown to work, separately from what is declared.
-Where it disagrees with another document, check the evidence named here, then correct that document.
+Dated 2026-11-07; sections 2 to 4 were updated on 2026-11-24 for the `@stackra/*` 0.33.0 branch (the
+default-branch facts in sections 3 and 6 are still those of 2026-11-07). This file reports what has
+been shown to work, separately from what is declared. Where it disagrees with another document,
+check the evidence named here, then correct that document.
 
 ## 1. What this repository is
 
@@ -17,9 +19,9 @@ Figentra Flow (`fflow`, stackra preset); code owner is `@figentra-usr`.
 | Fact                    | Value                                                                                                                                                         |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Default branch head     | `main` at `12f5b42a37b55ea765fe066b7ef43a58d82f41e6` (2026-11-07, #41)                                                                                        |
-| `@stackra/*` catalog    | `0.15.0`, exact, 89 entries in `catalogs.stackra` (`pnpm-workspace.yaml`)                                                                                     |
+| `@stackra/*` catalog    | `0.33.0`, exact, 89 entries in `catalogs.stackra` (`pnpm-workspace.yaml`); not 0.33.1, see section 4                                                          |
 | Member versions         | root `acme-platform` 0.0.0; service and package 0.0.0; console 0.0.1; docs 0.1.0 (all private)                                                                |
-| Figentra Flow           | `@figentra-oss/flow` 0.6.4; `.flow/lock.json` preset `stackra` 0.6.4                                                                                          |
+| Figentra Flow           | `@figentra-oss/flow` 0.11.0 (core's pin); `.flow/lock.json` preset `stackra` 0.11.0                                                                           |
 | Toolchain (`mise.toml`) | node 24.22.0, pnpm 12.16.1, oxfmt 0.71.0, oxlint 1.86.0, cspell 10.4.0, gitleaks 8.30.1, osv-scanner 2.7.0, encore 1.58.8, eas-cli 25.3.0, maestro cli-2.10.0 |
 | Build tools (catalog)   | turbo 2.11.9, typescript 7.0.2, @changesets/cli 3.0.3, mint 4.2.1184                                                                                          |
 | Tags                    | `v0.1.0-review.0` (2026-10-22), `pre-consolidate-2026-11-01`, 7 `archive/*` tags                                                                              |
@@ -35,12 +37,31 @@ All on `main` at `12f5b42` unless stated.
 - CodeQL passed: run 42336856386.
 - Release workflow ran green: run 42336856558. Install and build passed in the `release` job.
 - Main has been green since 447ec5a (2026-11-06, runs 42257961929 onward).
+- Local run on the build box, 2026-11-24 (lane L8; log and screenshots in the Stackra notes,
+  `notes-lanes/L8.md`). On `main` `d78a4fa` with `@stackra/*` 0.15.0: install, then
+  `turbo run build typecheck lint test --concurrency=2` passed 15 of 15 tasks (9 tests);
+  `pnpm verify` failed its secrets phase on a gitleaks false positive in history (`.gitleaksignore`,
+  #57). On the 0.33.0 branch (#58): the same turbo run passed 15 of 15 (12 tests), and every
+  `pnpm verify` phase, `pnpm validate`, `pnpm gen:check` and `fflow check` passed.
+- `apps/docs` (`pnpm dev`, mint on :3333) and `apps/console` (`pnpm dev`, Vite on :3710) rendered in
+  Chromium with no console error and no failed request, at 0.15.0 and at 0.33.0. The console draws
+  unstyled: see section 4.
 
 ## 4. Not proven
 
 - No test step runs in CI. Run 42336856556 has no `test` step, although the README says
-  `pnpm verify` is "the gate CI runs". No green run of `pnpm test` or `pnpm verify` is recorded
-  here.
+  `pnpm verify` is "the gate CI runs". A green local `pnpm test` and `pnpm verify` is recorded in
+  section 3 (the build box, 2026-11-24); no CI run of either is.
+- `@stackra/*` 0.33.1 cannot be installed: 20 packages (csp, iam, tenancy, identity, state, scope,
+  settings, query, ...) are at 0.33.1 in core's source but unpublished, while 70 published packages
+  depend on them at exactly 0.33.1 (checked 2026-11-24). The catalog stays on 0.33.0 until core
+  publishes them.
+- `apps/console` ships unstyled: its Vite config is the authored stand-in without Tailwind, and
+  `@stackra/vite-plugin` 0.33.0 does not install (pnpm `trustPolicy` refuses the trust downgrade of
+  a pre-release fork of `rollup-plugin-off-main-thread` (3.0.0-pre1), reached through
+  `vite-plugin-pwa` and `workbox-build`).
+- `services/example` has not been run (it needs Encore and Postgres); its tests, build and typecheck
+  pass.
 - `@stackra/starter` is not published. In run 42336856558 the Starter job warned that the registry
   refused the publish (no trusted publisher for this repository), and the job still exited green. An
   anonymous `GET https://npm.stackra.figentra.com/@stackra%2fstarter` returns 404.
@@ -98,6 +119,5 @@ Authoritative documents, in order:
 - `AGENTS.md` is 85,718 bytes; about 74 KB of it (Grammar to Single owners) is the framework
   programming model and is not specific to this repository. It has two `## This repository` sections
   (lines 62 and 88) that disagree on `apps/console`, and two `## Rules` sections.
-- `README.md` says the "0.5.1 catalog"; the catalog is 0.15.0.
 - Blocking `@stackra/starter`: the registry needs a trusted publisher row for
   `figentra/stackra-template`, `release.yml`, environment `release`.

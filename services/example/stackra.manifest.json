@@ -6,9 +6,43 @@
   "area": "app",
   "modules": [
     {
+      "key": "compliance",
+      "exports": [],
+      "dependsOn": []
+    },
+    {
       "key": "notes",
       "exports": [],
       "dependsOn": []
+    }
+  ],
+  "facets": [
+    {
+      "name": "Replaces",
+      "kind": "replaces",
+      "target": "class",
+      "from": "@stackra/container",
+      "targets": []
+    }
+  ],
+  "replaces": [
+    {
+      "class": "PostgresHoldRegistryDriver",
+      "file": "src/modules/compliance/drivers/postgres-hold-registry.driver.ts",
+      "replaces": "HoldRegistry",
+      "from": "@stackra/database/contracts"
+    },
+    {
+      "class": "PostgresSubjectHoldsDriver",
+      "file": "src/modules/compliance/drivers/postgres-subject-holds.driver.ts",
+      "replaces": "SubjectHolds",
+      "from": "@stackra/privacy/contracts"
+    },
+    {
+      "class": "PostgresSubjectSaltStoreDriver",
+      "file": "src/modules/compliance/drivers/postgres-subject-salt-store.driver.ts",
+      "replaces": "SubjectSaltStore",
+      "from": "@stackra/privacy/contracts"
     }
   ],
   "actions": [
@@ -22,9 +56,10 @@
       "risk": "L2",
       "actors": ["user", "agent"],
       "idempotency": "required",
+      "area": "app",
       "endpoint": {
         "method": "POST",
-        "path": "/notes",
+        "path": "/app/notes",
         "derived": true
       },
       "tool": {
@@ -54,9 +89,10 @@
       "risk": "L2",
       "actors": ["user", "agent"],
       "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "DELETE",
-        "path": "/notes/:noteId",
+        "path": "/app/notes/:noteId",
         "derived": true
       },
       "tool": {
@@ -65,7 +101,7 @@
         "hints": {
           "readOnlyHint": false,
           "destructiveHint": false,
-          "idempotentHint": true,
+          "idempotentHint": false,
           "openWorldHint": false
         }
       },
@@ -86,9 +122,10 @@
       "risk": "L2",
       "actors": ["user", "agent"],
       "idempotency": "optional",
+      "area": "app",
       "endpoint": {
         "method": "PATCH",
-        "path": "/notes/:noteId",
+        "path": "/app/notes/:noteId",
         "derived": true
       },
       "tool": {
@@ -97,7 +134,7 @@
         "hints": {
           "readOnlyHint": false,
           "destructiveHint": false,
-          "idempotentHint": true,
+          "idempotentHint": false,
           "openWorldHint": false
         }
       },
@@ -118,9 +155,10 @@
       "permission": "notes.note.read",
       "risk": "L0",
       "actors": ["user", "agent"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/notes/:noteId",
+        "path": "/app/notes/:noteId",
         "derived": true
       },
       "tool": {
@@ -149,9 +187,10 @@
       "permission": "notes.note.read",
       "risk": "L0",
       "actors": ["user", "agent"],
+      "area": "app",
       "endpoint": {
         "method": "GET",
-        "path": "/notes",
+        "path": "/app/notes",
         "derived": true
       },
       "tool": {
@@ -172,6 +211,575 @@
       }
     },
     {
+      "key": "access_log.audit_log_entry.export@1",
+      "kind": "action",
+      "module": "access_log",
+      "class": "ExportAuditAction",
+      "file": "src/node/actions/export-audit.action.ts",
+      "permission": "access_log.audit_log_entry.export",
+      "risk": "L2",
+      "actors": ["user", "service", "system"],
+      "idempotency": "optional",
+      "area": "app",
+      "job": {
+        "timeout": "15m"
+      },
+      "endpoint": {
+        "method": "POST",
+        "path": "/app/audit-log-entries/export",
+        "derived": true
+      },
+      "tool": {
+        "name": "access_log_audit_log_entry_export",
+        "default": true,
+        "hints": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "@stackra/access-log#/schemas/access_log.ExportAuditInput"
+      },
+      "output": {
+        "$ref": "@stackra/access-log#/schemas/access_log.ExportAuditOutput"
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "access_log.access_log_entry.purge@1",
+      "kind": "action",
+      "module": "access_log",
+      "class": "PurgeAccessLogAction",
+      "file": "src/node/actions/purge-access-log.action.ts",
+      "permission": "access_log.access_log_entry.purge",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "5m",
+        "cron": {
+          "schedule": "30 3 * * *",
+          "perScope": true
+        }
+      },
+      "input": {
+        "$ref": "@stackra/access-log#/schemas/access_log.PurgeAccessLogInput"
+      },
+      "output": {
+        "$ref": "@stackra/access-log#/schemas/access_log.PurgeAccessLogOutput"
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "access_log.audit_log_entry.search@1",
+      "kind": "query",
+      "module": "access_log",
+      "class": "AuditQuery",
+      "file": "src/node/queries/audit.query.ts",
+      "permission": "access_log.audit_log_entry.read",
+      "risk": "L1",
+      "actors": ["user", "service"],
+      "area": "app",
+      "endpoint": {
+        "method": "GET",
+        "path": "/app/audit-log-entries/search",
+        "derived": true
+      },
+      "tool": {
+        "name": "access_log_audit_log_entry_search",
+        "default": true,
+        "hints": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "@stackra/access-log#/schemas/access_log.AuditQueryInput"
+      },
+      "output": {
+        "$ref": "@stackra/access-log#/schemas/access_log.AuditQueryOutput"
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "data_maintenance.synonym.create@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "CreateSynonymAction",
+      "file": "src/node/actions/create-synonym.action.ts",
+      "permission": "data_maintenance.synonym.create",
+      "risk": "L2",
+      "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "area": "app",
+      "endpoint": {
+        "method": "POST",
+        "path": "/app/synonyms",
+        "derived": true
+      },
+      "tool": {
+        "name": "data_maintenance_synonym_create",
+        "default": true,
+        "hints": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.CreateSynonymInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.CreateSynonymOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.synonym.delete@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "DeleteSynonymAction",
+      "file": "src/node/actions/delete-synonym.action.ts",
+      "permission": "data_maintenance.synonym.delete",
+      "risk": "L2",
+      "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "area": "app",
+      "endpoint": {
+        "method": "DELETE",
+        "path": "/app/synonyms/:synonymId",
+        "derived": true
+      },
+      "tool": {
+        "name": "data_maintenance_synonym_delete",
+        "default": true,
+        "hints": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.DeleteSynonymInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.DeleteSynonymOutput"
+      },
+      "refusals": ["not_found"],
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.change_log.maintain@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "MaintainChangeLogAction",
+      "file": "src/node/actions/maintain-change-log.action.ts",
+      "permission": "data_maintenance.change_log.maintain",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "5m",
+        "cron": {
+          "schedule": "30 2 * * *"
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.MaintainChangeLogInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.MaintainChangeLogOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.partition.maintain@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "MaintainPartitionsAction",
+      "file": "src/node/actions/maintain-partitions.action.ts",
+      "permission": "data_maintenance.partition.maintain",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "10m",
+        "cron": {
+          "schedule": "15 2 * * *"
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.MaintainPartitionsInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.MaintainPartitionsOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.outbox_message.prune@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "PruneOutboxAction",
+      "file": "src/node/actions/prune-outbox.action.ts",
+      "permission": "data_maintenance.outbox_message.prune",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "5m",
+        "cron": {
+          "schedule": "15 3 * * *"
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.PruneOutboxInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.PruneOutboxOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.record.prune@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "PruneRecordsAction",
+      "file": "src/node/actions/prune-records.action.ts",
+      "permission": "data_maintenance.record.prune",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "10m",
+        "cron": {
+          "schedule": "0 3 * * *",
+          "perScope": true
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.PruneRecordsInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.PruneRecordsOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.query.record@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "RecordSearchQueryAction",
+      "file": "src/node/actions/record-search-query.action.ts",
+      "permission": "data_maintenance.query.record",
+      "risk": "L2",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "timeout": "30s",
+        "retries": 3
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.RecordSearchQueryInput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.index.reindex@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "ReindexSearchAction",
+      "file": "src/node/actions/reindex-search.action.ts",
+      "permission": "data_maintenance.index.reindex",
+      "risk": "L2",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "1h",
+        "retries": 5
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.ReindexSearchInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.ReindexSearchOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.index.reindex_semantic@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "ReindexSemanticAction",
+      "file": "src/node/actions/reindex-semantic.action.ts",
+      "permission": "data_maintenance.index.reindex_semantic",
+      "risk": "L2",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "2h",
+        "retries": 5
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.ReindexSearchInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.ReindexSearchOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.timeseries.rollup@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "RollUpTimeSeriesAction",
+      "file": "src/node/actions/roll-up-time-series.action.ts",
+      "permission": "data_maintenance.timeseries.rollup",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "10m",
+        "cron": {
+          "schedule": "*/15 * * * *",
+          "perScope": true
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.RollUpTimeSeriesInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.RollUpTimeSeriesOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.synonym.update@1",
+      "kind": "action",
+      "module": "data_maintenance",
+      "class": "UpdateSynonymAction",
+      "file": "src/node/actions/update-synonym.action.ts",
+      "permission": "data_maintenance.synonym.update",
+      "risk": "L2",
+      "actors": ["user", "agent"],
+      "idempotency": "optional",
+      "area": "app",
+      "endpoint": {
+        "method": "PATCH",
+        "path": "/app/synonyms/:synonymId",
+        "derived": true
+      },
+      "tool": {
+        "name": "data_maintenance_synonym_update",
+        "default": true,
+        "hints": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.UpdateSynonymInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.UpdateSynonymOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.synonym.list@1",
+      "kind": "query",
+      "module": "data_maintenance",
+      "class": "ListSynonymsQuery",
+      "file": "src/node/queries/list-synonyms.query.ts",
+      "permission": "data_maintenance.synonym.read",
+      "risk": "L0",
+      "actors": ["user", "agent"],
+      "area": "app",
+      "endpoint": {
+        "method": "GET",
+        "path": "/app/synonyms",
+        "derived": true
+      },
+      "tool": {
+        "name": "data_maintenance_synonym_list",
+        "default": true,
+        "hints": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      "input": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.ListSynonymsInput"
+      },
+      "output": {
+        "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.ListSynonymsOutput"
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "privacy.subject.erase@1",
+      "kind": "action",
+      "module": "privacy",
+      "class": "EraseSubjectAction",
+      "file": "src/node/actions/erase-subject.action.ts",
+      "permission": "privacy.subject.erase",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "1h",
+        "retries": 3
+      },
+      "input": {
+        "$ref": "@stackra/privacy#/schemas/privacy.EraseSubjectInput"
+      },
+      "output": {
+        "$ref": "@stackra/privacy#/schemas/privacy.EraseSubjectOutput"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.subject.export@1",
+      "kind": "action",
+      "module": "privacy",
+      "class": "ExportSubjectDataAction",
+      "file": "src/node/actions/export-subject-data.action.ts",
+      "permission": "privacy.subject.export",
+      "risk": "L2",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "timeout": "10m",
+        "retries": 2
+      },
+      "input": {
+        "$ref": "@stackra/privacy#/schemas/privacy.ExportSubjectDataInput"
+      },
+      "output": {
+        "$ref": "@stackra/privacy#/schemas/privacy.ExportSubjectDataOutput"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.hold.place@1",
+      "kind": "action",
+      "module": "privacy",
+      "class": "PlaceHoldAction",
+      "file": "src/node/actions/place-hold.action.ts",
+      "permission": "privacy.hold.place",
+      "risk": "L2",
+      "actors": ["user", "service"],
+      "idempotency": "optional",
+      "area": "app",
+      "endpoint": {
+        "method": "POST",
+        "path": "/app/holds/place",
+        "derived": true
+      },
+      "toolOff": "an agent never places or lifts a legal hold",
+      "input": {
+        "$ref": "@stackra/privacy#/schemas/privacy.PlaceHoldInput"
+      },
+      "output": {
+        "$ref": "@stackra/privacy#/schemas/privacy.PlaceHoldOutput"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.subject_export.purge@1",
+      "kind": "action",
+      "module": "privacy",
+      "class": "PurgeSubjectExportsAction",
+      "file": "src/node/actions/purge-subject-exports.action.ts",
+      "permission": "privacy.subject_export.purge",
+      "risk": "L4",
+      "actors": ["system"],
+      "area": "app",
+      "job": {
+        "unique": true,
+        "timeout": "5m",
+        "cron": {
+          "schedule": "0 4 * * *",
+          "perScope": true
+        }
+      },
+      "input": {
+        "$ref": "@stackra/privacy#/schemas/privacy.PurgeSubjectExportsInput"
+      },
+      "output": {
+        "$ref": "@stackra/privacy#/schemas/privacy.PurgeSubjectExportsOutput"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.hold.release@1",
+      "kind": "action",
+      "module": "privacy",
+      "class": "ReleaseHoldAction",
+      "file": "src/node/actions/release-hold.action.ts",
+      "permission": "privacy.hold.release",
+      "risk": "L4",
+      "actors": ["user", "service"],
+      "idempotency": "optional",
+      "area": "app",
+      "endpoint": {
+        "method": "PUT",
+        "path": "/app/holds/:holdId/release",
+        "derived": true
+      },
+      "toolOff": "an agent never places or lifts a legal hold",
+      "input": {
+        "$ref": "@stackra/privacy#/schemas/privacy.ReleaseHoldInput"
+      },
+      "output": {
+        "$ref": "@stackra/privacy#/schemas/privacy.ReleaseHoldOutput"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.hold.list@1",
+      "kind": "query",
+      "module": "privacy",
+      "class": "ListHoldsQuery",
+      "file": "src/node/queries/list-holds.query.ts",
+      "permission": "privacy.hold.read",
+      "risk": "L1",
+      "actors": ["user", "service"],
+      "area": "app",
+      "endpoint": {
+        "method": "GET",
+        "path": "/app/holds",
+        "derived": true
+      },
+      "toolOff": "legal holds are a compliance officer's surface, not an agent's",
+      "input": {
+        "$ref": "@stackra/privacy#/schemas/privacy.ListHoldsInput"
+      },
+      "output": {
+        "$ref": "@stackra/privacy#/schemas/privacy.ListHoldsOutput"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
       "key": "tenancy.approval_binding.prune@1",
       "kind": "action",
       "module": "tenancy",
@@ -180,6 +788,7 @@
       "permission": "tenancy.approval_binding.prune",
       "risk": "L4",
       "actors": ["system"],
+      "area": "app",
       "job": {
         "unique": true,
         "timeout": "5m",
@@ -232,6 +841,30 @@
       }
     },
     {
+      "name": "access_log.access_record.recorded.v1",
+      "module": "access_log",
+      "class": "AccessRecorded",
+      "file": "src/core/events/access-recorded.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/access-log#/schemas/access_log.AccessRecorded"
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "name": "actions.approval.granted.v1",
+      "module": "actions",
+      "class": "ApprovalGranted",
+      "file": "src/contracts/events/approval-granted.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/actions#/schemas/actions.ApprovalGranted"
+      },
+      "from": "@stackra/actions"
+    },
+    {
       "name": "actions.analytics.tracked.v1",
       "module": "actions",
       "class": "AnalyticsTracked",
@@ -268,6 +901,18 @@
       "from": "@stackra/actions"
     },
     {
+      "name": "privacy.subject.erased.v1",
+      "module": "privacy",
+      "class": "SubjectErased",
+      "file": "src/core/events/subject-erased.event.ts",
+      "kind": "integration",
+      "version": 1,
+      "fields": {
+        "$ref": "@stackra/privacy#/schemas/privacy.SubjectErased"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
       "name": "scope.node.moved.v1",
       "module": "scope",
       "class": "ScopeMoved",
@@ -278,6 +923,17 @@
         "$ref": "@stackra/scope#/schemas/scope.ScopeMoved"
       },
       "from": "@stackra/scope"
+    },
+    {
+      "name": "tenancy.tenant_data_key_minted",
+      "module": "tenancy",
+      "class": "TenantDataKeyMinted",
+      "file": "src/core/events/tenant-data-key-minted.event.ts",
+      "kind": "domain",
+      "fields": {
+        "$ref": "@stackra/tenancy#/schemas/tenancy.TenantDataKeyMinted"
+      },
+      "from": "@stackra/tenancy"
     }
   ],
   "permissions": [
@@ -314,6 +970,207 @@
       "file": "src/modules/notes/access/note.permissions.ts"
     },
     {
+      "key": "access_log.access_log_entry.purge",
+      "risk": "L4",
+      "class": "AccessLogEntryPermissions",
+      "module": "access_log",
+      "member": "purge",
+      "file": "src/node/access/access-log-entry.permissions.ts",
+      "system": true,
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "access_log.audit_log_entry.read",
+      "risk": "L1",
+      "class": "AuditLogEntryPermissions",
+      "module": "access_log",
+      "member": "read",
+      "file": "src/node/access/audit-log-entry.permissions.ts",
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "access_log.audit_log_entry.export",
+      "risk": "L2",
+      "class": "AuditLogEntryPermissions",
+      "module": "access_log",
+      "member": "export",
+      "file": "src/node/access/audit-log-entry.permissions.ts",
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "data_maintenance.change_log.maintain",
+      "risk": "L4",
+      "class": "ChangeLogPermissions",
+      "module": "data_maintenance",
+      "member": "maintain",
+      "file": "src/core/access/change-log.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.index.reindex",
+      "risk": "L2",
+      "class": "IndexPermissions",
+      "module": "data_maintenance",
+      "member": "reindex",
+      "file": "src/core/access/index.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.index.reindex_semantic",
+      "risk": "L2",
+      "class": "IndexPermissions",
+      "module": "data_maintenance",
+      "member": "reindexSemantic",
+      "file": "src/core/access/index.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.outbox_message.prune",
+      "risk": "L4",
+      "class": "OutboxMessagePermissions",
+      "module": "data_maintenance",
+      "member": "prune",
+      "file": "src/core/access/outbox-message.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.partition.maintain",
+      "risk": "L4",
+      "class": "PartitionPermissions",
+      "module": "data_maintenance",
+      "member": "maintain",
+      "file": "src/core/access/partition.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.query.record",
+      "risk": "L2",
+      "class": "QueryPermissions",
+      "module": "data_maintenance",
+      "member": "record",
+      "file": "src/core/access/query.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.record.prune",
+      "risk": "L4",
+      "class": "RecordPermissions",
+      "module": "data_maintenance",
+      "member": "prune",
+      "file": "src/core/access/record.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.synonym.read",
+      "risk": "L0",
+      "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "read",
+      "file": "src/core/access/synonym.permissions.ts",
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.synonym.create",
+      "risk": "L2",
+      "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "create",
+      "file": "src/core/access/synonym.permissions.ts",
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.synonym.update",
+      "risk": "L2",
+      "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "update",
+      "file": "src/core/access/synonym.permissions.ts",
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.synonym.delete",
+      "risk": "L2",
+      "class": "SynonymPermissions",
+      "module": "data_maintenance",
+      "member": "delete",
+      "file": "src/core/access/synonym.permissions.ts",
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "data_maintenance.timeseries.rollup",
+      "risk": "L4",
+      "class": "TimeseriesPermissions",
+      "module": "data_maintenance",
+      "member": "rollup",
+      "file": "src/core/access/timeseries.permissions.ts",
+      "system": true,
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "key": "privacy.hold.place",
+      "risk": "L2",
+      "class": "HoldPermissions",
+      "module": "privacy",
+      "member": "place",
+      "file": "src/node/access/hold.permissions.ts",
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.hold.release",
+      "risk": "L4",
+      "class": "HoldPermissions",
+      "module": "privacy",
+      "member": "release",
+      "file": "src/node/access/hold.permissions.ts",
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.hold.read",
+      "risk": "L1",
+      "class": "HoldPermissions",
+      "module": "privacy",
+      "member": "read",
+      "file": "src/node/access/hold.permissions.ts",
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.subject_export.purge",
+      "risk": "L4",
+      "class": "SubjectExportPermissions",
+      "module": "privacy",
+      "member": "purge",
+      "file": "src/node/access/subject-export.permissions.ts",
+      "system": true,
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.subject.erase",
+      "risk": "L4",
+      "class": "SubjectPermissions",
+      "module": "privacy",
+      "member": "erase",
+      "file": "src/node/access/subject.permissions.ts",
+      "system": true,
+      "from": "@stackra/privacy"
+    },
+    {
+      "key": "privacy.subject.export",
+      "risk": "L2",
+      "class": "SubjectPermissions",
+      "module": "privacy",
+      "member": "export",
+      "file": "src/node/access/subject.permissions.ts",
+      "system": true,
+      "from": "@stackra/privacy"
+    },
+    {
       "key": "tenancy.approval_binding.prune",
       "risk": "L4",
       "class": "ApprovalBindingPermissions",
@@ -333,11 +1190,107 @@
       "class": "EmptyNoteUpdateError"
     },
     {
+      "code": "access_log_write_failed",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "access_log",
+      "class": "AccessLogWriteFailedError",
+      "from": "@stackra/access-log"
+    },
+    {
+      "code": "audit_export_failed",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "access_log",
+      "class": "AuditExportFailedError",
+      "from": "@stackra/access-log"
+    },
+    {
+      "code": "command_audit_scope_invalid",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "access_log",
+      "class": "CommandAuditScopeInvalidError",
+      "from": "@stackra/access-log"
+    },
+    {
+      "code": "command_audit_scope_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "access_log",
+      "class": "CommandAuditScopeMissingError",
+      "from": "@stackra/access-log"
+    },
+    {
+      "code": "approval_consumed",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "actions",
+      "class": "ApprovalConsumedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_expired",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "ApprovalExpiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_identity_unavailable",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "actions",
+      "class": "ApprovalIdentityUnavailableError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_mismatch",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "actions",
+      "class": "ApprovalMismatchError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_not_granted",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "ApprovalNotGrantedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_pending_limit",
+      "kind": "rate_limited",
+      "category": "rate_limited",
+      "module": "actions",
+      "class": "ApprovalPendingLimitError",
+      "from": "@stackra/actions"
+    },
+    {
       "code": "approval_required",
       "kind": "failed_precondition",
       "category": "precondition_failed",
       "module": "actions",
       "class": "ApprovalRequiredError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approval_settings_unavailable",
+      "kind": "unavailable",
+      "category": "unavailable",
+      "module": "actions",
+      "class": "ApprovalSettingsUnavailableError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "actions",
+      "class": "ClaimNotLoadedError",
       "from": "@stackra/actions"
     },
     {
@@ -386,6 +1339,30 @@
       "category": "precondition_failed",
       "module": "actions",
       "class": "OfflineCapReachedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "actions",
+      "class": "RowIsolationMissingError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "approver_refused",
+      "kind": "forbidden",
+      "category": "forbidden",
+      "module": "actions",
+      "class": "ApproverRefusedError",
+      "from": "@stackra/actions"
+    },
+    {
+      "code": "step_up_required",
+      "kind": "unauthenticated",
+      "category": "unauthenticated",
+      "module": "actions",
+      "class": "StepUpRequiredError",
       "from": "@stackra/actions"
     },
     {
@@ -613,6 +1590,14 @@
       "from": "@stackra/errors"
     },
     {
+      "code": "idempotency_key_in_progress",
+      "kind": "conflict",
+      "category": "conflict",
+      "module": "errors",
+      "class": "IdempotencyKeyInProgressError",
+      "from": "@stackra/errors"
+    },
+    {
       "code": "idempotency_key_reused",
       "kind": "conflict",
       "category": "conflict",
@@ -661,6 +1646,38 @@
       "from": "@stackra/errors"
     },
     {
+      "code": "file_not_found",
+      "kind": "not_found",
+      "category": "not_found",
+      "module": "filesystem",
+      "class": "FileNotFoundError",
+      "from": "@stackra/filesystem"
+    },
+    {
+      "code": "file_retained",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "filesystem",
+      "class": "FileRetainedError",
+      "from": "@stackra/filesystem"
+    },
+    {
+      "code": "retention_unsupported",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "filesystem",
+      "class": "RetentionUnsupportedError",
+      "from": "@stackra/filesystem"
+    },
+    {
+      "code": "job_claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "queue",
+      "class": "JobClaimNotLoadedError",
+      "from": "@stackra/queue"
+    },
+    {
       "code": "job_isolation_missing",
       "kind": "failed_precondition",
       "category": "precondition_failed",
@@ -674,6 +1691,14 @@
       "category": "unavailable",
       "module": "queue",
       "class": "JobNotDueError",
+      "from": "@stackra/queue"
+    },
+    {
+      "code": "job_row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "queue",
+      "class": "JobRowIsolationMissingError",
       "from": "@stackra/queue"
     },
     {
@@ -717,6 +1742,22 @@
       "from": "@stackra/scheduler"
     },
     {
+      "code": "schedule_claim_not_loaded",
+      "kind": "internal",
+      "category": "internal",
+      "module": "scheduler",
+      "class": "ScheduleClaimNotLoadedError",
+      "from": "@stackra/scheduler"
+    },
+    {
+      "code": "schedule_row_isolation_missing",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "scheduler",
+      "class": "ScheduleRowIsolationMissingError",
+      "from": "@stackra/scheduler"
+    },
+    {
       "code": "scope_label_invalid",
       "kind": "validation",
       "category": "validation",
@@ -747,6 +1788,22 @@
       "module": "scope",
       "class": "ScopeUnresolvedError",
       "from": "@stackra/scope"
+    },
+    {
+      "code": "external_role_not_allowed",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "ExternalRoleNotAllowedError",
+      "from": "@stackra/tenancy"
+    },
+    {
+      "code": "last_owner_refused",
+      "kind": "failed_precondition",
+      "category": "precondition_failed",
+      "module": "tenancy",
+      "class": "LastOwnerRefusedError",
+      "from": "@stackra/tenancy"
     },
     {
       "code": "region_mismatch",
@@ -828,10 +1885,18 @@
       "file": "src/modules/notes/models/note.model.ts",
       "table": "notes.notes",
       "publicId": "not",
-      "traits": ["HasPublicId", "BelongsToTenant", "Timestamps"],
+      "traits": ["HasPublicId", "BelongsToTenant", "Timestamps", "Retention"],
       "entity": {
         "module": "notes",
         "fields": [
+          {
+            "name": "authorId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
           {
             "name": "title",
             "optional": false,
@@ -889,12 +1954,451 @@
       }
     },
     {
+      "key": "access_log.access_log_entry",
+      "class": "AccessLogEntry",
+      "file": "src/node/models/access-log-entry.model.ts",
+      "table": "access_log.access_log_entries",
+      "publicId": "acl",
+      "traits": ["HasPublicId", "BelongsToTenant", "AppendOnly"],
+      "entity": {
+        "module": "access_log",
+        "fields": [
+          {
+            "name": "callId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "target",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "sequence",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "number"
+            },
+            "int": true
+          },
+          {
+            "name": "previousHash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "hash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "classification",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "enum",
+              "name": "DataClassification",
+              "values": [
+                "personal",
+                "financial",
+                "health",
+                "pseudonymous",
+                "regulated",
+                "credential"
+              ]
+            }
+          },
+          {
+            "name": "actor",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "shipped",
+              "name": "Actor",
+              "from": "@stackra/validation"
+            }
+          },
+          {
+            "name": "subjects",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "array",
+              "element": {
+                "kind": "string"
+              }
+            }
+          },
+          {
+            "name": "at",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "acl"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "access_log.audit_log_entry",
+      "class": "AuditLogEntry",
+      "file": "src/node/models/audit-log-entry.model.ts",
+      "table": "access_log.audit_log_entries",
+      "publicId": "aud",
+      "traits": ["HasPublicId", "BelongsToTenant", "AppendOnly"],
+      "entity": {
+        "module": "access_log",
+        "fields": [
+          {
+            "name": "callId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "key",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "permission",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "risk",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "scopeId",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "originKind",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "originId",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "hatch",
+              "source": "z.enum([\"ok\", \"refused\"])",
+              "imports": [["z", "zod"]]
+            }
+          },
+          {
+            "name": "code",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "sequence",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "number"
+            },
+            "int": true
+          },
+          {
+            "name": "previousHash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "hash",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "effects",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "array",
+              "element": {
+                "kind": "string"
+              }
+            }
+          },
+          {
+            "name": "actor",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "shipped",
+              "name": "Actor",
+              "from": "@stackra/validation"
+            }
+          },
+          {
+            "name": "scopePath",
+            "optional": false,
+            "nullable": true,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "record",
+              "value": {
+                "kind": "json"
+              }
+            }
+          },
+          {
+            "name": "at",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "aud"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "key": "data_maintenance.synonym",
+      "class": "Synonym",
+      "file": "src/node/models/synonym.model.ts",
+      "table": "data_maintenance.synonyms",
+      "publicId": "syn",
+      "traits": ["HasPublicId", "BelongsToTenant", "Timestamps"],
+      "entity": {
+        "module": "data_maintenance",
+        "fields": [
+          {
+            "name": "indexName",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "language",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "terms",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "hatch",
+              "source": "SYNONYM_FIELDS.shape.terms",
+              "imports": [["SYNONYM_FIELDS", "#node/constants/synonym-fields-schema.constant"]]
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "syn"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
+      "from": "@stackra/data-maintenance"
+    },
+    {
       "key": "scope.scope_node",
       "class": "ScopeNode",
       "file": "src/node/models/scope-node.model.ts",
       "table": "scope.scope_nodes",
       "publicId": "scp",
       "traits": ["HasPublicId", "Timestamps"],
+      "global": true,
+      "entity": {
+        "module": "scope",
+        "fields": [
+          {
+            "name": "level",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "scopePath",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "date"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": [],
+        "computed": []
+      },
       "from": "@stackra/scope"
     },
     {
@@ -1055,9 +2559,214 @@
         "computed": []
       },
       "from": "@stackra/tenancy"
+    },
+    {
+      "key": "tenancy.tenant_data_key",
+      "class": "TenantDataKey",
+      "file": "src/node/models/tenant-data-key.model.ts",
+      "table": "tenancy.tenant_data_keys",
+      "publicId": "tdk",
+      "traits": ["HasPublicId", "BelongsToTenant", "AppendOnly"],
+      "entity": {
+        "module": "tenancy",
+        "fields": [
+          {
+            "name": "version",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "number"
+            },
+            "int": true
+          },
+          {
+            "name": "keyId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "wrapped",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "id",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "tdk"
+            }
+          },
+          {
+            "name": "tenantId",
+            "optional": false,
+            "nullable": false,
+            "type": {
+              "kind": "public_id",
+              "prefix": "scp"
+            }
+          }
+        ],
+        "relations": [],
+        "optional": ["id", "tenantId"],
+        "computed": []
+      },
+      "from": "@stackra/tenancy"
     }
   ],
   "drivers": [
+    {
+      "port": "AccessLogSink",
+      "key": "access_log.AccessLogSink",
+      "candidates": ["memory", "outbox", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemoryAccessLogSinkDriver",
+          "from": "@stackra/access-log"
+        },
+        "outbox": {
+          "class": "OutboxAccessLogSinkDriver",
+          "from": "@stackra/access-log",
+          "deps": [
+            {
+              "class": {
+                "name": "EventOutbox",
+                "from": "@stackra/events/contracts"
+              }
+            }
+          ]
+        },
+        "postgres": {
+          "class": "PostgresAccessLogSinkDriver",
+          "from": "@stackra/access-log/node",
+          "deps": [
+            {
+              "class": {
+                "name": "AccessLogEntry",
+                "from": "@stackra/access-log/node"
+              },
+              "of": {
+                "name": "repositoryOf",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "TenantIsolationService",
+                "from": "@stackra/tenancy/node"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:access_log.sink",
+      "config": {
+        "class": "AccessLogConfig",
+        "from": "@stackra/access-log"
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "port": "CommandAudit",
+      "key": "console.CommandAudit",
+      "candidates": ["audit_trail"],
+      "classes": {
+        "audit_trail": {
+          "class": "AuditTrailCommandAuditDriver",
+          "from": "@stackra/access-log/node",
+          "deps": [
+            {
+              "class": {
+                "name": "AuditTrail",
+                "from": "@stackra/actions/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "AccessLogConfig",
+                "from": "@stackra/access-log"
+              }
+            },
+            {
+              "class": {
+                "name": "TenantDirectory",
+                "from": "@stackra/tenancy"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "port": "AuditExportSink",
+      "key": "access_log.AuditExportSink",
+      "candidates": ["https"],
+      "classes": {
+        "https": {
+          "class": "HttpsAuditExportSinkDriver",
+          "from": "@stackra/access-log/node",
+          "deps": [
+            {
+              "class": {
+                "name": "AccessLogConfig",
+                "from": "@stackra/access-log"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/access-log"
+    },
+    {
+      "port": "AuditTrail",
+      "key": "actions.AuditTrail",
+      "candidates": ["postgres"],
+      "classes": {
+        "postgres": {
+          "class": "PostgresAuditTrailDriver",
+          "from": "@stackra/access-log/node",
+          "deps": [
+            {
+              "class": {
+                "name": "AuditLogEntry",
+                "from": "@stackra/access-log/node"
+              },
+              "of": {
+                "name": "repositoryOf",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "TenantIsolationService",
+                "from": "@stackra/tenancy/node"
+              }
+            },
+            {
+              "class": {
+                "name": "Logger",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/access-log"
+    },
     {
       "port": "DeviceSequenceStore",
       "key": "actions.DeviceSequenceStore",
@@ -1187,11 +2896,29 @@
     {
       "port": "ApprovalGate",
       "key": "actions.ApprovalGate",
-      "candidates": ["open"],
+      "candidates": ["open", "memory"],
       "classes": {
         "open": {
           "class": "OpenApprovalGateDriver",
           "from": "@stackra/actions"
+        },
+        "memory": {
+          "class": "MemoryApprovalGateDriver",
+          "from": "@stackra/actions/testing",
+          "deps": [
+            {
+              "class": {
+                "name": "IdentityResolver",
+                "from": "@stackra/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
         }
       },
       "from": "@stackra/actions"
@@ -1265,6 +2992,83 @@
       "from": "@stackra/actions"
     },
     {
+      "port": "ActorStatusCheck",
+      "key": "actions.ActorStatusCheck",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryActorStatusCheckDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "ApprovalBindingStore",
+      "key": "actions.ApprovalBindingStore",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryApprovalBindingStoreDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "JobDispatcher",
+      "key": "actions.JobDispatcher",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryJobDispatcherDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "StepUpCheck",
+      "key": "actions.StepUpCheck",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryStepUpCheckDriver",
+          "from": "@stackra/actions/testing"
+        }
+      },
+      "from": "@stackra/actions"
+    },
+    {
+      "port": "EdgeSigningKeys",
+      "key": "app.EdgeSigningKeys",
+      "candidates": ["env", "memory"],
+      "classes": {
+        "env": {
+          "class": "EnvEdgeSigningKeysDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "EdgeConfig",
+                "from": "@stackra/app/server"
+              }
+            }
+          ]
+        },
+        "memory": {
+          "class": "MemoryEdgeSigningKeysDriver",
+          "from": "@stackra/app/server"
+        }
+      },
+      "selectedBy": "config:app.edge.keys",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
+      },
+      "from": "@stackra/app"
+    },
+    {
       "port": "EdgeNonceStore",
       "key": "app.EdgeNonceStore",
       "candidates": ["memory"],
@@ -1274,17 +3078,10 @@
           "from": "@stackra/app/server"
         }
       },
-      "from": "@stackra/app"
-    },
-    {
-      "port": "EdgeSigningKeys",
-      "key": "app.EdgeSigningKeys",
-      "candidates": ["memory"],
-      "classes": {
-        "memory": {
-          "class": "MemoryEdgeSigningKeysDriver",
-          "from": "@stackra/app/server"
-        }
+      "selectedBy": "config:app.edge.nonces",
+      "config": {
+        "class": "EdgeConfig",
+        "from": "@stackra/app/server"
       },
       "from": "@stackra/app"
     },
@@ -1304,7 +3101,7 @@
             {
               "class": {
                 "name": "BearerConfig",
-                "from": "@stackra/app"
+                "from": "@stackra/app/server"
               }
             }
           ]
@@ -1313,12 +3110,202 @@
       "from": "@stackra/app"
     },
     {
+      "port": "ClientSession",
+      "key": "clients.ClientSession",
+      "candidates": ["service"],
+      "classes": {
+        "service": {
+          "class": "ServiceClientSessionDriver",
+          "from": "@stackra/app/server",
+          "deps": [
+            {
+              "class": {
+                "name": "ServiceTokens",
+                "from": "@stackra/identity/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "ClientsConfig",
+                "from": "@stackra/clients"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/app"
+    },
+    {
+      "port": "Signer",
+      "key": "contracts.Signer",
+      "candidates": ["ephemeral", "kms"],
+      "classes": {
+        "ephemeral": {
+          "class": "EphemeralSignerDriver",
+          "from": "@stackra/config",
+          "deps": [
+            {
+              "class": {
+                "name": "SignerConfig",
+                "from": "@stackra/config"
+              }
+            }
+          ]
+        },
+        "kms": {
+          "class": "KmsSignerDriver",
+          "from": "@stackra/config",
+          "deps": [
+            {
+              "class": {
+                "name": "SignerConfig",
+                "from": "@stackra/config"
+              }
+            },
+            {
+              "class": {
+                "name": "KmsClient",
+                "from": "@stackra/config/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:config.signer.driver",
+      "config": {
+        "class": "SignerConfig",
+        "from": "@stackra/config"
+      },
+      "from": "@stackra/config"
+    },
+    {
+      "port": "SecretStore",
+      "key": "config.SecretStore",
+      "candidates": ["memory", "aws_secrets_manager"],
+      "classes": {
+        "memory": {
+          "class": "MemorySecretStoreDriver",
+          "from": "@stackra/config"
+        },
+        "aws_secrets_manager": {
+          "class": "AwsSecretsManagerSecretStoreDriver",
+          "from": "@stackra/config/node",
+          "deps": [
+            {
+              "class": {
+                "name": "AwsSecretsManagerConfig",
+                "from": "@stackra/config"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:config.secrets.store",
+      "config": {
+        "class": "SecretsConfig",
+        "from": "@stackra/config"
+      },
+      "from": "@stackra/config"
+    },
+    {
+      "port": "KmsClient",
+      "key": "config.KmsClient",
+      "candidates": ["aws_sdk"],
+      "classes": {
+        "aws_sdk": {
+          "class": "AwsSdkKmsClientDriver",
+          "from": "@stackra/config/node",
+          "deps": [
+            {
+              "class": {
+                "name": "SignerConfig",
+                "from": "@stackra/config"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/config"
+    },
+    {
+      "port": "Renderer",
+      "key": "console.Renderer",
+      "candidates": ["text", "ink"],
+      "classes": {
+        "text": {
+          "class": "TextRendererDriver",
+          "from": "@stackra/console",
+          "deps": [
+            {
+              "class": {
+                "name": "RenderContext",
+                "from": "@stackra/console"
+              }
+            }
+          ]
+        },
+        "ink": {
+          "class": "InkRendererDriver",
+          "from": "@stackra/console/node",
+          "deps": [
+            {
+              "class": {
+                "name": "RenderContext",
+                "from": "@stackra/console"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
+      "port": "ProcessRunner",
+      "key": "console.ProcessRunner",
+      "candidates": ["node", "memory"],
+      "classes": {
+        "node": {
+          "class": "NodeProcessRunnerDriver",
+          "from": "@stackra/console/node"
+        },
+        "memory": {
+          "class": "MemoryProcessRunnerDriver",
+          "from": "@stackra/console/testing"
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
+      "port": "Completions",
+      "key": "console.Completions",
+      "candidates": ["tab"],
+      "classes": {
+        "tab": {
+          "class": "TabCompletionsDriver",
+          "from": "@stackra/console/node"
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
       "port": "CommandAudit",
       "key": "console.CommandAudit",
       "candidates": ["memory"],
       "classes": {
         "memory": {
           "class": "MemoryCommandAuditDriver",
+          "from": "@stackra/console/testing"
+        }
+      },
+      "from": "@stackra/console"
+    },
+    {
+      "port": "OperatorBreakGlass",
+      "key": "console.OperatorBreakGlass",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryOperatorBreakGlassDriver",
           "from": "@stackra/console/testing"
         }
       },
@@ -1337,16 +3324,50 @@
       "from": "@stackra/container"
     },
     {
-      "port": "Logger",
-      "key": "contracts.Logger",
-      "candidates": ["memory"],
+      "port": "SynonymSource",
+      "key": "search.SynonymSource",
+      "candidates": ["database"],
       "classes": {
-        "memory": {
-          "class": "MemoryLoggerDriver",
-          "from": "@stackra/container/testing"
+        "database": {
+          "class": "DatabaseSynonymSourceDriver",
+          "from": "@stackra/data-maintenance/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
         }
       },
-      "from": "@stackra/container"
+      "from": "@stackra/data-maintenance"
+    },
+    {
+      "port": "SearchQueryLog",
+      "key": "search.SearchQueryLog",
+      "candidates": ["queued"],
+      "classes": {
+        "queued": {
+          "class": "QueuedSearchQueryLogDriver",
+          "from": "@stackra/data-maintenance/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "QueueService",
+                "from": "@stackra/queue"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/data-maintenance"
     },
     {
       "port": "HealthIndicator",
@@ -1595,11 +3616,29 @@
     {
       "port": "PlanSnapshots",
       "key": "entitlements.PlanSnapshots",
-      "candidates": ["memory"],
+      "candidates": ["memory", "service"],
       "classes": {
         "memory": {
           "class": "MemoryPlanSnapshotsDriver",
           "from": "@stackra/entitlements"
+        },
+        "service": {
+          "class": "ServicePlanSnapshotsDriver",
+          "from": "@stackra/entitlements",
+          "deps": [
+            {
+              "class": {
+                "name": "PlanServiceChannel",
+                "from": "@stackra/entitlements/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
         }
       },
       "from": "@stackra/entitlements"
@@ -1735,6 +3774,135 @@
         }
       },
       "from": "@stackra/errors"
+    },
+    {
+      "port": "HealthIndicator",
+      "key": "contracts.HealthIndicator",
+      "candidates": ["filesystem"],
+      "classes": {
+        "filesystem": {
+          "class": "FilesystemHealthIndicatorDriver",
+          "from": "@stackra/filesystem",
+          "deps": [
+            {
+              "class": {
+                "name": "FileSystem",
+                "from": "@stackra/filesystem/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "FilesystemConfig",
+                "from": "@stackra/filesystem"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/filesystem"
+    },
+    {
+      "port": "FileSystem",
+      "key": "filesystem.FileSystem",
+      "candidates": ["memory", "electron", "expo", "encore_bucket", "gcs", "local", "s3"],
+      "classes": {
+        "memory": {
+          "class": "MemoryFileSystemDriver",
+          "from": "@stackra/filesystem",
+          "deps": [
+            {
+              "class": {
+                "name": "FilesystemConfig",
+                "from": "@stackra/filesystem"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        },
+        "electron": {
+          "class": "ElectronFileSystemDriver",
+          "from": "@stackra/filesystem/desktop",
+          "deps": [
+            {
+              "class": {
+                "name": "FilesystemConfig",
+                "from": "@stackra/filesystem"
+              }
+            }
+          ]
+        },
+        "expo": {
+          "class": "ExpoFileSystemDriver",
+          "from": "@stackra/filesystem/native",
+          "deps": [
+            {
+              "class": {
+                "name": "FilesystemConfig",
+                "from": "@stackra/filesystem"
+              }
+            }
+          ]
+        },
+        "encore_bucket": {
+          "class": "EncoreBucketFileSystemDriver",
+          "from": "@stackra/filesystem/node",
+          "deps": [
+            {
+              "class": {
+                "name": "EncoreBucket",
+                "from": "@stackra/filesystem/contracts"
+              }
+            }
+          ]
+        },
+        "gcs": {
+          "class": "GcsFileSystemDriver",
+          "from": "@stackra/filesystem/node",
+          "deps": [
+            {
+              "class": {
+                "name": "FilesystemConfig",
+                "from": "@stackra/filesystem"
+              }
+            }
+          ]
+        },
+        "local": {
+          "class": "LocalFileSystemDriver",
+          "from": "@stackra/filesystem/node",
+          "deps": [
+            {
+              "class": {
+                "name": "FilesystemConfig",
+                "from": "@stackra/filesystem"
+              }
+            }
+          ]
+        },
+        "s3": {
+          "class": "S3FileSystemDriver",
+          "from": "@stackra/filesystem/node",
+          "deps": [
+            {
+              "class": {
+                "name": "FilesystemConfig",
+                "from": "@stackra/filesystem"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:filesystem.disk",
+      "config": {
+        "class": "FilesystemConfig",
+        "from": "@stackra/filesystem"
+      },
+      "from": "@stackra/filesystem"
     },
     {
       "port": "AccessControl",
@@ -1905,6 +4073,242 @@
         }
       },
       "from": "@stackra/iam"
+    },
+    {
+      "port": "Logger",
+      "key": "contracts.Logger",
+      "candidates": ["channel"],
+      "classes": {
+        "channel": {
+          "class": "ChannelLoggerDriver",
+          "from": "@stackra/logger",
+          "deps": [
+            {
+              "class": {
+                "name": "LoggingConfig",
+                "from": "@stackra/logger"
+              }
+            },
+            {
+              "class": {
+                "name": "LogReporter",
+                "from": "@stackra/logger/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "Clock",
+                "from": "@stackra/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/logger"
+    },
+    {
+      "port": "LogReporter",
+      "key": "logger.LogReporter",
+      "candidates": ["console", "otlp"],
+      "classes": {
+        "console": {
+          "class": "ConsoleLogReporterDriver",
+          "from": "@stackra/logger"
+        },
+        "otlp": {
+          "class": "OtlpLogReporterDriver",
+          "from": "@stackra/logger",
+          "deps": [
+            {
+              "class": {
+                "name": "OtlpConfig",
+                "from": "@stackra/logger"
+              }
+            },
+            {
+              "class": {
+                "name": "SecretStore",
+                "from": "@stackra/config/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:logger.logging.reporter",
+      "config": {
+        "class": "LoggingConfig",
+        "from": "@stackra/logger"
+      },
+      "from": "@stackra/logger"
+    },
+    {
+      "port": "Metrics",
+      "key": "contracts.Metrics",
+      "candidates": ["otlp"],
+      "classes": {
+        "otlp": {
+          "class": "OtlpMetricsDriver",
+          "from": "@stackra/logger",
+          "deps": [
+            {
+              "class": {
+                "name": "OtlpConfig",
+                "from": "@stackra/logger"
+              }
+            },
+            {
+              "class": {
+                "name": "SecretStore",
+                "from": "@stackra/config/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/logger"
+    },
+    {
+      "port": "Tracer",
+      "key": "contracts.Tracer",
+      "candidates": ["otlp"],
+      "classes": {
+        "otlp": {
+          "class": "OtlpTracerDriver",
+          "from": "@stackra/logger",
+          "deps": [
+            {
+              "class": {
+                "name": "OtlpConfig",
+                "from": "@stackra/logger"
+              }
+            },
+            {
+              "class": {
+                "name": "SecretStore",
+                "from": "@stackra/config/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/logger"
+    },
+    {
+      "port": "PersonalDataStore",
+      "key": "privacy.PersonalDataStore",
+      "candidates": ["memory", "repository"],
+      "classes": {
+        "memory": {
+          "class": "MemoryPersonalDataStoreDriver",
+          "from": "@stackra/privacy"
+        },
+        "repository": {
+          "class": "RepositoryPersonalDataStoreDriver",
+          "from": "@stackra/privacy/node"
+        }
+      },
+      "selectedBy": "config:privacy.store",
+      "config": {
+        "class": "PrivacyConfig",
+        "from": "@stackra/privacy"
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "port": "SubjectSaltStore",
+      "key": "privacy.SubjectSaltStore",
+      "candidates": ["memory", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemorySubjectSaltStoreDriver",
+          "from": "@stackra/privacy"
+        },
+        "postgres": {
+          "class": "PostgresSubjectSaltStoreDriver",
+          "from": "@stackra/privacy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "port": "HoldRegistry",
+      "key": "database.HoldRegistry",
+      "candidates": ["postgres"],
+      "classes": {
+        "postgres": {
+          "class": "PostgresHoldRegistryDriver",
+          "from": "@stackra/privacy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            },
+            {
+              "class": {
+                "name": "Container",
+                "from": "@stackra/container"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "port": "SubjectHolds",
+      "key": "privacy.SubjectHolds",
+      "candidates": ["postgres"],
+      "classes": {
+        "postgres": {
+          "class": "PostgresSubjectHoldsDriver",
+          "from": "@stackra/privacy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "Database",
+                "from": "@stackra/database"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/privacy"
+    },
+    {
+      "port": "SubjectCipherResolver",
+      "key": "model.SubjectCipherResolver",
+      "candidates": ["salted"],
+      "classes": {
+        "salted": {
+          "class": "SaltedSubjectCipherResolverDriver",
+          "from": "@stackra/privacy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "KeyProvider",
+                "from": "@stackra/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "SubjectSaltStore",
+                "from": "@stackra/privacy/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "from": "@stackra/privacy"
     },
     {
       "port": "BrokerPublisher",
@@ -2240,6 +4644,35 @@
       "from": "@stackra/tenancy"
     },
     {
+      "port": "TenantDataKeyStore",
+      "key": "tenancy.TenantDataKeyStore",
+      "candidates": ["memory", "postgres"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantDataKeyStoreDriver",
+          "from": "@stackra/tenancy"
+        },
+        "postgres": {
+          "class": "PostgresTenantDataKeyStoreDriver",
+          "from": "@stackra/tenancy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "TenantDataKeyService",
+                "from": "@stackra/tenancy/node"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:tenancy.tenant_keys.store",
+      "config": {
+        "class": "TenantKeysConfig",
+        "from": "@stackra/tenancy"
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
       "port": "TenantDirectory",
       "key": "tenancy.TenantDirectory",
       "candidates": ["memory"],
@@ -2444,6 +4877,47 @@
       "from": "@stackra/tenancy"
     },
     {
+      "port": "KeyProvider",
+      "key": "contracts.KeyProvider",
+      "candidates": ["ephemeral", "kms"],
+      "classes": {
+        "ephemeral": {
+          "class": "EphemeralKeyProviderDriver",
+          "from": "@stackra/tenancy/node"
+        },
+        "kms": {
+          "class": "KmsKeyProviderDriver",
+          "from": "@stackra/tenancy/node",
+          "deps": [
+            {
+              "class": {
+                "name": "TenantKeysConfig",
+                "from": "@stackra/tenancy"
+              }
+            },
+            {
+              "class": {
+                "name": "KmsClient",
+                "from": "@stackra/config/contracts"
+              }
+            },
+            {
+              "class": {
+                "name": "TenantDataKeyStore",
+                "from": "@stackra/tenancy/contracts"
+              }
+            }
+          ]
+        }
+      },
+      "selectedBy": "config:tenancy.tenant_keys.driver",
+      "config": {
+        "class": "TenantKeysConfig",
+        "from": "@stackra/tenancy"
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
       "port": "ApprovalBindingStore",
       "key": "actions.ApprovalBindingStore",
       "candidates": ["postgres"],
@@ -2459,6 +4933,30 @@
               }
             }
           ]
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantMembers",
+      "key": "tenancy.TenantMembers",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantMembersDriver",
+          "from": "@stackra/tenancy/testing"
+        }
+      },
+      "from": "@stackra/tenancy"
+    },
+    {
+      "port": "TenantProfile",
+      "key": "tenancy.TenantProfile",
+      "candidates": ["memory"],
+      "classes": {
+        "memory": {
+          "class": "MemoryTenantProfileDriver",
+          "from": "@stackra/tenancy/testing"
         }
       },
       "from": "@stackra/tenancy"
@@ -2482,6 +4980,137 @@
     }
   ],
   "roles": [],
+  "env": [
+    {
+      "name": "ACCESS_LOG_EXPORT_TOKEN",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "access_log",
+      "class": "AccessLogConfig",
+      "field": "exportToken",
+      "from": "@stackra/access-log"
+    },
+    {
+      "name": "ACTIONS_VALKEY_URL",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "actions.stores",
+      "class": "StoresConfig",
+      "field": "valkeyUrl",
+      "from": "@stackra/actions"
+    },
+    {
+      "name": "QUEUE_BROKER_VALKEY_URL",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "queue.broker",
+      "class": "BrokerConfig",
+      "field": "valkeyUrl",
+      "from": "@stackra/queue"
+    },
+    {
+      "name": "STACKRA_ACCESS_LOG_SINK",
+      "kind": "config",
+      "type": "enum",
+      "values": ["memory", "outbox", "postgres"],
+      "required": false,
+      "config": "access_log",
+      "class": "AccessLogConfig",
+      "field": "sink",
+      "from": "@stackra/access-log"
+    },
+    {
+      "name": "STACKRA_BEARER_AUDIENCE",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "app.bearer",
+      "class": "BearerConfig",
+      "field": "audience",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_BEARER_ISSUER",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "app.bearer",
+      "class": "BearerConfig",
+      "field": "issuer",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_COMMAND_AUDIT_SCOPE",
+      "kind": "config",
+      "type": "string",
+      "required": false,
+      "config": "access_log",
+      "class": "AccessLogConfig",
+      "field": "commandAuditScope",
+      "from": "@stackra/access-log"
+    },
+    {
+      "name": "STACKRA_CORS_ALLOWED_ORIGINS",
+      "kind": "config",
+      "type": "array",
+      "required": false,
+      "config": "app.cors",
+      "class": "CorsConfig",
+      "field": "allowedOrigins",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_EDGE_SIGNING_KEYS",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.edge",
+      "class": "EdgeConfig",
+      "field": "signingKeys",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_PRIVACY_STORE",
+      "kind": "config",
+      "type": "enum",
+      "values": ["memory", "repository"],
+      "required": false,
+      "config": "privacy",
+      "class": "PrivacyConfig",
+      "field": "store",
+      "from": "@stackra/privacy"
+    },
+    {
+      "name": "STACKRA_VISITOR_SIGNING_KEY",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.visitor",
+      "class": "VisitorConfig",
+      "field": "signingKey",
+      "from": "@stackra/app"
+    },
+    {
+      "name": "STACKRA_VISITOR_SIGNING_KEY_PREVIOUS",
+      "kind": "secret",
+      "type": "string",
+      "required": false,
+      "config": "app.visitor",
+      "class": "VisitorConfig",
+      "field": "previousSigningKey",
+      "from": "@stackra/app"
+    }
+  ],
+  "factories": [
+    {
+      "class": "NoteFactory",
+      "file": "src/modules/notes/database/factories/note.factory.ts",
+      "model": "Note"
+    }
+  ],
   "commands": [
     {
       "name": "db:migrate",
@@ -2616,8 +5245,12 @@
     },
     "notes.Note": {
       "type": "object",
-      "required": ["title", "body", "id", "createdAt", "updatedAt", "tenantId"],
+      "required": ["authorId", "title", "body", "id", "createdAt", "updatedAt", "tenantId"],
       "properties": {
+        "authorId": {
+          "type": "string",
+          "maxLength": 64
+        },
         "title": {
           "type": "string",
           "minLength": 1,

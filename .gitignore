@@ -36,6 +36,8 @@ maestro-report/
 # stackra gen output: runtime entries, gen modules, tool configs, compiled migration SQL, the Encore
 # app. Every member's, at any depth: the pattern has no leading or middle slash, so it is unanchored.
 .stackra/
+# The Encore app file gen writes at each service's root (ADR 0091).
+/services/*/encore.app
 # The root shims gen writes for the tools that read only the member root; each re-exports or copies
 # its `.stackra/` file, and tsconfig.build.json is a package's declaration build.
 /apps/*/vitest.config.ts

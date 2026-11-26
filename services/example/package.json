@@ -3,18 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "description": "An example service: one tenant-owned resource (notes) through the actions pipeline; rename it to the product's first service or delete it.",
-  "keywords": [
-    "stackra"
-  ],
+  "keywords": ["stackra"],
   "license": "UNLICENSED",
   "type": "module",
   "imports": {
-    "#src/*": [
-      "./src/*",
-      "./src/*.ts",
-      "./src/*.tsx",
-      "./src/*/index.ts"
-    ],
+    "#src/*": ["./src/*", "./src/*.ts", "./src/*.tsx", "./src/*/index.ts"],
     "#config/*": [
       "./src/config/*",
       "./src/config/*.ts",
@@ -56,17 +49,23 @@
     "clean": "rm -rf dist coverage .turbo .stackra"
   },
   "dependencies": {
+    "@stackra/access-log": "catalog:stackra",
     "@stackra/actions": "catalog:stackra",
     "@stackra/app": "catalog:stackra",
+    "@stackra/config": "catalog:stackra",
     "@stackra/console": "catalog:stackra",
     "@stackra/container": "catalog:stackra",
     "@stackra/contracts": "catalog:stackra",
+    "@stackra/data-maintenance": "catalog:stackra",
     "@stackra/database": "catalog:stackra",
     "@stackra/entitlements": "catalog:stackra",
     "@stackra/errors": "catalog:stackra",
     "@stackra/events": "catalog:stackra",
+    "@stackra/filesystem": "catalog:stackra",
     "@stackra/iam": "catalog:stackra",
+    "@stackra/logger": "catalog:stackra",
     "@stackra/model": "catalog:stackra",
+    "@stackra/privacy": "catalog:stackra",
     "@stackra/queue": "catalog:stackra",
     "@stackra/scheduler": "catalog:stackra",
     "@stackra/scope": "catalog:stackra",
@@ -97,8 +96,6 @@
   "stackra": {
     "kind": "package",
     "tier": "service",
-    "runtimes": [
-      "node"
-    ]
+    "runtimes": ["node"]
   }
 }

@@ -7,7 +7,7 @@
     "x-stackra-member": "example"
   },
   "paths": {
-    "/notes": {
+    "/app/notes": {
       "post": {
         "operationId": "notes_note_create",
         "summary": "CreateNoteAction",
@@ -87,7 +87,7 @@
         }
       }
     },
-    "/notes/{noteId}": {
+    "/app/notes/{noteId}": {
       "delete": {
         "operationId": "notes_note_delete",
         "summary": "DeleteNoteAction",
@@ -213,6 +213,324 @@
           }
         }
       }
+    },
+    "/app/audit-log-entries/export": {
+      "post": {
+        "operationId": "access_log_audit_log_entry_export",
+        "summary": "ExportAuditAction",
+        "tags": ["access_log"],
+        "x-stackra-action": "access_log.audit_log_entry.export@1",
+        "x-stackra-permission": "access_log.audit_log_entry.export",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "@stackra/access-log#/schemas/access_log.ExportAuditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/access-log#/schemas/access_log.ExportAuditOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      }
+    },
+    "/app/audit-log-entries/search": {
+      "get": {
+        "operationId": "access_log_audit_log_entry_search",
+        "summary": "AuditQuery",
+        "tags": ["access_log"],
+        "x-stackra-action": "access_log.audit_log_entry.search@1",
+        "x-stackra-permission": "access_log.audit_log_entry.read",
+        "x-stackra-risk": "L1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/access-log#/schemas/access_log.AuditQueryOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      }
+    },
+    "/app/synonyms": {
+      "post": {
+        "operationId": "data_maintenance_synonym_create",
+        "summary": "CreateSynonymAction",
+        "tags": ["data_maintenance"],
+        "x-stackra-action": "data_maintenance.synonym.create@1",
+        "x-stackra-permission": "data_maintenance.synonym.create",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.CreateSynonymInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.CreateSynonymOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      },
+      "get": {
+        "operationId": "data_maintenance_synonym_list",
+        "summary": "ListSynonymsQuery",
+        "tags": ["data_maintenance"],
+        "x-stackra-action": "data_maintenance.synonym.list@1",
+        "x-stackra-permission": "data_maintenance.synonym.read",
+        "x-stackra-risk": "L0",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.ListSynonymsOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      }
+    },
+    "/app/synonyms/{synonymId}": {
+      "delete": {
+        "operationId": "data_maintenance_synonym_delete",
+        "summary": "DeleteSynonymAction",
+        "tags": ["data_maintenance"],
+        "x-stackra-action": "data_maintenance.synonym.delete@1",
+        "x-stackra-permission": "data_maintenance.synonym.delete",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
+        "x-stackra-refusals": ["not_found"],
+        "parameters": [
+          {
+            "name": "synonymId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.DeleteSynonymInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.DeleteSynonymOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "data_maintenance_synonym_update",
+        "summary": "UpdateSynonymAction",
+        "tags": ["data_maintenance"],
+        "x-stackra-action": "data_maintenance.synonym.update@1",
+        "x-stackra-permission": "data_maintenance.synonym.update",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
+        "parameters": [
+          {
+            "name": "synonymId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.UpdateSynonymInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/data-maintenance#/schemas/data_maintenance.UpdateSynonymOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      }
+    },
+    "/app/holds/place": {
+      "post": {
+        "operationId": "privacy_hold_place",
+        "summary": "PlaceHoldAction",
+        "tags": ["privacy"],
+        "x-stackra-action": "privacy.hold.place@1",
+        "x-stackra-permission": "privacy.hold.place",
+        "x-stackra-risk": "L2",
+        "x-stackra-idempotency": "optional",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "@stackra/privacy#/schemas/privacy.PlaceHoldInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/privacy#/schemas/privacy.PlaceHoldOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      }
+    },
+    "/app/holds/{holdId}/release": {
+      "put": {
+        "operationId": "privacy_hold_release",
+        "summary": "ReleaseHoldAction",
+        "tags": ["privacy"],
+        "x-stackra-action": "privacy.hold.release@1",
+        "x-stackra-permission": "privacy.hold.release",
+        "x-stackra-risk": "L4",
+        "x-stackra-idempotency": "optional",
+        "parameters": [
+          {
+            "name": "holdId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "@stackra/privacy#/schemas/privacy.ReleaseHoldInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/privacy#/schemas/privacy.ReleaseHoldOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      }
+    },
+    "/app/holds": {
+      "get": {
+        "operationId": "privacy_hold_list",
+        "summary": "ListHoldsQuery",
+        "tags": ["privacy"],
+        "x-stackra-action": "privacy.hold.list@1",
+        "x-stackra-permission": "privacy.hold.read",
+        "x-stackra-risk": "L1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "@stackra/privacy#/schemas/privacy.ListHoldsOutput"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Refusal"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -249,8 +567,12 @@
       },
       "notes.Note": {
         "type": "object",
-        "required": ["title", "body", "id", "createdAt", "updatedAt", "tenantId"],
+        "required": ["authorId", "title", "body", "id", "createdAt", "updatedAt", "tenantId"],
         "properties": {
+          "authorId": {
+            "type": "string",
+            "maxLength": 64
+          },
           "title": {
             "type": "string",
             "minLength": 1,

@@ -1,7 +1,8 @@
 /**
  * Stackra file contract:
  * Purpose: unit tests of `CreateNoteAction`: the `note.create` action for users and agents, which stores the title and
- *          text (an empty text when none), answers the note as stored and records `NoteCreated` on it.
+ *          text (an empty text when none) with the call's originating principal as the author, never input, answers
+ *          the note as stored and records `NoteCreated` on it.
  * Boundary: test only; the action is called directly with a stand-in note service and a fake action context. The
  *           pipeline's permission, tenancy and transaction are the pipeline's own tests, and the real database's are
  *           the integration tests.
@@ -10,7 +11,7 @@
  */
 import { fakeActionContext } from "@stackra/actions/testing";
 import { kindOf } from "@stackra/container";
-import { ActorKind, type PublicId } from "@stackra/contracts";
+import { type Actor, ActorKind, type PublicId, Realm } from "@stackra/contracts";
 import { takeRecordedEvents } from "@stackra/events";
 import { describe, expect, it } from "@stackra/testing";
 
@@ -22,6 +23,14 @@ import type { NoteService } from "#modules/notes/services/note.service";
 
 const noteId = "not_01ja0000000000000000000001" as PublicId<"not">;
 const at = new Date("2026-11-02T08:00:00.000Z");
+
+/** The user the calls run as. */
+const user: Actor = {
+  kind: ActorKind.User,
+  id: "usr_01ja0000000000000000000005",
+  realm: Realm.Staff,
+  scopeId: "scp_01ja0000000000000000000009",
+};
 
 /** A note service whose `create` records what it was given and answers a stored note. */
 function service(): { notes: NoteService; created: object[]; stored: () => Note | undefined } {
@@ -48,14 +57,14 @@ describe(CreateNoteAction, () => {
     });
   });
 
-  /** The service gets exactly the title and text, and the answer is the stored row. */
-  it("stores the title and text and answers the note as stored", async () => {
+  /** The service gets exactly the caller as author, the title and the text, and the answer is the stored row. */
+  it("stores the caller as author with the title and text and answers the note as stored", async () => {
     const { notes, created } = service();
     const output = await new CreateNoteAction(notes).handle(
       CreateNoteInput.create({ title: "Buy milk", body: "Two litres" }),
-      fakeActionContext(),
+      fakeActionContext({ actor: user }),
     );
-    expect(created).toEqual([{ title: "Buy milk", body: "Two litres" }]);
+    expect(created).toEqual([{ authorId: user.id, title: "Buy milk", body: "Two litres" }]);
     expect({ ...output }).toEqual({
       id: noteId,
       title: "Buy milk",
@@ -70,9 +79,25 @@ describe(CreateNoteAction, () => {
     const { notes, created } = service();
     await new CreateNoteAction(notes).handle(
       CreateNoteInput.create({ title: "Buy milk" }),
-      fakeActionContext(),
+      fakeActionContext({ actor: user }),
     );
-    expect(created).toEqual([{ title: "Buy milk", body: "" }]);
+    expect(created).toEqual([{ authorId: user.id, title: "Buy milk", body: "" }]);
+  });
+
+  /** A note an agent writes for a user is the user's: their export holds it and their erasure deletes it. */
+  it("stores the user an agent acts for as the author, not the agent", async () => {
+    const { notes, created } = service();
+    const agent: Actor = {
+      kind: ActorKind.Agent,
+      id: "agt_01ja0000000000000000000007",
+      scopeId: "scp_01ja0000000000000000000009",
+      onBehalfOf: user,
+    };
+    await new CreateNoteAction(notes).handle(
+      CreateNoteInput.create({ title: "Buy milk" }),
+      fakeActionContext({ actor: agent }),
+    );
+    expect(created).toEqual([{ authorId: user.id, title: "Buy milk", body: "" }]);
   });
 
   /** The event is recorded on the new note, carrying its id and nothing of its content. */
