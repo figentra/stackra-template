@@ -101,6 +101,17 @@
       // A vitest preset change is a catalog bump (pnpm-workspace.yaml, a global dependency).
       "inputs": ["$TURBO_DEFAULT$"]
     },
+    // Stackra ADR 0182 decision 1 (STA-1570): the integration tier. Never cached: the result depends on a live Docker
+    // daemon and the Postgres container Testcontainers starts, which no input hash sees. The Docker and Testcontainers
+    // settings pass through without entering a key, and TESTBED_POSTGRES_HOST names a Postgres for the tests that
+    // take one instead of starting their own.
+    "test:int": {
+      "description": "A member's `.int.test.ts` files (its own and the tenant-isolation test gen writes into .stackra/tests) on a real Postgres: `stackra test --tier int`. Needs Docker. Defined only by members that have int tests.",
+      "dependsOn": ["gen"],
+      "cache": false,
+      "passThroughEnv": ["DOCKER_*", "TESTCONTAINERS_*", "TESTBED_POSTGRES_HOST"],
+      "outputs": []
+    },
     "test:coverage": {
       "description": "vitest run --coverage against the shared gate; packages only.",
       "dependsOn": ["gen"],

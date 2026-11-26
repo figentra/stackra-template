@@ -1,18 +1,18 @@
 <!--
 Stackra file contract:
 Purpose: the index of the repository's GitHub workflows and the scripts they run (the pre-release
-         gate and the example drift check).
+         gate, the test-tier check and the example drift check).
 Boundary: documentation only; the workflow files are the source of truth.
 Runtime: none (documentation)
 Governing contract: Stackra ADR 0019 (least privilege, pinned actions), ADR 0027 (toolchain from
-                    mise.toml), stackra-15 (the example drift check)
+                    mise.toml), ADR 0182 (test tiers), stackra-15 (the example drift check)
 -->
 
 # `.github/workflows/`
 
 | Workflow      | Runs on                                                                        | Does                                                                                                                                                                                                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`      | pull requests to `main`, merge-queue groups (`merge_group`), pushes to `main`  | **Quality Gate**: install, the pull request title and commit messages (commitlint), `pnpm verify` (`stackra verify`), `pnpm spell` and `pnpm secrets:scan`. While `@stackra/*` is unpublished (pre-release) it runs `node .github/scripts/preview-gate.mjs` instead. A superseded pull request run is cancelled |
+| `ci.yml`      | pull requests to `main`, merge-queue groups (`merge_group`), pushes to `main`  | **Quality Gate**: the install-free pre-release gate (`node .github/scripts/preview-gate.mjs`: pull request title and commit messages, format, spelling, config files, secrets scan, the test-tier wiring, the scripts' tests), then, once `@stackra/cli` resolves from the registry, install, lint, typecheck, build, gen and gen check, `pnpm validate`, Squawk, the unit tests (`turbo run test`) and the integration tests on Postgres (`turbo run test:int`, Testcontainers on the runner's Docker). OSV-Scanner runs as its own job. The repository variable `CI_TESTS=off` skips the two test steps. A superseded pull request run is cancelled |
 | `release.yml` | pushes to `main`; `workflow_dispatch` with a `dry_run` input (publish dry run) | Changesets: opens or updates the "version packages" PR, publishes released packages to npm with provenance (trusted publishing, no token), then builds a CycloneDX SBOM when something was published. Skipped (green) until `pnpm-lock.yaml` is committed                                                       |
 
 ## Rules
@@ -38,6 +38,22 @@ Governing contract: Stackra ADR 0019 (least privilege, pinned actions), ADR 0027
   `ci/build/registry`, which every figentra repository may read, masks it and writes `~/.npmrc`.
   Without it it warns and reads of `@figentra/*` are refused.
 
+## Tests in the gate
+
+The gate runs both test tiers of Stackra ADR 0182 on a pull request for the members it affects, and
+on every member on `main` and in the merge queue:
+
+- `turbo run test`: each member's unit suite (`stackra test`).
+- `turbo run test:int`: each member's `.int.test.ts` files and the tenant-isolation test `stackra gen`
+  writes into a service's `.stackra/tests` when it has tenant-owned models (Stackra ADR 0239). The
+  tests start their Postgres with Testcontainers on the runner's Docker; nothing is cached (turbo
+  `test:int` has `cache: false`). turbo runs the task only in members that define it, so the
+  pre-release gate's `tiers` check (`.github/scripts/test-tiers.mjs`) fails when a member with
+  integration tests has no `test:int` script, and when either step is removed.
+
+Set the repository variable `CI_TESTS` to `off` (**Settings → Secrets and variables → Actions →
+Variables**) only where the tests run somewhere else; the gate then prints a notice instead.
+
 ## Branch rules
 
 `.github/rulesets/main.json` is the ruleset for `main`: pull requests only, squash merges, linear
@@ -50,7 +66,8 @@ and the `Quality Gate` check from GitHub Actions passing on an up-to-date branch
 
 `node .github/scripts/preview-gate.mjs` runs the same checks as the pre-release Quality Gate (the
 pull request title when `PR_TITLE` is set, commit messages against `origin/main`, format, spelling,
-config files parse, secrets scan, the `node:test` suites under `.github/scripts/__tests__`); name
+config files parse, secrets scan, the test-tier wiring, the `node:test` suites under
+`.github/scripts/__tests__`); name
 checks to run a subset, for example `node .github/scripts/preview-gate.mjs format spelling`. It
 needs only Node and the gitleaks pinned in `mise.toml`.
 

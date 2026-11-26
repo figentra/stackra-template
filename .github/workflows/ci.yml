@@ -6,11 +6,15 @@
 #           credential is the Stackra registry read token (.github/actions/registry-auth, SOPS through
 #           Workload Identity, so the gate job has id-token: write). Tools come from mise.toml. Until the catalog's `@stackra/cli`
 #           resolves from the Stackra registry only the install-free pre-release gate runs; from then on
-#           the job also installs and runs OSV-Scanner, lint, typecheck, build, gen, validate
-#           and Squawk, the shape of core's Quality Gate.
+#           the job also installs and runs OSV-Scanner, lint, typecheck, build, gen, validate,
+#           Squawk, the unit tests and the integration tests on a real Postgres (Testcontainers on the
+#           runner's Docker). The repository variable CI_TESTS=off skips the two test steps, for a
+#           repository whose tests run elsewhere (Figentra's own repositories run them on the testbed,
+#           STA-2064); a product created from this template runs them.
 # Runtime: node
 # Governing contract: Stackra ADR 0019 (supply-chain hardening), Stackra ADR 0027 (toolchain from
-#                     mise.toml), Stackra ADR 0174 (OSV), Stackra ADR 0159 (Squawk). Runbook: https://docs.stackra.figentra.com/runbooks/ci
+#                     mise.toml), Stackra ADR 0174 (OSV), Stackra ADR 0159 (Squawk), Stackra ADR 0182
+#                     (test tiers), Stackra ADR 0239 (the tenant-isolation test). Runbook: https://docs.stackra.figentra.com/runbooks/ci
 name: CI
 
 on:
@@ -133,8 +137,8 @@ jobs:
         if: steps.registry.outputs.published == 'true'
         run: pnpm lint
 
-      # STA-2064: no test step; tests run on the box (CONTRIBUTING.md). On a pull request typecheck and
-      # build run for the members the change affects, against the base commit.
+      # On a pull request typecheck, build and the two test tiers run for the members the change affects,
+      # against the base commit.
       - name: Typecheck
         if: steps.registry.outputs.published == 'true'
         env:
@@ -188,3 +192,26 @@ jobs:
           }
           if [ "${#transactional[@]}" -gt 0 ]; then lint --assume-in-transaction "${transactional[@]}"; fi
           if [ "${#online[@]}" -gt 0 ]; then lint "${online[@]}"; fi
+
+      # Stackra ADR 0182 decision 1: the unit tier, every member's vitest suite (gen runs first through turbo).
+      - name: Test
+        if: steps.registry.outputs.published == 'true' && vars.CI_TESTS != 'off'
+        env:
+          AFFECTED: ${{ github.event_name == 'pull_request' && '1' || '' }}
+          TURBO_SCM_BASE: HEAD~1 # a PR checks out its merge into main, so HEAD~1 is main and the diff is the PR's own
+        run: pnpm exec turbo run test ${AFFECTED:+--affected}
+
+      # STA-1570, ADR 0182 decision 1: the integration tier on a real Postgres. Each member's `.int.test.ts` files and
+      # the tenant-isolation test gen writes for a service with tenant-owned models (ADR 0239) start their Postgres with
+      # Testcontainers on the runner's Docker. A member with int tests declares `test:int`; the pre-release gate's
+      # `tiers` check fails when one does not, so none is skipped in silence.
+      - name: Integration tests
+        if: steps.registry.outputs.published == 'true' && vars.CI_TESTS != 'off'
+        env:
+          AFFECTED: ${{ github.event_name == 'pull_request' && '1' || '' }}
+          TURBO_SCM_BASE: HEAD~1 # a PR checks out its merge into main, so HEAD~1 is main and the diff is the PR's own
+        run: pnpm exec turbo run test:int ${AFFECTED:+--affected}
+
+      - name: Tests skipped (CI_TESTS=off)
+        if: steps.registry.outputs.published == 'true' && vars.CI_TESTS == 'off'
+        run: echo "::notice title=Tests::CI_TESTS=off for this repository; the unit and integration tests run elsewhere"

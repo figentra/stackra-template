@@ -38,9 +38,11 @@ All on `main` at `12f5b42` unless stated.
 
 ## 4. Not proven
 
-- No test step runs in CI. Run 42336856556 has no `test` step, although the README says
-  `pnpm verify` is "the gate CI runs". No green run of `pnpm test` or `pnpm verify` is recorded
-  here.
+- No test step has run in CI. Run 42336856556 has no `test` step. Since STA-1570 the Quality Gate
+  has `Test` (`turbo run test`) and `Integration tests` (`turbo run test:int`, Postgres through
+  Testcontainers) steps, skipped where the variable `CI_TESTS` is `off`; no GitHub run of them is
+  recorded yet (the figentra organisation's Actions are billing-locked). The same commands passed on
+  box 2 in a `stackra create` app (STA-1570 pull request).
 - `@stackra/starter` is not published. In run 42336856558 the Starter job warned that the registry
   refused the publish (no trusted publisher for this repository), and the job still exited green. An
   anonymous `GET https://npm.stackra.figentra.com/@stackra%2fstarter` returns 404.

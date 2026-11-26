@@ -3,15 +3,16 @@
  * Stackra file contract:
  * Purpose: the pre-release Quality Gate, one command for CI and for agents: `node .github/scripts/preview-gate.mjs`.
  *          It runs every check that needs no workspace install (pull request title and commit messages, format,
- *          spelling, config files parse, secrets scan, the tests of these scripts), because the `@stackra/*` packages and the `stackra` CLI
+ *          spelling, config files parse, secrets scan, the test-tier wiring, the tests of these scripts), because the `@stackra/*` packages and the `stackra` CLI
  *          are not published yet.
  * Boundary: reads tracked files and git history and reports findings; it never edits a file. Tools are pinned
  *           here (npx with exact versions; gitleaks from mise.toml). Delete this script and its workflow step
  *           once `pnpm install --frozen-lockfile` and `pnpm verify` run in CI.
  * Runtime: node (built-ins only, so it runs before any install)
- * Governing contract: Stackra ADR 0019 (pinned tools), ADR 0027 (toolchain from mise.toml)
+ * Governing contract: Stackra ADR 0019 (pinned tools), ADR 0027 (toolchain from mise.toml), ADR 0182 (test tiers)
  *
- * Usage: `node .github/scripts/preview-gate.mjs [commits|format|spelling|config|secrets|scripts ...]` (default: all six).
+ * Usage: `node .github/scripts/preview-gate.mjs [commits|format|spelling|config|secrets|tiers|scripts ...]` (default: all
+ * seven).
  * `commits` lints the pull request title (PR_TITLE) and BASE_SHA..HEAD_SHA (CI) or origin/main..HEAD (local); it
  * is skipped outside pull requests (push, merge_group) and on renovate/ and changeset-release/ branches
  * (PR_BRANCH), whose titles and commit messages a bot writes.
@@ -204,6 +205,14 @@ function secrets() {
   return run("gitleaks", ["git", "--no-banner", "--redact", "--log-opts=HEAD", "."]);
 }
 
+/**
+ * Check that the unit and integration tiers run in CI and that every member with integration tests declares
+ * `test:int` (.github/scripts/test-tiers.mjs, built-ins only).
+ */
+function tiers() {
+  return run("node", [".github/scripts/test-tiers.mjs"]);
+}
+
 /** Run the node:test suites of the scripts under .github/scripts (built-ins only, no install). */
 function scripts() {
   return run("node", ["--test", ".github/scripts/__tests__/*.test.mjs"]);
@@ -219,7 +228,7 @@ function skip(name, reason) {
   return true;
 }
 
-const CHECKS = { commits, format, spelling, config, secrets, scripts };
+const CHECKS = { commits, format, spelling, config, secrets, tiers, scripts };
 const wanted = process.argv.slice(2);
 const unknown = wanted.filter((name) => !(name in CHECKS));
 if (unknown.length > 0) {

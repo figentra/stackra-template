@@ -251,8 +251,10 @@ folder.
 │                                 four environments, shared pools, the topology groups of each
 │                                 environment, defaults, targets, edge, secrets, release policy)
 ├── .gitignore                    `.stackra/*` and the generated root shims of tool configs
-├── .github/                      Quality Gate (pre-release: `scripts/preview-gate.mjs`; then `pnpm verify`),
-│                                 the example drift check (`scripts/example-drift.mjs`),
+├── .github/                      Quality Gate (pre-release: `scripts/preview-gate.mjs`; then lint,
+│                                 typecheck, build, gen, validate, Squawk, `test` and `test:int` on
+│                                 Postgres; `CI_TESTS=off` skips the tests), the test-tier check
+│                                 (`scripts/test-tiers.mjs`), the example drift check (`scripts/example-drift.mjs`),
 │                                 release (skips until pnpm-lock.yaml is committed), issue and PR
 │                                 templates, CODEOWNERS, the main ruleset (`rulesets/main.json`),
 │                                 Stackra brand assets (`assets/`, all rights reserved)
