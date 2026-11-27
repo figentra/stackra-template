@@ -74,7 +74,7 @@
     "test": "stackra test",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "clean": "rm -rf dist coverage .turbo .stackra"
+    "clean": "node -e \"for (const p of process.argv.slice(1)) process.getBuiltinModule('node:fs').rmSync(p, { recursive: true, force: true })\" dist coverage .turbo .stackra"
   },
   "dependencies": {
     "@stackra/contracts": "catalog:stackra",
