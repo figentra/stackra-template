@@ -218,7 +218,9 @@ folder.
   Code, OpenCode or Kiro at user level, so the repository holds only this project's facts in
   [`AGENTS.md`](../AGENTS.md).
 - **Stackra MCP** ([`.mcp.yaml`](../.mcp.yaml)): a local server that answers from this project's
-  generated facts (kinds, manifests, routes, wiring) and a hosted one for framework know-how.
+  generated facts (kinds, manifests, routes, wiring) and a hosted one for framework know-how. The
+  local one is also the one path to the local Encore tools (`encore_*`, with the app id from
+  `runway.yaml`), so `.mcp.yaml` has no separate `encore` server.
 - **Quality tooling**: oxlint and oxfmt, Vitest, knip, cspell (enforced in the hook and the gate),
   lefthook, commitlint, changesets and gitleaks, all pinned through pnpm catalogs and `mise.toml`;
   Renovate (`renovate.json5`) proposes the updates.
@@ -536,7 +538,7 @@ first push (`pnpm create stackra` asks for them and rewrites them for you):
 
 | Value                                                  | Where                                                                                                                            | Put                                                                           |
 | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `acme-platform` (root package `name`)                  | `package.json`, `runway.yaml` (`project`, `providers.encore.app`, GitHub), `stackra.lock.yaml`, `.mcp.yaml` (Encore app id)      | your project name and Encore app id                                           |
+| `acme-platform` (root package `name`)                  | `package.json`, `runway.yaml` (`project`, `providers.encore.app`, GitHub), `stackra.lock.yaml`                                   | your project name and Encore app id                                           |
 | `acme` product key                                     | `runway.yaml` (`product.key`); the examples' names follow it (`@figentra/acme-*`), so regenerate or delete them after the change | your product key                                                              |
 | `@acme/docs`                                           | `apps/docs/package.json`, the root `docs` script's `--filter`, `.claude/launch.json`                                             | your npm scope                                                                |
 | `acme` organisation                                    | `runway.yaml` (GitHub, Sentry), `.github/ISSUE_TEMPLATE/config.yml` (security advisory URL)                                      | your GitHub and Sentry organisations                                          |

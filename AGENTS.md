@@ -866,7 +866,9 @@ change; commit the member's `stackra.manifest.json` and `openapi.json`), `pnpm n
 `pnpm db:diff`, `pnpm run doctor` (`run`, because `pnpm doctor` is pnpm's own command). Agent
 skills, sub-agents, rules and guard hooks are not in this repository: install them once per machine
 with `stackra agents setup` (`@stackra/skills`), and read framework know-how through the Stackra MCP
-server in `.mcp.yaml`.
+server in `.mcp.yaml`. Query a tenant table with that server's `db_query` and the tenant's scope id,
+never by turning row-level security off: Encore's `encore_query_database` runs with no tenant set,
+so a table under row-level security answers no rows there.
 
 ## How work flows
 
