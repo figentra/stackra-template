@@ -48,6 +48,9 @@ The states: **Live** (serving customers), **In progress** (being built), **Plann
 
 ## Quick start
 
+Runs on macOS, Linux and Windows through WSL 2 (native Windows is not supported: run `wsl --install`, then work
+inside the Linux distribution, with the repository under `~/`, not `/mnt/c`). `stackra doctor` checks it first.
+
 1. Click **Use this template** on GitHub, then clone your new repository.
 2. Run:
 
