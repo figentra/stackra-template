@@ -550,10 +550,16 @@ first push (`pnpm create stackra` asks for them and rewrites them for you):
 | `GITHUB_TOKEN` in the release job                      | `.github/workflows/release.yml`                                                                                                  | a GitHub App token if the version PR must run the gate                        |
 
 Then import `.github/rulesets/main.json` (Settings → Rules → Rulesets), turn on private
-vulnerability reporting (`SECURITY.md`), and install the Renovate app.
+vulnerability reporting (`SECURITY.md`), and install the Renovate app. The daily Catalog latest
+workflow (`.github/workflows/catalog-latest.yml`) opens a pull request whenever a `@stackra/*`
+package's `latest` moves; it needs a GitHub App with contents and pull-requests write on your
+repository, its client id and private key in the `STACKRA_BOT_APP_ID` and `STACKRA_BOT_PRIVATE_KEY`
+secrets.
 
 Template-only lines, removed in a real project once `@stackra/*` is published: the pre-release step
-in `.github/workflows/ci.yml` with `.github/scripts/preview-gate.mjs`.
+in `.github/workflows/ci.yml` with `.github/scripts/preview-gate.mjs`. The registry probe before it
+fails closed: a registry error fails the job, and an unpublished `@stackra/cli` pin passes only
+while the probe step sets `STACKRA_PRE_RELEASE: "true"`.
 
 Secret values never go in a file: a config's options schema marks a field `@Secret("NAME")` (or its
 `env` map names an environment variable), `runway.yaml` names the secret, and the value lives in

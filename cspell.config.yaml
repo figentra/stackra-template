@@ -63,6 +63,9 @@ ignoreRegExpList:
 words:
   # the shell keyword, in workflow scripts (as the products have it)
   - elif
+  # the shell case terminator and a jq builtin, in workflow scripts (STA-2884)
+  - esac
+  - startswith
   - fflow
   - "mintlify's"
   - "zitadel's"

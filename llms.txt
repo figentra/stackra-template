@@ -1,6 +1,6 @@
 # stackra-template
 
-> The lean starter workspace for a new Stackra product: docs app, web console, one example service and one example package on the @stackra/* 0.15.0 catalog.
+> The lean starter workspace for a new Stackra product: docs app, web console, one example service and one example package on the @stackra/* catalog, which a daily bot pull request moves to each package's latest version.
 
 ## Docs
 
