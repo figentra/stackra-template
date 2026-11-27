@@ -66,10 +66,6 @@
       "type": "http",
       "url": "https://mcp.stackra.figentra.com/mcp"
     },
-    "encore": {
-      "command": "encore",
-      "args": ["mcp", "run", "--app=acme-platform"]
-    },
     "encore-cloud": {
       "type": "http",
       "url": "https://api.encore.dev/mcp"
