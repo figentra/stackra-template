@@ -1,17 +1,23 @@
 # Stackra file contract:
 # Purpose: the starter profile file `stackra create` reads from the published @stackra/starter (ADR 0515
-#          decision 5): the names it rewrites and, per profile, which tracked files it writes. `minimal` is the
-#          standalone app (the web console, one service with one module, the root toolchain and CI); `full` is
-#          this whole template, the Figentra product shape (surfaces in runway.yaml, no app member, ADR 0515
-#          decision 6). Both carry a root runway.yaml Runway reads the same way.
+#          decision 5): the names it rewrites and, per profile, which tracked files it writes. `minimal` (the
+#          default) is the standalone app that belongs to whoever creates it (STA-2877): the web console, one service
+#          with one module, the root toolchain and one Quality Gate workflow, with none of Figentra's own setup.
+#          `internal` (opt in) is the same app with Figentra's setup kept: Figentra Flow, code owners, every workflow,
+#          the agent hooks and the full MCP list. `full` is this whole template, the Figentra product shape with that
+#          setup (surfaces in runway.yaml, no app member, ADR 0515 decision 6). Each carries a root runway.yaml Runway
+#          reads the same way.
 # Boundary: data only; `create` implements it. It writes only the git-tracked files a profile's `include` globs
-#           match (POSIX globs from the repository root, Node `path.matchesGlob` semantics: `*` and `**` skip dot
-#           files, so dot paths are listed), then copies each `overlay` source over its target path, applies
-#           `rename` to every text file, drops this file, pnpm-lock.yaml and starter/, pins catalog `stackra` to
-#           the CLI's own version and installs fresh. Every overlay source lives under `starter/<profile>/`.
+#           match (POSIX globs from the repository root, Node `path.matchesGlob` semantics on paths whose segments'
+#           leading dots are dropped, so `*` also matches a dot file and `!(…)` excludes), then copies each `overlay`
+#           source over its target path, applies `rename` to every text file, drops this file, pnpm-lock.yaml and
+#           starter/, pins catalog `stackra` to the CLI's own version and installs fresh. Every overlay source lives
+#           under `starter/minimal/`; `node .github/scripts/starter-overlays.mjs` derives all but five of them from
+#           their root file, and its test refuses Figentra's furniture (its FURNITURE list) and any trace of Figentra's
+#           process (Flow, Linear, the bot, the build box) in every file the minimal profile writes.
 # Runtime: node
 # Governing contract: Stackra ADR 0515 (decisions 3, 5 and 6); ADR 0349 (product package names); ADR 0441
-#                     (the product shape, kept by `full`).
+#                     (the product shape, kept by `full`); STA-2877 (the outside default and the internal profile).
 version: 1
 
 # Ordered literal replacements, most specific first, applied to every text file `create` writes. Placeholders:
@@ -34,17 +40,40 @@ rename:
     to: "{key}"
 
 profiles:
+  # The default: an app that belongs to whoever creates it. Each root file and tooling path is named, so a new one
+  # is a choice and not an accident; Figentra's furniture (Flow, code owners, the deploy, release and Flow workflows,
+  # the registry-token action, the agent hooks and personas, the process rules, the OpenCode setup) is left out, and
+  # the root files that carry Figentra's setup come from starter/minimal/ instead.
   minimal:
     include:
-      # The root files and the repository tooling.
-      - "*"
-      - ".*"
-      - ".agents/**"
+      # The root toolchain.
       - ".changeset/**"
-      - ".claude/**"
-      - ".flow/**"
-      - ".github/**"
+      - ".commitlintrc.yaml"
+      - ".editorconfig"
+      - ".gitattributes"
+      - ".gitignore"
+      - ".gitleaks.toml"
+      - ".markdownlint.yaml"
+      - ".node-version"
       - ".vscode/**"
+      - "LICENSE"
+      - "NOTICE"
+      - "SECURITY.md"
+      - "knip.jsonc"
+      - "mise.toml"
+      - "osv-scanner.toml"
+      - "renovate.json5"
+      - "stackra.lock.yaml"
+      - "turbo.jsonc"
+      - ".claude/launch.json"
+      # GitHub: the issue forms, the pull request template, the main ruleset and the Quality Gate's scripts.
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+      - ".github/rulesets/**"
+      - ".github/scripts/example-drift.mjs"
+      - ".github/scripts/preview-gate.mjs"
+      - ".github/scripts/__tests__/example-drift.test.mjs"
+      # The template guide (its Flow lines dropped by the overlay below).
       - "docs/**"
       # The web console and the one service with its notes module.
       - "apps/README.md"
@@ -61,8 +90,74 @@ profiles:
     overlay:
       # No surfaces, mobile app or docs site; the console's `web` destinations instead.
       runway.yaml: starter/minimal/root-runway.yaml
+      # Written for the app, not for this template.
+      README.md: starter/minimal/README.md
+      CONTRIBUTING.md: starter/minimal/CONTRIBUTING.md
+      llms.txt: starter/minimal/llms.txt
+      # The Stackra scopes only; no Figentra scope.
+      .npmrc: starter/minimal/.npmrc
+      # Derived from the root files by .github/scripts/starter-overlays.mjs.
+      package.json: starter/minimal/package.json
+      pnpm-workspace.yaml: starter/minimal/pnpm-workspace.yaml
+      .mcp.yaml: starter/minimal/.mcp.yaml
+      .claude/settings.json: starter/minimal/.claude/settings.json
+      lefthook.yml: starter/minimal/lefthook.yml
+      .github/workflows/ci.yml: starter/minimal/.github/workflows/ci.yml
+      AGENTS.md: starter/minimal/AGENTS.md
+      CLAUDE.md: starter/minimal/CLAUDE.md
+      docs/template-guide.md: starter/minimal/docs/template-guide.md
+      .oxfmtrc.jsonc: starter/minimal/.oxfmtrc.jsonc
+      .oxlintrc.jsonc: starter/minimal/.oxlintrc.jsonc
+      cspell.config.yaml: starter/minimal/cspell.config.yaml
+      # The agent setup: the framework's open rules and skills (OPEN_AGENT_FILES), without the Flow header.
+      .agents/rules/http-conventions.md: starter/minimal/.agents/rules/http-conventions.md
+      .agents/rules/module-boundary.md: starter/minimal/.agents/rules/module-boundary.md
+      .agents/rules/naming-and-casing.md: starter/minimal/.agents/rules/naming-and-casing.md
+      .agents/rules/not-built-yet.md: starter/minimal/.agents/rules/not-built-yet.md
+      .agents/rules/service-checklist.md: starter/minimal/.agents/rules/service-checklist.md
+      .agents/rules/tenancy.md: starter/minimal/.agents/rules/tenancy.md
+      .agents/rules/versions.md: starter/minimal/.agents/rules/versions.md
+      .agents/skills/ai-mcp-tools/SKILL.md: starter/minimal/.agents/skills/ai-mcp-tools/SKILL.md
+      .agents/skills/backend-assets-and-storage/SKILL.md: starter/minimal/.agents/skills/backend-assets-and-storage/SKILL.md
+      .agents/skills/backend-author-an-action/SKILL.md: starter/minimal/.agents/skills/backend-author-an-action/SKILL.md
+      .agents/skills/backend-decorator-package-with-explorer/SKILL.md: starter/minimal/.agents/skills/backend-decorator-package-with-explorer/SKILL.md
+      .agents/skills/backend-errors/SKILL.md: starter/minimal/.agents/skills/backend-errors/SKILL.md
+      .agents/skills/backend-gen-and-encore-target/SKILL.md: starter/minimal/.agents/skills/backend-gen-and-encore-target/SKILL.md
+      .agents/skills/backend-module-and-root-module/SKILL.md: starter/minimal/.agents/skills/backend-module-and-root-module/SKILL.md
+      .agents/skills/code-naming-and-casing/SKILL.md: starter/minimal/.agents/skills/code-naming-and-casing/SKILL.md
+      .agents/skills/db-models-and-migrations/SKILL.md: starter/minimal/.agents/skills/db-models-and-migrations/SKILL.md
+      .agents/skills/frontend-resource-console/SKILL.md: starter/minimal/.agents/skills/frontend-resource-console/SKILL.md
+  # Opt in (`stackra create --profile internal`): the minimal app with Figentra's own setup kept, for an app
+  # Figentra builds and runs itself.
+  internal:
+    include:
+      # The root files and the repository tooling.
+      - "*"
+      - ".*"
+      - ".agents/**"
+      - ".changeset/**"
+      - ".claude/**"
+      - ".flow/**"
+      - ".github/**"
+      - ".vscode/**"
+      # The web console and the one service with its notes module.
+      - "apps/README.md"
+      - "apps/console/**"
+      - "services/**"
+      - "services/**/.*"
+      # The brand and language sources; no mobile, store or landing assets.
+      - "assets/.gitkeep"
+      - "assets/README.md"
+      - "assets/brand/**"
+      - "assets/brand/.gitkeep"
+      - "assets/lang/**"
+      - "assets/lang/.gitkeep"
+    overlay:
+      # No surfaces, mobile app or docs site; the console's `web` destinations instead.
+      runway.yaml: starter/minimal/root-runway.yaml
   full:
-    # Everything tracked except the minimal profile's console (ADR 0515 decision 6: no app member here).
+    # Everything tracked except the minimal profile's console (ADR 0515 decision 6: no app member here), with
+    # Figentra's setup, as `internal`.
     include:
       - "*"
       - ".*"
@@ -71,7 +166,6 @@ profiles:
       - "apps/docs/**"
       - "assets/**"
       - "assets/**/.*"
-      - "docs/**"
       - "packages/**"
       - "packages/**/.*"
       - "services/**"

@@ -1,0 +1,21 @@
+# acme-platform
+
+> A Stackra app: a web console and one service with its notes module, on the @stackra/* catalog.
+
+## Docs
+
+- [README.md](README.md): front page, quick start and the commands
+- [AGENTS.md](AGENTS.md): agent rules and the programming model v3.1
+- [docs/template-guide.md](docs/template-guide.md): the tree, file ownership, member kinds and what to replace
+- [CONTRIBUTING.md](CONTRIBUTING.md): how changes land
+- [Stackra docs](https://docs.stackra.figentra.com): the framework
+
+## Entry points
+
+- [package.json](package.json): root scripts (dev, gen, verify, validate, new)
+- [pnpm-workspace.yaml](pnpm-workspace.yaml): members and catalogs
+- [runway.yaml](runway.yaml): product key, environments and targets
+- [services/example/README.md](services/example/README.md): the example service and its notes module
+- [apps/console/README.md](apps/console/README.md): the web console
+- [.mcp.yaml](.mcp.yaml): the MCP servers for coding agents
+- [.github/workflows/ci.yml](.github/workflows/ci.yml): the Quality Gate

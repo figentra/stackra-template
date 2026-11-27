@@ -17,7 +17,7 @@
 - [pnpm-workspace.yaml](pnpm-workspace.yaml): members and catalogs
 - [flow.config.json](flow.config.json): Figentra Flow preset; source of AGENTS.md
 - [runway.yaml](runway.yaml): product key, surfaces, mobile, environments and targets
-- [stackra.starter.yaml](stackra.starter.yaml): the minimal and full starter profiles
+- [stackra.starter.yaml](stackra.starter.yaml): the minimal (default), internal and full starter profiles
 - [services/example/README.md](services/example/README.md): the example service and its notes module
 - [packages/application/example/README.md](packages/application/example/README.md): the example package
 - [apps/console/README.md](apps/console/README.md): the web console
@@ -26,3 +26,4 @@
 - [.github/workflows/release.yml](.github/workflows/release.yml): release and the @stackra/starter publish
 - [.github/workflows/deploy.yml](.github/workflows/deploy.yml): deploy policy (dev, staging, promote)
 - [.github/scripts/example-drift.mjs](.github/scripts/example-drift.mjs): the example drift check
+- [.github/scripts/starter-overlays.mjs](.github/scripts/starter-overlays.mjs): the minimal profile's derived overlays and the list of Figentra's furniture
