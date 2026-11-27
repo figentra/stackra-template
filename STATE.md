@@ -17,7 +17,7 @@ Figentra Flow (`fflow`, stackra preset); code owner is `@figentra-usr`.
 | Fact                    | Value                                                                                                                                                         |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Default branch head     | `main` at `12f5b42a37b55ea765fe066b7ef43a58d82f41e6` (2026-11-07, #41)                                                                                        |
-| `@stackra/*` catalog    | `0.15.0`, exact, 89 entries in `catalogs.stackra` (`pnpm-workspace.yaml`)                                                                                     |
+| `@stackra/*` catalog    | `0.15.0`, exact, 89 entries in `catalogs.stackra` (`pnpm-workspace.yaml`); `catalog-latest.yml` proposes each move to `latest` (STA-2884)                     |
 | Member versions         | root `acme-platform` 0.0.0; service and package 0.0.0; console 0.0.1; docs 0.1.0 (all private)                                                                |
 | Figentra Flow           | `@figentra-oss/flow` 0.6.4; `.flow/lock.json` preset `stackra` 0.6.4                                                                                          |
 | Toolchain (`mise.toml`) | node 24.22.0, pnpm 12.16.1, oxfmt 0.71.0, oxlint 1.86.0, cspell 10.4.0, gitleaks 8.30.1, osv-scanner 2.7.0, encore 1.58.8, eas-cli 25.3.0, maestro cli-2.10.0 |

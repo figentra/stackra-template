@@ -1,19 +1,21 @@
 <!--
 Stackra file contract:
 Purpose: the index of the repository's GitHub workflows and the scripts they run (the pre-release
-         gate and the example drift check).
+         gate, the registry probe, the catalog bump and the example drift check).
 Boundary: documentation only; the workflow files are the source of truth.
 Runtime: none (documentation)
 Governing contract: Stackra ADR 0019 (least privilege, pinned actions), ADR 0027 (toolchain from
-                    mise.toml), stackra-15 (the example drift check)
+                    mise.toml), stackra-15 (the example drift check), ADR 0013 and STA-2884 (the
+                    catalog follows the registry's latest; the probe fails closed)
 -->
 
 # `.github/workflows/`
 
 | Workflow      | Runs on                                                                        | Does                                                                                                                                                                                                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`      | pull requests to `main`, merge-queue groups (`merge_group`), pushes to `main`  | **Quality Gate**: install, the pull request title and commit messages (commitlint), `pnpm verify` (`stackra verify`), `pnpm spell` and `pnpm secrets:scan`. While `@stackra/*` is unpublished (pre-release) it runs `node .github/scripts/preview-gate.mjs` instead. A superseded pull request run is cancelled |
+| `ci.yml` | pull requests to `main`, merge-queue groups (`merge_group`), pushes to `main` | **Quality Gate**. The registry probe (`node .github/scripts/registry-probe.mjs`) fails closed: when the catalog's `@stackra/cli` is on the registry the job installs and runs lint, typecheck, build, gen, validate and Squawk; a registry or network error fails the job; an unpublished pin fails it too unless the probe step sets `STACKRA_PRE_RELEASE: "true"`, which runs `node .github/scripts/preview-gate.mjs` alone. A superseded pull request run is cancelled |
 | `release.yml` | pushes to `main`; `workflow_dispatch` with a `dry_run` input (publish dry run) | Changesets: opens or updates the "version packages" PR, publishes released packages to npm with provenance (trusted publishing, no token), then builds a CycloneDX SBOM when something was published. Skipped (green) until `pnpm-lock.yaml` is committed                                                       |
+| `catalog-latest.yml` | daily (04:23 UTC); `workflow_dispatch` with a `dry_run` input | Moves catalog `stackra` (the `@stackra/cli` pin with it) to each package's `latest` dist-tag (`node .github/scripts/stackra-catalog.mjs`), refreshes `pnpm-lock.yaml` and opens one pull request as the stackra-bot App (`STACKRA_BOT_APP_ID`, `STACKRA_BOT_PRIVATE_KEY`), so the Quality Gate runs on it; closes the older catalog-latest pull requests it supersedes. A registry error, a deprecated `latest` or a `latest` line that does not install fails the run. Never pushes to `main`, never force-pushes, never merges |
 
 ## Rules
 

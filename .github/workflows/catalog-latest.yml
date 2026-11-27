@@ -1,0 +1,128 @@
+# Stackra file contract:
+# Purpose: keeps catalog `stackra` (pnpm-workspace.yaml, the `@stackra/cli` pin with it) in step with the Stackra
+#          registry. Daily and on demand, .github/scripts/stackra-catalog.mjs moves each entry to its package's
+#          `latest` dist-tag; when anything moved, the job refreshes pnpm-lock.yaml and opens one pull request as the
+#          stackra-bot GitHub App, so the Quality Gate runs on it, and closes the older open catalog-latest pull
+#          requests it supersedes. Nothing merges on its own.
+# Boundary: writes only pnpm-workspace.yaml and pnpm-lock.yaml, on a new `stackra/catalog-latest-<digest>` branch; never
+#           pushes to main, never force-pushes, never reopens a branch that already exists (a closed proposal stays
+#           closed). A registry error, a deprecated `latest` or a package the registry does not have fails the run,
+#           naming the packages. Credentials: the registry read token (.github/actions/registry-auth, Workload
+#           Identity) and a short-lived App token (STACKRA_BOT_APP_ID, STACKRA_BOT_PRIVATE_KEY) with contents and
+#           pull-requests write on this repository only.
+# Runtime: GitHub Actions (node from mise.toml; gh on the runner image)
+# Governing contract: Stackra ADR 0013 (versions only from catalogs), ADR 0019 (least privilege, pinned actions,
+#                     nothing merges on its own), ADR 0453 (the registry), ADR 0515 decision 3 (the starter follows the
+#                     catalog's `@stackra/cli`). Issue: STA-2884.
+name: Catalog latest
+
+on:
+  schedule:
+    # Daily, outside working hours (UTC).
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Print what would move; open no pull request
+        type: boolean
+        default: false
+
+# Stackra ADR 0019: nothing by default; the job asks for what it needs.
+permissions: {}
+
+# One run at a time; a queued run waits instead of racing the open one.
+concurrency:
+  group: catalog-latest
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Move the Stackra catalog to latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write # Workload Identity for the registry read token (registry-auth)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: main
+          persist-credentials: false
+          submodules: false
+
+      - name: Toolchain (mise)
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm
+
+      - name: Registry auth
+        uses: ./.github/actions/registry-auth
+
+      # Fails, naming the packages, on any registry error or deprecated `latest`; writes nothing then.
+      - name: Move catalog stackra to latest
+        id: catalog
+        run: >-
+          node .github/scripts/stackra-catalog.mjs --write
+          --summary "$RUNNER_TEMP/catalog-body.md" --message "$RUNNER_TEMP/catalog-commit.txt"
+
+      # A `latest` line that does not resolve (a partial release: a package's `latest` needs a sibling version
+      # that was never published) fails here, so no broken pull request is opened.
+      - name: Refresh the lockfile
+        if: steps.catalog.outputs.changed == 'true'
+        run: |
+          if ! pnpm install --lockfile-only --no-frozen-lockfile; then
+            echo "::error title=Catalog::the latest @stackra versions do not install together (see the log above); fix the registry's latest dist-tags, then re-run"
+            exit 1
+          fi
+
+      - name: Show the change
+        if: steps.catalog.outputs.changed == 'true'
+        run: |
+          git diff --stat
+          cat "$RUNNER_TEMP/catalog-body.md" >> "$GITHUB_STEP_SUMMARY"
+
+      # The App token, not GITHUB_TOKEN: a pull request GITHUB_TOKEN opens does not run the Quality Gate.
+      - name: Bot token (GitHub App)
+        id: bot
+        if: steps.catalog.outputs.changed == 'true' && inputs.dry_run != true
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.STACKRA_BOT_APP_ID }}
+          private-key: ${{ secrets.STACKRA_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Open the pull request
+        if: steps.catalog.outputs.changed == 'true' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          APP_SLUG: ${{ steps.bot.outputs.app-slug }}
+          BRANCH: ${{ steps.catalog.outputs.branch }}
+          TITLE: ${{ steps.catalog.outputs.title }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/${GITHUB_REPOSITORY}/branches/${BRANCH}" --silent 2>/dev/null; then
+            echo "::notice title=Catalog::${BRANCH} already exists; these versions were proposed before"
+            exit 0
+          fi
+          bot_id="$(gh api "users/${APP_SLUG}%5Bbot%5D" --jq .id)"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::${auth}"
+          git switch -c "$BRANCH"
+          git add pnpm-workspace.yaml pnpm-lock.yaml
+          git -c user.name="${APP_SLUG}[bot]" \
+            -c user.email="${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com" \
+            commit -q -F "$RUNNER_TEMP/catalog-commit.txt"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${auth}" \
+            push origin "HEAD:refs/heads/${BRANCH}"
+          url="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
+            --title "$TITLE" --body-file "$RUNNER_TEMP/catalog-body.md")"
+          number="${url##*/}"
+          echo "::notice title=Catalog::opened ${url}"
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json number,headRefName \
+            --jq ".[] | select(.headRefName | startswith(\"stackra/catalog-latest-\")) | select(.number != ${number}) | .number" |
+            while read -r old; do
+              gh pr close "$old" --repo "$GITHUB_REPOSITORY" \
+                --comment "Superseded by #${number}, which moves the catalog to a newer latest."
+            done

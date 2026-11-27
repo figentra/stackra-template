@@ -77,24 +77,35 @@ jobs:
         with:
           install_args: node pnpm
 
-      # The same probe as ci.yml, plus the template's own guard: nothing deploys from the template
-      # repository, and nothing installs before @stackra/cli is on the registry and pnpm-lock.yaml is
-      # committed.
-      - name: Registry probe
-        id: registry
+      # The template's own guard (nothing deploys from the template repository, under its old or its
+      # new organisation), then the lockfile, then the same fail-closed probe as ci.yml (STA-2884): a
+      # registry error fails the run instead of reporting "nothing deployed" green.
+      - name: Template guard
+        id: guard
         env:
           REPOSITORY: ${{ github.repository }}
         run: |
-          version="$(sed -n 's/^    "@stackra\/cli": //p' pnpm-workspace.yaml)"
-          if [ "$REPOSITORY" = "figentra/stackra-template" ]; then
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Template::the template deploys nothing; a product copied from it does"
-          elif [ -f pnpm-lock.yaml ] && npm view "@stackra/cli@${version}" version --registry https://npm.stackra.figentra.com/ >/dev/null 2>&1; then
-            echo "published=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Pre-release::@stackra/cli@${version} is not on the registry or pnpm-lock.yaml is not committed yet; nothing is deployed"
-          fi
+          case "$REPOSITORY" in
+            figentra/stackra-template | stackra-inc/stackra-template)
+              echo "deploy=false" >> "$GITHUB_OUTPUT"
+              echo "::notice title=Template::the template deploys nothing; a product copied from it does"
+              ;;
+            *)
+              if [ -f pnpm-lock.yaml ]; then
+                echo "deploy=true" >> "$GITHUB_OUTPUT"
+              else
+                echo "deploy=false" >> "$GITHUB_OUTPUT"
+                echo "::notice title=Pre-release::pnpm-lock.yaml is not committed yet; nothing is deployed"
+              fi
+              ;;
+          esac
+
+      - name: Registry probe
+        id: registry
+        if: steps.guard.outputs.deploy == 'true'
+        env:
+          STACKRA_PRE_RELEASE: "false"
+        run: node .github/scripts/registry-probe.mjs
 
   # A push to main deploys dev, then staging, one at a time; a ship (a manual run with
   # `environment` dev or staging) deploys that one environment.
